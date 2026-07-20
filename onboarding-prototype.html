@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TRUS — 가입하기</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+:root{
+  --text:#191F28; --sub:#4E5968; --muted:#8B95A1; --faint:#B0B8C1;
+  --gray:#F2F4F6; --gray-2:#E8EBEE; --line:#EDF0F3;
+  --blue:#3182F6; --blue-dark:#1B64DA; --blue-soft:#E8F3FF;
+  --orange:#F76B1C; --orange-soft:#FFF1E7;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:"Pretendard Variable",Pretendard,-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+  color:var(--text); letter-spacing:-0.02em; background:var(--gray); word-break:keep-all;
+  min-height:100vh; display:flex; flex-direction:column; align-items:center;
+}
+button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
+.num{font-variant-numeric:tabular-nums}
+
+.card{
+  width:min(480px, 94vw); background:#fff; border-radius:24px; overflow:hidden;
+  box-shadow:0 6px 24px rgba(25,31,40,.06); margin:44px 0 16px;
+}
+.prog{height:4px; background:var(--line)}
+.prog i{display:block; height:100%; width:25%; background:var(--blue); border-radius:0 2px 2px 0; transition:width .3s ease}
+.inner{padding:30px 28px 32px}
+.step-label{font-size:.72rem; font-weight:700; color:var(--blue); margin-bottom:8px}
+.stage{display:none}
+.stage.on{display:block}
+h2{font-size:1.5rem; font-weight:800; letter-spacing:-0.035em; line-height:1.35; margin-bottom:8px}
+.sub{font-size:.88rem; color:var(--muted); line-height:1.65; margin-bottom:22px; font-weight:500}
+.sub b{color:var(--sub)}
+.pill{display:inline-flex; font-size:.68rem; font-weight:700; padding:3px 9px; border-radius:9px}
+.pill.blue{background:var(--blue-soft); color:var(--blue-dark)}
+.pill.or{background:var(--orange-soft); color:var(--orange)}
+.shellv{color:var(--orange); font-weight:700}
+.shellv::before{content:"◗ "; font-size:.8em}
+
+.pbtn{display:flex; align-items:center; justify-content:center; gap:6px; width:100%; font-size:.98rem; font-weight:700; padding:16px; border-radius:16px; background:var(--blue); color:#fff; transition:.15s}
+.pbtn:hover{background:var(--blue-dark)}
+.pbtn:active{transform:scale(.98)}
+.pbtn:disabled{background:var(--gray-2); color:var(--faint); cursor:not-allowed; transform:none}
+.pbtn.ghost{background:var(--gray); color:var(--text)}
+.pbtn.ghost:hover{background:var(--gray-2)}
+.pnote{font-size:.76rem; color:var(--muted); background:var(--gray); border-radius:14px; padding:12px 14px; line-height:1.65; margin-top:14px; font-weight:500}
+.pnote b{color:var(--sub)}
+
+.field{margin-bottom:14px}
+.field label{display:block; font-size:.74rem; font-weight:700; color:var(--muted); margin-bottom:6px}
+.field input{width:100%; font:inherit; font-size:.98rem; font-weight:600; border:1.5px solid transparent; border-radius:14px; padding:14px 16px; background:var(--gray); transition:.15s}
+.field input:focus{outline:none; border-color:var(--blue); background:#fff}
+
+/* 동의 (토스식) */
+.agree-all{display:flex; align-items:center; gap:11px; padding:15px 14px; border:1.5px solid var(--line); border-radius:16px; font-size:.95rem; font-weight:800; margin-bottom:6px; cursor:pointer}
+.agree-all input{width:20px; height:20px; accent-color:var(--blue)}
+.agree{padding:2px 6px 6px}
+.a-row{display:flex; align-items:flex-start; gap:11px; padding:11px 8px; font-size:.84rem; line-height:1.5; border-radius:10px; cursor:pointer}
+.a-row:hover{background:var(--gray)}
+.a-row input{width:18px; height:18px; margin-top:2px; accent-color:var(--blue); flex-shrink:0}
+.a-row b{display:block; font-weight:700}
+.a-row small{color:var(--muted); font-size:.74rem; font-weight:500}
+
+/* 사용자 카드 — 프롬프트 복사·붙여넣기 */
+.howto{display:flex; flex-direction:column; gap:6px; margin-bottom:14px}
+.h-step{display:flex; align-items:center; gap:10px; font-size:.84rem; color:var(--sub); font-weight:500}
+.h-step i{font-style:normal; width:22px; height:22px; border-radius:50%; background:var(--blue-soft); color:var(--blue-dark); font-size:.72rem; font-weight:800; display:flex; align-items:center; justify-content:center; flex-shrink:0}
+.promptbox{border:1.5px solid var(--line); border-radius:16px; overflow:hidden; margin-bottom:12px; background:#fff}
+.pb-head{display:flex; align-items:center; justify-content:space-between; padding:11px 14px; background:var(--gray); font-size:.8rem; font-weight:700}
+.copybtn{font-size:.78rem; font-weight:700; background:var(--blue); color:#fff; padding:7px 14px; border-radius:10px; transition:.15s}
+.copybtn:hover{background:var(--blue-dark)}
+.copybtn:active{transform:scale(.96)}
+.copybtn.done{background:var(--gray-2); color:var(--sub)}
+.pb-body{font-family:inherit; font-size:.74rem; color:var(--sub); line-height:1.7; padding:12px 14px 4px; white-space:pre-wrap; word-break:keep-all;
+  max-height:120px; overflow:hidden; position:relative; font-weight:500}
+.promptbox.expand .pb-body{max-height:none}
+.promptbox:not(.expand) .pb-body{-webkit-mask-image:linear-gradient(#000 60%, transparent); mask-image:linear-gradient(#000 60%, transparent)}
+.pb-toggle{display:block; width:100%; font-size:.76rem; font-weight:700; color:var(--blue); padding:8px; text-align:center}
+.pastebox{width:100%; font:inherit; font-size:.84rem; border:1.5px solid var(--line); border-radius:14px; padding:13px 15px; background:var(--gray); min-height:120px; resize:vertical; margin-bottom:10px; line-height:1.6}
+.pastebox:focus{outline:none; border-color:var(--blue); background:#fff}
+.skiplink{font-size:.74rem; color:var(--muted); text-decoration:underline; font-weight:600}
+
+/* 캐릭터 */
+.char-stage{display:flex; gap:22px; align-items:center; margin-bottom:16px}
+.char-preview{width:150px; height:190px; background:linear-gradient(#F2E3C8 55%, #C9A06C 55%); border-radius:20px; display:flex; align-items:flex-end; justify-content:center; padding-bottom:16px; flex-shrink:0}
+.avatar{display:flex; flex-direction:column; align-items:center}
+.avatar .nametag{font-size:.68rem; font-weight:700; background:rgba(25,31,40,.85); color:#fff; padding:2px 9px; border-radius:10px; margin-bottom:4px}
+.avatar .body{position:relative; width:44px; height:66px}
+.avatar .head{position:absolute; top:0; left:50%; transform:translateX(-50%); width:33px; height:33px; border-radius:50%; background:#F2C9A8; border:2px solid #D9A87F}
+.avatar .hair{position:absolute; top:-4px; left:50%; transform:translateX(-50%); width:36px; height:17px; border-radius:17px 17px 5px 5px; background:#4A3628}
+.avatar .torso{position:absolute; top:30px; left:50%; transform:translateX(-50%); width:38px; height:30px; border-radius:10px 10px 5px 5px; background:#3182F6}
+.avatar .legs{position:absolute; top:58px; left:50%; transform:translateX(-50%); width:28px; height:9px; border-radius:0 0 5px 5px; background:#3B4252}
+h4{font-size:.74rem; font-weight:700; color:var(--muted); margin:14px 0 8px}
+.swatches{display:flex; gap:8px; flex-wrap:wrap}
+.swatches button{width:34px; height:34px; border-radius:50%; border:2.5px solid transparent; transition:.13s}
+.swatches button:active{transform:scale(.9)}
+.swatches button.sel{border-color:var(--text)}
+
+/* 기능 오픈 결과 */
+.enter-hero{text-align:center; padding:6px 0 4px}
+.enter-hero .big{font-size:54px; margin-bottom:10px}
+.open-grid{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:16px 0 4px}
+@media(max-width:480px){.open-grid{grid-template-columns:1fr}}
+.open-item{display:flex; align-items:center; gap:10px; border-radius:14px; padding:12px 13px; background:var(--gray); font-size:.83rem; font-weight:600}
+.open-item .oi{font-size:22px}
+.open-item.unlocked{background:var(--blue-soft); color:var(--blue-dark); font-weight:700}
+.open-item.locked{color:var(--faint)}
+.open-item.locked .oi{filter:grayscale(1); opacity:.5}
+.open-item .lk{margin-left:auto; font-size:.7rem; font-weight:700}
+.btn-col{display:flex; flex-direction:column; gap:8px; margin-top:18px}
+.foot-links{font-size:.74rem; color:var(--faint); margin-bottom:34px; font-weight:500}
+.foot-links a{color:var(--faint)}
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="prog"><i id="progBar"></i></div>
+  <div class="inner">
+
+  <!-- ① 가입 · 동의 -->
+  <section class="stage on" id="st0">
+    <div class="step-label">1 / 4 · 가입</div>
+    <h2>실명으로 시작해요</h2>
+    <p class="sub">TRUS에서는 <b>본명으로 만나요</b> — 닉네임은 없어요. 가입하면 내 마이스페이스가 열리고, <b>기능 2개를 무료로</b> 써볼 수 있어요. 딱 한 번이에요!</p>
+    <div class="field"><label>본명</label><input type="text" id="inName" placeholder="실명을 입력하세요" value="김이서"></div>
+    <div class="field"><label>이메일</label><input type="text" placeholder="you@example.com" value="iseo@example.com"></div>
+
+    <h4>약관 · 개인정보 동의 — 나중에 따로 묻지 않고, 여기서 한 번에 확인해요</h4>
+    <label class="agree-all"><input type="checkbox" id="agAll"> 모두 동의하고 시작하기</label>
+    <div class="agree">
+      <label class="a-row"><input type="checkbox" class="ag"><span><b>서비스 이용약관 (필수)</b><small>무료 체험 후 전체 이용은 강의 결제로 · 완강 후 3개월 포함, 이후 월 멤버십</small></span></label>
+      <label class="a-row"><input type="checkbox" class="ag"><span><b>본명 공개 범위 (필수)</b><small>내 본명은 우리 채널(150명) 안에서만 보여요. 반대로 직무·회사는 절대 공개되지 않아요.</small></span></label>
+      <label class="a-row"><input type="checkbox" class="ag"><span><b>활동 기록 수집 (필수)</b><small>할 일 실행, 회고, 강의 진도가 내 신뢰점수와 팀 소식의 재료가 돼요.</small></span></label>
+      <label class="a-row"><input type="checkbox" class="ag"><span><b>기록 코치의 기록·일기 상시 참조 (필수)</b><small>일기는 사람에겐 완전 비공개예요. 다만 AI 코치는 읽고 나를 더 잘 도와줘요.</small></span></label>
+    </div>
+    <div style="margin-top:10px"><button class="pbtn" id="btnAgree" disabled onclick="go(1)">다음</button></div>
+  </section>
+
+  <!-- ② 사용자 카드 — 내 AI에게 물어오기 -->
+  <section class="stage" id="st1">
+    <div class="step-label">2 / 4 · 사용자 카드</div>
+    <h2>당신을 가장 잘 아는 AI에게<br>물어볼게요</h2>
+    <p class="sub">매일 쓰는 AI(ChatGPT·Claude 등)의 대화창이 당신을 제일 잘 알고 있어요. 아래 프롬프트를 그 AI에게 붙여넣으면 <b>[Trus World 사용자 카드]</b>를 만들어줘요. 이 카드가 <b>팀을 짜는 기준</b>과 <b>코치의 첫 대화</b>가 돼요.</p>
+
+    <div class="howto">
+      <div class="h-step"><i>1</i>아래 프롬프트를 <b>복사</b>해요</div>
+      <div class="h-step"><i>2</i>내가 쓰는 AI 대화창에 <b>붙여넣고</b>, 질문에 답하며 카드를 완성해요</div>
+      <div class="h-step"><i>3</i>완성된 카드를 <b>아래 칸에 붙여넣어요</b></div>
+    </div>
+
+    <div class="promptbox" id="promptBox">
+      <div class="pb-head">
+        <span>📋 사용자 카드 프롬프트</span>
+        <button class="copybtn" id="btnCopy">복사하기</button>
+      </div>
+      <pre class="pb-body" id="promptText"></pre>
+      <button class="pb-toggle" id="pbToggle">전체 보기 ▾</button>
+    </div>
+
+    <textarea class="pastebox" id="cardPaste" placeholder="여기에 AI가 만들어준 [Trus World 사용자 카드]를 붙여넣어 주세요"></textarea>
+    <button class="pbtn" id="btnCard" disabled onclick="saveCard()">다음 — 캐릭터 만들기</button>
+    <div class="pnote">카드에 <b>직무·회사가 적혀 있어도 팀을 짤 때만 쓰고</b>, 타운 안 누구에게도 보여주지 않아요. <button class="skiplink" onclick="go(2)">프로토타입이라 그냥 넘어갈래요 →</button></div>
+  </section>
+
+  <!-- ③ 캐릭터 생성 -->
+  <section class="stage" id="st2">
+    <div class="step-label">3 / 4 · 캐릭터</div>
+    <h2>타운을 걸어 다닐 내 모습이에요</h2>
+    <p class="sub">머리색과 옷을 골라보세요. 이름표는 본명 그대로예요.</p>
+    <div class="char-stage">
+      <div class="char-preview">
+        <div class="avatar">
+          <div class="nametag" id="avName">김이서</div>
+          <div class="body"><div class="hair" id="avHair"></div><div class="head"></div><div class="torso" id="avTorso"></div><div class="legs"></div></div>
+        </div>
+      </div>
+      <div style="flex:1">
+        <h4 style="margin-top:0">머리 색</h4>
+        <div class="swatches" data-part="hair">
+          <button class="sel" style="background:#4A3628"></button>
+          <button style="background:#6E4B2E"></button>
+          <button style="background:#2E2E38"></button>
+          <button style="background:#8A5A2E"></button>
+        </div>
+        <h4>옷 색</h4>
+        <div class="swatches" data-part="torso">
+          <button class="sel" style="background:#3182F6"></button>
+          <button style="background:#5B6ABF"></button>
+          <button style="background:#B8607E"></button>
+          <button style="background:#F76B1C"></button>
+        </div>
+      </div>
+    </div>
+    <button class="pbtn" onclick="go(3)">이 모습으로 시작하기</button>
+  </section>
+
+  <!-- ④ 입장 — 랜덤 2개 오픈 -->
+  <section class="stage" id="st3">
+    <div class="step-label">4 / 4 · 입장</div>
+    <div class="enter-hero">
+      <div class="big">🎉</div>
+      <h2 id="welcomeName">기능 2개가 열렸어요</h2>
+      <p class="sub">가입 선물로 <b id="openNames">—</b>가 열렸어요.<br>나머지는 아직 잠겨 있고, 강의를 결제하면 전부 열려요.</p>
+    </div>
+    <div class="open-grid" id="openGrid"></div>
+    <div class="btn-col">
+      <button class="pbtn" onclick="enterTrial()">마이스페이스 입장하기</button>
+      <button class="pbtn ghost" onclick="location.href='payment-prototype.html'">결제하고 전부 열기</button>
+    </div>
+    <div class="pnote">어떤 2개가 열릴지는 <b>열어봐야 알아요</b> <span class="pill or">기획 논의 중</span> — 지금은 랜덤이에요. 다시 가입해도 새로 열리지는 않아요.</div>
+  </section>
+
+  </div>
+</div>
+<div class="foot-links"><a href="home-prototype.html">← 메인 홈</a> · <a href="index.html">전체 화면 목록</a></div>
+
+<script>
+/* 단계 이동 */
+function go(n){
+  document.querySelectorAll('.stage').forEach((s,i)=>s.classList.toggle('on', i===n));
+  document.getElementById('progBar').style.width = ((n+1)/4*100) + '%';
+  if(n===2){ const nm = document.getElementById('inName').value || '김이서'; document.getElementById('avName').textContent = nm; }
+  if(n===3) revealUnlocks();
+  window.scrollTo(0,0);
+}
+
+/* 동의 체크 */
+const ags = document.querySelectorAll('.ag');
+const agAll = document.getElementById('agAll');
+function syncAgree(){
+  const all = [...ags].every(x=>x.checked);
+  agAll.checked = all;
+  document.getElementById('btnAgree').disabled = !all;
+}
+ags.forEach(a=>a.addEventListener('change', syncAgree));
+agAll.addEventListener('change', ()=>{ ags.forEach(a=>a.checked = agAll.checked); syncAgree(); });
+
+/* 사용자 카드 — 프롬프트 복사 · 카드 붙여넣기 */
+const USER_CARD_PROMPT = `지금부터 이 대화창 주인에 대해 알고 있는 것을 정리해 주세요. 목적은 제가 쓰는 업무 코칭 도구(Trus World)에 기초 정보를 옮기는 것입니다.
+# 진행 순서
+1단계 — 이 계정의 대화 기록과 저장된 기억을 근거로 아래 카드의 초안을 만듭니다. 근거가 없는 항목은 지어내지 말고 비워 둡니다.
+2단계 — 비어 있거나 근거가 약한 항목이 있으면, 그 항목을 채우기 위한 질문을 저에게 합니다. 질문은 부족한 항목에 대해서만, 한 번에 모아서 합니다.
+3단계 — 제 답을 반영한 카드를 보여주고 "이대로 확정할까요?"라고 확인을 받습니다.
+4단계 — 제가 확인하면 [Trus World 사용자 카드] 블록을 최종본으로 출력합니다. 고칠 게 있다고 하면 반영해서 다시 확인받습니다.
+# 작성 규칙
+1. 기록에 실제로 근거한 내용만 씁니다. 기록에서 유추한 내용이면 문장 끝에 (추측)을 붙이고, 3단계 확인 때 맞는지 물어봅니다.
+2. 사업과 업무의 현재 상태만 담습니다. 일하는 과정에 대한 이야기 — AI와 주고받은 수정, 산출물의 버전이나 제작 이력, 도구 사용 방식 — 는 담지 않습니다. 날짜와 말 인용도 쓰지 않고, 전부 현재형으로 씁니다.
+3. 건강·가족·자산 같은 민감한 내용은 구체적인 사정은 빼고, 일에 주는 영향만 씁니다. (예: "오전에는 집중 시간이 제한됨" 까지만)
+4. 각 항목은 1~3줄, 카드 전체는 15줄 이내. 칭찬이나 수식 없이 사실만 씁니다.
+# 카드 항목
+[Trus World 사용자 카드]
+- 활동 영역: (지금 맡은 역할·업무·사업·프로젝트를 한 줄씩, 최대 5개. 각 줄에 "누구와/누구에게 무엇을"을 담고, 줄 끝에 [최근 집중 / 유지 / 탐색 / 보류] 중 하나 표시)
+- 반복 패턴: (사업에서 계속 막히는 지점 2~3개. 각각 실제 있었던 사건이나 고객·동료의 반응을 근거로 한 줄씩)
+- 숫자: (대화에 등장한 사업 지표·수치 / 성과 이야기는 있는데 확인되는 숫자가 없는 영역)
+- 목표 후보: (본인이 직접 말한 목표와 기록에서 추정한 목표를 나눠서. 전부 확정이 아니라 검증할 후보)
+- 일하는 방식: (결정을 내리는 스타일과 대화 성향 1~2줄)
+지금 1단계부터 시작하세요.`;
+
+document.getElementById('promptText').textContent = USER_CARD_PROMPT;
+
+document.getElementById('btnCopy').addEventListener('click', async function(){
+  try{ await navigator.clipboard.writeText(USER_CARD_PROMPT); }
+  catch(e){
+    const ta = document.createElement('textarea');
+    ta.value = USER_CARD_PROMPT; document.body.appendChild(ta);
+    ta.select(); document.execCommand('copy'); ta.remove();
+  }
+  this.textContent = '복사됐어요 ✓'; this.classList.add('done');
+  setTimeout(()=>{ this.textContent = '복사하기'; this.classList.remove('done'); }, 2200);
+});
+
+document.getElementById('pbToggle').addEventListener('click', function(){
+  const box = document.getElementById('promptBox');
+  box.classList.toggle('expand');
+  this.textContent = box.classList.contains('expand') ? '접기 ▴' : '전체 보기 ▾';
+});
+
+const cardPaste = document.getElementById('cardPaste');
+cardPaste.addEventListener('input', ()=>{
+  document.getElementById('btnCard').disabled = cardPaste.value.trim().length < 10;
+});
+function saveCard(){
+  localStorage.setItem('trus_card', cardPaste.value.trim());
+  go(2);
+}
+
+/* 캐릭터 스와치 */
+document.querySelectorAll('.swatches').forEach(sw=>{
+  sw.querySelectorAll('button').forEach(b=>b.addEventListener('click', ()=>{
+    sw.querySelectorAll('button').forEach(x=>x.classList.remove('sel'));
+    b.classList.add('sel');
+    const color = b.style.background;
+    if(sw.dataset.part==='hair') document.getElementById('avHair').style.background = color;
+    else document.getElementById('avTorso').style.background = color;
+  }));
+});
+
+/* 랜덤 2개 기능 오픈 */
+const FEATURES = [
+  {id:'lecture',  icon:'📺', name:'강의 스크린'},
+  {id:'worktool', icon:'🗒️', name:'워크툴 책상'},
+  {id:'records',  icon:'📚', name:'업무 기록 책장'},
+  {id:'goal100',  icon:'📓', name:'목표 100번 쓰기'},
+  {id:'diary',    icon:'📔', name:'개인 일기장'},
+  {id:'coachB',   icon:'🦉', name:'바운더리 코치'},
+  {id:'coachR',   icon:'🐢', name:'기록 코치'},
+  {id:'tree',     icon:'🌳', name:'성과열매 나무'},
+  {id:'mailbox',  icon:'📮', name:'우체통'},
+  {id:'presence', icon:'📡', name:'프레즌스 전광판'},
+];
+let unlocked = [];
+function revealUnlocks(){
+  const nm = document.getElementById('inName').value || '김이서';
+  const prev = JSON.parse(localStorage.getItem('trus_unlocked') || 'null');
+  if(prev && prev.length){ unlocked = prev; }
+  else{
+    const pool = [...FEATURES];
+    unlocked = [];
+    for(let i=0;i<2;i++) unlocked.push(pool.splice(Math.floor(Math.random()*pool.length),1)[0].id);
+  }
+  localStorage.setItem('trus_unlocked', JSON.stringify(unlocked));
+  localStorage.setItem('trus_mode','trial');
+  localStorage.setItem('trus_name', nm);
+
+  const names = FEATURES.filter(f=>unlocked.includes(f.id)).map(f=>f.name);
+  document.getElementById('welcomeName').textContent = nm + ' 님, 2개가 열렸어요';
+  document.getElementById('openNames').textContent = names.join('과 ');
+  document.getElementById('openGrid').innerHTML = FEATURES.map(f=>{
+    const on = unlocked.includes(f.id);
+    return `<div class="open-item ${on?'unlocked':'locked'}">
+      <span class="oi">${f.icon}</span>${f.name}
+      <span class="lk">${on?'🔓 열림':'🔒'}</span></div>`;
+  }).join('');
+}
+function enterTrial(){ location.href = 'myspace-prototype.html?mode=trial'; }
+</script>
+</body>
+</html>

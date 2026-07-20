@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>바운더리 타운 — 강의실 (프로토타입)</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+@font-face{font-family:'NeoDunggeunmo'; src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_two@1.0/NeoDunggeunmo.woff') format('woff'); font-display:swap}
+:root{
+  --ink:#191F28; --paper:#FFF9F1;
+  --night:#231B2E; --night-2:#2E2340;
+  --accent:#F26D9C; --accent-d:#C24C78; --accent-soft:#FBE4EE;
+  --tide:#3182F6; --shell:#F76B1C;
+  --muted:#8B95A1; --line:#E8DFD2;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:"Pretendard Variable",Pretendard,-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+  color:var(--ink); letter-spacing:-0.01em; background:var(--night); min-height:100vh; word-break:keep-all;
+}
+button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
+.num{font-variant-numeric:tabular-nums}
+.pxfont, .hud-btn, .pill-stat, .step-label, .pbtn, .sign{font-family:'NeoDunggeunmo','Pretendard Variable',sans-serif; letter-spacing:0}
+
+/* 밤 자습실 배경 — 별 + 창밖 불빛 */
+.bg-night{position:fixed; inset:0; pointer-events:none;
+  background:linear-gradient(var(--night) 0%, var(--night-2) 100%)}
+.bg-night::before{content:""; position:absolute; left:5%; top:6%; width:4px; height:4px; background:#fff; opacity:.7;
+  box-shadow:18vw 30px #FFF6C9, 39vw 8px #fff, 57vw 40px #FBE4EE, 74vw 16px #fff, 90vw 34px #C9E9FA, 28vw 70px #fff, 66vw 78px #FFF6C9}
+.bg-night::after{content:""; position:absolute; left:0; right:0; bottom:0; height:90px; opacity:.5;
+  background:
+    linear-gradient(#171130,#171130) 4% 100%/9% 70% no-repeat,
+    repeating-linear-gradient(180deg,#F26D9C 0 5px, transparent 5px 14px) 5% 100%/5% 55% no-repeat,
+    linear-gradient(#171130,#171130) 84% 100%/9% 84% no-repeat,
+    repeating-linear-gradient(180deg,#46D5B2 0 5px, transparent 5px 14px) 85% 100%/5% 66% no-repeat}
+
+/* HUD */
+.hud{position:fixed; top:0; left:0; right:0; z-index:60; display:flex; align-items:flex-start; gap:8px; padding:12px 14px; pointer-events:none}
+.hud>*{pointer-events:auto}
+.hud .spacer{flex:1; pointer-events:none}
+.hud-btn{width:42px; height:42px; border-radius:10px; background:#FFF9E9; border:3px solid #17171C; box-shadow:0 3px 0 rgba(0,0,0,.5); font-size:1.1rem; display:flex; align-items:center; justify-content:center}
+.hud-btn:active{transform:translateY(2px); box-shadow:0 1px 0 rgba(0,0,0,.5)}
+.pill-stat{display:inline-flex; align-items:center; gap:7px; padding:5px 14px 5px 7px; border-radius:16px; background:#F7E9C4; border:3px solid #17171C; box-shadow:0 3px 0 rgba(0,0,0,.5); font-size:.85rem; color:#4A3A18}
+.pill-stat .ic{width:22px; height:22px; border-radius:50%; display:flex; align-items:center; justify-content:center; background:#F2C14E; border:2px solid #B8860B; font-size:.7rem; color:#7A4E00}
+
+/* 무대 */
+.stage{max-width:640px; margin:0 auto; padding:86px 20px 60px; position:relative}
+.sign{text-align:center; color:#FFD9E8; font-size:1.05rem; margin-bottom:6px;
+  text-shadow:0 0 8px rgba(242,109,156,.8)}
+.sign small{display:block; font-size:.68rem; color:#A092B5; text-shadow:none; margin-top:4px; font-family:"Pretendard Variable",sans-serif}
+
+/* 진행 오브 레일 */
+.rail{display:flex; align-items:center; justify-content:center; gap:8px; margin:16px 0 22px}
+.orb{width:26px; height:26px; border-radius:50%; border:3px solid #17171C; background:#3A2E4E; position:relative; overflow:hidden; flex-shrink:0}
+.orb i{position:absolute; left:0; right:0; bottom:0; height:0; background:linear-gradient(180deg,var(--accent),#FF9DBE); transition:height .5s ease}
+.orb.done i{height:100%}
+.orb.cur{border-color:#FFD9E8; box-shadow:0 0 10px rgba(242,109,156,.6)}
+.rail .bar{width:14px; height:3px; background:#3A2E4E}
+
+/* 함께 듣는 친구들 */
+.classmates{display:flex; align-items:center; justify-content:center; gap:8px; flex-wrap:wrap; margin:-8px 0 18px}
+.cm-live{display:inline-flex; align-items:center; gap:6px; font-size:.7rem; font-weight:700; color:#FFD9E8; background:#17131F; border:2px solid #0B0912; border-radius:3px; padding:4px 10px}
+.cm-live .dot{width:7px; height:7px; border-radius:50%; background:#FF4D6D; animation:blink 1.4s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.cm{display:inline-flex; align-items:center; gap:6px; font-size:.7rem; color:#D8CFE8; background:rgba(255,255,255,.08); border:2px solid rgba(11,9,18,.6); border-radius:3px; padding:4px 10px}
+.cm .av{width:16px; height:16px; border-radius:50%; border:2px solid #17131C}
+.cm b{color:#fff; font-weight:700}
+.cm.done{opacity:.65}
+
+/* 흔적 — 먼저 지나간 친구가 남긴 것 */
+.trace{margin-top:14px; border:2px dashed #E0CFA8; border-radius:6px; background:#FDF8EC; padding:11px 14px}
+.trace .t-label{font-size:.7rem; font-weight:800; color:#A8834A; margin-bottom:6px}
+.trace p{font-size:.82rem; color:#5A5244; line-height:1.6}
+.trace .peer{font-size:.85rem; font-weight:600; background:#fff; border:2px solid #17171C; border-radius:5px; padding:9px 12px; margin-top:6px; transition:filter .5s}
+.trace .peer.blur{filter:blur(5px); user-select:none}
+.trace svg{display:block; margin-top:4px}
+
+/* 게이트 통과 응원 */
+.cheer{position:fixed; z-index:95; font-size:.85rem; font-weight:700; background:#fff; border:2px solid #17131F; border-radius:4px; padding:7px 13px; box-shadow:3px 3px 0 rgba(0,0,0,.35); animation:cheerup 2.2s ease forwards; pointer-events:none}
+@keyframes cheerup{0%{opacity:0; transform:translateY(14px)}15%{opacity:1; transform:none}80%{opacity:1}100%{opacity:0; transform:translateY(-22px)}}
+
+/* 스텝 카드 */
+.card{
+  background:var(--paper); border:3px solid #17171C; border-radius:8px;
+  box-shadow:8px 8px 0 rgba(0,0,0,.45); padding:26px 26px 24px; position:relative;
+  animation:rise .4s ease;
+}
+@keyframes rise{from{opacity:0; transform:translateY(16px)}to{opacity:1; transform:none}}
+.step-label{font-size:.72rem; color:var(--accent-d); margin-bottom:10px}
+.card h1{font-size:clamp(1.25rem,4vw,1.6rem); font-weight:800; letter-spacing:-0.03em; line-height:1.35; margin-bottom:6px}
+.lede{font-size:.86rem; color:#7A7264; line-height:1.6; margin-bottom:18px}
+
+/* 게이트 푸터 */
+.gate{display:flex; align-items:center; gap:12px; margin-top:20px; padding-top:16px; border-top:2px dashed var(--line)}
+.gate .hint{font-size:.8rem; color:var(--muted); flex:1}
+.gate .hint.ready{color:var(--accent-d); font-weight:700}
+.pbtn{display:inline-flex; align-items:center; gap:6px; font-size:.85rem; padding:10px 20px; border-radius:5px; background:var(--accent); color:#fff; border:2px solid var(--accent-d); box-shadow:0 4px 0 var(--accent-d); transition:transform .08s, box-shadow .08s, opacity .2s}
+.pbtn:active{transform:translateY(3px); box-shadow:0 1px 0 var(--accent-d)}
+.pbtn:disabled{opacity:.35; cursor:not-allowed; transform:none}
+
+/* 01 영상 */
+.tv{background:#17131F; border:3px solid #0B0912; border-radius:6px; aspect-ratio:16/9; position:relative; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:12px; overflow:hidden}
+.tv .quote{color:#D8CFE8; font-size:.95rem; text-align:center; padding:0 30px; line-height:1.7}
+.tv .playbtn{font-size:46px; color:#FFD9E8; filter:drop-shadow(0 0 10px rgba(242,109,156,.7)); transition:transform .15s}
+.tv .playbtn:hover{transform:scale(1.12)}
+.tv .vbar{position:absolute; bottom:0; left:0; right:0; height:6px; background:rgba(255,255,255,.12)}
+.tv .vbar i{display:block; height:100%; width:0; background:var(--accent)}
+
+/* 02 그리기 */
+.padwrap{border:3px solid #17171C; border-radius:6px; background:#fff; overflow:hidden}
+canvas{display:block; width:100%; height:200px; touch-action:none; cursor:crosshair}
+.colors{display:flex; gap:8px; margin-top:12px}
+.colors button{width:30px; height:30px; border-radius:50%; border:3px solid transparent}
+.colors button.sel{border-color:#17171C}
+
+/* 03 읽기 */
+.reader{border:3px solid #17171C; border-radius:6px; background:#fff; height:220px; overflow-y:auto; padding:18px 20px}
+.reader p{font-size:.88rem; line-height:1.85; color:#3A3428; margin-bottom:14px}
+.reader p b{background:linear-gradient(transparent 58%, #FFE0A3 58%)}
+.reader p.sent{cursor:pointer; border-radius:4px; padding:2px 4px; margin-left:-4px}
+.reader p.sent:hover{background:#FFF6E4}
+.reader p.my-ul{background:linear-gradient(transparent 62%, #FFE0A3 62%)}
+.reader p.friend-ul{border-bottom:2px dotted var(--accent)}
+.reader .ful{display:block; font-size:.68rem; color:var(--accent-d); margin-top:4px; font-weight:700}
+
+/* 04 말하기 */
+.say{background:#fff; border:3px solid #17171C; border-radius:6px; padding:22px; text-align:center}
+.say .line{font-family:inherit; font-size:1.05rem; line-height:1.8; margin-bottom:18px}
+.holdbtn{font-size:.9rem; font-weight:700; padding:14px 26px; border-radius:50px; background:var(--accent-soft); color:var(--accent-d); border:3px solid var(--accent-d); position:relative; overflow:hidden; user-select:none}
+.holdbtn .fill{position:absolute; left:0; top:0; bottom:0; width:0; background:rgba(242,109,156,.35)}
+.holdbtn span{position:relative}
+
+/* 05 PLAY */
+.playbox textarea{width:100%; font-family:inherit; font-size:1rem; border:3px solid #17171C; border-radius:6px; padding:14px 16px; background:#fff; min-height:110px; resize:vertical; line-height:1.8}
+.playbox textarea:focus{outline:3px solid var(--accent-soft)}
+
+/* 06 마무리 */
+.fin .field{margin-bottom:12px}
+.fin label{display:block; font-size:.74rem; font-weight:700; color:#7A7264; margin-bottom:6px}
+.fin input{width:100%; font-family:inherit; font-size:.95rem; border:3px solid #17171C; border-radius:6px; padding:12px 14px; background:#fff}
+.fin .chk{display:flex; align-items:center; gap:9px; font-size:.85rem; margin-top:6px}
+.fin .chk input{width:18px; height:18px; accent-color:var(--accent)}
+
+/* 완료 */
+.done-wrap{text-align:center; padding:14px 0 6px}
+.done-orb{width:110px; height:110px; border-radius:50%; margin:0 auto 18px; border:4px solid #17171C; position:relative; overflow:hidden; background:#fff}
+.done-orb i{position:absolute; left:-10%; right:-10%; bottom:0; height:0; background:linear-gradient(180deg,var(--accent),#FF9DBE); transition:height 1.2s ease; border-radius:40% 45% 0 0}
+.done-orb.fill i{height:105%}
+.done-orb .emo{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:44px}
+.done-wrap h1{margin-bottom:8px}
+.done-wrap .sub{font-size:.86rem; color:#7A7264; line-height:1.7; margin-bottom:18px}
+.outdots{display:flex; justify-content:center; gap:7px; margin:0 0 18px}
+.outdots span{width:30px; height:30px; border-radius:50%; border:3px solid #17171C; background:#F2EBDD; display:flex; align-items:center; justify-content:center; font-size:.75rem; color:#B0A793}
+.outdots span.on{background:var(--accent); color:#fff}
+
+.toast{position:fixed; bottom:22px; left:50%; transform:translateX(-50%) translateY(90px); z-index:90;
+  background:#17131F; color:#FFF; border:2px solid #0B0912; font-size:.82rem; font-weight:600;
+  padding:11px 20px; border-radius:4px; box-shadow:4px 4px 0 rgba(0,0,0,.4); transition:transform .25s ease; text-align:center; max-width:90vw}
+.toast.show{transform:translateX(-50%) translateY(0)}
+@media(prefers-reduced-motion:reduce){.card{animation:none}}
+</style>
+</head>
+<body>
+<div class="bg-night"></div>
+
+<header class="hud">
+  <button class="hud-btn" onclick="location.href='myspace-prototype.html'" title="마이스페이스로">🏠</button>
+  <span class="spacer"></span>
+  <span class="pill-stat"><span class="ic">◗</span><b class="num">96</b></span>
+</header>
+
+<div class="stage">
+  <div class="sign pxfont">📺 강의실 — 전략 설정<small>커리큘럼 5단계 중 마지막 · 일의 교과서</small></div>
+  <div class="rail" id="rail"></div>
+  <div class="classmates" id="classmates"></div>
+  <div id="cardHost"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ─── 레이어 수업: 한 번에 한 단계, 표현 게이트로 다음이 열림 ─── */
+const STEPS = [
+  {type:'video', label:'01 · 여는 영상', title:'오늘, 잠깐 멈추는 시간', lede:'재생 버튼을 누르면 시작돼요.',
+   quote:'"전략이란, 끝까지 생각해 보는 것입니다."', seconds:4},
+  {type:'draw',  label:'02 · 마음 그리기', title:'지금 마음을 색으로 칠해보세요', lede:'정답은 없어요. 손 가는 대로 조금만 그리면 다음이 열려요.'},
+  {type:'read',  label:'03 · 읽기', title:'잠깐, 읽고 갈게요', lede:'끝까지 내려 읽으면 다음이 열려요. 마음에 닿는 문장이 있다면 눌러서 밑줄을 그어보세요.',
+   paras:[
+    '전략은 계획표가 아니라 <b>한 컷의 장면</b>에서 시작합니다. 3개월 뒤, 일이 잘 풀렸다면 — 그날 무슨 일이 일어나고 있나요?',
+    '그 장면이 <b>키 씬</b>입니다. 키 씬이 선명하면 오늘 할 일과 하지 않을 일이 저절로 갈라집니다.',
+    '끝까지 생각한다는 건 어렵게 말하는 게 아니라, 그 한 컷을 고르고 — 거기서 거꾸로 걸어오는 것입니다.',
+   ]},
+  {type:'speak', label:'04 · 소리 내어 말하기', title:'방금 이야기를, 입으로 꺼내보세요', lede:'눈으로만 읽으면 흘러가요. 버튼을 꾹 누른 채, 소리 내어 말해보세요.',
+   say:'"나의 키 씬은 ___ 이다."'},
+  {type:'play',  label:'05 · PLAY 워크시트', title:'3개월 뒤의 한 컷을 적어보세요', lede:'여기 적은 문장이 내일 아침, 내 책상에 할 일 후보로 도착해요.',
+   ph:'3개월 뒤, 월 구독 300명이 되었다. 그날 나는…'},
+  {type:'write', label:'06 · 마무리', title:'오늘을 짧게 정리해요', lede:'두 칸만 채우면 오늘 수업이 끝나요.',
+   fields:[{label:'오늘 배운 걸 한 문장으로', ph:'오늘 나는 …라는 걸 알았다.'},{label:'내일 실제로 해볼 일 하나', ph:'내일 아침, 나는 …를 한다.'}]},
+];
+let cur = 0;
+const host = document.getElementById('cardHost');
+const rail = document.getElementById('rail');
+
+/* 함께 듣는 친구들 — 각자 자기 속도로, 같은 수업 안에 */
+const FRIENDS = [
+  {n:'정다인', c:'#E86CA8', step:3},
+  {n:'박준호', c:'#3E9E58', step:1},
+  {n:'최연우', c:'#5B8FD9', step:6},
+];
+function renderClassmates(){
+  const el = document.getElementById('classmates');
+  el.innerHTML = `<span class="cm-live"><span class="dot"></span>함께 듣는 중 ${FRIENDS.filter(f=>f.step<6).length + 1}명</span>` +
+    FRIENDS.map(f=>{
+      const where = f.step >= 6 ? '✓ 완주' : STEPS[f.step].label.replace(' · ', ' ');
+      return `<span class="cm ${f.step>=6?'done':''}"><span class="av" style="background:${f.c}"></span><b>${f.n}</b>${where}</span>`;
+    }).join('');
+}
+/* 흔적 — 단계마다 먼저 지나간 친구가 남긴 것 */
+const TRACES = {
+  video: `<div class="trace"><div class="t-label">함께 보는 중</div><p>👀 박준호도 지금 이 영상을 보는 중이에요 — 재생 위치가 나란히 흘러가요.</p></div>`,
+  draw:  `<div class="trace"><div class="t-label">정다인의 마음 그림</div>
+          <svg width="120" height="34" viewBox="0 0 120 34"><path d="M6 26 C 22 4, 38 30, 54 12 S 88 26, 114 8" fill="none" stroke="#E86CA8" stroke-width="5" stroke-linecap="round"/></svg>
+          <p>먼저 지나간 친구가 남긴 흔적이에요.</p></div>`,
+  speak: `<div class="trace"><div class="t-label">여기서 들린 목소리</div><p>🎙 32분 전, 정다인이 여기서 소리 내어 말하고 갔어요. 혼자 해도 혼자가 아니에요.</p></div>`,
+  play:  `<div class="trace"><div class="t-label">박준호의 한 컷 — 내가 쓰면 열려요</div><p class="peer blur">"3개월 뒤, 첫 유료 고객 10명과 인터뷰하는 날."</p><p style="margin-top:6px; font-size:.72rem">받고 싶다면, 먼저 내 것을 내어놓아야 해요.</p></div>`,
+  write: `<div class="trace"><div class="t-label">오늘의 마무리들</div><p>✍️ 오늘 팀원 3명이 여기에 마무리를 남기고 갔어요.</p></div>`,
+};
+function cheer(){
+  const names = ['정다인 👏','박준호 🔥','최연우 👍'];
+  const d = document.createElement('div');
+  d.className = 'cheer';
+  d.textContent = names[Math.floor(Math.random()*names.length)];
+  d.style.right = (18 + Math.random()*40) + 'px';
+  d.style.bottom = (90 + Math.random()*60) + 'px';
+  document.body.appendChild(d);
+  setTimeout(()=>d.remove(), 2300);
+}
+
+function renderRail(){
+  rail.innerHTML = STEPS.map((s,i)=>
+    `<div class="orb ${i<cur?'done':''} ${i===cur?'cur':''}"><i></i></div>${i<STEPS.length-1?'<span class="bar"></span>':''}`
+  ).join('');
+  rail.querySelectorAll('.orb.done i').forEach(i=>i.style.height='100%');
+}
+
+function gateHTML(hint){
+  return `<div class="gate"><span class="hint" id="gateHint">${hint}</span>
+    <button class="pbtn" id="btnNext" disabled>다음 ›</button></div>`;
+}
+function openGate(msg='열렸어요!'){
+  const h = document.getElementById('gateHint');
+  if(h.classList.contains('ready')) return;
+  h.textContent = msg; h.classList.add('ready');
+  document.getElementById('btnNext').disabled = false;
+  const peer = document.querySelector('.trace .peer.blur');
+  if(peer){ peer.classList.remove('blur'); toast('내가 썼으니, 박준호의 한 컷이 열렸어요'); }
+  cheer();
+}
+
+function render(){
+  renderRail();
+  const s = STEPS[cur];
+  if(!s){ renderDone(); return; }
+  let body = '';
+  if(s.type==='video') body = `
+    <div class="tv"><button class="playbtn" id="tvPlay">▶</button><div class="quote" style="display:none" id="tvQuote">${s.quote}</div>
+    <div class="vbar"><i id="vbar"></i></div></div>`;
+  if(s.type==='draw') body = `
+    <div class="padwrap"><canvas id="pad"></canvas></div>
+    <div class="colors" id="colors">
+      <button class="sel" style="background:#F26D9C"></button><button style="background:#3182F6"></button>
+      <button style="background:#46D5B2"></button><button style="background:#F2C14E"></button><button style="background:#2B2B33"></button>
+    </div>`;
+  if(s.type==='read') body = `<div class="reader" id="reader">${s.paras.map((p,i)=>`<p class="sent ${i===1?'friend-ul':''}" data-i="${i}">${p}${i===1?'<span class="ful">🖍 정다인·박준호도 여기 밑줄</span>':''}</p>`).join('')}<p style="color:#B0A793">— 여기까지예요.</p></div>`;
+  if(s.type==='speak') body = `
+    <div class="say"><div class="line">${s.say}</div>
+    <button class="holdbtn" id="hold"><span>🎙 꾹 누르고 말하기</span><div class="fill" id="holdFill"></div></button></div>`;
+  if(s.type==='play') body = `<div class="playbox"><textarea id="playTa" placeholder="${s.ph}"></textarea></div>`;
+  if(s.type==='write') body = `<div class="fin">${s.fields.map((f,i)=>
+    `<div class="field"><label>${f.label}</label><input id="fin${i}" placeholder="${f.ph}"></div>`).join('')}</div>`;
+
+  host.innerHTML = `<div class="card">
+    <div class="step-label">${s.label}</div><h1>${s.title}</h1><p class="lede">${s.lede}</p>
+    ${body}${TRACES[s.type] || ''}${gateHTML(gateHint(s))}</div>`;
+  renderClassmates();
+  bind(s);
+  document.getElementById('btnNext').addEventListener('click', ()=>{ cur++; render(); window.scrollTo(0,0); });
+}
+function gateHint(s){
+  return {video:'영상을 끝까지 보면 열려요', draw:'조금이라도 그리면 열려요', read:'끝까지 스크롤하면 열려요',
+          speak:'끝까지 누르고 있으면 열려요', play:'한 줄이라도 적으면 열려요', write:'두 칸을 채우면 끝나요'}[s.type];
+}
+
+function bind(s){
+  if(s.type==='video'){
+    document.getElementById('tvPlay').addEventListener('click', function(){
+      this.style.display='none';
+      document.getElementById('tvQuote').style.display='block';
+      let p = 0;
+      const t = setInterval(()=>{
+        p += 100/(s.seconds*10);
+        document.getElementById('vbar').style.width = Math.min(100,p)+'%';
+        if(p>=100){ clearInterval(t); openGate('다 봤어요!'); }
+      }, 100);
+    });
+  }
+  if(s.type==='draw'){
+    const cv = document.getElementById('pad');
+    const r = cv.getBoundingClientRect(); cv.width = r.width*2; cv.height = 400;
+    const ctx = cv.getContext('2d'); ctx.scale(2,2); ctx.lineWidth = 6; ctx.lineCap='round'; ctx.strokeStyle='#F26D9C';
+    let drawing = false, drew = 0;
+    const pos = e=>{ const b = cv.getBoundingClientRect(); const t = e.touches?e.touches[0]:e; return [t.clientX-b.left, t.clientY-b.top]; };
+    const start = e=>{ drawing = true; const [x,y]=pos(e); ctx.beginPath(); ctx.moveTo(x,y); e.preventDefault(); };
+    const move = e=>{ if(!drawing) return; const [x,y]=pos(e); ctx.lineTo(x,y); ctx.stroke(); if(++drew===12) openGate('예쁘네요. 열렸어요!'); e.preventDefault(); };
+    cv.addEventListener('mousedown',start); cv.addEventListener('mousemove',move);
+    window.addEventListener('mouseup',()=>drawing=false);
+    cv.addEventListener('touchstart',start); cv.addEventListener('touchmove',move); cv.addEventListener('touchend',()=>drawing=false);
+    document.querySelectorAll('#colors button').forEach(b=>b.addEventListener('click',()=>{
+      document.querySelectorAll('#colors button').forEach(x=>x.classList.remove('sel'));
+      b.classList.add('sel'); ctx.strokeStyle = b.style.background;
+    }));
+  }
+  if(s.type==='read'){
+    const rd = document.getElementById('reader');
+    rd.addEventListener('scroll', ()=>{
+      if(rd.scrollTop + rd.clientHeight >= rd.scrollHeight - 12) openGate('다 읽었어요!');
+    });
+    rd.querySelectorAll('.sent').forEach(pe=>pe.addEventListener('click', ()=>{
+      pe.classList.toggle('my-ul');
+      if(pe.classList.contains('my-ul')) toast('밑줄을 그었어요 — 같은 문장에 밑줄 친 친구가 보이면 반가워요');
+    }));
+  }
+  if(s.type==='speak'){
+    const btn = document.getElementById('hold'), fill = document.getElementById('holdFill');
+    let t = null, p = 0;
+    const down = e=>{ e.preventDefault(); t = setInterval(()=>{ p += 4; fill.style.width = p+'%';
+      if(p>=100){ clearInterval(t); openGate('들었어요. 열렸어요!'); btn.querySelector('span').textContent='🎙 말했어요 ✓'; } }, 60); };
+    const up = ()=>{ clearInterval(t); if(p<100){ p = 0; fill.style.width='0'; } };
+    btn.addEventListener('mousedown',down); btn.addEventListener('touchstart',down);
+    window.addEventListener('mouseup',up); btn.addEventListener('touchend',up);
+  }
+  if(s.type==='play'){
+    const ta = document.getElementById('playTa');
+    ta.addEventListener('input', ()=>{ if(ta.value.trim().length >= 8) openGate('바운더리 후보로 보낼게요!'); });
+  }
+  if(s.type==='write'){
+    const check = ()=>{
+      const ok = [...document.querySelectorAll('.fin input')].every(i=>i.value.trim().length >= 4);
+      if(ok) openGate('오늘 수업 끝!');
+    };
+    document.querySelectorAll('.fin input').forEach(i=>i.addEventListener('input', check));
+  }
+}
+
+function renderDone(){
+  renderRail();
+  host.innerHTML = `<div class="card done-wrap">
+    <div class="done-orb" id="dorb"><i></i><span class="emo">🎓</span></div>
+    <h1>일의 프레임이 완성됐어요 — 완강!</h1>
+    <div class="outdots"><span class="on">✓</span><span class="on">✓</span><span class="on">✓</span><span class="on">✓</span><span class="on">✓</span></div>
+    <p class="sub">다섯 조각이 모두 채워져 나만의 일의 프레임이 됐어요.<br>내일부터는 자기 일 중심 모드 — 강의실은 다시보기가 돼요.</p>
+    <div style="margin:0 0 16px; padding:12px 16px; border:3px solid #17171C; border-radius:6px; background:#FBE4EE; font-size:.85rem; font-weight:700; color:#8A2D55; box-shadow:3px 3px 0 rgba(0,0,0,.15)">
+      📦 오프라인 책 『일의 교과서』가 집으로 출발했어요<br><span style="font-weight:500; font-size:.76rem">여정을 끝낸 사람에게만 오는 졸업장이에요</span></div>
+    <button class="pbtn" onclick="location.href='myspace-prototype.html'">🏠 마이스페이스로 — <b>◗ +1</b></button>
+  </div>`;
+  setTimeout(()=>document.getElementById('dorb').classList.add('fill'), 100);
+  toast('PLAY 산출물이 워크툴 책상에 후보로 내려갔어요 ◗ +1');
+}
+
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._h); t._h = setTimeout(()=>t.classList.remove('show'), 3000);
+}
+
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>바운더리 타운 어드민 (프로토타입)</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+:root{
+  --ink:#1E2D3D; --ink-2:#16222F; --ink-3:#2A3B4D;
+  --bg:#F6F5F1; --card:#FFFFFF; --line:#E6E3DB; --line-soft:#EFEDE6;
+  --text:#26313B; --muted:#7B848D; --faint:#A6ADB4;
+  --tide:#1F7A6B; --tide-soft:#E4F0ED; --tide-line:#BFD9D3;
+  --shell:#C96343; --shell-soft:#F8EAE4;
+  --amber:#B8860B; --amber-soft:#F7EFDB;
+  --red:#B54141; --red-soft:#F7E7E7;
+  --radius:10px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{font-size:15px}
+body{
+  font-family:"Pretendard Variable",Pretendard,-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+  background:var(--bg); color:var(--text); letter-spacing:-0.01em; word-break:keep-all;
+  display:flex; min-height:100vh; min-width:1024px;
+}
+button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
+table{border-collapse:collapse;width:100%}
+.num{font-variant-numeric:tabular-nums}
+
+/* ---------- 사이드바 ---------- */
+.sidebar{
+  width:224px; flex-shrink:0; background:var(--ink); color:#C6CFD8;
+  display:flex; flex-direction:column; position:sticky; top:0; height:100vh;
+}
+.brand{padding:22px 20px 18px; border-bottom:1px solid var(--ink-3)}
+.brand h1{font-size:1.05rem; font-weight:800; color:#fff; letter-spacing:-0.02em}
+.brand h1 span{color:#7FB5A9}
+.brand p{font-size:.72rem; color:#8593A1; margin-top:4px}
+.nav{flex:1; padding:14px 10px; overflow-y:auto}
+.nav-group{margin-bottom:18px}
+.nav-group>span{display:block; font-size:.68rem; font-weight:700; color:#66788A; padding:0 10px 6px; letter-spacing:.06em}
+.nav button{
+  display:flex; align-items:center; gap:8px; width:100%; text-align:left;
+  padding:8px 10px; border-radius:7px; font-size:.88rem; color:#C6CFD8;
+}
+.nav button:hover{background:var(--ink-3); color:#fff}
+.nav button.active{background:var(--tide); color:#fff; font-weight:600}
+.nav button .cnt{margin-left:auto; font-size:.7rem; background:rgba(255,255,255,.14); border-radius:9px; padding:1px 7px}
+.sidebar-foot{padding:14px 20px; border-top:1px solid var(--ink-3); font-size:.72rem; color:#66788A; line-height:1.5}
+
+/* ---------- 헤더 · 개장 타임라인 ---------- */
+.main{flex:1; min-width:0; display:flex; flex-direction:column}
+.topbar{
+  background:var(--card); border-bottom:1px solid var(--line);
+  padding:14px 28px; display:flex; align-items:center; gap:20px; flex-wrap:wrap;
+  position:sticky; top:0; z-index:20;
+}
+.cohort-select{display:flex; align-items:center; gap:8px; font-weight:700; font-size:.95rem}
+.cohort-select select{font:inherit; font-weight:700; border:1px solid var(--line); border-radius:7px; padding:5px 8px; background:#fff; color:var(--text)}
+.townclock{flex:1; min-width:320px; max-width:640px}
+.townclock .tc-head{display:flex; justify-content:space-between; font-size:.72rem; color:var(--muted); margin-bottom:5px}
+.townclock .tc-head b{color:var(--tide); font-weight:700}
+.townclock .tc-head b.closed{color:var(--muted)}
+.tc-bar{position:relative; height:14px; border-radius:7px; background:var(--line-soft); overflow:visible}
+.tc-open{position:absolute; left:66.6%; width:33.3%; top:0; bottom:0; background:var(--tide-soft); border:1px solid var(--tide-line); border-radius:7px}
+.tc-open i{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-style:normal; font-size:.62rem; color:var(--tide); font-weight:700}
+.tc-now{position:absolute; top:-4px; bottom:-4px; width:2px; background:var(--shell); border-radius:1px}
+.tc-now::after{content:"지금"; position:absolute; top:-15px; left:50%; transform:translateX(-50%); font-size:.62rem; color:var(--shell); font-weight:700; white-space:nowrap}
+.tc-ticks{display:flex; justify-content:space-between; font-size:.62rem; color:var(--faint); margin-top:4px}
+.admin-chip{margin-left:auto; display:flex; align-items:center; gap:10px; font-size:.82rem; color:var(--muted)}
+.admin-chip .avatar{width:30px;height:30px;border-radius:50%;background:var(--ink);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:700}
+
+/* ---------- 콘텐츠 공통 ---------- */
+.content{padding:26px 28px 60px; max-width:1200px; width:100%}
+.view{display:none}
+.view.active{display:block}
+.view-head{margin-bottom:20px}
+.view-head h2{font-size:1.35rem; font-weight:800; letter-spacing:-0.02em}
+.view-head p{font-size:.85rem; color:var(--muted); margin-top:4px; line-height:1.55}
+.card{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:18px 20px; margin-bottom:16px; overflow-x:auto}
+.card h3{font-size:.95rem; font-weight:700; margin-bottom:12px; display:flex; align-items:center; gap:8px; flex-wrap:wrap}
+.card h3 .sub{font-size:.75rem; color:var(--muted); font-weight:400}
+.grid{display:grid; gap:14px; margin-bottom:16px}
+.grid.c4{grid-template-columns:repeat(4,1fr)}
+.grid.c3{grid-template-columns:repeat(3,1fr)}
+.grid.c2{grid-template-columns:repeat(2,1fr)}
+@media(max-width:1000px){.grid.c4{grid-template-columns:repeat(2,1fr)}.grid.c3{grid-template-columns:1fr}.grid.c2{grid-template-columns:1fr}}
+
+.stat{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:14px 16px}
+.stat .label{font-size:.75rem; color:var(--muted)}
+.stat .value{font-size:1.5rem; font-weight:800; margin-top:4px; letter-spacing:-0.02em; white-space:nowrap}
+.stat .value small{font-size:.8rem; color:var(--faint); font-weight:500}
+.stat .foot{font-size:.72rem; color:var(--muted); margin-top:4px}
+
+/* 뱃지 · 칩 */
+.badge{display:inline-flex; align-items:center; gap:4px; font-size:.7rem; font-weight:700; padding:2px 8px; border-radius:20px; white-space:nowrap}
+.b-tbd{background:var(--amber-soft); color:var(--amber)}
+.b-ok{background:var(--tide-soft); color:var(--tide)}
+.b-warn{background:var(--red-soft); color:var(--red)}
+.b-mute{background:var(--line-soft); color:var(--muted)}
+.b-shell{background:var(--shell-soft); color:var(--shell)}
+.shell-chip{color:var(--shell); font-weight:700}
+.shell-chip::before{content:"◗ "; font-size:.8em}
+.admin-only{display:inline-flex; font-size:.68rem; color:var(--red); background:var(--red-soft); border-radius:4px; padding:1px 6px; font-weight:700}
+
+/* 테이블 */
+.tbl th{font-size:.72rem; color:var(--muted); font-weight:600; text-align:left; padding:8px 10px; border-bottom:1px solid var(--line); white-space:nowrap}
+.tbl td{font-size:.85rem; padding:9px 10px; border-bottom:1px solid var(--line-soft); vertical-align:middle}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tbody tr.clickable:hover{background:var(--bg); cursor:pointer}
+.tbl .name{font-weight:700}
+
+/* 버튼 */
+.btn{display:inline-flex; align-items:center; gap:6px; font-size:.82rem; font-weight:600; padding:7px 14px; border-radius:7px; border:1px solid var(--line); background:#fff; color:var(--text)}
+.btn:hover{border-color:var(--faint)}
+.btn.primary{background:var(--tide); border-color:var(--tide); color:#fff}
+.btn.primary:hover{background:#186355}
+.btn.sm{padding:4px 10px; font-size:.75rem}
+
+/* 탭 */
+.tabs{display:flex; gap:6px; margin-bottom:14px; flex-wrap:wrap}
+.tabs button{font-size:.8rem; font-weight:600; padding:6px 12px; border-radius:20px; border:1px solid var(--line); background:#fff; color:var(--muted)}
+.tabs button.active{background:var(--ink); border-color:var(--ink); color:#fff}
+.tabs button .cnt{margin-left:5px; font-size:.7rem; opacity:.7}
+
+/* 파이프라인 */
+.pipe{display:flex; gap:0; overflow-x:auto; margin-bottom:16px}
+.pipe .step{flex:1; min-width:132px; background:var(--card); border:1px solid var(--line); padding:12px 14px; position:relative}
+.pipe .step:first-child{border-radius:var(--radius) 0 0 var(--radius)}
+.pipe .step:last-child{border-radius:0 var(--radius) var(--radius) 0}
+.pipe .step+.step{border-left:none}
+.pipe .step .s-label{font-size:.72rem; color:var(--muted); font-weight:600}
+.pipe .step .s-val{font-size:1.3rem; font-weight:800; margin-top:2px}
+.pipe .step .s-foot{font-size:.68rem; color:var(--faint); margin-top:2px}
+.pipe .step.hot{background:var(--tide-soft)}
+
+/* 퍼널 바 */
+.funnel-row{display:flex; align-items:center; gap:12px; margin-bottom:10px}
+.funnel-row .f-label{width:118px; font-size:.82rem; font-weight:600; flex-shrink:0; white-space:nowrap}
+.funnel-row .f-track{flex:1; height:22px; background:var(--line-soft); border-radius:5px; overflow:hidden}
+.funnel-row .f-fill{height:100%; background:var(--tide); border-radius:5px; display:flex; align-items:center; justify-content:flex-end; padding-right:8px; color:#fff; font-size:.72rem; font-weight:700; min-width:34px}
+.funnel-row .f-pct{width:44px; text-align:right; font-size:.75rem; color:var(--muted)}
+
+/* 팀 그리드 */
+.team-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:10px}
+.team-card{border:1px solid var(--line); border-radius:8px; padding:10px 12px; background:#fff; cursor:pointer}
+.team-card:hover{border-color:var(--tide)}
+.team-card.selected{border-color:var(--tide); background:var(--tide-soft)}
+.team-card.short{border-color:#E4BFBF; background:var(--red-soft)}
+.team-card .t-name{font-size:.85rem; font-weight:700}
+.team-card .t-meta{font-size:.7rem; color:var(--muted); margin-top:3px; line-height:1.5}
+
+/* 드로어 */
+.drawer-bg{position:fixed; inset:0; background:rgba(20,30,40,.35); z-index:40; display:none}
+.drawer-bg.open{display:block}
+.drawer{position:fixed; top:0; right:-460px; width:440px; max-width:92vw; height:100vh; background:#fff; z-index:50; box-shadow:-8px 0 30px rgba(0,0,0,.12); transition:right .22s ease; overflow-y:auto; padding:24px}
+.drawer.open{right:0}
+.drawer .d-close{position:absolute; top:16px; right:16px; font-size:1.1rem; color:var(--muted)}
+.drawer h3{font-size:1.15rem; font-weight:800}
+.drawer .d-sub{font-size:.78rem; color:var(--muted); margin:4px 0 16px}
+.d-section{border-top:1px solid var(--line-soft); padding:14px 0}
+.d-section h4{font-size:.78rem; font-weight:700; color:var(--muted); margin-bottom:8px}
+.kv{display:flex; justify-content:space-between; font-size:.84rem; padding:4px 0}
+.kv b{font-weight:700}
+
+/* 폼 */
+.field{margin-bottom:12px}
+.field label{display:block; font-size:.76rem; font-weight:600; color:var(--muted); margin-bottom:5px}
+.field input[type=text],.field textarea,.field select{width:100%; font:inherit; font-size:.86rem; border:1px solid var(--line); border-radius:7px; padding:8px 10px; background:#fff; color:var(--text)}
+.field textarea{min-height:90px; resize:vertical}
+.check{display:flex; align-items:center; gap:8px; font-size:.82rem; color:var(--muted); margin-bottom:8px}
+
+.note{font-size:.76rem; color:var(--muted); background:var(--line-soft); border-radius:7px; padding:10px 12px; line-height:1.6; margin-top:10px}
+.note b{color:var(--text)}
+.split{display:grid; grid-template-columns:1fr 1fr; gap:16px}
+@media(max-width:1000px){.split{grid-template-columns:1fr}}
+.proto-tag{position:fixed; bottom:14px; right:16px; font-size:.68rem; color:var(--faint); background:#fff; border:1px solid var(--line); border-radius:20px; padding:3px 10px; z-index:30}
+@media(prefers-reduced-motion:reduce){.drawer{transition:none}}
+</style>
+</head>
+<body>
+
+<!-- ============ 사이드바 ============ -->
+<aside class="sidebar">
+  <div class="brand">
+    <h1>바운더리 타운 <span>운영실</span></h1>
+    <p>어드민 프로토타입 · v0.1</p>
+  </div>
+  <nav class="nav">
+    <div class="nav-group">
+      <span>현황</span>
+      <button data-view="dashboard" class="active">대시보드</button>
+    </div>
+    <div class="nav-group">
+      <span>소속</span>
+      <button data-view="cohorts">기수 · 채널</button>
+      <button data-view="teams">팀 배치 <span class="cnt">결원 1</span></button>
+    </div>
+    <div class="nav-group">
+      <span>사람 · 경제</span>
+      <button data-view="users">유저</button>
+      <button data-view="economy">조개 경제</button>
+    </div>
+    <div class="nav-group">
+      <span>광장 운영</span>
+      <button data-view="help">도움 게시판</button>
+      <button data-view="ops">운영 도구 <span class="cnt">4</span></button>
+    </div>
+    <div class="nav-group">
+      <span>콘텐츠</span>
+      <button data-view="curriculum">커리큘럼 · 완강</button>
+    </div>
+  </nav>
+  <div class="sidebar-foot">
+    <a href="home-prototype.html" style="display:block; text-align:center; background:var(--ink-3); color:#C6CFD8; border-radius:7px; padding:8px; font-size:.8rem; font-weight:600; text-decoration:none; margin-bottom:10px">🏙️ 서비스 화면 보기</a>
+    기능 정의 통합본 2026-07-18 기준<br>미확정 항목은 <b>§7</b> 뱃지로 표시해요</div>
+</aside>
+
+<!-- ============ 메인 ============ -->
+<div class="main">
+  <header class="topbar">
+    <div class="cohort-select">
+      <select>
+        <option>3기 채널 (진행 중)</option>
+        <option>2기 채널 (완강 후)</option>
+        <option>1기 채널 (종료)</option>
+        <option>4기 (모집 중)</option>
+      </select>
+    </div>
+    <div class="townclock">
+      <div class="tc-head">
+        <span>광장 개장 타임라인 · 16:00 ~ 24:00</span>
+        <b id="tcStatus">—</b>
+      </div>
+      <div class="tc-bar">
+        <div class="tc-open"><i>개장 시간</i></div>
+        <div class="tc-now" id="tcNow"></div>
+      </div>
+      <div class="tc-ticks"><span>0시</span><span>6시</span><span>12시</span><span>16시</span><span>24시</span></div>
+    </div>
+    <div class="admin-chip">
+      <span>운영자</span>
+      <div class="avatar">황</div>
+    </div>
+  </header>
+
+  <main class="content">
+
+  <!-- ============ 1. 대시보드 ============ -->
+  <section class="view active" id="view-dashboard">
+    <div class="view-head">
+      <h2>대시보드</h2>
+      <p>3기 채널(150명)의 오늘이에요. 운영 리듬은 하루 두 번의 파도 — 오후 4시 개장과 저녁 코어타임(미확정)이에요.</p>
+    </div>
+
+    <div class="grid c4">
+      <div class="stat"><div class="label">오늘 접속</div><div class="value num">87<small> / 150명</small></div><div class="foot">어제 82명 · 몰입 중 34명</div></div>
+      <div class="stat"><div class="label">아침 바운더리 세팅</div><div class="value num">111<small>명 · 74%</small></div><div class="foot">3개 모두 세팅 96명</div></div>
+      <div class="stat"><div class="label">저녁 완료 체크</div><div class="value num">64<small>명 진행 중</small></div><div class="foot">완료율은 자정 집계</div></div>
+      <div class="stat"><div class="label">오늘 조개 흐름</div><div class="value num shell-chip">+342</div><div class="foot">발행 +342 · 소비 −57 (코치 대화)</div></div>
+    </div>
+
+    <div class="split">
+      <div class="card">
+        <h3>광장 상태 <span class="badge b-ok" id="dashPlaza">—</span></h3>
+        <div class="kv"><span>현재 접속</span><b class="num">41명</b></div>
+        <div class="kv"><span>오늘 도움 요청 접수 (우체통)</span><b class="num">9건 — 16:00 일괄 게시</b></div>
+        <div class="kv"><span>무대 브로드캐스트</span><b>오늘 20:00 라이브 예정</b></div>
+        <div class="kv"><span>코어타임</span><b>21:00 (안) <span class="badge b-tbd">미확정 §7</span></b></div>
+        <div class="note"><b>운영 메모</b> — 개장과 동시에 접수 글이 한 번에 공개돼요. 게시 직전(15:50)에 접수 큐를 한 번 살펴보는 걸 권해요.</div>
+      </div>
+      <div class="card">
+        <h3>오늘 할 일 <span class="sub">운영자 액션 대기 4건</span></h3>
+        <table class="tbl">
+          <tbody>
+            <tr><td>무대 화면 공유 권한 승인 — 박준호</td><td style="text-align:right"><button class="btn sm primary">승인</button> <button class="btn sm">보류</button></td></tr>
+            <tr><td>운영자 문의 미답변 <b class="num">3건</b> (결제 1 · 오류 2)</td><td style="text-align:right"><button class="btn sm" data-goto="ops">문의함 열기</button></td></tr>
+            <tr><td>결원 팀 1개 — 07팀 (5/6명) <span class="badge b-tbd">충원 규칙 미확정 §7</span></td><td style="text-align:right"><button class="btn sm" data-goto="teams">팀 보기</button></td></tr>
+            <tr><td>도움 정산 지연 1건 — 완료 확정 후 48시간 경과</td><td style="text-align:right"><button class="btn sm" data-goto="help">게시판 보기</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>오늘의 흐름 <span class="sub">프레즌스 소식은 전부 앱 안 행동에서 자동 생성 — 운영자는 모니터링만</span></h3>
+      <table class="tbl">
+        <thead><tr><th style="width:80px">시각</th><th>이벤트</th><th style="width:120px">유형</th></tr></thead>
+        <tbody>
+          <tr><td class="num">14:52</td><td>정다인 — 오늘의 바운더리 3개 완료</td><td><span class="badge b-ok">실행</span></td></tr>
+          <tr><td class="num">14:31</td><td>김이서 → 도움 요청 접수 「고객 인터뷰 질문 검토」 <span class="shell-chip num">20</span></td><td><span class="badge b-shell">도움</span></td></tr>
+          <tr><td class="num">13:05</td><td>문가은 — 커리큘럼 3단계(고객언어) 산출물 제출</td><td><span class="badge b-mute">학습</span></td></tr>
+          <tr><td class="num">11:47</td><td>박준호 — 목표 100번 쓰기 완료 (연속 12일)</td><td><span class="badge b-ok">리추얼</span></td></tr>
+          <tr><td class="num">09:12</td><td>서도윤 → 운영자 문의 「결제 영수증 재발급」</td><td><span class="badge b-warn">문의</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============ 2. 기수 · 채널 ============ -->
+  <section class="view" id="view-cohorts">
+    <div class="view-head">
+      <h2>기수 · 채널</h2>
+      <p>기수 하나가 채널 하나(최대 150명), 광장 하나를 써요. 결제하면 바로 솔로 모드로 입장하고, 팀과 광장은 기수 시작일에 함께 열려요.</p>
+    </div>
+
+    <div class="card">
+      <h3>기수 목록 <button class="btn sm primary" style="margin-left:auto">+ 새 기수 만들기</button></h3>
+      <table class="tbl">
+        <thead><tr><th>기수</th><th>상태</th><th>인원</th><th>팀</th><th>시작일</th><th>완강자</th><th>광장</th></tr></thead>
+        <tbody>
+          <tr class="clickable"><td class="name">4기</td><td><span class="badge b-mute">모집 중</span></td><td class="num">23 / 150</td><td>—</td><td class="num">2026-07-27 (예정) <span class="badge b-tbd">기수 주기 §7</span></td><td>—</td><td>미오픈</td></tr>
+          <tr class="clickable"><td class="name">3기</td><td><span class="badge b-ok">진행 중</span></td><td class="num">150 / 150</td><td class="num">25개</td><td class="num">2026-07-06</td><td class="num">0명</td><td>운영 중</td></tr>
+          <tr class="clickable"><td class="name">2기</td><td><span class="badge b-ok">완강 후</span></td><td class="num">147 / 150</td><td class="num">25개</td><td class="num">2026-04-13</td><td class="num">21명</td><td>운영 중</td></tr>
+          <tr class="clickable"><td class="name">1기</td><td><span class="badge b-mute">종료</span></td><td class="num">142 / 150</td><td class="num">24개</td><td class="num">2026-01-19</td><td class="num">38명</td><td>닫힘 · 자산 휴면 보존</td></tr>
+        </tbody>
+      </table>
+      <div class="note"><b>휴면 보존</b> — 멤버십을 쉬는 유저의 조개·기록·신뢰점수는 그대로 보관했다가, 다시 오면 복원해요 (확정 2026-07-18).</div>
+    </div>
+
+    <div class="card">
+      <h3>4기 대기자 — 솔로 모드 수강 중 <span class="sub">결제 완료 → 기수 시작 전. 강의·데일리 트랙은 이미 사용 가능</span></h3>
+      <table class="tbl">
+        <thead><tr><th>이름</th><th>결제일</th><th>AI 인터뷰</th><th>캐릭터 생성</th><th>커리큘럼</th><th>커리어 단계</th></tr></thead>
+        <tbody>
+          <tr><td class="name">임태오</td><td class="num">2026-07-19</td><td><span class="badge b-ok">완료</span></td><td><span class="badge b-ok">완료</span></td><td class="num">1단계 진행 중</td><td class="num">3단계</td></tr>
+          <tr><td class="name">조예린</td><td class="num">2026-07-19</td><td><span class="badge b-ok">완료</span></td><td><span class="badge b-ok">완료</span></td><td class="num">1단계 진행 중</td><td class="num">4단계</td></tr>
+          <tr><td class="name">신재하</td><td class="num">2026-07-20</td><td><span class="badge b-warn">미완료</span></td><td>—</td><td>—</td><td>—</td></tr>
+        </tbody>
+      </table>
+      <div class="note">AI 인터뷰(자기소개·커리어 단계·직무)가 팀 배치의 재료예요. 기수 시작 전에 인터뷰를 안 끝낸 분은 배치에서 빠지니, 리마인드가 필요해요.</div>
+    </div>
+  </section>
+
+  <!-- ============ 3. 팀 배치 ============ -->
+  <section class="view" id="view-teams">
+    <div class="view-head">
+      <h2>팀 배치 — 3기 채널</h2>
+      <p>AI가 팀당 6명씩 자동 배치해요. 규칙은 <b>직무는 서로 다르게 · 커리어 단계는 비슷하게 · 상호 비공개.</b> 아래 직무 표시는 어드민에서만 보여요 — 유저 화면엔 절대 노출되지 않아요.</p>
+    </div>
+
+    <div class="card">
+      <h3>팀 25개 <span class="badge b-warn">결원 1</span> <span class="sub">카드를 누르면 상세를 봅니다</span></h3>
+      <div class="team-grid" id="teamGrid"></div>
+    </div>
+
+    <div class="card" id="teamDetail"></div>
+
+    <div class="card">
+      <h3>결원 · 재구성 <span class="badge b-tbd">미확정 §7</span></h3>
+      <p style="font-size:.85rem; line-height:1.7; color:var(--muted)">
+        07팀에서 1명 이탈(환불). 충원·통폐합 규칙은 미확정 — 통폐합은 배치 의도(직무 다르게·커리어 비슷하게)가 깨질 수 있어 신중히 결정할 사안입니다.
+        완강 후 코호트 재구성 시에는 기존 축에 <b>유사 목표(바운더리)</b> 기준이 더해집니다.
+      </p>
+      <div style="margin-top:10px"><button class="btn sm">충원 시뮬레이션 (준비 중)</button> <button class="btn sm">통폐합 시뮬레이션 (준비 중)</button></div>
+    </div>
+  </section>
+
+  <!-- ============ 4. 유저 ============ -->
+  <section class="view" id="view-users">
+    <div class="view-head">
+      <h2>유저 — 3기 채널</h2>
+      <p>모든 유저는 본명으로 활동해요(닉네임 없음). 행을 누르면 상세가 열려요 — 신뢰점수 내역·조개·차단 관계는 어드민에서만 보여요.</p>
+    </div>
+    <div class="card">
+      <h3>
+        <input type="text" id="userSearch" placeholder="이름 검색" style="font:inherit;font-size:.85rem;border:1px solid var(--line);border-radius:7px;padding:6px 10px;width:200px">
+        <span class="sub">150명 중 표본 12명 표시 (프로토타입)</span>
+      </h3>
+      <table class="tbl">
+        <thead><tr><th>이름</th><th>팀</th><th>커리어 단계</th><th>직무 <span class="admin-only">어드민 전용</span></th><th>커리큘럼</th><th>신뢰점수</th><th>조개</th><th>상태</th></tr></thead>
+        <tbody id="userRows"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============ 5. 조개 경제 ============ -->
+  <section class="view" id="view-economy">
+    <div class="view-head">
+      <h2>조개 경제</h2>
+      <p>일해서 벌고 성장에 쓰는 화폐예요. 최소 단위 1 · 현금 연결 없음 · 가입 시 20개 지급. 수치 구조는 확정됐고(2026-07-18), 행사 참여권 가격만 미정이에요.</p>
+    </div>
+
+    <div class="grid c4">
+      <div class="stat"><div class="label">채널 총 유통량</div><div class="value num shell-chip">11,240</div><div class="foot">3기 · 150명</div></div>
+      <div class="stat"><div class="label">이번 주 발행</div><div class="value num">+1,872</div><div class="foot">실행 82% · 도움 정산 11% · 리추얼 7%</div></div>
+      <div class="stat"><div class="label">이번 주 소비</div><div class="value num">−318</div><div class="foot">코치 자유 대화 −241 · 도움 요청 −77</div></div>
+      <div class="stat"><div class="label">잔액 0 유저</div><div class="value num">3<small>명</small></div><div class="foot">도움 요청 불가 상태 — 관찰 대상</div></div>
+    </div>
+
+    <div class="split">
+      <div class="card">
+        <h3>정책 수치 <span class="badge b-ok">확정 2026-07-18</span></h3>
+        <table class="tbl">
+          <thead><tr><th>항목</th><th style="width:110px">수치</th><th>감각</th></tr></thead>
+          <tbody>
+            <tr><td>아침 세팅</td><td class="num shell-chip">+1</td><td>하루를 여는 보상</td></tr>
+            <tr><td>바운더리 완료</td><td class="num shell-chip">개당 +1</td><td>3개 = +3 · 실행이 최대 수입원</td></tr>
+            <tr><td>저녁 회고</td><td class="num shell-chip">+1</td><td>하루를 닫는 보상</td></tr>
+            <tr><td>목표 100번 쓰기</td><td class="num shell-chip">+1</td><td>성실한 하루 합계 = 6</td></tr>
+            <tr><td>코치 자유 대화</td><td class="num">1회 −1</td><td>아침 세팅·저녁 회고 대화는 무료</td></tr>
+            <tr><td>도움 요청 최소</td><td class="num">5</td><td>하루치 수입 — 요청의 무게</td></tr>
+            <tr><td>초기 지급</td><td class="num shell-chip">20</td><td>첫 주 코치 대화 + 도움 요청 1~2회</td></tr>
+            <tr><td>오프라인 행사 참여권</td><td class="num">100~150 <span class="badge b-tbd">§7</span></td><td>한 달 성실 실행(약 180) 수준</td></tr>
+          </tbody>
+        </table>
+        <div class="note"><b>운영 조정 후보</b> — 코치 사용량이 눈에 띄게 낮으면 "하루 첫 자유 대화 1회 무료"를 붙이는 걸 검토해요.</div>
+      </div>
+      <div class="card">
+        <h3>최근 7일 발행/소비 <span class="sub">단위: 조개</span></h3>
+        <table class="tbl">
+          <thead><tr><th>날짜</th><th>발행</th><th>소비</th><th>순증</th></tr></thead>
+          <tbody>
+            <tr><td class="num">07-14 (월)</td><td class="num">+284</td><td class="num">−41</td><td class="num">+243</td></tr>
+            <tr><td class="num">07-15 (화)</td><td class="num">+291</td><td class="num">−48</td><td class="num">+243</td></tr>
+            <tr><td class="num">07-16 (수)</td><td class="num">+268</td><td class="num">−39</td><td class="num">+229</td></tr>
+            <tr><td class="num">07-17 (목)</td><td class="num">+301</td><td class="num">−52</td><td class="num">+249</td></tr>
+            <tr><td class="num">07-18 (금)</td><td class="num">+276</td><td class="num">−45</td><td class="num">+231</td></tr>
+            <tr><td class="num">07-19 (토)</td><td class="num">+189</td><td class="num">−36</td><td class="num">+153</td></tr>
+            <tr><td class="num">07-20 (일)</td><td class="num">+342</td><td class="num">−57</td><td class="num">+285</td></tr>
+          </tbody>
+        </table>
+        <div class="note"><b>지켜볼 것</b> — 지금은 발행이 소비를 크게 웃돌아요. 큰 소비처(행사 참여권)가 열리기 전까지 인플레 추이를 지켜봐야 해요. 회수는 반발을 부르니, 조정은 소비처 추가로만 해요.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 6. 도움 게시판 ============ -->
+  <section class="view" id="view-help">
+    <div class="view-head">
+      <h2>도움 게시판 — 3기 광장</h2>
+      <p>사람과 사람이 이어지는 유일한 공식 통로예요. 우체통으로 하루 종일 접수받아 개장(16시)에 한 번에 게시돼요. 성사된 대화는 글에 남아 사라지지 않아요.</p>
+    </div>
+
+    <div class="pipe">
+      <div class="step hot"><div class="s-label">① 접수 (우체통)</div><div class="s-val num">9</div><div class="s-foot">오늘 16:00 일괄 게시</div></div>
+      <div class="step"><div class="s-label">② 응답 대기</div><div class="s-val num">5</div><div class="s-foot">손 든 사람 있음 3건</div></div>
+      <div class="step"><div class="s-label">③ 진행 중</div><div class="s-val num">3</div><div class="s-foot">글에 묶인 대화 열림</div></div>
+      <div class="step"><div class="s-label">④ 정산 대기</div><div class="s-val num">2</div><div class="s-foot">완료 확정 시 조개 이동</div></div>
+      <div class="step"><div class="s-label">⑤ 평가 대기</div><div class="s-val num">1</div><div class="s-foot">좋았다/싫었다 2단</div></div>
+    </div>
+
+    <div class="card">
+      <h3>요청 목록</h3>
+      <div class="tabs" id="helpTabs">
+        <button class="active" data-f="all">전체 <span class="cnt">11</span></button>
+        <button data-f="queued">게시 대기 <span class="cnt">3</span></button>
+        <button data-f="waiting">응답 대기 <span class="cnt">3</span></button>
+        <button data-f="progress">진행 중 <span class="cnt">3</span></button>
+        <button data-f="settle">정산·평가 <span class="cnt">2</span></button>
+      </div>
+      <table class="tbl">
+        <thead><tr><th>제목</th><th>요청자</th><th>조개</th><th>상태</th><th>응답/상대</th><th>접수 시각</th></tr></thead>
+        <tbody id="helpRows"></tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h3>"다시는 안 만나기" 로그 <span class="admin-only">어드민 전용 · 화면 비노출</span></h3>
+      <table class="tbl">
+        <thead><tr><th>발생일</th><th>당사자</th><th>적용 범위</th><th>상태</th></tr></thead>
+        <tbody>
+          <tr><td class="num">07-15</td><td>유저 A ↔ 유저 B <span class="badge b-mute">익명 처리 표시</span></td><td>도움 매칭 · 팀 재구성 · 약속 상호 제외</td><td><span class="badge b-ok">적용 중</span></td></tr>
+          <tr><td class="num">07-09</td><td>유저 C ↔ 유저 D</td><td>도움 매칭 · 팀 재구성 · 약속 상호 제외</td><td><span class="badge b-ok">적용 중</span></td></tr>
+        </tbody>
+      </table>
+      <div class="note">차단은 양방향 매칭 제외로만 조용히 작동하고, <b>상대는 그 사실을 몰라요.</b> 어드민도 개입 없이 지켜보기만 해요 — 유난히 잦은 유저가 보일 때만 따로 살펴봐요.</div>
+    </div>
+  </section>
+
+  <!-- ============ 7. 운영 도구 ============ -->
+  <section class="view" id="view-ops">
+    <div class="view-head">
+      <h2>운영 도구</h2>
+      <p>공지 발행, 문의함, 무대 방송, 일정을 여기서 관리해요. 운영자 문의는 1:1 없음 원칙의 유일한 예외 통로예요.</p>
+    </div>
+
+    <div class="split">
+      <div class="card">
+        <h3>공지 발행</h3>
+        <div class="field"><label>제목</label><input type="text" placeholder="예: 이번 주 코어타임 안내"></div>
+        <div class="field"><label>본문</label><textarea placeholder="공식 발행 장소는 광장 게시판입니다."></textarea></div>
+        <div class="check"><input type="checkbox" checked disabled> 광장 공지 게시판에 발행 (공식 발행 장소 · 고정)</div>
+        <div class="check"><input type="checkbox" checked disabled> 마이스페이스 우편함에 사본 발송 (고정)</div>
+        <div class="check"><input type="checkbox" checked disabled> 알림 발송 — 운영 공지는 유저가 끌 수 없음</div>
+        <button class="btn primary">발행하기</button>
+        <div class="note">밤 12시~아침 8시 사이에 발행하면, 알림은 조용히 모였다가 아침에 한 번에 나가요.</div>
+      </div>
+
+      <div class="card">
+        <h3>운영자 문의함 <span class="badge b-warn">미답변 3</span></h3>
+        <table class="tbl">
+          <thead><tr><th>유형</th><th>내용</th><th>보낸 사람</th><th>상태</th></tr></thead>
+          <tbody>
+            <tr><td><span class="badge b-mute">결제</span></td><td>결제 영수증 재발급 요청</td><td class="name">서도윤</td><td><span class="badge b-warn">미답변</span></td></tr>
+            <tr><td><span class="badge b-mute">오류</span></td><td>우체통 접수 글이 목록에 안 보여요</td><td class="name">한지운</td><td><span class="badge b-warn">미답변</span></td></tr>
+            <tr><td><span class="badge b-mute">오류</span></td><td>조개 잔액 표시가 어제와 달라요</td><td class="name">배수현</td><td><span class="badge b-warn">미답변</span></td></tr>
+            <tr><td><span class="badge b-mute">불편</span></td><td>프레즌스 소식이 너무 자주 떠요</td><td class="name">강민서</td><td><span class="badge b-ok">답변 완료</span></td></tr>
+          </tbody>
+        </table>
+        <div class="note">결제·오류·불편 문의가 광장 공개 게시판에 올라가지 않도록 여기로 받아요. 답장은 유저의 우편함으로 가요.</div>
+      </div>
+    </div>
+
+    <div class="split">
+      <div class="card">
+        <h3>무대 브로드캐스트</h3>
+        <table class="tbl">
+          <thead><tr><th>일시</th><th>제목</th><th>주체</th><th>상태</th></tr></thead>
+          <tbody>
+            <tr><td class="num">오늘 20:00</td><td>3기 중간 점검 라이브</td><td>운영자</td><td><span class="badge b-ok">예고 노출 중</span></td></tr>
+            <tr><td class="num">07-23 20:00</td><td>완강자 사례 공유 (2기 초청)</td><td>운영자 + 승인 유저</td><td><span class="badge b-mute">예정</span></td></tr>
+          </tbody>
+        </table>
+        <div style="margin-top:10px; padding:10px 12px; border:1px solid var(--line); border-radius:8px; display:flex; align-items:center; gap:10px; font-size:.84rem">
+          <span><b>권한 승인 대기</b> — 박준호 · 오늘 라이브 화면 공유 요청</span>
+          <span style="margin-left:auto"><button class="btn sm primary">승인</button> <button class="btn sm">거절</button></span>
+        </div>
+        <div class="note">방송은 기본적으로 운영자가 진행하고, 그 자리에서 승인한 유저에게만 권한이 열려요. 라이브 예고는 상단바와 프레즌스 창에 노출돼요.</div>
+      </div>
+
+      <div class="card">
+        <h3>일정 관리</h3>
+        <table class="tbl">
+          <thead><tr><th>항목</th><th>시각</th><th>비고</th></tr></thead>
+          <tbody>
+            <tr><td>광장 개장</td><td class="num">매일 16:00 ~ 24:00</td><td><span class="badge b-ok">확정</span></td></tr>
+            <tr><td>도움 요청 일괄 게시</td><td class="num">매일 16:00</td><td>우체통 접수분</td></tr>
+            <tr><td>코어타임</td><td class="num">21:00 (안)</td><td><span class="badge b-tbd">시각·주기·프로그램 미확정 §7</span></td></tr>
+            <tr><td>알림 무음 시간</td><td class="num">00:00 ~ 08:00</td><td>아침에 일괄 발송</td></tr>
+            <tr><td>4기 시작 (팀 배치 + 광장 오픈)</td><td class="num">07-27 (예정)</td><td><span class="badge b-tbd">기수 주기 미확정 §7</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 8. 커리큘럼 · 완강 ============ -->
+  <section class="view" id="view-curriculum">
+    <div class="view-head">
+      <h2>커리큘럼 · 완강 — 3기</h2>
+      <p>커리큘럼은 순서가 고정이에요: 바운더리 설정 → 숫자언어 → 고객언어 → 문제정의 → 전략 설정. <b>완강 기준은 산출물 5개 완성</b>이에요 — 시청률이 아니에요 (확정 2026-07-18).</p>
+    </div>
+
+    <div class="card">
+      <h3>단계별 도달 현황 <span class="sub">해당 단계 산출물 제출 기준 · 150명</span></h3>
+      <div class="funnel-row"><div class="f-label">① 바운더리 설정</div><div class="f-track"><div class="f-fill num" style="width:100%">150</div></div><div class="f-pct num">100%</div></div>
+      <div class="funnel-row"><div class="f-label">② 숫자언어</div><div class="f-track"><div class="f-fill num" style="width:79%">118</div></div><div class="f-pct num">79%</div></div>
+      <div class="funnel-row"><div class="f-label">③ 고객언어</div><div class="f-track"><div class="f-fill num" style="width:56%">84</div></div><div class="f-pct num">56%</div></div>
+      <div class="funnel-row"><div class="f-label">④ 문제정의</div><div class="f-track"><div class="f-fill num" style="width:26%">39</div></div><div class="f-pct num">26%</div></div>
+      <div class="funnel-row"><div class="f-label">⑤ 전략 설정</div><div class="f-track"><div class="f-fill num" style="width:11%">16</div></div><div class="f-pct num">11%</div></div>
+      <div class="note">끝점(숫자언어+고객언어)은 ②·③단계를 마치면 상단 칩으로 표시되기 시작해요 — 지금 84명이 끝점을 갖고 있어요. PLAY 미션은 코치 대화와 워크툴의 바운더리 후보로 이어져요.</div>
+    </div>
+
+    <div class="split">
+      <div class="card">
+        <h3>완강 현황</h3>
+        <div class="grid c2" style="margin-bottom:0">
+          <div class="stat"><div class="label">3기 완강자 (산출물 5/5)</div><div class="value num">0<small>명 · 시작 2주차</small></div></div>
+          <div class="stat"><div class="label">완강 임박 (산출물 4/5)</div><div class="value num">9<small>명</small></div></div>
+        </div>
+        <div class="note"><b>판정 기준</b> — 영상을 다 봐도 산출물이 없으면 완강이 아니에요. 완강 후 모드(자기 일 중심)가 끝점 없이는 성립하지 않기 때문이에요. 완강하면 강의실은 다시보기 아카이브로 바뀌어요.</div>
+      </div>
+      <div class="card">
+        <h3>완강 임박자 <span class="sub">4/5 — 남은 산출물 1개</span></h3>
+        <table class="tbl">
+          <thead><tr><th>이름</th><th>남은 산출물</th><th>최근 활동</th></tr></thead>
+          <tbody>
+            <tr><td class="name">김이서</td><td>3개월 전략</td><td class="num">오늘</td></tr>
+            <tr><td class="name">정다인</td><td>3개월 전략</td><td class="num">오늘</td></tr>
+            <tr><td class="name">이하람</td><td>문제 한 문장</td><td class="num">어제</td></tr>
+            <tr><td class="name">오세진</td><td>3개월 전략</td><td class="num">3일 전 <span class="badge b-warn">정체</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  </main>
+</div>
+
+<div class="drawer-bg" id="drawerBg"></div>
+<aside class="drawer" id="drawer"></aside>
+<div class="proto-tag">임시 프로토타입 · 목데이터 · 2026-07-20</div>
+
+<script>
+/* ---------- 네비게이션 ---------- */
+const navBtns = document.querySelectorAll('.nav button');
+function show(view){
+  navBtns.forEach(b=>b.classList.toggle('active', b.dataset.view===view));
+  document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active', v.id==='view-'+view));
+  window.scrollTo(0,0);
+}
+navBtns.forEach(b=>b.addEventListener('click', ()=>show(b.dataset.view)));
+document.querySelectorAll('[data-goto]').forEach(b=>b.addEventListener('click', ()=>show(b.dataset.goto)));
+
+/* ---------- 개장 타임라인 ---------- */
+function renderClock(){
+  const now = new Date();
+  const mins = now.getHours()*60 + now.getMinutes();
+  document.getElementById('tcNow').style.left = (mins/1440*100)+'%';
+  const open = now.getHours() >= 16;
+  const st = document.getElementById('tcStatus');
+  const dash = document.getElementById('dashPlaza');
+  if(open){
+    st.textContent = '개장 중 · 24시 마감'; st.classList.remove('closed');
+    if(dash){ dash.textContent='개장 중'; dash.className='badge b-ok'; }
+  }else{
+    const left = 16*60 - mins;
+    st.textContent = '개장 전 · '+Math.floor(left/60)+'시간 '+(left%60)+'분 후 개장'; st.classList.add('closed');
+    if(dash){ dash.textContent='개장 전'; dash.className='badge b-mute'; }
+  }
+}
+renderClock(); setInterval(renderClock, 30000);
+
+/* ---------- 팀 데이터 ---------- */
+const JOBS = ['마케터','개발자','디자이너','PM','데이터 분석가','영업'];
+const teams = Array.from({length:25}, (_,i)=>{
+  const n = i+1;
+  return {
+    id:n, name:String(n).padStart(2,'0')+'팀',
+    size: n===7 ? 5 : 6,
+    stage: 2 + (n%3),
+    activity: [92,81,77,88,64,90,58,73,85,79,91,68,74,82,87,60,93,71,78,84,66,89,75,80,86][i]
+  };
+});
+const teamGrid = document.getElementById('teamGrid');
+let selectedTeam = 7;
+function renderTeams(){
+  teamGrid.innerHTML = teams.map(t=>`
+    <div class="team-card ${t.size<6?'short':''} ${t.id===selectedTeam?'selected':''}" data-id="${t.id}">
+      <div class="t-name">${t.name} ${t.size<6?'<span class="badge b-warn">결원</span>':''}</div>
+      <div class="t-meta num">${t.size}/6명 · 커리어 ${t.stage}~${t.stage+1}단계<br>주간 활동 ${t.activity}%</div>
+    </div>`).join('');
+  teamGrid.querySelectorAll('.team-card').forEach(c=>c.addEventListener('click',()=>{
+    selectedTeam = +c.dataset.id; renderTeams(); renderTeamDetail();
+  }));
+}
+const detailMembers = {
+  7: [
+    {n:'박준호', job:'개발자', st:3, trust:81, note:'활동 상위'},
+    {n:'문가은', job:'디자이너', st:3, trust:74, note:''},
+    {n:'서도윤', job:'마케터', st:4, trust:69, note:''},
+    {n:'한지운', job:'PM', st:3, trust:77, note:''},
+    {n:'배수현', job:'데이터 분석가', st:4, trust:62, note:'최근 7일 미접속'},
+  ],
+  default: [
+    {n:'김이서', job:'마케터', st:3, trust:84, note:'완강 임박'},
+    {n:'정다인', job:'PM', st:3, trust:79, note:'완강 임박'},
+    {n:'최연우', job:'개발자', st:4, trust:71, note:''},
+    {n:'이하람', job:'데이터 분석가', st:3, trust:76, note:''},
+    {n:'오세진', job:'디자이너', st:4, trust:65, note:'3일 정체'},
+    {n:'강민서', job:'영업', st:3, trust:70, note:''},
+  ]
+};
+function renderTeamDetail(){
+  const t = teams.find(x=>x.id===selectedTeam);
+  const members = detailMembers[t.id] || detailMembers.default;
+  document.getElementById('teamDetail').innerHTML = `
+    <h3>${t.name} 상세 ${t.size<6?'<span class="badge b-warn">결원 1 — 이탈(환불) 07-14</span>':'<span class="badge b-ok">정상</span>'}
+      <span class="sub">배치 근거: 직무 6종 모두 다름 · 커리어 단계 ${t.stage}±1 · 상호 비공개 유지</span></h3>
+    <table class="tbl">
+      <thead><tr><th>이름</th><th>직무 <span class="admin-only">어드민 전용</span></th><th>커리어 단계</th><th>신뢰점수</th><th>비고</th></tr></thead>
+      <tbody>${members.map(m=>`
+        <tr><td class="name">${m.n}</td><td>${m.job}</td><td class="num">${m.st}단계</td><td class="num">${m.trust}</td>
+        <td>${m.note?'<span class="badge b-mute">'+m.note+'</span>':''}</td></tr>`).join('')}
+      </tbody>
+    </table>
+    <div class="note">유저 화면에는 직무·회사가 절대 노출되지 않아요(뼈대 정책 2). 예외는 도움 자리에서 본인이 직접 밝히는 경우뿐이에요.</div>`;
+}
+renderTeams(); renderTeamDetail();
+
+/* ---------- 유저 데이터 ---------- */
+const users = [
+  {n:'김이서', team:'03팀', st:3, job:'마케터', cur:'4/5 전략', trust:84, shell:96, status:'활동', done:4,
+   trustLog:[['도움 상호 평가 (좋았다 ×6)','+'],['바운더리 실행 31일 연속','+'],['학습 참여 — 문답 정답률 88%','+']],
+   block:'없음', memo:'도움 제공 6회 — 채널 상위. AI 소개문 갱신 제안 1건 대기.'},
+  {n:'박준호', team:'07팀', st:3, job:'개발자', cur:'3/5 고객언어', trust:81, shell:128, status:'활동', done:3,
+   trustLog:[['도움 상호 평가 (좋았다 ×4)','+'],['바운더리 실행 24일','+'],['학습 참여 양호','+']],
+   block:'없음', memo:'오늘 무대 화면 공유 권한 요청 중.'},
+  {n:'정다인', team:'12팀', st:3, job:'PM', cur:'4/5 전략', trust:79, shell:74, status:'활동', done:4,
+   trustLog:[['도움 상호 평가 (좋았다 ×3)','+'],['바운더리 완료율 91%','+']], block:'없음', memo:''},
+  {n:'최연우', team:'12팀', st:4, job:'개발자', cur:'3/5 고객언어', trust:71, shell:52, status:'활동', done:3,
+   trustLog:[['바운더리 실행 꾸준','+'],['도움 평가 1건 (좋았다)','+']], block:'없음', memo:''},
+  {n:'이하람', team:'05팀', st:3, job:'데이터 분석가', cur:'4/5 문제정의', trust:76, shell:88, status:'활동', done:4,
+   trustLog:[['학습 문답 정답률 92%','+'],['도움 제공 2회','+']], block:'없음', memo:''},
+  {n:'한지운', team:'07팀', st:3, job:'PM', cur:'2/5 숫자언어', trust:77, shell:61, status:'활동', done:2,
+   trustLog:[['바운더리 실행 양호','+']], block:'없음', memo:'우체통 오류 문의 1건 미답변.'},
+  {n:'서도윤', team:'07팀', st:4, job:'마케터', cur:'3/5 고객언어', trust:69, shell:43, status:'활동', done:3,
+   trustLog:[['도움 평가 혼재 (좋았다 2 · 싫었다 1)','·']], block:'1건 (상호 제외 적용 중)', memo:'결제 영수증 문의 미답변.'},
+  {n:'문가은', team:'07팀', st:3, job:'디자이너', cur:'3/5 고객언어', trust:74, shell:70, status:'활동', done:3,
+   trustLog:[['오늘 고객언어 산출물 제출','+']], block:'없음', memo:''},
+  {n:'오세진', team:'09팀', st:4, job:'디자이너', cur:'4/5 전략', trust:65, shell:39, status:'정체', done:4,
+   trustLog:[['최근 3일 바운더리 미세팅','−']], block:'없음', memo:'완강 임박이나 3일 정체 — 코치 넛지 후보.'},
+  {n:'배수현', team:'07팀', st:4, job:'데이터 분석가', cur:'2/5 숫자언어', trust:62, shell:12, status:'이탈 위험', done:2,
+   trustLog:[['최근 7일 미접속','−']], block:'없음', memo:'조개 잔액 문의 1건. 프레즌스 응원 수신 0 — 관찰.'},
+  {n:'임태오', team:'4기 대기', st:3, job:'영업', cur:'1/5 진행 중', trust:50, shell:20, status:'솔로 모드', done:0,
+   trustLog:[['초기 상태','·']], block:'없음', memo:'4기 대기자 — 기수 시작 시 팀 배치.'},
+  {n:'황보라', team:'02팀', st:2, job:'마케터', cur:'3/5 고객언어', trust:73, shell:67, status:'활동', done:3,
+   trustLog:[['목표 100번 쓰기 연속 18일','+']], block:'없음', memo:''},
+];
+const userRows = document.getElementById('userRows');
+function statusBadge(s){
+  if(s==='활동') return '<span class="badge b-ok">활동</span>';
+  if(s==='솔로 모드') return '<span class="badge b-mute">솔로 모드</span>';
+  if(s==='정체') return '<span class="badge b-tbd">정체</span>';
+  return '<span class="badge b-warn">'+s+'</span>';
+}
+function renderUsers(filter=''){
+  userRows.innerHTML = users.filter(u=>u.n.includes(filter)).map((u,i)=>`
+    <tr class="clickable" data-i="${users.indexOf(u)}">
+      <td class="name">${u.n}</td><td>${u.team}</td><td class="num">${u.st}단계</td>
+      <td>${u.job}</td><td class="num">${u.cur}</td><td class="num">${u.trust}</td>
+      <td class="num shell-chip">${u.shell}</td><td>${statusBadge(u.status)}</td>
+    </tr>`).join('');
+  userRows.querySelectorAll('tr').forEach(r=>r.addEventListener('click',()=>openUser(+r.dataset.i)));
+}
+renderUsers();
+document.getElementById('userSearch').addEventListener('input', e=>renderUsers(e.target.value.trim()));
+
+/* ---------- 유저 상세 드로어 ---------- */
+const drawer = document.getElementById('drawer'), drawerBg = document.getElementById('drawerBg');
+function openUser(i){
+  const u = users[i];
+  drawer.innerHTML = `
+    <button class="d-close" id="dClose">✕</button>
+    <h3>${u.n}</h3>
+    <div class="d-sub">${u.team} · 커리어 ${u.st}단계 · 직무 ${u.job} <span class="admin-only">어드민 전용</span></div>
+    <div class="d-section">
+      <h4>핵심 지표</h4>
+      <div class="kv"><span>신뢰점수</span><b class="num">${u.trust} <span class="badge b-tbd">산식 미확정 §7</span></b></div>
+      <div class="kv"><span>조개 잔액</span><b class="num shell-chip">${u.shell}</b></div>
+      <div class="kv"><span>커리큘럼 산출물</span><b class="num">${u.done} / 5</b></div>
+      <div class="kv"><span>상태</span><b>${u.status}</b></div>
+    </div>
+    <div class="d-section">
+      <h4>신뢰점수 내역 (구성 3요소: 상호 평가 · 실행 · 학습)</h4>
+      ${u.trustLog.map(l=>`<div class="kv"><span>${l[0]}</span><b>${l[1]}</b></div>`).join('')}
+    </div>
+    <div class="d-section">
+      <h4>차단 관계 <span class="admin-only">화면 비노출 · 매칭 제외로만 작동</span></h4>
+      <div class="kv"><span>"다시는 안 만나기"</span><b>${u.block}</b></div>
+    </div>
+    <div class="d-section">
+      <h4>운영 메모</h4>
+      <p style="font-size:.84rem; line-height:1.6; color:var(--muted)">${u.memo || '메모 없음'}</p>
+    </div>
+    <div class="d-section">
+      <h4>비공개 경계 안내</h4>
+      <p style="font-size:.78rem; line-height:1.6; color:var(--muted)">개인 일기장은 어드민에서도 열람 불가(코치 AI만 참조). 직무·회사는 유저 화면에 절대 노출되지 않습니다.</p>
+    </div>`;
+  drawer.classList.add('open'); drawerBg.classList.add('open');
+  document.getElementById('dClose').addEventListener('click', closeDrawer);
+}
+function closeDrawer(){ drawer.classList.remove('open'); drawerBg.classList.remove('open'); }
+drawerBg.addEventListener('click', closeDrawer);
+
+/* ---------- 도움 게시판 ---------- */
+const helps = [
+  {t:'고객 인터뷰 질문 검토', by:'김이서', shell:20, f:'waiting', s:'응답 대기 (2명 손듦)', with:'—', at:'오늘 14:31'},
+  {t:'첫 제안서 목차 조언', by:'오세진', shell:15, f:'waiting', s:'응답 대기 (1명 손듦)', with:'—', at:'오늘 11:02'},
+  {t:'숫자언어 지표 뭘로 잡을지', by:'황보라', shell:10, f:'waiting', s:'응답 대기', with:'—', at:'어제 21:40'},
+  {t:'랜딩 카피 피드백', by:'김이서', shell:15, f:'progress', s:'진행 중', with:'박준호', at:'07-18'},
+  {t:'숫자언어 지표 정리', by:'정다인', shell:10, f:'progress', s:'진행 중', with:'이하람', at:'07-17'},
+  {t:'회고 습관 어떻게 잡나요', by:'최연우', shell:5, f:'progress', s:'진행 중', with:'한지운', at:'07-16'},
+  {t:'포트폴리오 구성 조언', by:'문가은', shell:20, f:'settle', s:'정산 대기 — 완료 확정 후 조개 이동', with:'서도윤', at:'07-14'},
+  {t:'첫 고객 미팅 리허설', by:'배수현', shell:10, f:'settle', s:'평가 대기 1건 (요청자 완료)', with:'강민서', at:'07-12'},
+  {t:'문제 한 문장 다듬기', by:'한지운', shell:5, f:'queued', s:'게시 대기 — 오늘 16:00', with:'—', at:'오늘 13:05'},
+  {t:'주간 회고 템플릿 추천', by:'서도윤', shell:5, f:'queued', s:'게시 대기 — 오늘 16:00', with:'—', at:'오늘 10:44'},
+  {t:'경쟁사 조사 범위 조언', by:'임태오', shell:8, f:'queued', s:'게시 대기 — 오늘 16:00', with:'—', at:'오늘 09:20'},
+];
+const helpRows = document.getElementById('helpRows');
+function helpBadge(f){
+  return {queued:'<span class="badge b-mute">게시 대기</span>', waiting:'<span class="badge b-tbd">응답 대기</span>',
+          progress:'<span class="badge b-ok">진행 중</span>', settle:'<span class="badge b-shell">정산·평가</span>'}[f];
+}
+function renderHelps(f='all'){
+  helpRows.innerHTML = helps.filter(h=>f==='all'||h.f===f).map(h=>`
+    <tr><td class="name">${h.t}</td><td>${h.by}</td><td class="num shell-chip">${h.shell}</td>
+    <td>${helpBadge(h.f)} <span style="font-size:.74rem;color:var(--muted)">${h.s}</span></td>
+    <td>${h.with}</td><td class="num">${h.at}</td></tr>`).join('');
+}
+renderHelps();
+document.querySelectorAll('#helpTabs button').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('#helpTabs button').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active'); renderHelps(b.dataset.f);
+}));
+</script>
+</body>
+</html>

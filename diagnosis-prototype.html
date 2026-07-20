@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TRUS — 당신을 먼저 알아볼게요</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+@font-face{font-family:'NeoDunggeunmo'; src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_two@1.0/NeoDunggeunmo.woff') format('woff'); font-display:swap}
+:root{
+  --ink:#191F28; --paper:#FFF9F1;
+  --night:#231B2E; --night-2:#2E2340;
+  --accent:#F26D9C; --accent-d:#C24C78; --accent-soft:#FBE4EE;
+  --muted:#8B95A1; --line:#E8DFD2;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:"Pretendard Variable",Pretendard,-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+  color:var(--ink); letter-spacing:-0.01em; background:var(--night); min-height:100vh; word-break:keep-all;
+}
+button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
+.pxfont, .step-label, .pbtn, .sign{font-family:'NeoDunggeunmo','Pretendard Variable',sans-serif; letter-spacing:0}
+
+.bg-night{position:fixed; inset:0; pointer-events:none; background:linear-gradient(var(--night) 0%, var(--night-2) 100%)}
+.bg-night::before{content:""; position:absolute; left:5%; top:6%; width:4px; height:4px; background:#fff; opacity:.7;
+  box-shadow:18vw 30px #FFF6C9, 39vw 8px #fff, 57vw 40px #FBE4EE, 74vw 16px #fff, 90vw 34px #C9E9FA, 28vw 70px #fff}
+
+.stage{max-width:560px; margin:0 auto; padding:70px 20px 60px; position:relative}
+.sign{text-align:center; color:#FFD9E8; font-size:1.05rem; margin-bottom:6px; text-shadow:0 0 8px rgba(242,109,156,.8)}
+.sign small{display:block; font-size:.68rem; color:#A092B5; text-shadow:none; margin-top:4px; font-family:"Pretendard Variable",sans-serif}
+
+.rail{display:flex; align-items:center; justify-content:center; gap:8px; margin:16px 0 22px}
+.orb{width:22px; height:22px; border-radius:50%; border:3px solid #17171C; background:#3A2E4E; position:relative; overflow:hidden}
+.orb i{position:absolute; left:0; right:0; bottom:0; height:0; background:linear-gradient(180deg,var(--accent),#FF9DBE); transition:height .5s}
+.orb.done i{height:100%}
+.orb.cur{border-color:#FFD9E8; box-shadow:0 0 10px rgba(242,109,156,.6)}
+
+.card{background:var(--paper); border:3px solid #17171C; border-radius:8px; box-shadow:8px 8px 0 rgba(0,0,0,.45); padding:28px 26px; animation:rise .4s ease}
+@keyframes rise{from{opacity:0; transform:translateY(16px)}to{opacity:1; transform:none}}
+.step-label{font-size:.72rem; color:var(--accent-d); margin-bottom:10px}
+.card h1{font-size:clamp(1.2rem,4vw,1.5rem); font-weight:800; letter-spacing:-0.03em; line-height:1.4; margin-bottom:6px}
+.lede{font-size:.85rem; color:#7A7264; line-height:1.65; margin-bottom:18px}
+.lede b{color:var(--ink)}
+
+.q-input{width:100%; font:inherit; font-size:.95rem; border:3px solid #17171C; border-radius:6px; padding:14px 16px; background:#fff; min-height:80px; resize:vertical; line-height:1.7}
+.q-input:focus{outline:3px solid var(--accent-soft)}
+.chips{display:flex; gap:8px; flex-wrap:wrap}
+.chips button{font-size:.86rem; font-weight:600; padding:11px 18px; border-radius:6px; background:#fff; border:3px solid #17171C; box-shadow:0 3px 0 rgba(0,0,0,.25)}
+.chips button:hover{background:var(--accent-soft)}
+.chips button:active{transform:translateY(2px); box-shadow:0 1px 0 rgba(0,0,0,.25)}
+
+.gate{display:flex; align-items:center; gap:12px; margin-top:18px; padding-top:16px; border-top:2px dashed var(--line)}
+.gate .hint{font-size:.8rem; color:var(--muted); flex:1}
+.gate .hint.ready{color:var(--accent-d); font-weight:700}
+.pbtn{display:inline-flex; align-items:center; gap:6px; font-size:.85rem; padding:10px 20px; border-radius:5px; background:var(--accent); color:#fff; border:2px solid var(--accent-d); box-shadow:0 4px 0 var(--accent-d); transition:transform .08s, box-shadow .08s, opacity .2s}
+.pbtn:active{transform:translateY(3px); box-shadow:0 1px 0 var(--accent-d)}
+.pbtn:disabled{opacity:.35; cursor:not-allowed; transform:none}
+.pbtn.wide{width:100%; justify-content:center; padding:13px}
+
+/* 성적표 */
+.report{border:3px solid #17171C; border-radius:6px; background:#fff; overflow:hidden; margin:14px 0}
+.report .r-head{background:#17131F; color:#FFD9E8; padding:10px 16px; font-size:.85rem; display:flex; justify-content:space-between; align-items:center}
+.report .r-head .pxfont{font-size:.9rem}
+.report .r-row{display:flex; gap:12px; padding:13px 16px; border-bottom:2px dashed #EFE7D8; font-size:.85rem; line-height:1.6}
+.report .r-row:last-child{border-bottom:none}
+.report .r-row .k{width:88px; flex-shrink:0; font-weight:800; color:var(--accent-d); font-size:.76rem; padding-top:2px}
+.report .r-row .hl{background:linear-gradient(transparent 60%, #FFE0A3 60%); font-weight:700}
+.tear{text-align:center; font-size:.72rem; color:#A092B5; margin:6px 0 10px; letter-spacing:.2em}
+
+/* 팀 안내 */
+.next-list{display:flex; flex-direction:column; gap:9px; margin:16px 0 4px}
+.next-item{display:flex; gap:12px; align-items:flex-start; background:#fff; border:3px solid #17171C; border-radius:6px; padding:13px 15px; box-shadow:3px 3px 0 rgba(0,0,0,.15)}
+.next-item .ni{font-size:22px; flex-shrink:0}
+.next-item b{font-size:.86rem; display:block; margin-bottom:2px}
+.next-item p{font-size:.76rem; color:#7A7264; line-height:1.55}
+.pull{margin-top:14px; padding:12px 16px; border-left:3px solid var(--accent); background:var(--accent-soft); border-radius:0 10px 10px 0; font-size:.9rem; font-weight:800; line-height:1.6; color:#8A2D55}
+@media(prefers-reduced-motion:reduce){.card{animation:none}}
+</style>
+</head>
+<body>
+<div class="bg-night"></div>
+
+<div class="stage">
+  <div class="sign pxfont">🤖 AI 튜터<small>수업은 아직이에요 — 당신을 먼저 알아볼게요</small></div>
+  <div class="rail" id="rail"></div>
+  <div id="host"></div>
+</div>
+
+<script>
+const NAME = localStorage.getItem('trus_name') || '김이서';
+const answers = [];
+let cur = 0;
+
+const FLOW = [
+  {type:'intro'},
+  {type:'q', q:'지금 어떤 일을 하고 계세요?', h:'직함 말고, 요즘 하루의 대부분을 쓰는 일이면 돼요.', ph:'예: 마케팅 대행사에서 콘텐츠 만드는 일'},
+  {type:'q', q:'요즘 가장 막막한 건 뭐예요?', h:'거창하지 않아도 괜찮아요.', ph:'한 문장이면 충분해요'},
+  {type:'chips', q:'혼자 하는 게 편해요, 같이 하는 게 좋아요?', h:'팀을 짜드릴 때 참고해요.', opts:['혼자가 편해요','같이가 좋아요','반반이에요']},
+  {type:'q', q:'지금 마음을 한 단어로 말한다면?', h:'솔직할수록 좋아요.', ph:'예: 조급함'},
+  {type:'report'},
+  {type:'team'},
+];
+
+const rail = document.getElementById('rail');
+const host = document.getElementById('host');
+
+function renderRail(){
+  rail.innerHTML = FLOW.map((s,i)=>`<div class="orb ${i<cur?'done':''} ${i===cur?'cur':''}"><i></i></div>`).join('');
+  rail.querySelectorAll('.orb.done i').forEach(i=>i.style.height='100%');
+}
+
+function render(){
+  renderRail();
+  const s = FLOW[cur];
+
+  if(s.type==='intro'){
+    host.innerHTML = `<div class="card">
+      <div class="step-label">결제 완료 · TICKET №1090</div>
+      <h1>${NAME} 님, 환영해요!<br>핫핑크 박스가 집으로 출발했어요 📦</h1>
+      <p class="lede">수업이 바로 시작될 줄 알았죠? 아직이에요.<br>강의를 드리기 전에, <b>당신부터 알아볼게요.</b> 한 문장씩만 적어주면 돼요.</p>
+      <button class="pbtn wide" id="go">시작할게요</button>
+    </div>`;
+    document.getElementById('go').addEventListener('click', next);
+  }
+
+  if(s.type==='q'){
+    host.innerHTML = `<div class="card">
+      <div class="step-label">질문 ${cur} / 4</div>
+      <h1>${s.q}</h1>
+      <p class="lede">${s.h}</p>
+      <textarea class="q-input" id="qa" placeholder="${s.ph}"></textarea>
+      <div class="gate"><span class="hint" id="hint">한 문장을 적어야 다음 질문이 떠요</span>
+      <button class="pbtn" id="go" disabled>다음 ›</button></div>
+    </div>`;
+    const ta = document.getElementById('qa'); ta.focus();
+    ta.addEventListener('input', ()=>{
+      const ok = ta.value.trim().length >= 5;
+      document.getElementById('go').disabled = !ok;
+      const h = document.getElementById('hint');
+      h.textContent = ok ? '좋아요!' : '한 문장을 적어야 다음 질문이 떠요';
+      h.classList.toggle('ready', ok);
+    });
+    document.getElementById('go').addEventListener('click', ()=>{ answers.push(ta.value.trim()); next(); });
+  }
+
+  if(s.type==='chips'){
+    host.innerHTML = `<div class="card">
+      <div class="step-label">질문 ${cur} / 4</div>
+      <h1>${s.q}</h1>
+      <p class="lede">${s.h}</p>
+      <div class="chips">${s.opts.map(o=>`<button data-v="${o}">${o}</button>`).join('')}</div>
+    </div>`;
+    host.querySelectorAll('.chips button').forEach(b=>b.addEventListener('click', ()=>{ answers.push(b.dataset.v); next(); }));
+  }
+
+  if(s.type==='report'){
+    const work = answers[0] || '지금 하는 일';
+    const stuck = answers[1] || '막막함';
+    const mood = answers[3] || '조급함';
+    host.innerHTML = `<div class="card">
+      <div class="step-label">진단 끝</div>
+      <h1>눈앞에서, 성적표 한 장이 갈려요</h1>
+      <div class="tear">··········· ✂ ···········</div>
+      <div class="report">
+        <div class="r-head"><span class="pxfont">${NAME}의 성적표</span><span>TRUS AI 튜터</span></div>
+        <div class="r-row"><span class="k">지금 위치</span><span>「${work}」을 하고 있고, <span class="hl">커리어 3단계 — 혼자서도 일을 굴리는 사람</span> 근처에 서 있어요.</span></div>
+        <div class="r-row"><span class="k">막힌 곳</span><span>"${stuck}" — 노력이 모자란 게 아니에요. <span class="hl">성과를 재는 나만의 숫자가 아직 없을 뿐이에요.</span></span></div>
+        <div class="r-row"><span class="k">마음</span><span>"${mood}"라고 하셨죠. 속도를 올리기 전에, <span class="hl">방향부터 같이 정해요.</span></span></div>
+        <div class="r-row"><span class="k">필요한 것</span><span>끝점 하나 — 숫자와 고객의 말로 적은 <span class="hl">나만의 도착지</span>예요. 커리큘럼 1단계에서 함께 만들어요.</span></div>
+      </div>
+      <p class="lede" style="margin:4px 0 14px">"아… 내가 이걸 모르고 있었구나" 싶다면, 괜찮아요. 다들 여기서 시작했어요.</p>
+      <button class="pbtn wide" id="go">그래서, 이제 어떻게 해요?</button>
+    </div>`;
+    document.getElementById('go').addEventListener('click', next);
+  }
+
+  if(s.type==='team'){
+    host.innerHTML = `<div class="card">
+      <div class="step-label">마지막 안내</div>
+      <div class="pull">"지금 너에게 필요한 건 이거야.<br>그리고 — 너랑 맞는 친구들을 찾아줄게."</div>
+      <div class="next-list">
+        <div class="next-item"><span class="ni">📞</span><span><b>3일 안에, 진짜 사람이 전화를 드려요</b><p>담당 매니저가 진단 결과를 읽고 인사를 건넬 거예요. 목소리가 참 따뜻할 거예요.</p></span></div>
+        <div class="next-item"><span class="ni">🤝</span><span><b>결이 맞는 6명이 팀이 돼요</b><p>하는 일은 서로 다르고, 걷는 속도는 비슷한 사람들 — 방금의 진단으로 AI가 골라요.</p></span></div>
+        <div class="next-item"><span class="ni">🌙</span><span><b>첫 만남은 목요일 밤 10시</b><p>처음엔 얼굴이 안 보여요. 노트에 답을 적고, 마음을 그림으로 그린 다음 — 5, 4, 3, 2, 1, 빵!</p></span></div>
+      </div>
+      <p class="lede" style="margin:14px 0">팀이 오기 전까지는 <b>솔로 모드</b>예요 — 내 작업실에서 강의와 하루 루틴을 먼저 시작해요.</p>
+      <button class="pbtn wide" onclick="finish()">🏠 내 마이스페이스 입장하기</button>
+    </div>`;
+  }
+}
+function next(){ cur++; render(); window.scrollTo(0,0); }
+function finish(){
+  localStorage.setItem('trus_diag', JSON.stringify(answers));
+  localStorage.setItem('trus_mode','full');
+  location.href = 'myspace-prototype.html?mode=full&paid=1';
+}
+render();
+</script>
+</body>
+</html>

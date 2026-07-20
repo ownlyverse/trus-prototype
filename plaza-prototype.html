@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>바운더리 타운 — 광장 (프로토타입)</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+@font-face{font-family:'NeoDunggeunmo'; src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_two@1.0/NeoDunggeunmo.woff') format('woff'); font-display:swap}
+:root{
+  --ink:#191F28; --paper:#FFFFFF;
+  --sky-a:#F5C98A; --sky-b:#E8A96B; --ground-a:#C9B08E; --ground-b:#B49A78;
+  --wood:#8B6844; --wood-d:#6E5236;
+  --tide:#3182F6; --tide-soft:#E8F3FF;
+  --shell:#F76B1C; --shell-soft:#FFF1E7;
+  --amber:#D18E0F;
+  --panel-w:410px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:"Pretendard Variable",Pretendard,-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+  color:var(--ink); letter-spacing:-0.01em; overflow:hidden; background:#20242E;
+}
+button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
+.num{font-variant-numeric:tabular-nums}
+
+/* 픽셀 폰트 — 게임 UI 요소에만 */
+.pill-stat, .hud-btn, .obj .tag, .char .nametag, .hint, .panel h3, .pbtn, .pill, .neon-sign, .proto-tag, .gate h2{
+  font-family:'NeoDunggeunmo','Pretendard Variable',Pretendard,sans-serif; letter-spacing:0;
+}
+
+/* ---------- 게임 HUD ---------- */
+.hud{position:fixed; top:0; left:0; right:0; z-index:60; display:flex; align-items:flex-start; gap:8px; padding:12px 14px; pointer-events:none}
+.hud>*{pointer-events:auto}
+.hud .spacer{flex:1; pointer-events:none}
+.pill-stat{display:inline-flex; align-items:center; gap:7px; padding:5px 14px 5px 7px; border-radius:16px; background:#F7E9C4; border:3px solid #17171C; box-shadow:0 3px 0 rgba(0,0,0,.5); font-size:.85rem; color:#4A3A18}
+.pill-stat .ic{width:22px; height:22px; border-radius:50%; display:flex; align-items:center; justify-content:center; background:#F2C14E; border:2px solid #B8860B; font-size:.7rem; color:#7A4E00}
+.pill-stat.trust{background:#E7DBF5; color:#4A3572}
+.pill-stat.trust .ic{background:#B79BE0; border-color:#7C5BB5}
+.pill-stat.live{background:#FFD9E8; color:#8A2D55}
+.pill-stat.live .ic{background:#F26D9C; border-color:#B03A66; animation:pulse 1.4s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+.hud-btn{position:relative; width:42px; height:42px; border-radius:10px; background:#FFF9E9; border:3px solid #17171C; box-shadow:0 3px 0 rgba(0,0,0,.5); font-size:1.1rem; display:flex; align-items:center; justify-content:center}
+.hud-btn:active{transform:translateY(2px); box-shadow:0 1px 0 rgba(0,0,0,.5)}
+
+/* ---------- 장면 (해질녘 광장) ---------- */
+.scene{position:fixed; inset:0; overflow:hidden; background:#241E3E}
+.bg-sky{position:absolute; left:0; right:0; top:0; height:30%; background:linear-gradient(#0F0C22 0%, #241E3E 70%, #35284E 100%)}
+.bg-sky::before{ /* 네온 빌딩 불빛 */
+  content:""; position:absolute; inset:0; opacity:.9;
+  background:
+    linear-gradient(#1B1533,#1B1533) 3% 100%/8% 80% no-repeat,
+    repeating-linear-gradient(180deg, #F26D9C 0 6px, transparent 6px 16px) 4% 100%/5% 70% no-repeat,
+    linear-gradient(#171130,#171130) 15% 100%/7% 92% no-repeat,
+    repeating-linear-gradient(180deg, #46D5B2 0 5px, transparent 5px 14px) 16% 100%/4% 84% no-repeat,
+    linear-gradient(#1B1533,#1B1533) 27% 100%/8% 70% no-repeat,
+    repeating-linear-gradient(180deg, #F2C14E 0 5px, transparent 5px 15px) 28% 100%/5% 60% no-repeat,
+    linear-gradient(#171130,#171130) 62% 100%/8% 88% no-repeat,
+    repeating-linear-gradient(180deg, #7C8BE0 0 6px, transparent 6px 15px) 63% 100%/5% 78% no-repeat,
+    linear-gradient(#1B1533,#1B1533) 76% 100%/7% 66% no-repeat,
+    repeating-linear-gradient(180deg, #F26D9C 0 5px, transparent 5px 14px) 77% 100%/4% 58% no-repeat,
+    linear-gradient(#171130,#171130) 88% 100%/8% 84% no-repeat,
+    repeating-linear-gradient(180deg, #46D5B2 0 6px, transparent 6px 16px) 89% 100%/5% 74% no-repeat;
+}
+.bg-sky::after{ /* 별 */
+  content:""; position:absolute; left:6%; top:8%; width:4px; height:4px; background:#fff; opacity:.8;
+  box-shadow:20vw 14px #FFF6C9, 44vw 4px #fff, 58vw 22px #FFD9E8, 72vw 8px #fff, 90vw 18px #C9E9FA, 34vw 30px #fff;
+}
+.cityb{position:absolute; display:flex; flex-direction:column; align-items:center; gap:4px; z-index:2; cursor:pointer; transform:translateX(-50%)}
+.cityb .tower{width:56px; position:relative; border:3px solid #0B0912; border-top:7px solid var(--roof,#6C5CC9); border-radius:4px 4px 0 0; background:#3A3450}
+.cityb .tower::before{content:""; position:absolute; inset:6px 6px 14px;
+  background:repeating-conic-gradient(var(--win,#4A4462) 0% 25%, transparent 0% 50%) 0 0/14px 14px}
+.cityb .tower::after{content:""; position:absolute; left:50%; transform:translateX(-50%); bottom:0; width:12px; height:12px; background:#17131F; border-radius:3px 3px 0 0}
+.cityb.lit .tower{--win:#FFD97A; box-shadow:0 0 18px rgba(255,217,122,.5)}
+.cityb.off .tower{opacity:.55}
+.cityb .bname{font-family:'NeoDunggeunmo',sans-serif; font-size:.62rem; background:#17131F; color:#fff; border:2px solid #0B0912; border-radius:2px; padding:1px 7px; white-space:nowrap}
+.cityb.off .bname{opacity:.6}
+.cityb:hover .tower{outline:2px solid #FFD9E8}
+
+.bg-shop{position:absolute; left:0; right:0; top:30%; height:28%;
+  background:
+    repeating-linear-gradient(90deg, rgba(0,0,0,.22) 0 4px, transparent 4px 96px),
+    linear-gradient(#4A3450, #3A2842)}
+.bg-shop::before{ /* 불 켜진 선반 */
+  content:""; position:absolute; inset:16% 3% 12%;
+  background:
+    repeating-linear-gradient(180deg, transparent 0 24%, rgba(255,214,140,.22) 24% 28%, transparent 28% 33%),
+    repeating-linear-gradient(90deg, transparent 0 68px, rgba(0,0,0,.3) 68px 72px);
+}
+.awning{position:absolute; left:5%; right:5%; top:28.4%; height:4.6%; z-index:3;
+  background:repeating-linear-gradient(90deg, #6C5CC9 0 46px, #8579DD 46px 92px);
+  border:3px solid #17171C; border-radius:8px 8px 0 0;
+}
+.awning::after{content:""; position:absolute; left:-3px; right:-3px; top:100%; height:12px;
+  background:radial-gradient(circle at 23px 0, #6C5CC9 0 20px, transparent 21px) 0 0/46px 12px;
+}
+.neon-sign{position:absolute; left:50%; transform:translateX(-50%); top:19.5%; z-index:4;
+  font-size:clamp(1.1rem, 3vw, 1.6rem); color:#FFD9E8; padding:8px 22px;
+  background:#17131F; border:3px solid #F26D9C; border-radius:8px;
+  text-shadow:0 0 8px #F26D9C, 0 0 18px #F26D9C; box-shadow:0 0 16px rgba(242,109,156,.5), 0 4px 0 rgba(0,0,0,.5);
+}
+.bg-floor{position:absolute; left:0; right:0; top:58%; bottom:0;
+  background:repeating-conic-gradient(#5F519E 0% 25%, #6E60B0 0% 50%) 0 0/52px 52px}
+.bg-grass{position:absolute; left:0; right:0; bottom:0; height:6%; z-index:2; border-top:4px solid #1F4D2A;
+  background:
+    radial-gradient(circle 4px at 12% 40%, #F26D8D 98%, transparent),
+    radial-gradient(circle 4px at 32% 62%, #F2D24E 98%, transparent),
+    radial-gradient(circle 4px at 55% 45%, #C9E9FA 98%, transparent),
+    radial-gradient(circle 4px at 76% 58%, #F26D8D 98%, transparent),
+    radial-gradient(circle 4px at 92% 42%, #F2D24E 98%, transparent),
+    linear-gradient(#2E6B3C,#24552F);
+}
+
+/* ---------- 오브젝트 ---------- */
+.obj{position:absolute; display:flex; flex-direction:column; align-items:center; gap:4px; cursor:pointer; user-select:none; transform:translate(-50%,0); transition:transform .15s; z-index:5}
+.obj:hover{transform:translate(-50%,-4px)}
+.obj .art{font-size:52px; line-height:1; filter:drop-shadow(4px 5px 0 rgba(0,0,0,.35))}
+.obj .art.big{font-size:68px}
+.obj .art.small{font-size:44px}
+.obj .tag{font-size:.72rem; font-weight:400; background:#17131F; color:#FFFFFF; padding:3px 9px; border-radius:2px; border:2px solid #0B0912; white-space:nowrap; box-shadow:2px 2px 0 rgba(0,0,0,.4)}
+.obj .tag small{font-weight:400; opacity:.75}
+.obj.near .tag{background:var(--tide)}
+.obj.center .tag{background:var(--shell)}
+
+/* ---------- 캐릭터 공통 ---------- */
+.char{position:absolute; width:56px; transform:translate(-50%,0); z-index:10; transition:left 1.1s ease, bottom 1.1s ease; display:flex; flex-direction:column; align-items:center; pointer-events:none}
+.char .nametag{font-size:.66rem; background:#17131F; color:#fff; padding:2px 8px; border-radius:2px; border:2px solid #0B0912; margin-bottom:4px}
+.char .body{position:relative; width:36px; height:48px}
+.char .spr{position:absolute; top:0; left:0; width:3px; height:3px; background:transparent; image-rendering:pixelated}
+.char .shadow{width:34px; height:8px; border-radius:2px; background:rgba(0,0,0,.35); margin-top:2px}
+.char .bubble{
+  position:absolute; bottom:calc(100% + 8px); left:50%; transform:translateX(-50%);
+  background:#fff; border:2px solid #17131F; border-radius:3px; padding:6px 10px; font-size:.74rem; font-weight:600;
+  white-space:nowrap; box-shadow:3px 3px 0 rgba(0,0,0,.35); opacity:0; transition:opacity .25s; z-index:20;
+}
+.char .bubble.show{opacity:1}
+.char .bubble::after{content:""; position:absolute; top:100%; left:50%; transform:translateX(-50%); border:6px solid transparent; border-top-color:#fff}
+.char.me{z-index:12}
+.char.me .nametag{background:var(--tide); border-color:#1B4FA0}
+
+/* ---------- 패널 ---------- */
+.panel{
+  position:fixed; top:64px; right:14px; width:var(--panel-w); max-width:calc(100vw - 28px);
+  max-height:calc(100vh - 84px); overflow-y:auto; z-index:70;
+  background:var(--paper); border-radius:6px; border:3px solid #2B2B33; box-shadow:8px 8px 0 rgba(43,43,51,.25);
+  padding:20px 22px; display:none;
+}
+.panel.open{display:block}
+.panel .p-close{position:absolute; top:14px; right:14px; font-size:1rem; color:#8B95A1}
+.panel h3{font-size:1.05rem; font-weight:800; margin-bottom:2px; padding-right:24px}
+.panel .p-sub{font-size:.74rem; color:#8B95A1; margin-bottom:14px; line-height:1.5}
+.panel h4{font-size:.78rem; font-weight:700; color:#8B95A1; margin:16px 0 8px}
+.row{display:flex; justify-content:space-between; align-items:center; font-size:.85rem; padding:6px 0; border-bottom:1px dashed #E5E8EB}
+.row:last-child{border-bottom:none}
+.pill{display:inline-flex; align-items:center; gap:4px; font-size:.68rem; font-weight:400; padding:2px 8px; border-radius:3px}
+.pill.ok{background:var(--tide-soft); color:var(--tide)}
+.pill.sh{background:var(--shell-soft); color:var(--shell)}
+.pill.mut{background:#F2F4F6; color:#8B95A1}
+.pill.tbd{background:#FFF3D6; color:var(--amber)}
+.shellv{color:var(--shell); font-weight:700}
+.shellv::before{content:"◗ "; font-size:.8em}
+.pbtn{display:inline-flex; align-items:center; gap:6px; font-size:.82rem; font-weight:400; padding:8px 16px; border-radius:4px; background:var(--tide); color:#fff; border:2px solid #1B64DA; box-shadow:0 4px 0 #1B64DA; transition:transform .08s, box-shadow .08s}
+.pbtn:hover{background:#4A93F8}
+.pbtn:active{transform:translateY(3px); box-shadow:0 1px 0 #1B64DA}
+.pbtn.ghost{background:#fff; color:var(--ink); border:2px solid #C6CDD5; box-shadow:0 4px 0 #C6CDD5}
+.pbtn.ghost:active{box-shadow:0 1px 0 #C6CDD5}
+.pbtn.done{background:#F2F4F6; color:#8B95A1; cursor:default}
+.pnote{font-size:.72rem; color:#8B95A1; background:#F2F4F6; border-radius:8px; padding:9px 11px; line-height:1.6; margin-top:12px}
+.pnote b{color:var(--ink)}
+.ptabs{display:flex; gap:6px; margin-bottom:10px; flex-wrap:wrap}
+.ptabs button{font-size:.76rem; font-weight:700; padding:5px 12px; border-radius:16px; background:#F2F4F6; color:#8B95A1}
+.ptabs button.active{background:var(--ink); color:#fff}
+.helpcard{background:#fff; border:1px solid #E5E8EB; border-radius:10px; padding:11px 13px; margin-bottom:8px}
+.helpcard .h-top{display:flex; justify-content:space-between; align-items:center; margin-bottom:4px}
+.helpcard .h-top b{font-size:.86rem}
+.helpcard p{font-size:.76rem; color:#8B95A1; line-height:1.5}
+.helpcard .h-foot{display:flex; align-items:center; gap:8px; margin-top:8px}
+.postcard{background:#fff; border:1px solid #E5E8EB; border-radius:10px; padding:11px 13px; margin-bottom:8px}
+.postcard .n-top{display:flex; justify-content:space-between; font-size:.72rem; color:#8B95A1; margin-bottom:3px}
+.postcard .n-top b{color:var(--ink)}
+.postcard p{font-size:.83rem; line-height:1.55}
+.membercard{background:#fff; border:1px solid #E5E8EB; border-radius:10px; padding:12px 14px; margin-bottom:8px}
+.membercard .m-top{display:flex; justify-content:space-between; align-items:center; margin-bottom:5px}
+.membercard .m-top b{font-size:.88rem}
+.membercard p{font-size:.78rem; color:#4E5968; line-height:1.6}
+.steps5{display:flex; gap:4px; margin:10px 0}
+.steps5 span{flex:1; text-align:center; font-size:.62rem; font-weight:700; padding:5px 2px; background:#F2F4F6; color:#8B95A1; border-radius:5px}
+.steps5 span.on{background:var(--tide); color:#fff}
+
+/* 개장 전 게이트 */
+.gate{position:fixed; inset:0; z-index:65; background:rgba(32,38,50,.78); backdrop-filter:blur(4px);
+  display:none; align-items:center; justify-content:center; text-align:center; color:#FFFFFF}
+.gate.show{display:flex}
+.gate .g-box{max-width:420px; padding:30px}
+.gate h2{font-size:1.5rem; font-weight:800; margin-bottom:10px}
+.gate p{font-size:.9rem; line-height:1.7; color:#C6CFD8; margin-bottom:18px}
+
+.hint{position:fixed; bottom:14px; left:50%; transform:translateX(-50%); z-index:55; font-size:.76rem; color:#FFFFFF; background:#17131F; border:2px solid #0B0912; border-radius:3px; padding:6px 16px; box-shadow:3px 3px 0 rgba(0,0,0,.4)}
+.proto-tag{position:fixed; bottom:14px; right:14px; font-size:.66rem; color:#B0B8C1; z-index:55}
+@media(prefers-reduced-motion:reduce){.char{transition:none}}
+</style>
+</head>
+<body>
+
+<!-- ============ 게임 HUD ============ -->
+<header class="hud">
+  <span class="pill-stat"><span class="ic">◗</span><b class="num">96</b></span>
+  <span class="pill-stat trust"><span class="ic">★</span><b class="num">84</b></span>
+  <span class="pill-stat live"><span class="ic">📡</span>20시 라이브</span>
+  <span class="spacer"></span>
+  <button class="hud-btn" id="chipBack" title="마이스페이스로">🏠</button>
+</header>
+
+<!-- ============ 장면 ============ -->
+<div class="scene" id="scene">
+  <div class="bg-sky"></div>
+
+  <!-- 팀원 빌딩숲 — 불빛으로 서로의 하루가 보여요 -->
+  <div class="cityb lit" data-home="me"    style="left:8%;  top:6%;  --roof:#F26D9C"><div class="tower" style="height:118px"></div><span class="bname">나 (김이서)</span></div>
+  <div class="cityb lit" data-home="dain"  style="left:22%; top:12%"><div class="tower" style="height:96px"></div><span class="bname">정다인</span></div>
+  <div class="cityb lit" data-home="yeonwoo" style="left:35%; top:9%; --roof:#46D5B2"><div class="tower" style="height:108px"></div><span class="bname">최연우</span></div>
+  <div class="cityb off" data-home="haram" style="left:63%; top:14%"><div class="tower" style="height:88px"></div><span class="bname">이하람 💤</span></div>
+  <div class="cityb off" data-home="sejin" style="left:77%; top:10%; --roof:#F2C14E"><div class="tower" style="height:102px"></div><span class="bname">오세진 💤</span></div>
+  <div class="cityb off" data-home="minseo" style="left:91%; top:15%"><div class="tower" style="height:84px"></div><span class="bname">강민서 💤</span></div>
+
+  <div class="bg-shop"></div>
+  <div class="awning"></div>
+  <div class="bg-floor"></div>
+  <div class="bg-grass"></div>
+  <div class="neon-sign">⛲ 3기 타운 — 광장 · 접속 41명</div>
+
+  <!-- 오브젝트 6종 · 도움 게시판이 중심 구조물 -->
+  <div class="obj center" data-obj="help"     style="left:50%; top:33%"><div class="art big">🪧</div><div class="tag">도움 게시판 <small>새 글 9</small></div></div>
+  <div class="obj" data-obj="members"  style="left:26%; top:35%"><div class="art">🪪</div><div class="tag">멤버 소개 보드 <small>AI 생성</small></div></div>
+  <div class="obj" data-obj="stage"    style="left:74%; top:35%"><div class="art">🎤</div><div class="tag">무대 <small>오늘 20시</small></div></div>
+  <div class="obj" data-obj="board"    style="left:12%; top:62%"><div class="art">📋</div><div class="tag">게시판 <small>공지·자랑·같이 놀래요</small></div></div>
+  <div class="obj" data-obj="table"    style="left:84%; top:64%"><div class="art">⛱️</div><div class="tag">약속 테이블 <small>내 약속 1</small></div></div>
+  <div class="obj" data-obj="schedule" style="left:7%; top:40%"><div class="art small">🕰️</div><div class="tag">일정 안내판</div></div>
+
+  <!-- 걸어다니는 사람들 (공개 말풍선) -->
+  <div class="char" id="npc-junho"  style="left:38%; bottom:30%" data-spr="junho"><div class="bubble"></div><div class="nametag">박준호</div><div class="body"><div class="spr"></div></div><div class="shadow"></div></div>
+  <div class="char" id="npc-dain"   style="left:60%; bottom:22%" data-spr="dain"><div class="bubble"></div><div class="nametag">정다인</div><div class="body"><div class="spr"></div></div><div class="shadow"></div></div>
+  <div class="char" id="npc-yeonwoo" style="left:70%; bottom:34%" data-spr="yeonwoo"><div class="bubble"></div><div class="nametag">최연우</div><div class="body"><div class="spr"></div></div><div class="shadow"></div></div>
+  <div class="char" id="npc-bora"   style="left:26%; bottom:14%" data-spr="bora"><div class="bubble"></div><div class="nametag">황보라</div><div class="body"><div class="spr"></div></div><div class="shadow"></div></div>
+
+  <!-- 나 -->
+  <div class="char me" id="me" style="left:48%; bottom:10%" data-spr="me">
+    <div class="bubble" id="meBubble"></div>
+    <div class="nametag">김이서</div>
+    <div class="body"><div class="spr"></div></div>
+    <div class="shadow"></div>
+  </div>
+</div>
+
+<!-- 개장 전 게이트 -->
+<div class="gate" id="gate">
+  <div class="g-box">
+    <h2>광장은 오후 4시에 열립니다</h2>
+    <p>광장은 오후 4시부터 밤 12시까지 열려요.<br>열리는 시간이 정해져 있어야, 그 시간에 모이게 되니까요.<br><span id="gateLeft"></span></p>
+    <button class="pbtn" id="gateEnter">프로토타입이니 그냥 들어가기</button>
+  </div>
+</div>
+
+<div class="hint">대화는 모두 공개 — 머리 위 말풍선 · 귓속말 없음 · 오브젝트를 클릭하면 다가가서 엽니다</div>
+<div class="proto-tag">광장 프로토타입 · 목데이터</div>
+
+<!-- ============ 패널 ============ -->
+<div class="panel" id="panel">
+  <button class="p-close" id="panelClose">✕</button>
+  <div id="panelBody"></div>
+</div>
+
+<script>
+/* ================= 픽셀 스프라이트 ================= */
+const SPRITE_MAP = [
+  '..HHHHHHHH..','.HHHHHHHHHH.','.HHHHHHHHHH.','.HHSSSSSSHH.','..SESSSSES..','..SSSSSSSS..',
+  '...SSSSSS...','..TTTTTTTT..','.TTTTTTTTTT.','.TSTTTTTTST.','..TTTTTTTT..','..PPPPPPPP..',
+  '..PPP..PPP..','..PPP..PPP..','..DDD..DDD..',
+];
+const PALETTES = {
+  me:      {H:'#4A3628', S:'#F2C9A8', E:'#222831', T:'#3182F6', P:'#2B3442', D:'#6E5236'},
+  junho:   {H:'#3E9E58', S:'#F2C9A8', E:'#222831', T:'#5B6ABF', P:'#2B3442', D:'#333A46'},
+  dain:    {H:'#E86CA8', S:'#F6D2AE', E:'#222831', T:'#46D5B2', P:'#3A2E52', D:'#5A4630'},
+  yeonwoo: {H:'#5B8FD9', S:'#EFC49E', E:'#222831', T:'#8B6844', P:'#2B3442', D:'#333A46'},
+  bora:    {H:'#8A5BC4', S:'#F6D2AE', E:'#222831', T:'#F2C14E', P:'#4A2E3E', D:'#5A4630'},
+};
+document.querySelectorAll('[data-spr]').forEach(el=>{
+  const colors = PALETTES[el.dataset.spr] || PALETTES.me;
+  const px = 3, shadows = [];
+  SPRITE_MAP.forEach((row, y)=>[...row].forEach((ch, x)=>{
+    const c = colors[ch];
+    if(c) shadows.push(`${x*px}px ${y*px}px 0 0 ${c}`);
+  }));
+  el.querySelector('.spr').style.boxShadow = shadows.join(',');
+});
+
+/* ================= 개장 게이트 ================= */
+(function(){
+  const h = new Date().getHours();
+  if(h < 16){
+    const mins = 16*60 - (h*60 + new Date().getMinutes());
+    document.getElementById('gateLeft').textContent = '개장까지 ' + Math.floor(mins/60) + '시간 ' + (mins%60) + '분';
+    document.getElementById('gate').classList.add('show');
+  }
+})();
+document.getElementById('gateEnter').addEventListener('click', ()=>document.getElementById('gate').classList.remove('show'));
+
+/* ================= 내 캐릭터 이동 ================= */
+const me = document.getElementById('me');
+const scene = document.getElementById('scene');
+const meBubble = document.getElementById('meBubble');
+let walkTimer = null;
+function walkTo(l, b, cb){
+  me.style.left = l+'%'; me.style.bottom = b+'%';
+  clearTimeout(walkTimer); walkTimer = setTimeout(()=>cb&&cb(), 1120);
+}
+function say(el, text, dur=2600){
+  const bb = el.querySelector('.bubble');
+  bb.textContent = text; bb.classList.add('show');
+  setTimeout(()=>bb.classList.remove('show'), dur);
+}
+scene.addEventListener('click', e=>{
+  if(e.target !== scene && !e.target.classList.contains('bg-floor') && !e.target.classList.contains('bg-grass')) return;
+  const r = scene.getBoundingClientRect();
+  const x = (e.clientX - r.left)/r.width*100;
+  const yTop = (e.clientY - r.top)/r.height*100;
+  if(yTop < 56) return;
+  walkTo(x, Math.max(3, Math.min(38, 100 - yTop - 8)));
+});
+
+/* ================= NPC 배회 + 공개 대화 ================= */
+const npcs = [
+  {el:document.getElementById('npc-junho'),  lines:['랜딩 카피 피드백 정리해서 올렸어요','오늘 20시 라이브에서 화면 공유해요']},
+  {el:document.getElementById('npc-dain'),   lines:['오늘 3개 다 했어요!','이번 주 끝점 다시 잡는 중']},
+  {el:document.getElementById('npc-yeonwoo'),lines:['숫자언어 지표 이거 맞나…','도움 글 하나 잡아야지']},
+  {el:document.getElementById('npc-bora'),   lines:['100번 쓰기 18일째!','같이 놀래요 글 올렸어요, 목요일 번개 🍜']},
+];
+setInterval(()=>{
+  const n = npcs[Math.floor(Math.random()*npcs.length)];
+  const l = 10 + Math.random()*80, b = 4 + Math.random()*30;
+  n.el.style.left = l+'%'; n.el.style.bottom = b+'%';
+}, 3400);
+setInterval(()=>{
+  const n = npcs[Math.floor(Math.random()*npcs.length)];
+  say(n.el, n.lines[Math.floor(Math.random()*n.lines.length)]);
+}, 4200);
+
+/* ================= 오브젝트 → 패널 ================= */
+const targets = {help:[50,40], members:[28,38], stage:[72,38], board:[14,28], table:[82,26], schedule:[9,36]};
+document.querySelectorAll('[data-obj]').forEach(el=>{
+  el.addEventListener('click', e=>{
+    e.stopPropagation();
+    const id = el.dataset.obj;
+    document.querySelectorAll('.obj').forEach(o=>o.classList.remove('near'));
+    el.classList.add('near');
+    walkTo(targets[id][0], targets[id][1], ()=>openPanel(id));
+  });
+});
+
+const panel = document.getElementById('panel');
+const panelBody = document.getElementById('panelBody');
+document.getElementById('panelClose').addEventListener('click', ()=>{
+  panel.classList.remove('open');
+  document.querySelectorAll('.obj').forEach(o=>o.classList.remove('near'));
+});
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') panel.classList.remove('open'); });
+
+const P = {};
+
+P.help = `
+  <h3>도움 게시판 <span class="pill sh">광장의 중심 구조물</span></h3>
+  <div class="p-sub">사람과 사람이 이어지는 문이에요. 조개를 걸면 진심이 전해지고, 나눈 대화는 글에 남아 사라지지 않아요.</div>
+  <div class="steps5"><span class="on">① 요청</span><span class="on">② 응답</span><span class="on">③ 진행</span><span>④ 정산</span><span>⑤ 평가</span></div>
+  <div class="ptabs">
+    <button class="active" data-hf="open">도움 구함 (3)</button>
+    <button data-hf="prog">진행 중 (3)</button>
+    <button data-hf="done">완료 (2)</button>
+  </div>
+  <div data-hlist="open">
+    <div class="helpcard"><div class="h-top"><b>고객 인터뷰 질문 검토</b><span class="shellv num">20</span></div>
+      <p>B2B 인터뷰 처음이라 질문이 유도형인지 봐주실 분. — 김이서 (나)</p>
+      <div class="h-foot"><span class="pill mut">응답 2명 — 내가 고르기</span><button class="pbtn ghost" style="margin-left:auto">응답자 보기</button></div></div>
+    <div class="helpcard"><div class="h-top"><b>첫 제안서 목차 조언</b><span class="shellv num">15</span></div>
+      <p>외주 첫 제안서인데 목차 순서가 막혔어요. — 오세진</p>
+      <div class="h-foot"><span class="pill mut">응답 1명</span><button class="pbtn" style="margin-left:auto">돕겠다고 손 들기</button></div></div>
+    <div class="helpcard"><div class="h-top"><b>숫자언어 지표 뭘로 잡을지</b><span class="shellv num">10</span></div>
+      <p>뉴스레터인데 구독자 수 말고 뭘 봐야 할까요. — 황보라</p>
+      <div class="h-foot"><span class="pill mut">응답 대기</span><button class="pbtn" style="margin-left:auto">돕겠다고 손 들기</button></div></div>
+  </div>
+  <div data-hlist="prog" style="display:none">
+    <div class="helpcard"><div class="h-top"><b>랜딩 카피 피드백</b><span class="pill ok">진행 중</span></div>
+      <p>김이서 ↔ 박준호 — 글에 묶인 대화 8개 · 여기서만 대화가 열립니다</p>
+      <div class="h-foot"><button class="pbtn ghost">대화 보기</button><button class="pbtn" style="margin-left:auto">광장에서 만나기</button></div></div>
+    <div class="helpcard"><div class="h-top"><b>숫자언어 지표 정리</b><span class="pill ok">진행 중</span></div><p>정다인 ↔ 이하람</p></div>
+    <div class="helpcard"><div class="h-top"><b>회고 습관 조언</b><span class="pill ok">진행 중</span></div><p>최연우 ↔ 한지운</p></div>
+  </div>
+  <div data-hlist="done" style="display:none">
+    <div class="helpcard"><div class="h-top"><b>포트폴리오 구성 조언</b><span class="pill sh">정산 대기</span></div>
+      <p>문가은 ↔ 서도윤 — 완료 확정 시 조개 20 이동</p></div>
+    <div class="helpcard"><div class="h-top"><b>첫 고객 미팅 리허설</b><span class="pill sh">상호 평가 대기 1건</span></div>
+      <p>배수현 ↔ 강민서 — 좋았다/싫었다 2단 · "다시는 안 만나기" 선택 가능</p></div>
+  </div>
+  <div class="pnote">새 요청은 내 방 <b>우체통</b>에서 언제든 쓸 수 있고, 오후 4시에 여기 게시판에 올라와요. 도움을 주고받는 자리에서는 원한다면 직무·회사를 직접 밝혀도 돼요.</div>`;
+
+P.board = `
+  <h3>게시판</h3>
+  <div class="p-sub">글과 댓글을 사이에 두면 낯선 사람에게도 말 걸기가 쉬워져요. 활동은 신뢰점수에 차곡차곡 쌓여요.</div>
+  <div class="ptabs">
+    <button class="active" data-bf="notice">공지</button>
+    <button data-bf="free">자유</button>
+    <button data-bf="brag">자랑</button>
+    <button data-bf="play">같이 놀래요?</button>
+  </div>
+  <div data-blist="notice">
+    <div class="postcard"><div class="n-top"><b>운영자</b><span>오늘 15:00</span></div><p>📣 오늘 20시 무대 라이브 — 3기 중간 점검. 우편함에 사본을 보냈어요.</p></div>
+    <div class="postcard"><div class="n-top"><b>운영자</b><span>어제</span></div><p>코어타임 시각 설문 진행 중 (21시 안) <span class="pill tbd">미확정 §7</span></p></div>
+  </div>
+  <div data-blist="free" style="display:none">
+    <div class="postcard"><div class="n-top"><b>최연우</b><span>10분 전</span></div><p>다들 저녁 회고 몇 시에 쓰세요? 저는 자꾸 밀려요.</p><p style="color:#8B95A1;font-size:.74rem;margin-top:4px">💬 댓글 4</p></div>
+  </div>
+  <div data-blist="brag" style="display:none">
+    <div class="postcard"><div class="n-top"><b>황보라</b><span>1시간 전</span></div><p>목표 100번 쓰기 18일 연속! 지난 사이클 열매도 수확했어요 🍎</p><p style="color:#8B95A1;font-size:.74rem;margin-top:4px">📣 응원 12</p></div>
+  </div>
+  <div data-blist="play" style="display:none">
+    <div class="postcard"><div class="n-top"><b>황보라</b><span>2시간 전</span></div><p>목요일 저녁 라멘 번개 🍜 광장 앞 3명 모집!</p>
+      <div style="display:flex;gap:8px;margin-top:8px"><button class="pbtn ghost">참여 댓글 (2)</button><button class="pbtn">광장에서 만나기</button></div></div>
+    <div class="postcard"><div class="n-top"><b>박준호</b><span>어제</span></div><p>주말 오전 몰입 작업 같이 하실 분 — 각자 바운더리 하고 회고 공유</p>
+      <div style="display:flex;gap:8px;margin-top:8px"><button class="pbtn ghost">참여 댓글 (5)</button><button class="pbtn">광장에서 만나기</button></div></div>
+  </div>`;
+
+P.members = `
+  <h3>멤버 소개 보드 <span class="pill mut">AI 생성</span></h3>
+  <div class="p-sub">소개문에 직무·회사는 없어요. 대신 성향, 지금 붙잡고 있는 문제, 일하는 방식이 담겨요 — 고칠 수 있는 건 본인뿐이에요.</div>
+  <div class="membercard"><div class="m-top"><b>김이서 (나)</b><span class="pill ok">신뢰 84</span></div>
+    <p>아침에 몰아서 일하는 타입. 지금은 "혼자서도 굴러가는 팀"을 만드는 구독 모델을 붙잡고 있다. 질문을 받으면 일단 표부터 그린다.</p>
+    <div style="margin-top:8px"><button class="pbtn ghost">소개문 수정</button> <span class="pill tbd" style="margin-left:6px">갱신 제안 1 — 새 회고 반영</span></div></div>
+  <div class="membercard"><div class="m-top"><b>박준호</b><span class="pill ok">신뢰 81</span></div>
+    <p>말수는 적지만 피드백은 문서로 길게 주는 사람. 지금은 첫 사이드 프로젝트의 랜딩 전환율과 씨름 중.</p>
+    <div style="margin-top:8px"><button class="pbtn ghost" onclick="this.textContent='신청했어요 — 여정을 보고 연락이 와요 ✓'">☕ 커피챗 신청 — 명함이 아니라 행적으로</button></div></div>
+  <div class="membercard"><div class="m-top"><b>정다인</b><span class="pill ok">신뢰 79</span></div>
+    <p>계획보다 회고가 강한 타입. 끝점을 다시 잡는 중이고, 매일 3개를 지키는 것에 자부심이 있다.</p></div>
+  <div class="pnote">여기서는 <b>서로의 직무·회사를 몰라요.</b> 회사 이름 없이, 사람으로 먼저 만나요.</div>`;
+
+P.stage = `
+  <h3>무대 — 브로드캐스트</h3>
+  <div class="p-sub">채널 150명 모두에게 방송하는 자리예요. 기본은 운영자가 진행하고, 승인을 받으면 누구나 마이크를 잡을 수 있어요.</div>
+  <div class="postcard"><div class="n-top"><b>오늘 20:00 · 운영자</b><span class="pill sh">라이브 예정</span></div>
+    <p>3기 중간 점검 — 커리큘럼 3단계 병목 함께 풀기. 박준호 님 화면 공유 예정(승인 완료).</p>
+    <div style="margin-top:8px"><button class="pbtn">시작 전 알림 받기</button></div></div>
+  <div class="postcard"><div class="n-top"><b>07-23 20:00</b><span class="pill mut">예정</span></div><p>완강자 사례 공유 — 2기 초청</p></div>
+  <div class="pnote">라이브가 잡히면 미리 알려드려요 — 놓치지 않게요.</div>`;
+
+P.table = `
+  <h3>약속 테이블</h3>
+  <div class="p-sub">"광장에서 만나기"로 잡힌 약속이에요. 시간이 되면 캐릭터가 알아서 약속 테이블로 걸어가요.</div>
+  <h4>내 약속</h4>
+  <div class="postcard"><div class="n-top"><b>박준호와 — 랜딩 카피 마무리</b><span class="pill ok">오늘 21:30</span></div>
+    <p>도움 글 「랜딩 카피 피드백」에서 잡은 약속 · 테이블 자동 배정 · 시작 10분 전 알림</p></div>
+  <div class="pnote">약속 10분 전에 알림으로 불러드려요.</div>`;
+
+P.schedule = `
+  <h3>일정 안내판</h3>
+  <div class="p-sub">광장의 시간표예요 — 개장, 방송, 내 약속을 한눈에 봐요.</div>
+  <div class="row"><span>광장 개장</span><b class="num">매일 16:00 ~ 24:00</b></div>
+  <div class="row"><span>도움 요청 일괄 게시</span><b class="num">16:00 — 오늘 9건 게시됨</b></div>
+  <div class="row"><span>팀 오프닝 — 5, 4, 3, 2, 1, 빵! 🎉</span><b class="num">목 22:00</b></div>
+  <div class="row"><span>무대 라이브</span><b class="num">오늘 20:00</b></div>
+  <div class="row"><span>코어타임</span><b>21:00 (안) <span class="pill tbd">미확정 §7</span></b></div>
+  <div class="row"><span>내 약속</span><b class="num">21:30 박준호와</b></div>`;
+
+function openPanel(id){
+  panelBody.innerHTML = P[id];
+  panel.classList.add('open');
+  bindPanel();
+  const says = {help:'좋은 요청 먼저 잡아야지', table:'21시 반 약속!', stage:'오늘 라이브 기대되네'};
+  if(says[id]) say(me, says[id]);
+}
+function bindPanel(){
+  panelBody.querySelectorAll('[data-hf]').forEach(b=>b.addEventListener('click', ()=>{
+    panelBody.querySelectorAll('[data-hf]').forEach(x=>x.classList.remove('active')); b.classList.add('active');
+    panelBody.querySelectorAll('[data-hlist]').forEach(l=>l.style.display = l.dataset.hlist===b.dataset.hf ? '' : 'none');
+  }));
+  panelBody.querySelectorAll('[data-bf]').forEach(b=>b.addEventListener('click', ()=>{
+    panelBody.querySelectorAll('[data-bf]').forEach(x=>x.classList.remove('active')); b.classList.add('active');
+    panelBody.querySelectorAll('[data-blist]').forEach(l=>l.style.display = l.dataset.blist===b.dataset.bf ? '' : 'none');
+  }));
+}
+
+document.getElementById('chipBack').addEventListener('click', ()=>{ location.href = 'myspace-prototype.html'; });
+
+/* 빌딩숲 — 내 집만 들어갈 수 있어요 */
+document.querySelectorAll('.cityb').forEach(b=>{
+  b.addEventListener('click', e=>{
+    e.stopPropagation();
+    if(b.dataset.home === 'me'){ say(me, '집에 가자!'); setTimeout(()=>location.href='myspace-prototype.html', 700); }
+    else say(me, '들어갈 순 없지만, 불빛이 반갑다');
+  });
+});
+</script>
+</body>
+</html>

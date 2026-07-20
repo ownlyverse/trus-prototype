@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TRUS — 전부 열기</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+:root{
+  --text:#191F28; --sub:#4E5968; --muted:#8B95A1; --faint:#B0B8C1;
+  --gray:#F2F4F6; --gray-2:#E8EBEE; --line:#EDF0F3;
+  --blue:#3182F6; --blue-dark:#1B64DA; --blue-soft:#E8F3FF;
+  --orange:#F76B1C; --orange-soft:#FFF1E7;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:"Pretendard Variable",Pretendard,-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+  color:var(--text); letter-spacing:-0.02em; background:var(--gray); word-break:keep-all;
+  min-height:100vh; display:flex; flex-direction:column; align-items:center; padding:44px 20px;
+}
+button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
+.num{font-variant-numeric:tabular-nums}
+.card{width:min(480px,94vw); background:#fff; border-radius:24px; box-shadow:0 6px 24px rgba(25,31,40,.06); padding:32px 28px}
+.emo{font-size:44px; margin-bottom:12px}
+h2{font-size:1.5rem; font-weight:800; letter-spacing:-0.035em; line-height:1.35; margin-bottom:8px}
+.sub{font-size:.88rem; color:var(--muted); line-height:1.65; margin-bottom:22px; font-weight:500}
+.sub b{color:var(--sub)}
+.shellv{color:var(--orange); font-weight:700}
+.shellv::before{content:"◗ "; font-size:.8em}
+.pill{display:inline-flex; font-size:.68rem; font-weight:700; padding:3px 9px; border-radius:9px}
+.pill.or{background:var(--orange-soft); color:var(--orange)}
+
+.product{background:var(--gray); border-radius:18px; padding:18px 20px; margin-bottom:8px}
+.product .p-top{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:4px}
+.product .p-top b{font-size:1rem}
+.product .price{font-size:1.45rem; font-weight:800; letter-spacing:-0.02em}
+.product .p-per{font-size:.74rem; color:var(--muted); font-weight:500}
+
+.bene{padding:8px 4px 4px}
+.bene .b-row{display:flex; align-items:flex-start; gap:10px; font-size:.86rem; padding:7px 0; color:var(--sub); font-weight:500; line-height:1.5}
+.bene .b-row i{font-style:normal; color:var(--blue); font-weight:800; flex-shrink:0}
+
+.unlock{background:var(--blue-soft); border-radius:16px; padding:14px 16px; margin:12px 0 18px}
+.unlock h4{font-size:.78rem; font-weight:800; color:var(--blue-dark); margin-bottom:8px}
+.unlock .u-row{display:flex; align-items:center; gap:8px; font-size:.8rem; color:var(--sub); padding:3px 0; font-weight:500}
+.unlock .u-row i{font-style:normal}
+
+.ticket{margin:4px 0 12px; padding:14px 18px; border-left:3px solid #F26D9C; background:#FDF2F7; border-radius:0 14px 14px 0; font-size:.95rem; font-weight:800; line-height:1.6; color:#8A2D55; letter-spacing:-0.02em}
+.ticket small{display:block; font-size:.72rem; font-weight:500; color:#B56B8C; margin-top:4px}
+.pbtn{display:flex; align-items:center; justify-content:center; gap:6px; width:100%; font-size:1rem; font-weight:700; padding:17px; border-radius:16px; background:var(--blue); color:#fff; transition:.15s}
+.pbtn:hover{background:var(--blue-dark)}
+.pbtn:active{transform:scale(.98)}
+.pnote{font-size:.76rem; color:var(--muted); background:var(--gray); border-radius:14px; padding:12px 14px; line-height:1.65; margin-top:14px; font-weight:500}
+.pnote b{color:var(--sub)}
+.back{font-size:.76rem; color:var(--faint); margin-top:18px; font-weight:500}
+.back a{color:var(--faint)}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="emo">🔓</div>
+  <h2>이제 전부 열어볼까요?</h2>
+  <p class="sub">지금은 <b id="openCount">2개</b>만 열려 있죠. 강의를 결제하면 커리큘럼 다섯 단계와 타운의 모든 기능이 한 번에 열려요.</p>
+
+  <div class="product">
+    <div class="p-top"><b>4기 · 일의 교과서 + 타운 이용</b><span class="price">₩000,000</span></div>
+    <div class="p-per">완강 후 3개월 이용까지 포함 · 그다음은 월 멤버십으로 이어져요</div>
+  </div>
+
+  <div class="bene">
+    <div class="b-row"><i>✓</i>커리큘럼 5단계 — 바운더리 설정부터 전략까지</div>
+    <div class="b-row"><i>✓</i>AI 코치 2종 무제한 · 조개 초기 지급 <span class="shellv">20</span></div>
+    <div class="b-row"><i>✓</i>기수 시작 시 팀 배치(6명) + 광장 오픈</div>
+    <div class="b-row"><i>✓</i>완주한 사람에게만 오는 오프라인 책 『일의 교과서』</div>
+  </div>
+
+  <div class="unlock">
+    <h4>결제하면 바로 열려요</h4>
+    <div class="u-row"><i>🔓</i>마이스페이스 전체 — 강의·워크툴·책장·노트·일기장·코치·우체통·나무</div>
+    <div class="u-row"><i>🔓</i>프레즌스 전광판 + 기수 시작 시 팀·광장</div>
+    <div class="u-row"><i>🔓</i>조개·신뢰점수 — 계속 쌓이는 유일한 연속 자산</div>
+  </div>
+
+  <div class="ticket">"이건 수업이 아니라 TICKET입니다.<br>특이점을 함께 건너는 티켓."<small>결제하면 며칠 뒤, 핫핑크색 박스가 집으로 가요 📦</small></div>
+  <button class="pbtn" onclick="pay()">TICKET 끊기</button>
+  <div class="pnote"><b>기수제</b> — 결제하는 순간 솔로 모드로 전부 열리고, 팀과 광장은 기수 시작일(4기 7/27 예정)에 함께 열려요. 프로토타입이라 실제 결제는 되지 않아요.</div>
+</div>
+<p class="back"><a href="myspace-prototype.html?mode=trial">← 마이스페이스로</a> · <a href="index.html">전체 화면 목록</a></p>
+
+<script>
+const unlocked = JSON.parse(localStorage.getItem('trus_unlocked') || '[]');
+if(unlocked.length) document.getElementById('openCount').textContent = unlocked.length + '개';
+function pay(){
+  localStorage.setItem('trus_mode','full');
+  location.href = 'diagnosis-prototype.html';
+}
+</script>
+</body>
+</html>

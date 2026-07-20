@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>바운더리 타운 — 프로토타입 목록</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+:root{--ink:#191F28; --paper:#FFFFFF; --bg:#F2F4F6; --tide:#3182F6; --shell:#F76B1C; --line:#E5E8EB}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:"Pretendard Variable",Pretendard,-apple-system,"Apple SD Gothic Neo",sans-serif; background:var(--bg); color:var(--ink); min-height:100vh; display:flex; flex-direction:column; align-items:center; padding:60px 20px; letter-spacing:-0.01em}
+h1{font-size:1.7rem; font-weight:800; letter-spacing:-0.02em}
+h1 span{color:var(--tide)}
+.sub{font-size:.86rem; color:#8B95A1; margin:8px 0 30px; text-align:center; line-height:1.6}
+.list{display:grid; gap:14px; width:min(640px,94vw)}
+a.item{display:flex; align-items:center; gap:18px; background:var(--paper); border:1px solid var(--line); border-radius:20px; padding:18px 22px; text-decoration:none; color:inherit; transition:transform .12s, box-shadow .12s}
+a.item:hover{transform:translateY(-2px); box-shadow:0 10px 30px rgba(60,45,15,.12)}
+.icon{font-size:34px}
+.item b{font-size:1rem; display:block}
+.item p{font-size:.78rem; color:#8B95A1; margin-top:3px; line-height:1.5}
+.item .go{margin-left:auto; color:var(--tide); font-weight:800}
+.foot{font-size:.72rem; color:#8B95A1; margin-top:34px; text-align:center; line-height:1.7}
+</style>
+</head>
+<body>
+<h1>바운더리 타운 <span>프로토타입</span></h1>
+<p class="sub">기능 정의 통합본(2026-07-18) 기반 임시 화면 · 목데이터 — 어드민·마이스페이스·광장의 수치는 같은 세계를 가리킵니다</p>
+<div class="list">
+  <a class="item" href="home-prototype.html"><span class="icon">🏙️</span><span><b>메인 홈 (TRUS)</b><p>소개 화면 · 마이스페이스 구경(데모) · Sign up / Log in 진입점</p></span><span class="go">→</span></a>
+  <a class="item" href="onboarding-prototype.html"><span class="icon">🎟️</span><span><b>Sign up</b><p>가입·동의 → AI 인터뷰 → 캐릭터 → 랜덤 2개 기능 오픈(나머지 잠금)</p></span><span class="go">→</span></a>
+  <a class="item" href="diagnosis-prototype.html"><span class="icon">🤖</span><span><b>AI 튜터 진단</b><p>결제 직후 첫 화면 — 한 문장씩 답하면 성적표가 갈리고, 팀을 찾아줘요</p></span><span class="go">→</span></a>
+  <a class="item" href="payment-prototype.html"><span class="icon">💳</span><span><b>강의 결제</b><p>전체 잠금 해제 — 결제하면 모든 기능 오픈</p></span><span class="go">→</span></a>
+  <a class="item" href="myspace-prototype.html"><span class="icon">🏠</span><span><b>마이스페이스</b><p>캐릭터가 걸어가 여는 오브젝트 9종 · 프레즌스 전광판 · 코치 대화</p></span><span class="go">→</span></a>
+  <a class="item" href="lecture-prototype.html"><span class="icon">📺</span><span><b>강의실</b><p>「일의 교과서」 커리큘럼 5단계 · PLAY 미션 → 바운더리 후보 · 산출물 보관함</p></span><span class="go">→</span></a>
+  <a class="item" href="plaza-prototype.html"><span class="icon">⛲</span><span><b>광장</b><p>16~24시 개장 · 캐릭터 말풍선 · 도움 게시판 중심 구조물</p></span><span class="go">→</span></a>
+  <a class="item" href="admin-prototype.html"><span class="icon">🛠️</span><span><b>어드민 (운영실)</b><p>대시보드 · 기수/팀 · 유저/조개 · 도움 모니터링 · 운영 도구</p></span><span class="go">→</span></a>
+</div>
+<p class="foot">유저 저니: 메인 홈 → 마이스페이스 구경(데모) → Sign up(랜덤 2개 오픈) → 강의 결제(전체 오픈) → 기수 시작(팀+광장).<br>마이스페이스는 ?mode=demo / trial / full 3가지 모드로 열립니다 · 어드민은 같은 목데이터를 운영자 시점에서 봅니다.</p>
+</body>
+</html>
