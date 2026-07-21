@@ -48,8 +48,47 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
 
 /* ---------- 장면 (해질녘 광장) ---------- */
 .scene{position:fixed; inset:0; overflow:hidden; background:#6E4634}
-.world{position:absolute; left:0; top:0; width:2200px; height:1400px; will-change:transform}
-.bg-sky{position:absolute; left:0; right:0; top:0; height:620px; background:url('assets/plaza-bg.png') center bottom/cover; image-rendering:pixelated}
+.world{position:absolute; left:0; top:0; width:2200px; height:1400px; will-change:transform; background-color:#74B152}
+
+/* 잔디 — 픽셀 체커 + 풀 점 */
+.grass{position:absolute; inset:0;
+  background-image:
+    repeating-conic-gradient(#7BBA58 0% 25%, transparent 0% 50%),
+    radial-gradient(circle 3px at 22px 34px, #5C9A40 97%, transparent),
+    radial-gradient(circle 3px at 84px 96px, #5C9A40 97%, transparent),
+    radial-gradient(circle 2px at 130px 50px, #8FCE6E 97%, transparent);
+  background-size:64px 64px, 150px 150px, 170px 170px, 130px 130px}
+
+/* 중앙 포장 광장 */
+.pave{position:absolute; left:700px; top:380px; width:800px; height:720px; border-radius:6px;
+  background-color:#AB9686; border:6px solid #8A7566; box-shadow:0 0 0 5px rgba(64,96,48,.4);
+  background-image:
+    repeating-linear-gradient(90deg, rgba(70,52,40,.24) 0 3px, transparent 3px 80px),
+    repeating-linear-gradient(0deg, rgba(70,52,40,.24) 0 3px, transparent 3px 80px)}
+.pave::before{content:""; position:absolute; inset:30px; border:4px solid rgba(245,238,220,.55); border-radius:3px}
+.pave::after{content:""; position:absolute; left:50%; top:50%; width:230px; height:230px; transform:translate(-50%,-50%); border:4px solid rgba(245,238,220,.55); border-radius:50%}
+
+/* 숲 테두리 — 덤불 블롭 */
+.forest{position:absolute; pointer-events:none; z-index:2000;
+  background-image:
+    radial-gradient(circle 48px at 44px 56px, #2E6B3C 97%, transparent),
+    radial-gradient(circle 42px at 106px 88px, #35753F 97%, transparent),
+    radial-gradient(circle 36px at 150px 40px, #2A6338 97%, transparent),
+    radial-gradient(circle 7px at 38px 38px, #4C8F4C 97%, transparent),
+    radial-gradient(circle 6px at 112px 70px, #4C8F4C 97%, transparent);
+  background-size:180px 160px}
+.forest.n{left:-30px; right:-30px; top:-36px; height:160px}
+.forest.s{left:-30px; right:-30px; bottom:-36px; height:160px}
+.forest.w{left:-36px; top:0; bottom:0; width:160px}
+.forest.e{right:-36px; top:0; bottom:0; width:160px}
+
+/* 흙 패치 · 벤치 */
+.patch{position:absolute; background:#C89B62; border:5px solid #B98C52; border-radius:48% 52% 55% 45%/55% 48% 52% 45%; opacity:.9}
+.bench{position:absolute; width:116px; height:22px; border-radius:4px; border:3px solid #4A3320;
+  background:repeating-linear-gradient(90deg, #B5713F 0 22px, #A3632F 22px 26px)}
+.bench::before, .bench::after{content:""; position:absolute; top:100%; width:10px; height:10px; background:#4A3320}
+.bench::before{left:12px} .bench::after{right:12px}
+
 .prop{position:absolute; transform:translate(-50%,-100%); pointer-events:none; filter:drop-shadow(4px 5px 0 rgba(0,0,0,.25)); line-height:1}
 .bg-sky::before{content:none}
 .bg-sky::after{content:none}
@@ -58,19 +97,6 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
   background:#17131F; border:3px solid #F26D9C; border-radius:8px;
   text-shadow:0 0 8px #F26D9C, 0 0 18px #F26D9C; box-shadow:0 0 16px rgba(242,109,156,.5), 0 4px 0 rgba(0,0,0,.5);
 }
-.bg-floor{position:absolute; left:0; right:0; top:620px; bottom:0; background-color:#DEA981;
-  background-image:
-    repeating-linear-gradient(90deg, rgba(122,74,44,.30) 0 4px, transparent 4px 104px),
-    repeating-linear-gradient(0deg, rgba(122,74,44,.30) 0 4px, transparent 4px 104px),
-    repeating-conic-gradient(rgba(255,244,224,.10) 0% 25%, rgba(94,56,30,.07) 0% 50%);
-  background-size:104px 104px, 104px 104px, 208px 208px}
-/* 분수 광장 문양 — 중앙 원형 석재 */
-.plaza-ring{position:absolute; left:1100px; top:870px; width:640px; height:320px; transform:translate(-50%,-50%); border-radius:50%; pointer-events:none;
-  background:radial-gradient(closest-side,
-    rgba(214,150,104,.5) 0 30%, rgba(122,74,44,.4) 30% 33%, transparent 33% 56%,
-    rgba(122,74,44,.38) 56% 59%, transparent 59% 76%, rgba(122,74,44,.34) 76% 79%, transparent 79%)}
-.bg-grass{position:absolute; left:0; right:0; bottom:0; height:64px; z-index:1; border-top:4px solid #45703A;
-  background:linear-gradient(#6FA34E,#578540)}
 
 /* ---------- 오브젝트 ---------- */
 .obj{position:absolute; display:flex; flex-direction:column; align-items:center; gap:4px; cursor:pointer; user-select:none; transform:translate(-50%,0); transition:transform .15s; z-index:5}
@@ -184,19 +210,17 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
 <!-- ============ 장면 ============ -->
 <div class="scene" id="scene">
   <div class="world" id="world">
-    <div class="bg-sky"></div>
-    <div class="bg-floor"></div>
-    <div class="bg-grass"></div>
-    <div class="plaza-ring"></div>
-
-    <!-- 광장 소품 — 걸어서 지나칠 수 있어요 (깊이 정렬 적용) -->
-    <span class="prop" style="left:1100px; top:840px; font-size:120px">⛲</span>
-    <span class="prop" style="left:420px;  top:900px; font-size:44px">🏮</span>
-    <span class="prop" style="left:1780px; top:900px; font-size:44px">🏮</span>
-    <span class="prop" style="left:700px;  top:1240px; font-size:44px">🏮</span>
-    <span class="prop" style="left:1500px; top:1240px; font-size:44px">🏮</span>
-    <span class="prop" style="left:560px;  top:1060px; font-size:46px">🪑</span>
-    <span class="prop" style="left:1660px; top:1060px; font-size:46px">🪑</span>
+    <div class="grass"></div>
+    <div class="patch" style="left:950px; top:60px; width:300px; height:150px"></div>
+    <div class="patch" style="left:180px; top:1120px; width:200px; height:110px"></div>
+    <div class="patch" style="left:1850px; top:250px; width:160px; height:90px"></div>
+    <div class="pave"></div>
+    <span class="prop" style="left:1100px; top:800px; font-size:110px">⛲</span>
+    <div class="bench" style="left:420px; top:520px"></div>
+    <div class="bench" style="left:1660px; top:520px"></div>
+    <div class="bench" style="left:420px; top:1180px"></div>
+    <div class="bench" style="left:1660px; top:1180px"></div>
+    <div class="forest n"></div><div class="forest s"></div><div class="forest w"></div><div class="forest e"></div>
 
     <!-- 걸어다니는 사람들 (공개 말풍선) -->
     <div class="char" id="npc-junho"  style="left:420px; top:780px" data-spr="junho"><div class="bubble"></div><div class="nametag">박준호</div><div class="body"><div class="spr"></div></div><div class="shadow"></div></div>
@@ -283,10 +307,10 @@ function say(el, text, dur=2600){
 
 /* ================= RPG 월드 — 카메라가 나를 따라와요 ================= */
 const WORLD = { w:2200, h:1400 };
-const FLOOR = { x:50, y:650, w:2100, h:690 };   // 걸을 수 있는 평면 (월드 px, y는 위에서부터)
+const FLOOR = { x:180, y:180, w:1840, h:1080 };   // 숲 테두리 안쪽 전체 (월드 px)
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 
-const player = { x:1100, y:1020, speed:4.4, target:null };
+const player = { x:1100, y:960, speed:4.4, target:null };
 const KEYMAP = {ArrowLeft:[-1,0], ArrowRight:[1,0], ArrowUp:[0,-1], ArrowDown:[0,1], a:[-1,0], d:[1,0], w:[0,-1], s:[0,1]};
 const keys = new Set();
 window.addEventListener('keydown', e=>{
@@ -302,16 +326,15 @@ scene.addEventListener('click', e=>{
   const r = scene.getBoundingClientRect();
   const wx = e.clientX - r.left + cam.x;
   const wy = e.clientY - r.top + cam.y;
-  if(wy < FLOOR.y) return;
   player.target = { x:clamp(wx, FLOOR.x, FLOOR.x+FLOOR.w), y:clamp(wy, FLOOR.y, FLOOR.y+FLOOR.h) };
 });
 
 /* NPC — 월드를 어슬렁거려요 */
 const npcs = [
-  {el:document.getElementById('npc-junho'),  x:420,  y:780,  t:null, speed:1.5, lines:['랜딩 카피 피드백 정리해서 올렸어요','오늘 20시 라이브에서 화면 공유해요']},
-  {el:document.getElementById('npc-dain'),   x:1700, y:860,  t:null, speed:1.3, lines:['오늘 3개 다 했어요!','이번 주 끝점 다시 잡는 중']},
-  {el:document.getElementById('npc-yeonwoo'),x:820,  y:1150, t:null, speed:1.6, lines:['숫자언어 지표 이거 맞나…','도움 글 하나 잡아야지']},
-  {el:document.getElementById('npc-bora'),   x:1900, y:1190, t:null, speed:1.2, lines:['100번 쓰기 18일째!','같이 놀래요 글 올렸어요, 목요일 번개 🍜']},
+  {el:document.getElementById('npc-junho'),  x:520,  y:560,  t:null, speed:1.5, lines:['랜딩 카피 피드백 정리해서 올렸어요','오늘 20시 라이브에서 화면 공유해요']},
+  {el:document.getElementById('npc-dain'),   x:1620, y:640,  t:null, speed:1.3, lines:['오늘 3개 다 했어요!','이번 주 끝점 다시 잡는 중']},
+  {el:document.getElementById('npc-yeonwoo'),x:860,  y:1130, t:null, speed:1.6, lines:['숫자언어 지표 이거 맞나…','도움 글 하나 잡아야지']},
+  {el:document.getElementById('npc-bora'),   x:1760, y:1150, t:null, speed:1.2, lines:['100번 쓰기 18일째!','같이 놀래요 글 올렸어요, 목요일 번개 🍜']},
 ];
 setInterval(()=>{
   const n = npcs[Math.floor(Math.random()*npcs.length)];
