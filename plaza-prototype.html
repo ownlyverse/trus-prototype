@@ -165,6 +165,9 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
   <span class="pill-stat trust"><span class="ic">★</span><b class="num">84</b></span>
   <span class="pill-stat live"><span class="ic">📡</span>20시 라이브</span>
   <span class="spacer"></span>
+  <button class="hud-btn" data-panel="help" title="도움 게시판">🪧<span class="badge-n">9</span></button>
+  <button class="hud-btn" data-panel="board" title="게시판 — 공지·자랑·같이 놀래요">📋</button>
+  <button class="hud-btn" data-panel="members" title="멤버 소개 보드">🪪</button>
   <button class="hud-btn" data-panel="stage" title="무대 — 오늘 20시 라이브">🎤</button>
   <button class="hud-btn" data-panel="table" title="약속 테이블">⛱️<span class="badge-n">1</span></button>
   <button class="hud-btn" data-panel="schedule" title="일정 안내판">🕰️</button>
@@ -180,9 +183,6 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
   <div class="neon-sign">⛲ 타운 — 광장 · 접속 41명</div>
 
   <!-- 오브젝트 6종 · 도움 게시판이 중심 구조물 -->
-  <div class="obj center" data-obj="help"     style="left:50%; top:56%"><div class="art big">🪧</div><div class="tag">도움 게시판 <small>새 글 9</small></div></div>
-  <div class="obj" data-obj="members"  style="left:22%; top:60%"><div class="art">🪪</div><div class="tag">멤버 소개 보드 <small>AI 생성</small></div></div>
-  <div class="obj" data-obj="board"    style="left:10%; top:74%"><div class="art">📋</div><div class="tag">게시판 <small>공지·자랑·같이 놀래요</small></div></div>
 
   <!-- 걸어다니는 사람들 (공개 말풍선) -->
   <div class="char" id="npc-junho"  style="left:38%; bottom:30%" data-spr="junho"><div class="bubble"></div><div class="nametag">박준호</div><div class="body"><div class="spr"></div></div><div class="shadow"></div></div>
@@ -211,7 +211,7 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
   </div>
 </div>
 
-<div class="hint">대화는 모두 공개 — 머리 위 말풍선 · 귓속말 없음 · 오브젝트를 클릭하면 다가가서 엽니다</div>
+<div class="hint">대화는 모두 공개 — 머리 위 말풍선 · 귓속말 없음 · 게시판·무대·약속은 오른쪽 위 아이콘에서 열어요</div>
 <div class="proto-tag">광장 프로토타입 · 목데이터</div>
 
 <!-- ============ 패널 ============ -->
@@ -292,17 +292,6 @@ setInterval(()=>{
   say(n.el, n.lines[Math.floor(Math.random()*n.lines.length)]);
 }, 4200);
 
-/* ================= 오브젝트 → 패널 ================= */
-const targets = {help:[50,34], members:[24,30], board:[12,19]};
-document.querySelectorAll('[data-obj]').forEach(el=>{
-  el.addEventListener('click', e=>{
-    e.stopPropagation();
-    const id = el.dataset.obj;
-    document.querySelectorAll('.obj').forEach(o=>o.classList.remove('near'));
-    el.classList.add('near');
-    walkTo(targets[id][0], targets[id][1], ()=>openPanel(id));
-  });
-});
 
 const panel = document.getElementById('panel');
 const panelBody = document.getElementById('panelBody');
