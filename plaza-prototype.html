@@ -48,7 +48,9 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
 
 /* ---------- 장면 (해질녘 광장) ---------- */
 .scene{position:fixed; inset:0; overflow:hidden; background:#6E4634}
-.bg-sky{position:absolute; left:0; right:0; top:0; height:58%; background:url('assets/plaza-bg.png') center bottom/cover; image-rendering:pixelated}
+.world{position:absolute; left:0; top:0; width:2200px; height:1400px; will-change:transform}
+.bg-sky{position:absolute; left:0; right:0; top:0; height:620px; background:url('assets/plaza-bg.png') center bottom/cover; image-rendering:pixelated}
+.prop{position:absolute; transform:translate(-50%,-100%); pointer-events:none; filter:drop-shadow(4px 5px 0 rgba(0,0,0,.25)); line-height:1}
 .bg-sky::before{content:none}
 .bg-sky::after{content:none}
 .neon-sign{position:absolute; left:50%; transform:translateX(-50%); top:10%; z-index:4;
@@ -56,17 +58,10 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
   background:#17131F; border:3px solid #F26D9C; border-radius:8px;
   text-shadow:0 0 8px #F26D9C, 0 0 18px #F26D9C; box-shadow:0 0 16px rgba(242,109,156,.5), 0 4px 0 rgba(0,0,0,.5);
 }
-.bg-floor{position:absolute; left:0; right:0; top:58%; bottom:0;
+.bg-floor{position:absolute; left:0; right:0; top:620px; bottom:0;
   background:repeating-conic-gradient(#D9A47C 0% 25%, #E5B58E 0% 50%) 0 0/52px 52px}
-.bg-grass{position:absolute; left:0; right:0; bottom:0; height:6%; z-index:2; border-top:4px solid #45703A;
-  background:
-    radial-gradient(circle 4px at 12% 40%, #F26D8D 98%, transparent),
-    radial-gradient(circle 4px at 32% 62%, #F2D24E 98%, transparent),
-    radial-gradient(circle 4px at 55% 45%, #C9E9FA 98%, transparent),
-    radial-gradient(circle 4px at 76% 58%, #F26D8D 98%, transparent),
-    radial-gradient(circle 4px at 92% 42%, #F2D24E 98%, transparent),
-    linear-gradient(#6FA34E,#578540);
-}
+.bg-grass{position:absolute; left:0; right:0; bottom:0; height:64px; z-index:1; border-top:4px solid #45703A;
+  background:linear-gradient(#6FA34E,#578540)}
 
 /* ---------- 오브젝트 ---------- */
 .obj{position:absolute; display:flex; flex-direction:column; align-items:center; gap:4px; cursor:pointer; user-select:none; transform:translate(-50%,0); transition:transform .15s; z-index:5}
@@ -80,7 +75,7 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
 .obj.center .tag{background:var(--shell)}
 
 /* ---------- 캐릭터 공통 ---------- */
-.char{position:absolute; width:56px; transform:translate(-50%,0); z-index:10; transition:left 1.1s ease, bottom 1.1s ease; display:flex; flex-direction:column; align-items:center; pointer-events:none}
+.char{position:absolute; width:56px; transform:translate(-50%,-100%); display:flex; flex-direction:column; align-items:center; pointer-events:none}
 .char .nametag{font-size:.66rem; background:#17131F; color:#fff; padding:2px 8px; border-radius:2px; border:2px solid #0B0912; margin-bottom:4px}
 .char .body{position:relative; width:36px; height:48px}
 .char .spr{position:absolute; top:0; left:0; width:3px; height:3px; background:transparent; image-rendering:pixelated}
@@ -179,27 +174,46 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
 
 <!-- ============ 장면 ============ -->
 <div class="scene" id="scene">
-  <div class="bg-sky"></div>
-
+  <div class="world" id="world">
+    <div class="bg-sky"></div>
     <div class="bg-floor"></div>
-  <div class="bg-grass"></div>
-  <div class="neon-sign">⛲ 타운 — 광장 · 접속 41명</div>
+    <div class="bg-grass"></div>
 
-  <!-- 오브젝트 6종 · 도움 게시판이 중심 구조물 -->
+    <!-- 광장 소품 — 걸어서 지나칠 수 있어요 (깊이 정렬 적용) -->
+    <span class="prop" style="left:1100px; top:840px; font-size:120px">⛲</span>
+    <span class="prop" style="left:180px;  top:700px; font-size:76px">🌳</span>
+    <span class="prop" style="left:640px;  top:672px; font-size:64px">🌳</span>
+    <span class="prop" style="left:1560px; top:690px; font-size:72px">🌳</span>
+    <span class="prop" style="left:2050px; top:710px; font-size:78px">🌳</span>
+    <span class="prop" style="left:340px;  top:1330px; font-size:70px">🌳</span>
+    <span class="prop" style="left:1880px; top:1340px; font-size:66px">🌳</span>
+    <span class="prop" style="left:420px;  top:900px; font-size:44px">🏮</span>
+    <span class="prop" style="left:1780px; top:900px; font-size:44px">🏮</span>
+    <span class="prop" style="left:700px;  top:1240px; font-size:44px">🏮</span>
+    <span class="prop" style="left:1500px; top:1240px; font-size:44px">🏮</span>
+    <span class="prop" style="left:560px;  top:1060px; font-size:46px">🪑</span>
+    <span class="prop" style="left:1660px; top:1060px; font-size:46px">🪑</span>
+    <span class="prop" style="left:900px;  top:1180px; font-size:34px">🌼</span>
+    <span class="prop" style="left:1330px; top:1150px; font-size:34px">🌼</span>
+    <span class="prop" style="left:260px;  top:1150px; font-size:34px">🌷</span>
+    <span class="prop" style="left:1980px; top:1120px; font-size:34px">🌷</span>
 
-  <!-- 걸어다니는 사람들 (공개 말풍선) -->
-  <div class="char" id="npc-junho"  style="left:38%; bottom:30%" data-spr="junho"><div class="bubble"></div><div class="nametag">박준호</div><div class="body"><div class="spr"></div></div><div class="shadow"></div></div>
-  <div class="char" id="npc-dain"   style="left:60%; bottom:22%" data-spr="dain"><div class="bubble"></div><div class="nametag">정다인</div><div class="body"><div class="spr"></div></div><div class="shadow"></div></div>
-  <div class="char" id="npc-yeonwoo" style="left:70%; bottom:34%" data-spr="yeonwoo"><div class="bubble"></div><div class="nametag">최연우</div><div class="body"><div class="spr"></div></div><div class="shadow"></div></div>
-  <div class="char" id="npc-bora"   style="left:26%; bottom:14%" data-spr="bora"><div class="bubble"></div><div class="nametag">황보라</div><div class="body"><div class="spr"></div></div><div class="shadow"></div></div>
+    <!-- 걸어다니는 사람들 (공개 말풍선) -->
+    <div class="char" id="npc-junho"  style="left:420px; top:780px" data-spr="junho"><div class="bubble"></div><div class="nametag">박준호</div><div class="body"><div class="spr"></div></div><div class="shadow"></div></div>
+    <div class="char" id="npc-dain"   style="left:1700px; top:860px" data-spr="dain"><div class="bubble"></div><div class="nametag">정다인</div><div class="body"><div class="spr"></div></div><div class="shadow"></div></div>
+    <div class="char" id="npc-yeonwoo" style="left:820px; top:1150px" data-spr="yeonwoo"><div class="bubble"></div><div class="nametag">최연우</div><div class="body"><div class="spr"></div></div><div class="shadow"></div></div>
+    <div class="char" id="npc-bora"   style="left:1900px; top:1190px" data-spr="bora"><div class="bubble"></div><div class="nametag">황보라</div><div class="body"><div class="spr"></div></div><div class="shadow"></div></div>
 
-  <!-- 나 -->
-  <div class="char me" id="me" style="left:48%; bottom:10%" data-spr="me">
-    <div class="bubble" id="meBubble"></div>
-    <div class="nametag">김이서</div>
-    <div class="body"><div class="spr"></div></div>
-    <div class="shadow"></div>
+    <!-- 나 -->
+    <div class="char me" id="me" style="left:1100px; top:1020px" data-spr="me">
+      <div class="bubble" id="meBubble"></div>
+      <div class="nametag">김이서</div>
+      <div class="body"><div class="spr"></div></div>
+      <div class="shadow"></div>
+    </div>
   </div>
+
+  <div class="neon-sign">⛲ 타운 — 광장 · 접속 41명</div>
 </div>
 
 <!-- 완강 게이트 -->
@@ -258,92 +272,113 @@ document.getElementById('gateEnter').addEventListener('click', ()=>document.getE
 /* ================= 내 캐릭터 이동 ================= */
 const me = document.getElementById('me');
 const scene = document.getElementById('scene');
+const world = document.getElementById('world');
 const meBubble = document.getElementById('meBubble');
-let walkTimer = null;
 
-/* ================= 걸을 수 있는 평면 — FLOOR ================= */
-const FLOOR = { x:2, y:58, w:96, h:34 };   // 장면 % 좌표(y는 위에서부터) — 지평선 아래 광장만
-const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
-const B_MIN = 100 - (FLOOR.y + FLOOR.h) - 8;   // bottom% 하한
-const B_MAX = 100 - FLOOR.y - 8;               // bottom% 상한
-let px = 48, pb = 10;
-
-function walkTo(l, b, cb){
-  const nx = clamp(l, FLOOR.x, FLOOR.x + FLOOR.w);
-  if(nx < px) me.classList.add('flip'); else if(nx > px) me.classList.remove('flip');
-  px = nx;
-  pb = clamp(b, B_MIN, B_MAX);
-  me.style.transition = 'left 1.1s ease, bottom 1.1s ease';
-  me.classList.add('walking');
-  me.style.left = px+'%'; me.style.bottom = pb+'%';
-  clearTimeout(walkTimer);
-  walkTimer = setTimeout(()=>{ me.classList.remove('walking'); walkTimer = null; cb&&cb(); }, 1120);
+function say(el, text, dur=2600){
+  const bb = el.querySelector('.bubble');
+  bb.textContent = text; bb.classList.add('show');
+  setTimeout(()=>bb.classList.remove('show'), dur);
 }
 
-/* 방향키·WASD 이동 — FLOOR 안에서만 */
-const KEYMAP = {ArrowLeft:[-1,0], ArrowRight:[1,0], ArrowUp:[0,1], ArrowDown:[0,-1], a:[-1,0], d:[1,0], w:[0,1], s:[0,-1]};
+/* ================= RPG 월드 — 카메라가 나를 따라와요 ================= */
+const WORLD = { w:2200, h:1400 };
+const FLOOR = { x:50, y:650, w:2100, h:690 };   // 걸을 수 있는 평면 (월드 px, y는 위에서부터)
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+
+const player = { x:1100, y:1020, speed:4.4, target:null };
+const KEYMAP = {ArrowLeft:[-1,0], ArrowRight:[1,0], ArrowUp:[0,-1], ArrowDown:[0,1], a:[-1,0], d:[1,0], w:[0,-1], s:[0,1]};
 const keys = new Set();
 window.addEventListener('keydown', e=>{
   if(e.target.tagName==='INPUT' || e.target.tagName==='TEXTAREA' || e.target.isContentEditable) return;
   if(KEYMAP[e.key]){ keys.add(e.key); e.preventDefault(); }
 });
 window.addEventListener('keyup', e=>keys.delete(e.key));
-(function stepLoop(){
-  let dx = 0, db = 0;
-  keys.forEach(k=>{ const v = KEYMAP[k]; if(v){ dx += v[0]; db += v[1]; } });
-  if(dx || db){
-    clearTimeout(walkTimer); walkTimer = null;
-    me.style.transition = 'none';
-    px = clamp(px + dx * 0.6, FLOOR.x, FLOOR.x + FLOOR.w);
-    pb = clamp(pb + db * 0.45, B_MIN, B_MAX);
-    me.style.left = px+'%'; me.style.bottom = pb+'%';
-    if(dx) me.classList.toggle('flip', dx < 0);
-    me.classList.add('walking');
-  } else if(!walkTimer){
-    me.classList.remove('walking');
-  }
-  requestAnimationFrame(stepLoop);
-})();
-function say(el, text, dur=2600){
-  const bb = el.querySelector('.bubble');
-  bb.textContent = text; bb.classList.add('show');
-  setTimeout(()=>bb.classList.remove('show'), dur);
-}
+
+/* 클릭 → 월드 좌표로 목적지 지정 */
+let cam = { x:0, y:0 };
 scene.addEventListener('click', e=>{
-  if(e.target !== scene && !e.target.classList.contains('bg-floor') && !e.target.classList.contains('bg-grass')) return;
+  if(e.target.closest('.panel') || e.target.closest('.hud')) return;
   const r = scene.getBoundingClientRect();
-  const x = (e.clientX - r.left)/r.width*100;
-  const yTop = (e.clientY - r.top)/r.height*100;
-  if(yTop < FLOOR.y) return;
-  walkTo(x, 100 - yTop - 8);
+  const wx = e.clientX - r.left + cam.x;
+  const wy = e.clientY - r.top + cam.y;
+  if(wy < FLOOR.y) return;
+  player.target = { x:clamp(wx, FLOOR.x, FLOOR.x+FLOOR.w), y:clamp(wy, FLOOR.y, FLOOR.y+FLOOR.h) };
 });
 
-/* ================= 깊이 정렬 — zIndex = y (매 프레임 갱신) ================= */
-/* 화면 아래(가까이) 있는 캐릭터가 앞에 그려져요 — worldLayer.sortableChildren 패턴 */
-(function depthLoop(){
-  document.querySelectorAll('.char').forEach(c=>{
-    c.style.zIndex = Math.round(c.getBoundingClientRect().bottom);
-  });
-  requestAnimationFrame(depthLoop);
-})();
-
-/* ================= NPC 배회 + 공개 대화 ================= */
+/* NPC — 월드를 어슬렁거려요 */
 const npcs = [
-  {el:document.getElementById('npc-junho'),  lines:['랜딩 카피 피드백 정리해서 올렸어요','오늘 20시 라이브에서 화면 공유해요']},
-  {el:document.getElementById('npc-dain'),   lines:['오늘 3개 다 했어요!','이번 주 끝점 다시 잡는 중']},
-  {el:document.getElementById('npc-yeonwoo'),lines:['숫자언어 지표 이거 맞나…','도움 글 하나 잡아야지']},
-  {el:document.getElementById('npc-bora'),   lines:['100번 쓰기 18일째!','같이 놀래요 글 올렸어요, 목요일 번개 🍜']},
+  {el:document.getElementById('npc-junho'),  x:420,  y:780,  t:null, speed:1.5, lines:['랜딩 카피 피드백 정리해서 올렸어요','오늘 20시 라이브에서 화면 공유해요']},
+  {el:document.getElementById('npc-dain'),   x:1700, y:860,  t:null, speed:1.3, lines:['오늘 3개 다 했어요!','이번 주 끝점 다시 잡는 중']},
+  {el:document.getElementById('npc-yeonwoo'),x:820,  y:1150, t:null, speed:1.6, lines:['숫자언어 지표 이거 맞나…','도움 글 하나 잡아야지']},
+  {el:document.getElementById('npc-bora'),   x:1900, y:1190, t:null, speed:1.2, lines:['100번 쓰기 18일째!','같이 놀래요 글 올렸어요, 목요일 번개 🍜']},
 ];
 setInterval(()=>{
   const n = npcs[Math.floor(Math.random()*npcs.length)];
-  const l = FLOOR.x + 4 + Math.random()*(FLOOR.w - 8);
-  const b = B_MIN + Math.random()*(B_MAX - B_MIN - 4);
-  n.el.style.left = l+'%'; n.el.style.bottom = b+'%';
-}, 3400);
+  n.t = { x:FLOOR.x + 60 + Math.random()*(FLOOR.w-120), y:FLOOR.y + 30 + Math.random()*(FLOOR.h-60) };
+}, 2600);
 setInterval(()=>{
   const n = npcs[Math.floor(Math.random()*npcs.length)];
   say(n.el, n.lines[Math.floor(Math.random()*n.lines.length)]);
 }, 4200);
+
+/* 메인 루프 — 이동 · 카메라 · 깊이 정렬 */
+function moveToward(o, tx, ty, sp){
+  const dx = tx - o.x, dy = ty - o.y;
+  const d = Math.hypot(dx, dy);
+  if(d < sp){ o.x = tx; o.y = ty; return false; }
+  o.x += dx/d*sp; o.y += dy/d*sp;
+  return true;
+}
+(function loop(){
+  /* 키보드가 우선, 없으면 클릭 목적지로 */
+  let dx = 0, dy = 0;
+  keys.forEach(k=>{ const v = KEYMAP[k]; if(v){ dx += v[0]; dy += v[1]; } });
+  let moving = false, dirX = 0;
+  if(dx || dy){
+    player.target = null;
+    const len = Math.hypot(dx, dy) || 1;
+    const nx = player.x + dx/len*player.speed;
+    const ny = player.y + dy/len*player.speed;
+    dirX = dx;
+    player.x = clamp(nx, FLOOR.x, FLOOR.x+FLOOR.w);
+    player.y = clamp(ny, FLOOR.y, FLOOR.y+FLOOR.h);
+    moving = true;
+  }else if(player.target){
+    dirX = player.target.x - player.x;
+    moving = moveToward(player, player.target.x, player.target.y, player.speed);
+    if(!moving) player.target = null;
+    moving = true;
+  }
+  if(dirX) me.classList.toggle('flip', dirX < 0);
+  me.classList.toggle('walking', moving && !!(keys.size || player.target));
+  me.style.left = player.x+'px'; me.style.top = player.y+'px';
+
+  npcs.forEach(n=>{
+    if(n.t){
+      const before = n.x;
+      const still = moveToward(n, n.t.x, n.t.y, n.speed);
+      if(!still) n.t = null;
+      n.el.classList.toggle('flip', n.x < before);
+    }
+    n.el.style.left = n.x+'px'; n.el.style.top = n.y+'px';
+  });
+
+  /* 카메라 — 나를 부드럽게 따라옴 */
+  const vw = scene.clientWidth, vh = scene.clientHeight;
+  const cx = clamp(player.x - vw/2, 0, Math.max(0, WORLD.w - vw));
+  const cy = clamp(player.y - vh/2, 0, Math.max(0, WORLD.h - vh));
+  cam.x += (cx - cam.x) * 0.1;
+  cam.y += (cy - cam.y) * 0.1;
+  world.style.transform = `translate(${-Math.round(cam.x)}px, ${-Math.round(cam.y)}px)`;
+
+  /* 깊이 정렬 — zIndex = y (아래가 앞) */
+  document.querySelectorAll('.char, .prop').forEach(c=>{
+    c.style.zIndex = Math.round(parseFloat(c.style.top) || 0);
+  });
+
+  requestAnimationFrame(loop);
+})();
 
 
 const panel = document.getElementById('panel');
