@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TRUS — 라인 드로잉 컨셉 예시</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+:root{
+  --paper:#F3F1EC; --card:#FAF8F4; --ink:#2A2A2A; --soft:#8C8880; --hair:#C9C5BC;
+  --tan:#C9A06C;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:"Pretendard Variable",Pretendard,-apple-system,"Apple SD Gothic Neo",sans-serif;
+  background:var(--paper); color:var(--ink); letter-spacing:-0.01em; word-break:keep-all;
+  padding:44px 24px 90px;
+}
+svg{display:block}
+.head{max-width:1200px; margin:0 auto 30px}
+.head h1{font-size:1.3rem; font-weight:600; letter-spacing:-0.02em}
+.head p{font-size:.8rem; color:var(--soft); margin-top:6px; line-height:1.7}
+.head a{color:var(--ink)}
+
+.frames{max-width:1200px; margin:0 auto; display:grid; grid-template-columns:1fr 1fr; gap:22px; align-items:start}
+@media(max-width:960px){.frames{grid-template-columns:1fr}}
+.frame{background:var(--card); border:1px solid var(--hair); border-radius:4px; padding:0; overflow:hidden; box-shadow:0 10px 34px rgba(50,45,35,.07)}
+.frame .f-label{font-size:.64rem; font-weight:600; color:var(--soft); letter-spacing:.14em; padding:12px 18px; border-bottom:1px solid var(--hair)}
+.frame.wide{grid-column:1/3}
+@media(max-width:960px){.frame.wide{grid-column:auto}}
+
+/* ── A. 홈 — 도면 히어로 ── */
+.hero{padding:52px 30px 40px; text-align:center}
+.hero .mark{font-size:.66rem; letter-spacing:.5em; color:var(--soft); margin-bottom:22px}
+.hero h2{font-size:clamp(1.5rem,3.4vw,2.1rem); font-weight:300; letter-spacing:.02em; line-height:1.5}
+.hero h2 b{font-weight:700}
+.hero .fig{margin:30px auto 8px; width:150px}
+.hero .cap{font-size:.66rem; color:var(--soft); letter-spacing:.18em; margin-bottom:28px}
+.lbtn{display:inline-block; font-size:.76rem; font-weight:500; letter-spacing:.1em; border:1px solid var(--ink); padding:11px 34px; border-radius:2px}
+.lbtn:hover{background:var(--ink); color:var(--card)}
+.lbtn+.lbtn{margin-left:8px; border-color:var(--hair); color:var(--soft)}
+
+/* ── B. 마이스페이스 — 오브젝트 도면 시트 ── */
+.sheet{display:grid; grid-template-columns:repeat(4,1fr); padding:34px 20px 26px; gap:8px}
+@media(max-width:700px){.sheet{grid-template-columns:repeat(2,1fr); row-gap:30px}}
+.item{text-align:center; position:relative; padding:0 10px}
+.item+.item::before{content:""; position:absolute; left:0; top:12%; bottom:22%; width:1px; background:var(--hair)}
+@media(max-width:700px){.item+.item::before{display:none}}
+.item svg{margin:0 auto 16px; height:130px}
+.item .nm{font-size:.76rem; font-weight:600; letter-spacing:.06em}
+.item .st{font-size:.62rem; color:var(--soft); margin-top:5px; line-height:1.6}
+.sheet-foot{border-top:1px solid var(--hair); display:flex; justify-content:space-between; padding:10px 18px; font-size:.6rem; color:var(--soft); letter-spacing:.1em}
+
+/* ── C. 강의실 — 미니멀 리더 ── */
+.reader{padding:30px 30px 0}
+.reader .kicker{font-size:.6rem; letter-spacing:.3em; color:var(--soft)}
+.reader h3{font-size:1.15rem; font-weight:600; margin:10px 0 4px}
+.reader .by{font-size:.68rem; color:var(--soft); margin-bottom:22px}
+.chapters{border-top:1px solid var(--ink)}
+.chapter{display:flex; align-items:baseline; gap:14px; padding:13px 2px; border-bottom:1px solid var(--hair); font-size:.78rem}
+.chapter .no{font-size:.62rem; color:var(--soft); width:20px}
+.chapter .tm{margin-left:auto; font-size:.62rem; color:var(--soft); font-variant-numeric:tabular-nums}
+.chapter.now{font-weight:700}
+.chapter.now .dot{width:5px; height:5px; border-radius:50%; background:var(--ink); align-self:center}
+.chapter.done{color:var(--soft)}
+.chapter.done .nm{text-decoration:line-through; text-decoration-thickness:1px}
+.rplayer{display:flex; align-items:center; gap:16px; padding:18px 2px 24px}
+.rplayer .pbtn-l{width:40px; height:40px; border:1px solid var(--ink); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:.8rem}
+.rplayer .line{flex:1; height:1px; background:var(--hair); position:relative}
+.rplayer .line i{position:absolute; left:0; top:0; bottom:0; width:38%; background:var(--ink)}
+.rplayer .line em{position:absolute; left:38%; top:-3px; width:7px; height:7px; background:var(--ink); border-radius:50%}
+.rplayer .tm{font-size:.64rem; color:var(--soft); font-variant-numeric:tabular-nums}
+.note-l{border-top:1px solid var(--hair); padding:12px 18px; font-size:.62rem; color:var(--soft); letter-spacing:.04em}
+
+/* ── 캐릭터 비교 ── */
+.charrow{max-width:1200px; margin:22px auto 0; background:var(--card); border:1px solid var(--hair); border-radius:4px; padding:26px 30px; display:flex; gap:34px; align-items:center; flex-wrap:wrap}
+.charrow .c-item{text-align:center}
+.charrow img{height:120px}
+.charrow img.px{image-rendering:pixelated}
+.charrow .c-item p{font-size:.62rem; color:var(--soft); margin-top:10px; letter-spacing:.1em}
+.charrow .note{flex:1; min-width:240px; font-size:.74rem; line-height:1.85; color:#4A4640}
+</style>
+</head>
+<body>
+
+<div class="head">
+  <h1>TRUS — 라인 드로잉(도면) 컨셉 예시</h1>
+  <p>아이보리 종이에 가는 잉크 선, 채색 없는 일러스트, 캡션 라벨링. 룩앤필 확인용 시안이에요 · <a href="index.html">← 전체 화면 목록</a> · <a href="concept-retro.html">레트로 시안 보기</a></p>
+</div>
+
+<div class="frames">
+
+  <!-- A. 홈 -->
+  <div class="frame">
+    <div class="f-label">A — 홈 · 도면 히어로</div>
+    <div class="hero">
+      <div class="mark">T R U S</div>
+      <h2>배움을, <b>도면처럼 정확하게.</b><br>일을, 한 세계 안에서.</h2>
+      <div class="fig">
+        <svg viewBox="0 0 150 120" fill="none" stroke="#2A2A2A" stroke-width="1.6">
+          <ellipse cx="75" cy="104" rx="62" ry="11"/>
+          <ellipse cx="75" cy="98" rx="62" ry="11" fill="#FAF8F4"/>
+          <path d="M40 97 L44 76 L106 76 L110 97"/>
+          <ellipse cx="75" cy="76" rx="31" ry="7" fill="#FAF8F4"/>
+          <path d="M60 75 L63 58 L87 58 L90 75"/>
+          <ellipse cx="75" cy="58" rx="12" ry="4" fill="#FAF8F4"/>
+          <path d="M75 54 L75 40" stroke-dasharray="0"/>
+          <path d="M75 40 C 68 46, 64 50, 62 56 M75 40 C 82 46, 86 50, 88 56 M75 38 L75 44" />
+          <circle cx="75" cy="37" r="2.4" fill="#FAF8F4"/>
+        </svg>
+      </div>
+      <div class="cap">FIG. 01 — 광장의 분수</div>
+      <div><a class="lbtn">입장하기</a><a class="lbtn">구경하기</a></div>
+    </div>
+  </div>
+
+  <!-- C. 강의실 -->
+  <div class="frame">
+    <div class="f-label">C — 강의실 · 미니멀 리더</div>
+    <div class="reader">
+      <div class="kicker">일 의 교 과 서</div>
+      <h3>3장 — 고객언어</h3>
+      <div class="by">윤소정 · 코치 3명과 같이 듣는 중</div>
+      <div class="chapters">
+        <div class="chapter done"><span class="no">01</span><span class="nm">오늘, 잠깐 멈추는 시간</span><span class="tm">05:00</span></div>
+        <div class="chapter done"><span class="no">02</span><span class="nm">끝까지 생각하는 훈련</span><span class="tm">05:00</span></div>
+        <div class="chapter now"><span class="no">03</span><span class="nm">고객언어 — 끝점에 있어야 하는 말</span><span class="dot"></span><span class="tm">-12:40</span></div>
+        <div class="chapter"><span class="no">04</span><span class="nm">단 한 컷을 고른다면</span><span class="tm">05:00</span></div>
+        <div class="chapter"><span class="no">05</span><span class="nm">전략을 바운더리로</span><span class="tm">05:00</span></div>
+      </div>
+      <div class="rplayer">
+        <span class="pbtn-l">⏸</span>
+        <span class="line"><i></i><em></em></span>
+        <span class="tm">12:40 / 33:10</span>
+      </div>
+    </div>
+    <div class="note-l">섹션이 끝나기 전에는 멈출 수 없습니다 — 남은 시간만 표시됩니다</div>
+  </div>
+
+  <!-- B. 마이스페이스 도면 시트 -->
+  <div class="frame wide">
+    <div class="f-label">B — 마이스페이스 · 오브젝트 도면 시트</div>
+    <div class="sheet">
+      <div class="item">
+        <svg viewBox="0 0 120 110" fill="none" stroke="#2A2A2A" stroke-width="1.6">
+          <rect x="14" y="52" width="92" height="8" fill="#FAF8F4"/>
+          <path d="M20 60 L20 98 M100 60 L100 98 M20 78 L100 78"/>
+          <rect x="34" y="30" width="36" height="22" rx="2" fill="#FAF8F4"/>
+          <path d="M34 52 L30 56 L74 56 L70 52"/>
+          <path d="M80 44 L92 44 M80 48 L96 48" stroke-width="1.2"/>
+        </svg>
+        <div class="nm">워크툴 책상</div>
+        <div class="st">오늘의 바운더리 — 2 / 3<br>남은 하나: 전략 초안</div>
+      </div>
+      <div class="item">
+        <svg viewBox="0 0 120 110" fill="none" stroke="#2A2A2A" stroke-width="1.6">
+          <rect x="34" y="26" width="52" height="34" rx="16" fill="#FAF8F4"/>
+          <path d="M34 43 L86 43" stroke-width="1.2"/>
+          <path d="M58 60 L58 98 M62 60 L62 98"/>
+          <path d="M52 98 L68 98"/>
+          <circle cx="78" cy="36" r="3" fill="#FAF8F4"/>
+          <path d="M86 30 L96 24 L96 34 Z" fill="#FAF8F4"/>
+        </svg>
+        <div class="nm">우체통</div>
+        <div class="st">새 소식 1 — 무대 라이브 공지<br>도움 요청 접수는 24시간</div>
+      </div>
+      <div class="item">
+        <svg viewBox="0 0 120 110" fill="none" stroke="#2A2A2A" stroke-width="1.6">
+          <path d="M60 96 L60 62" />
+          <path d="M60 74 C 50 70, 44 62, 46 52 M60 68 C 70 64, 76 56, 74 46"/>
+          <path d="M36 52 C 30 30, 52 18, 60 30 C 66 16, 92 24, 86 44 C 98 50, 88 66, 74 62 C 70 72, 50 72, 46 62 C 34 64, 28 56, 36 52 Z" fill="#FAF8F4"/>
+          <circle cx="52" cy="44" r="2.2"/><circle cx="70" cy="38" r="2.2"/><circle cx="64" cy="52" r="2.2"/>
+          <path d="M48 96 L72 96" stroke-width="1.2"/>
+        </svg>
+        <div class="nm">성과열매 나무</div>
+        <div class="st">LV.3 — 다음 레벨까지 18<br>수확일: 9월 말</div>
+      </div>
+      <div class="item">
+        <svg viewBox="0 0 120 110" fill="none" stroke="#2A2A2A" stroke-width="1.6">
+          <path d="M30 30 C 30 26, 34 24, 38 24 L86 24 C 90 24, 92 26, 92 30 L92 88 C 92 92, 90 94, 86 94 L38 94 C 34 94, 30 92, 30 88 Z" fill="#FAF8F4"/>
+          <path d="M40 24 L40 94" stroke-width="1.2"/>
+          <path d="M50 42 L82 42 M50 52 L82 52 M50 62 L74 62" stroke-width="1.2"/>
+          <circle cx="88" cy="60" r="4" fill="#FAF8F4"/>
+        </svg>
+        <div class="nm">개인 일기장</div>
+        <div class="st">오늘 일기 — 아직<br>사람에겐 비공개 · 코치만 참조</div>
+      </div>
+    </div>
+    <div class="sheet-foot"><span>MYSPACE — OBJECT SHEET 01</span><span>김이서 · ◗ 96 · 신뢰 84</span><span>SCALE 1 : 1</span></div>
+  </div>
+</div>
+
+<!-- 캐릭터 전환 -->
+<div class="charrow">
+  <div class="c-item"><img class="px" src="assets/char1.png" alt=""><p>지금 — 게임 픽셀</p></div>
+  <div class="c-item"><img src="assets/char-retro.png" alt=""><p>레트로 — 잉크 3톤</p></div>
+  <div class="c-item"><img src="assets/char-line.png" alt=""><p>도면 — 라인 드로잉</p></div>
+  <div class="note"><b>캐릭터 전환</b> — 같은 캐릭터에서 채색을 걷어내고 잉크 외곽선 + 종이색 채움만 남겼어요. 부츠 도면과 같은 문법이라 이 컨셉의 프로필·일러스트 자리에 그대로 앉습니다. 세 무드(픽셀·레트로·도면)를 나란히 두었으니 방향을 골라주세요.</div>
+</div>
+
+</body>
+</html>
