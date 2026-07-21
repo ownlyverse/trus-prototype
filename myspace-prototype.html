@@ -152,7 +152,8 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
   display:flex; flex-direction:column; align-items:center;
 }
 .me .nametag{font-size:.68rem; background:#2B2B33; color:#fff; padding:2px 8px; border-radius:2px; border:2px solid #17171C; margin-bottom:4px}
-.me .body{position:relative; width:36px; height:48px}
+.me .body{position:relative; width:52px; height:auto}
+.char-img{display:block; width:52px; image-rendering:pixelated}
 .me .sprite{position:absolute; top:0; left:0; width:3px; height:3px; background:transparent; image-rendering:pixelated}
 .me .shadow{width:34px; height:8px; border-radius:2px; background:rgba(60,40,10,.22); margin-top:2px}
 .me.walking .body{animation:bob .35s infinite alternate}
@@ -292,7 +293,7 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
   <div class="me" id="me" style="left:44%; bottom:18%">
     <div class="bubble" id="meBubble"></div>
     <div class="nametag">김이서</div>
-    <div class="body"><div class="sprite" id="meSprite"></div></div>
+    <div class="body"><img class="char-img" src="assets/char1.png" alt=""></div>
     <div class="shadow"></div>
   </div>
 </div>
@@ -308,36 +309,6 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
 
 
 <script>
-/* ================= 픽셀 스프라이트 캐릭터 ================= */
-const SPRITE_MAP = [
-  '..HHHHHHHH..',
-  '.HHHHHHHHHH.',
-  '.HHHHHHHHHH.',
-  '.HHSSSSSSHH.',
-  '..SESSSSES..',
-  '..SSSSSSSS..',
-  '...SSSSSS...',
-  '..TTTTTTTT..',
-  '.TTTTTTTTTT.',
-  '.TSTTTTTTST.',
-  '..TTTTTTTT..',
-  '..PPPPPPPP..',
-  '..PPP..PPP..',
-  '..PPP..PPP..',
-  '..DDD..DDD..',
-];
-const SPRITE_COLORS = {H:'#4A3628', S:'#F2C9A8', E:'#222831', T:'#3182F6', P:'#2B3442', D:'#6E5236'};
-(function drawSprite(){
-  const px = 3, shadows = [];
-  SPRITE_MAP.forEach((row, y)=>{
-    [...row].forEach((ch, x)=>{
-      const c = SPRITE_COLORS[ch];
-      if(c) shadows.push(`${x*px}px ${y*px}px 0 0 ${c}`);
-    });
-  });
-  document.getElementById('meSprite').style.boxShadow = shadows.join(',');
-})();
-
 /* ================= 캐릭터 이동 ================= */
 const me = document.getElementById('me');
 const scene = document.getElementById('scene');
