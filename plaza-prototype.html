@@ -48,27 +48,13 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
 
 /* ---------- 장면 (해질녘 광장) ---------- */
 .scene{position:fixed; inset:0; overflow:hidden; background:#6E4634}
-.world{position:absolute; left:0; top:0; width:2200px; height:1400px; will-change:transform; background-color:#74B152}
+.world{position:absolute; left:0; top:0; width:2200px; height:1400px; will-change:transform; background-color:#D8C6AC}
 
-/* 잔디 — 픽셀 체커 + 풀 점 */
-.grass{position:absolute; inset:0;
-  background-image:
-    repeating-conic-gradient(#7BBA58 0% 25%, transparent 0% 50%),
-    radial-gradient(circle 3px at 22px 34px, #5C9A40 97%, transparent),
-    radial-gradient(circle 3px at 84px 96px, #5C9A40 97%, transparent),
-    radial-gradient(circle 2px at 130px 50px, #8FCE6E 97%, transparent);
-  background-size:64px 64px, 150px 150px, 170px 170px, 130px 130px}
-
-/* 중앙 포장 광장 */
-.pave{position:absolute; left:700px; top:380px; width:800px; height:720px; border-radius:6px;
-  background:url('assets/stone.png') 0 0/180px 180px repeat; image-rendering:pixelated;
-  border:6px solid #8A7566; box-shadow:0 0 0 5px rgba(64,96,48,.4)}
-.pave::before{content:""; position:absolute; inset:30px; border:4px solid rgba(245,238,220,.55); border-radius:3px}
-.pave::after{content:""; position:absolute; left:50%; top:50%; width:230px; height:230px; transform:translate(-50%,-50%); border:4px solid rgba(245,238,220,.55); border-radius:50%}
+/* 바닥 — 돌 텍스처 전체 타일링 */
+.grass{position:absolute; inset:0; background:url('assets/stone.png') 0 0/180px 180px repeat; image-rendering:pixelated}
 
 
-/* 흙 패치 · 벤치 */
-.patch{position:absolute; background:#C89B62; border:5px solid #B98C52; border-radius:48% 52% 55% 45%/55% 48% 52% 45%; opacity:.9}
+
 .tree, .bench-img{image-rendering:pixelated}
 
 .prop{position:absolute; transform:translate(-50%,-100%); pointer-events:none; filter:drop-shadow(4px 5px 0 rgba(0,0,0,.25)); line-height:1}
@@ -192,15 +178,11 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
 <div class="scene" id="scene">
   <div class="world" id="world">
     <div class="grass"></div>
-    <div class="patch" style="left:950px; top:60px; width:300px; height:150px"></div>
-    <div class="patch" style="left:180px; top:1120px; width:200px; height:110px"></div>
-    <div class="patch" style="left:1850px; top:250px; width:160px; height:90px"></div>
-    <div class="pave"></div>
     <span class="prop" style="left:1100px; top:800px; font-size:110px">⛲</span>
-    <img src="assets/bench.png" alt="" class="prop bench-img" style="left:470px; top:545px; width:120px">
-    <img src="assets/bench.png" alt="" class="prop bench-img" style="left:1720px; top:545px; width:120px">
-    <img src="assets/bench.png" alt="" class="prop bench-img" style="left:470px; top:1205px; width:120px">
-    <img src="assets/bench.png" alt="" class="prop bench-img" style="left:1720px; top:1205px; width:120px">
+    <img src="assets/bench.png" alt="" class="prop bench-img" style="left:470px; top:545px; width:88px">
+    <img src="assets/bench.png" alt="" class="prop bench-img" style="left:1720px; top:545px; width:88px">
+    <img src="assets/bench.png" alt="" class="prop bench-img" style="left:470px; top:1205px; width:88px">
+    <img src="assets/bench.png" alt="" class="prop bench-img" style="left:1720px; top:1205px; width:88px">
 
     <!-- 걸어다니는 사람들 (공개 말풍선) -->
     <div class="char" id="npc-junho"  style="left:420px; top:780px" data-spr="junho"><div class="bubble"></div><div class="nametag">박준호</div><div class="body"><div class="spr"></div></div><div class="shadow"></div></div>
@@ -320,6 +302,16 @@ const FLOOR = { x:180, y:180, w:1840, h:1080 };   // 숲 테두리 안쪽 전체
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 
 const player = { x:1100, y:960, speed:4.4, target:null };
+
+/* 장애물 — 벤치 4개 + 분수 (발 좌표 기준 AABB) */
+const OBSTACLES = [
+  {x:424,  y:509,  w:92, h:40},
+  {x:1674, y:509,  w:92, h:40},
+  {x:424,  y:1169, w:92, h:40},
+  {x:1674, y:1169, w:92, h:40},
+  {x:1052, y:756,  w:96, h:48},
+];
+const blocked = (x, y) => OBSTACLES.some(o => x > o.x && x < o.x + o.w && y > o.y && y < o.y + o.h);
 const KEYMAP = {ArrowLeft:[-1,0], ArrowRight:[1,0], ArrowUp:[0,-1], ArrowDown:[0,1], a:[-1,0], d:[1,0], w:[0,-1], s:[0,1]};
 const keys = new Set();
 window.addEventListener('keydown', e=>{
@@ -373,13 +365,17 @@ function moveToward(o, tx, ty, sp){
     const nx = player.x + dx/len*player.speed;
     const ny = player.y + dy/len*player.speed;
     dirX = dx;
-    player.x = clamp(nx, FLOOR.x, FLOOR.x+FLOOR.w);
-    player.y = clamp(ny, FLOOR.y, FLOOR.y+FLOOR.h);
+    const cx2 = clamp(nx, FLOOR.x, FLOOR.x+FLOOR.w);
+    const cy2 = clamp(ny, FLOOR.y, FLOOR.y+FLOOR.h);
+    if(!blocked(cx2, player.y)) player.x = cx2;
+    if(!blocked(player.x, cy2)) player.y = cy2;
     moving = true;
   }else if(player.target){
     dirX = player.target.x - player.x;
+    const ox = player.x, oy = player.y;
     moving = moveToward(player, player.target.x, player.target.y, player.speed);
-    if(!moving) player.target = null;
+    if(blocked(player.x, player.y)){ player.x = ox; player.y = oy; player.target = null; }
+    else if(!moving) player.target = null;
     moving = true;
   }
   if(dirX) me.classList.toggle('flip', dirX < 0);
