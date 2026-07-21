@@ -318,6 +318,15 @@ scene.addEventListener('click', e=>{
   walkTo(x, 100 - yTop - 8);
 });
 
+/* ================= 깊이 정렬 — zIndex = y (매 프레임 갱신) ================= */
+/* 화면 아래(가까이) 있는 캐릭터가 앞에 그려져요 — worldLayer.sortableChildren 패턴 */
+(function depthLoop(){
+  document.querySelectorAll('.char').forEach(c=>{
+    c.style.zIndex = Math.round(c.getBoundingClientRect().bottom);
+  });
+  requestAnimationFrame(depthLoop);
+})();
+
 /* ================= NPC 배회 + 공개 대화 ================= */
 const npcs = [
   {el:document.getElementById('npc-junho'),  lines:['랜딩 카피 피드백 정리해서 올렸어요','오늘 20시 라이브에서 화면 공유해요']},
