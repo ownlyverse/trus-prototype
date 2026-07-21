@@ -91,9 +91,9 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
 .char .bubble::after{content:""; position:absolute; top:100%; left:50%; transform:translateX(-50%); border:6px solid transparent; border-top-color:#fff}
 .char.me{z-index:12}
 .char.me .body{width:48px; height:72px}
-.char.me .me-img{width:100%; height:100%; object-fit:contain; display:block}
+.char.me .me-img{height:48px; width:auto; object-fit:contain; display:block; image-rendering:pixelated}
 .char.me .nametag{background:var(--tide); border-color:#1B4FA0}
-.char.me .body{width:52px; height:auto}
+.char.me .body{width:auto; height:48px}
 .char-img{display:block; width:52px; image-rendering:pixelated}
 .char.flip .body{--fx:-1; transform:scaleX(-1)}
 .char.me.walking .body{animation:pbob .35s infinite alternate}
@@ -341,10 +341,7 @@ const npcs = [
   {el:document.getElementById('npc-yeonwoo'),x:860,  y:1130, t:null, speed:1.6, lines:['숫자언어 지표 이거 맞나…','도움 글 하나 잡아야지']},
   {el:document.getElementById('npc-bora'),   x:1760, y:1150, t:null, speed:1.2, lines:['100번 쓰기 18일째!','같이 놀래요 글 올렸어요, 목요일 번개 🍜']},
 ];
-setInterval(()=>{
-  const n = npcs[Math.floor(Math.random()*npcs.length)];
-  n.t = { x:FLOOR.x + 60 + Math.random()*(FLOOR.w-120), y:FLOOR.y + 30 + Math.random()*(FLOOR.h-60) };
-}, 2600);
+/* NPC는 제자리에 고정 — 배회 없음 */
 setInterval(()=>{
   const n = npcs[Math.floor(Math.random()*npcs.length)];
   say(n.el, n.lines[Math.floor(Math.random()*n.lines.length)]);
