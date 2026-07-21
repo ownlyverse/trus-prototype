@@ -44,28 +44,10 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
 .hud-btn:active{transform:translateY(2px); box-shadow:0 1px 0 rgba(0,0,0,.5)}
 
 /* ---------- 장면 (해질녘 광장) ---------- */
-.scene{position:fixed; inset:0; overflow:hidden; background:#241E3E}
-.bg-sky{position:absolute; left:0; right:0; top:0; height:30%; background:linear-gradient(#0F0C22 0%, #241E3E 70%, #35284E 100%)}
-.bg-sky::before{ /* 네온 빌딩 불빛 */
-  content:""; position:absolute; inset:0; opacity:.9;
-  background:
-    linear-gradient(#1B1533,#1B1533) 3% 100%/8% 80% no-repeat,
-    repeating-linear-gradient(180deg, #F26D9C 0 6px, transparent 6px 16px) 4% 100%/5% 70% no-repeat,
-    linear-gradient(#171130,#171130) 15% 100%/7% 92% no-repeat,
-    repeating-linear-gradient(180deg, #46D5B2 0 5px, transparent 5px 14px) 16% 100%/4% 84% no-repeat,
-    linear-gradient(#1B1533,#1B1533) 27% 100%/8% 70% no-repeat,
-    repeating-linear-gradient(180deg, #F2C14E 0 5px, transparent 5px 15px) 28% 100%/5% 60% no-repeat,
-    linear-gradient(#171130,#171130) 62% 100%/8% 88% no-repeat,
-    repeating-linear-gradient(180deg, #7C8BE0 0 6px, transparent 6px 15px) 63% 100%/5% 78% no-repeat,
-    linear-gradient(#1B1533,#1B1533) 76% 100%/7% 66% no-repeat,
-    repeating-linear-gradient(180deg, #F26D9C 0 5px, transparent 5px 14px) 77% 100%/4% 58% no-repeat,
-    linear-gradient(#171130,#171130) 88% 100%/8% 84% no-repeat,
-    repeating-linear-gradient(180deg, #46D5B2 0 6px, transparent 6px 16px) 89% 100%/5% 74% no-repeat;
-}
-.bg-sky::after{ /* 별 */
-  content:""; position:absolute; left:6%; top:8%; width:4px; height:4px; background:#fff; opacity:.8;
-  box-shadow:20vw 14px #FFF6C9, 44vw 4px #fff, 58vw 22px #FFD9E8, 72vw 8px #fff, 90vw 18px #C9E9FA, 34vw 30px #fff;
-}
+.scene{position:fixed; inset:0; overflow:hidden; background:#6E4634}
+.bg-sky{position:absolute; left:0; right:0; top:0; height:32%; background:url('assets/plaza-bg.png') center 72%/cover; image-rendering:pixelated}
+.bg-sky::before{content:none}
+.bg-sky::after{content:none}
 .cityb{position:absolute; display:flex; flex-direction:column; align-items:center; gap:4px; z-index:2; cursor:pointer; transform:translateX(-50%)}
 .cityb .tower{width:56px; position:relative; border:3px solid #0B0912; border-top:7px solid var(--roof,#6C5CC9); border-radius:4px 4px 0 0; background:#3A3450}
 .cityb .tower::before{content:""; position:absolute; inset:6px 6px 14px;
@@ -80,7 +62,7 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
 .bg-shop{position:absolute; left:0; right:0; top:30%; height:28%;
   background:
     repeating-linear-gradient(90deg, rgba(0,0,0,.22) 0 4px, transparent 4px 96px),
-    linear-gradient(#4A3450, #3A2842)}
+    linear-gradient(#8A5B44, #6E4634)}
 .bg-shop::before{ /* 불 켜진 선반 */
   content:""; position:absolute; inset:16% 3% 12%;
   background:
@@ -88,11 +70,11 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
     repeating-linear-gradient(90deg, transparent 0 68px, rgba(0,0,0,.3) 68px 72px);
 }
 .awning{position:absolute; left:5%; right:5%; top:28.4%; height:4.6%; z-index:3;
-  background:repeating-linear-gradient(90deg, #6C5CC9 0 46px, #8579DD 46px 92px);
+  background:repeating-linear-gradient(90deg, #D97B5A 0 46px, #EA9C7C 46px 92px);
   border:3px solid #17171C; border-radius:8px 8px 0 0;
 }
 .awning::after{content:""; position:absolute; left:-3px; right:-3px; top:100%; height:12px;
-  background:radial-gradient(circle at 23px 0, #6C5CC9 0 20px, transparent 21px) 0 0/46px 12px;
+  background:radial-gradient(circle at 23px 0, #D97B5A 0 20px, transparent 21px) 0 0/46px 12px;
 }
 .neon-sign{position:absolute; left:50%; transform:translateX(-50%); top:19.5%; z-index:4;
   font-size:clamp(1.1rem, 3vw, 1.6rem); color:#FFD9E8; padding:8px 22px;
@@ -100,15 +82,15 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
   text-shadow:0 0 8px #F26D9C, 0 0 18px #F26D9C; box-shadow:0 0 16px rgba(242,109,156,.5), 0 4px 0 rgba(0,0,0,.5);
 }
 .bg-floor{position:absolute; left:0; right:0; top:58%; bottom:0;
-  background:repeating-conic-gradient(#5F519E 0% 25%, #6E60B0 0% 50%) 0 0/52px 52px}
-.bg-grass{position:absolute; left:0; right:0; bottom:0; height:6%; z-index:2; border-top:4px solid #1F4D2A;
+  background:repeating-conic-gradient(#D9A47C 0% 25%, #E5B58E 0% 50%) 0 0/52px 52px}
+.bg-grass{position:absolute; left:0; right:0; bottom:0; height:6%; z-index:2; border-top:4px solid #45703A;
   background:
     radial-gradient(circle 4px at 12% 40%, #F26D8D 98%, transparent),
     radial-gradient(circle 4px at 32% 62%, #F2D24E 98%, transparent),
     radial-gradient(circle 4px at 55% 45%, #C9E9FA 98%, transparent),
     radial-gradient(circle 4px at 76% 58%, #F26D8D 98%, transparent),
     radial-gradient(circle 4px at 92% 42%, #F2D24E 98%, transparent),
-    linear-gradient(#2E6B3C,#24552F);
+    linear-gradient(#6FA34E,#578540);
 }
 
 /* ---------- 오브젝트 ---------- */
