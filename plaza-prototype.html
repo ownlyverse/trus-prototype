@@ -76,6 +76,29 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
 .obj.near .tag{background:var(--tide)}
 .obj.center .tag{background:var(--shell)}
 
+/* 오른쪽 구조물 — 무대 · 약속 테라스 */
+.obj-zone{position:absolute; transform:translateX(-50%); cursor:pointer; z-index:4; display:flex; flex-direction:column; align-items:center; user-select:none}
+.obj-zone:hover{transform:translateX(-50%) translateY(-3px)}
+.obj-zone .tag{margin-top:7px; font-size:.72rem; background:#17131F; color:#fff; padding:3px 9px; border-radius:2px; border:2px solid #0B0912; white-space:nowrap; box-shadow:2px 2px 0 rgba(0,0,0,.4); font-family:'NeoDunggeunmo','Pretendard Variable',sans-serif; letter-spacing:0}
+.obj-zone .tag small{opacity:.75; font-weight:400}
+.obj-zone.near .tag, .obj-zone:hover .tag{background:var(--tide)}
+.z-wrap{position:relative}
+
+.zone-stage .z-wrap{width:240px; height:124px}
+.zone-stage .z-glow{position:absolute; left:50%; top:-10px; transform:translateX(-50%); width:150px; height:104px; background:radial-gradient(ellipse at top, rgba(255,228,150,.5), transparent 70%); pointer-events:none}
+.zone-stage .z-back{position:absolute; left:7%; right:7%; top:0; height:66px; background:repeating-linear-gradient(90deg, #8A3B5C 0 18px, #A34A6E 18px 36px); border:3px solid #17131F; border-radius:8px 8px 0 0}
+.zone-stage .z-deck{position:absolute; left:0; right:0; bottom:0; height:36px; background:#B5713F; border:3px solid #17131F; border-radius:4px; box-shadow:4px 4px 0 rgba(0,0,0,.3)}
+.zone-stage .z-deck::before{content:""; position:absolute; inset:3px 3px 50%; background:#D08A50; border-radius:2px}
+.zone-stage .z-mic{position:absolute; left:50%; bottom:26px; transform:translateX(-50%); font-size:46px; filter:drop-shadow(3px 4px 0 rgba(0,0,0,.35))}
+
+.zone-table .z-wrap{width:210px; height:112px}
+.zone-table .z-rug{position:absolute; left:0; right:0; bottom:0; height:46px; background:repeating-conic-gradient(#E9C29B 0% 25%, #F2D3AE 0% 50%) 0 0/22px 22px; border:3px solid #17131F; border-radius:10px; box-shadow:4px 4px 0 rgba(0,0,0,.25)}
+.zone-table .z-tb{position:absolute; bottom:30px; width:56px; height:26px; background:#F7F1E4; border:3px solid #17131F; border-radius:50%}
+.zone-table .z-tb::after{content:""; position:absolute; left:50%; top:96%; transform:translateX(-50%); width:9px; height:16px; background:#8A5B44; border:2px solid #17131F; border-top:none}
+.zone-table .z-tb.a{left:22px}
+.zone-table .z-tb.b{right:22px}
+.zone-table .z-para{position:absolute; left:10px; bottom:52px; font-size:48px; filter:drop-shadow(3px 4px 0 rgba(0,0,0,.3)); z-index:2}
+
 /* ---------- 캐릭터 공통 ---------- */
 .char{position:absolute; width:56px; transform:translate(-50%,0); z-index:10; transition:left 1.1s ease, bottom 1.1s ease; display:flex; flex-direction:column; align-items:center; pointer-events:none}
 .char .nametag{font-size:.66rem; background:#17131F; color:#fff; padding:2px 8px; border-radius:2px; border:2px solid #0B0912; margin-bottom:4px}
@@ -176,9 +199,15 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
   <!-- 오브젝트 6종 · 도움 게시판이 중심 구조물 -->
   <div class="obj center" data-obj="help"     style="left:50%; top:56%"><div class="art big">🪧</div><div class="tag">도움 게시판 <small>새 글 9</small></div></div>
   <div class="obj" data-obj="members"  style="left:22%; top:60%"><div class="art">🪪</div><div class="tag">멤버 소개 보드 <small>AI 생성</small></div></div>
-  <div class="obj" data-obj="stage"    style="left:79%; top:57%"><div class="art" style="font-size:62px">🎤</div><div class="tag">무대 <small>오늘 20시</small></div></div>
+  <div class="obj-zone zone-stage" data-obj="stage" style="left:79%; top:47%">
+    <div class="z-wrap"><div class="z-glow"></div><div class="z-back"></div><div class="z-deck"></div><div class="z-mic">🎤</div></div>
+    <div class="tag">무대 <small>오늘 20시 라이브</small></div>
+  </div>
   <div class="obj" data-obj="board"    style="left:10%; top:74%"><div class="art">📋</div><div class="tag">게시판 <small>공지·자랑·같이 놀래요</small></div></div>
-  <div class="obj" data-obj="table"    style="left:90%; top:70%"><div class="art" style="font-size:58px">⛱️</div><div class="tag">약속 테이블 <small>내 약속 1</small></div></div>
+  <div class="obj-zone zone-table" data-obj="table" style="left:88%; top:70%">
+    <div class="z-wrap"><div class="z-rug"></div><div class="z-para">⛱️</div><div class="z-tb a"></div><div class="z-tb b"></div></div>
+    <div class="tag">약속 테이블 <small>내 약속 1</small></div>
+  </div>
   <div class="obj" data-obj="schedule" style="left:6%; top:58%"><div class="art small">🕰️</div><div class="tag">일정 안내판</div></div>
 
   <!-- 걸어다니는 사람들 (공개 말풍선) -->
@@ -295,7 +324,7 @@ document.querySelectorAll('[data-obj]').forEach(el=>{
   el.addEventListener('click', e=>{
     e.stopPropagation();
     const id = el.dataset.obj;
-    document.querySelectorAll('.obj').forEach(o=>o.classList.remove('near'));
+    document.querySelectorAll('.obj, .obj-zone').forEach(o=>o.classList.remove('near'));
     el.classList.add('near');
     walkTo(targets[id][0], targets[id][1], ()=>openPanel(id));
   });
