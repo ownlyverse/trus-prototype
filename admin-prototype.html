@@ -192,9 +192,9 @@ table{border-collapse:collapse;width:100%}
       <button data-view="dashboard" class="active">대시보드</button>
     </div>
     <div class="nav-group">
-      <span>소속</span>
-      <button data-view="cohorts">기수 · 채널</button>
-      <button data-view="teams">팀 배치 <span class="cnt">결원 1</span></button>
+      <span>학습 운영</span>
+      <button data-view="coaches">코치 운영 <span class="cnt">검수 2</span></button>
+      <button data-view="curriculum">커리큘럼 · 완강</button>
     </div>
     <div class="nav-group">
       <span>사람 · 경제</span>
@@ -206,10 +206,7 @@ table{border-collapse:collapse;width:100%}
       <button data-view="help">도움 게시판</button>
       <button data-view="ops">운영 도구 <span class="cnt">4</span></button>
     </div>
-    <div class="nav-group">
-      <span>콘텐츠</span>
-      <button data-view="curriculum">커리큘럼 · 완강</button>
-    </div>
+
   </nav>
   <div class="sidebar-foot">
     <a href="home-prototype.html" style="display:block; text-align:center; background:var(--ink-3); color:#C6CFD8; border-radius:7px; padding:8px; font-size:.8rem; font-weight:600; text-decoration:none; margin-bottom:10px">🏙️ 서비스 화면 보기</a>
@@ -219,24 +216,16 @@ table{border-collapse:collapse;width:100%}
 <!-- ============ 메인 ============ -->
 <div class="main">
   <header class="topbar">
-    <div class="cohort-select">
-      <select>
-        <option>3기 채널 (진행 중)</option>
-        <option>2기 채널 (완강 후)</option>
-        <option>1기 채널 (종료)</option>
-        <option>4기 (모집 중)</option>
-      </select>
-    </div>
+    <div class="cohort-select"><b>TRUS 타운</b></div>
     <div class="townclock">
       <div class="tc-head">
-        <span>광장 개장 타임라인 · 16:00 ~ 24:00</span>
-        <b id="tcStatus">—</b>
+        <span>광장 게이트 — 강의 100% 완강자만 입장</span>
+        <b>완강 41 / 150명</b>
       </div>
       <div class="tc-bar">
-        <div class="tc-open"><i>개장 시간</i></div>
-        <div class="tc-now" id="tcNow"></div>
+        <div class="tc-open" style="left:0; width:27.3%"><i>입장 가능 27%</i></div>
       </div>
-      <div class="tc-ticks"><span>0시</span><span>6시</span><span>12시</span><span>16시</span><span>24시</span></div>
+      <div class="tc-ticks"><span>0%</span><span>완강률</span><span>100%</span></div>
     </div>
     <div class="admin-chip">
       <span>운영자</span>
@@ -250,7 +239,7 @@ table{border-collapse:collapse;width:100%}
   <section class="view active" id="view-dashboard">
     <div class="view-head">
       <h2>대시보드</h2>
-      <p>3기 채널(150명)의 오늘이에요. 운영 리듬은 하루 두 번의 파도 — 오후 4시 개장과 저녁 코어타임(미확정)이에요.</p>
+      <p>타운(150명)의 오늘이에요. 강의는 코치 3명과 같이 듣고, 광장은 100% 완강한 사람에게만 열려요.</p>
     </div>
 
     <div class="grid c4">
@@ -262,12 +251,12 @@ table{border-collapse:collapse;width:100%}
 
     <div class="split">
       <div class="card">
-        <h3>광장 상태 <span class="badge b-ok" id="dashPlaza">—</span></h3>
-        <div class="kv"><span>현재 접속</span><b class="num">41명</b></div>
+        <h3>광장 상태 <span class="badge b-ok">완강자 전용</span></h3>
+        <div class="kv"><span>입장 가능 (완강자)</span><b class="num">41명</b></div>
+        <div class="kv"><span>지금 접속</span><b class="num">17명</b></div>
         <div class="kv"><span>오늘 도움 요청 접수 (우체통)</span><b class="num">9건 — 16:00 일괄 게시</b></div>
         <div class="kv"><span>무대 브로드캐스트</span><b>오늘 20:00 라이브 예정</b></div>
-        <div class="kv"><span>코어타임</span><b>21:00 (안) <span class="badge b-tbd">미확정 §7</span></b></div>
-        <div class="note"><b>운영 메모</b> — 개장과 동시에 접수 글이 한 번에 공개돼요. 게시 직전(15:50)에 접수 큐를 한 번 살펴보는 걸 권해요.</div>
+        <div class="note"><b>게이트 규칙</b> — 광장은 강의 전체 에피소드를 100% 마친 사람만 들어와요. 완강 임박자(4/5) 9명이 다음 입장 후보예요.</div>
       </div>
       <div class="card">
         <h3>오늘 할 일 <span class="sub">운영자 액션 대기 4건</span></h3>
@@ -275,7 +264,7 @@ table{border-collapse:collapse;width:100%}
           <tbody>
             <tr><td>무대 화면 공유 권한 승인 — 박준호</td><td style="text-align:right"><button class="btn sm primary">승인</button> <button class="btn sm">보류</button></td></tr>
             <tr><td>운영자 문의 미답변 <b class="num">3건</b> (결제 1 · 오류 2)</td><td style="text-align:right"><button class="btn sm" data-goto="ops">문의함 열기</button></td></tr>
-            <tr><td>결원 팀 1개 — 07팀 (5/6명) <span class="badge b-tbd">충원 규칙 미확정 §7</span></td><td style="text-align:right"><button class="btn sm" data-goto="teams">팀 보기</button></td></tr>
+            <tr><td>코치 세션 검수 대기 <b class="num">2건</b> — 머니 코치 05·06</td><td style="text-align:right"><button class="btn sm" data-goto="coaches">코치 운영</button></td></tr>
             <tr><td>도움 정산 지연 1건 — 완료 확정 후 48시간 경과</td><td style="text-align:right"><button class="btn sm" data-goto="help">게시판 보기</button></td></tr>
           </tbody>
         </table>
@@ -297,69 +286,50 @@ table{border-collapse:collapse;width:100%}
     </div>
   </section>
 
-  <!-- ============ 2. 기수 · 채널 ============ -->
-  <section class="view" id="view-cohorts">
+  <!-- ============ 코치 운영 ============ -->
+  <section class="view" id="view-coaches">
     <div class="view-head">
-      <h2>기수 · 채널</h2>
-      <p>기수 하나가 채널 하나(최대 150명), 광장 하나를 써요. 결제하면 바로 솔로 모드로 입장하고, 팀과 광장은 기수 시작일에 함께 열려요.</p>
+      <h2>코치 운영</h2>
+      <p>강의를 열면 코치 3명의 동반 세션(대화·그림)이 실시간처럼 흘러요. 에피소드별 세션을 여기서 검수하고 게시해요.</p>
+    </div>
+
+    <div class="grid c3">
+      <div class="stat"><div class="label">🦉 바운더리 코치</div><div class="value num">6<small> / 6 세션</small></div><div class="foot">대화 84줄 · 그림 2장 · 전부 게시됨</div></div>
+      <div class="stat"><div class="label">🐢 기록 코치</div><div class="value num">6<small> / 6 세션</small></div><div class="foot">대화 71줄 · 그림 3장 · 전부 게시됨</div></div>
+      <div class="stat"><div class="label">🦊 머니 코치</div><div class="value num">4<small> / 6 세션</small></div><div class="foot">대화 52줄 · <b>검수 대기 2</b></div></div>
     </div>
 
     <div class="card">
-      <h3>기수 목록 <button class="btn sm primary" style="margin-left:auto">+ 새 기수 만들기</button></h3>
+      <h3>에피소드별 세션 상태 <span class="sub">세 코치의 대화·그림이 모두 게시되어야 "같이 듣기"가 완성돼요</span></h3>
       <table class="tbl">
-        <thead><tr><th>기수</th><th>상태</th><th>인원</th><th>팀</th><th>시작일</th><th>완강자</th><th>광장</th></tr></thead>
+        <thead><tr><th>에피소드</th><th>🦉 바운더리</th><th>🐢 기록</th><th>🦊 머니</th><th>유저 반응</th></tr></thead>
         <tbody>
-          <tr class="clickable"><td class="name">4기</td><td><span class="badge b-mute">모집 중</span></td><td class="num">23 / 150</td><td>—</td><td class="num">2026-07-27 (예정) <span class="badge b-tbd">기수 주기 §7</span></td><td>—</td><td>미오픈</td></tr>
-          <tr class="clickable"><td class="name">3기</td><td><span class="badge b-ok">진행 중</span></td><td class="num">150 / 150</td><td class="num">25개</td><td class="num">2026-07-06</td><td class="num">0명</td><td>운영 중</td></tr>
-          <tr class="clickable"><td class="name">2기</td><td><span class="badge b-ok">완강 후</span></td><td class="num">147 / 150</td><td class="num">25개</td><td class="num">2026-04-13</td><td class="num">21명</td><td>운영 중</td></tr>
-          <tr class="clickable"><td class="name">1기</td><td><span class="badge b-mute">종료</span></td><td class="num">142 / 150</td><td class="num">24개</td><td class="num">2026-01-19</td><td class="num">38명</td><td>닫힘 · 자산 휴면 보존</td></tr>
+          <tr><td class="name">01 여는 영상</td><td><span class="badge b-ok">게시됨</span></td><td><span class="badge b-ok">게시됨</span></td><td><span class="badge b-ok">게시됨</span></td><td class="num">응원 212</td></tr>
+          <tr><td class="name">02 마음 그리기</td><td><span class="badge b-ok">게시됨</span></td><td><span class="badge b-ok">게시됨 · 그림</span></td><td><span class="badge b-ok">게시됨 · 그림</span></td><td class="num">응원 187</td></tr>
+          <tr><td class="name">03 읽기</td><td><span class="badge b-ok">게시됨 · 밑줄</span></td><td><span class="badge b-ok">게시됨</span></td><td><span class="badge b-ok">게시됨</span></td><td class="num">밑줄 96</td></tr>
+          <tr><td class="name">04 말하기</td><td><span class="badge b-ok">게시됨</span></td><td><span class="badge b-ok">게시됨 · 음성</span></td><td><span class="badge b-ok">게시됨</span></td><td class="num">응원 154</td></tr>
+          <tr><td class="name">05 PLAY</td><td><span class="badge b-ok">게시됨 · 한 컷</span></td><td><span class="badge b-ok">게시됨</span></td><td><span class="badge b-tbd">검수 대기</span></td><td class="num">열람 118</td></tr>
+          <tr><td class="name">06 마무리</td><td><span class="badge b-ok">게시됨</span></td><td><span class="badge b-ok">게시됨</span></td><td><span class="badge b-tbd">검수 대기</span></td><td class="num">완료 41</td></tr>
         </tbody>
       </table>
-      <div class="note"><b>휴면 보존</b> — 멤버십을 쉬는 유저의 조개·기록·신뢰점수는 그대로 보관했다가, 다시 오면 복원해요 (확정 2026-07-18).</div>
     </div>
 
     <div class="card">
-      <h3>4기 대기자 — 솔로 모드 수강 중 <span class="sub">결제 완료 → 기수 시작 전. 강의·데일리 트랙은 이미 사용 가능</span></h3>
+      <h3>검수 대기 큐 <span class="badge b-warn">2건</span></h3>
       <table class="tbl">
-        <thead><tr><th>이름</th><th>결제일</th><th>AI 인터뷰</th><th>캐릭터 생성</th><th>커리큘럼</th><th>커리어 단계</th></tr></thead>
         <tbody>
-          <tr><td class="name">임태오</td><td class="num">2026-07-19</td><td><span class="badge b-ok">완료</span></td><td><span class="badge b-ok">완료</span></td><td class="num">1단계 진행 중</td><td class="num">3단계</td></tr>
-          <tr><td class="name">조예린</td><td class="num">2026-07-19</td><td><span class="badge b-ok">완료</span></td><td><span class="badge b-ok">완료</span></td><td class="num">1단계 진행 중</td><td class="num">4단계</td></tr>
-          <tr><td class="name">신재하</td><td class="num">2026-07-20</td><td><span class="badge b-warn">미완료</span></td><td>—</td><td>—</td><td>—</td></tr>
+          <tr><td>🦊 머니 코치 — 05 PLAY 세션 (대화 9줄 + 한 컷)</td><td style="text-align:right"><button class="btn sm primary">게시 승인</button> <button class="btn sm">반려</button></td></tr>
+          <tr><td>🦊 머니 코치 — 06 마무리 세션 (대화 7줄)</td><td style="text-align:right"><button class="btn sm primary">게시 승인</button> <button class="btn sm">반려</button></td></tr>
         </tbody>
       </table>
-      <div class="note">AI 인터뷰(자기소개·커리어 단계·직무)가 팀 배치의 재료예요. 기수 시작 전에 인터뷰를 안 끝낸 분은 배치에서 빠지니, 리마인드가 필요해요.</div>
-    </div>
-  </section>
-
-  <!-- ============ 3. 팀 배치 ============ -->
-  <section class="view" id="view-teams">
-    <div class="view-head">
-      <h2>팀 배치 — 3기 채널</h2>
-      <p>AI가 팀당 6명씩 자동 배치해요. 규칙은 <b>직무는 서로 다르게 · 커리어 단계는 비슷하게 · 상호 비공개.</b> 아래 직무 표시는 어드민에서만 보여요 — 유저 화면엔 절대 노출되지 않아요.</p>
-    </div>
-
-    <div class="card">
-      <h3>팀 25개 <span class="badge b-warn">결원 1</span> <span class="sub">카드를 누르면 상세를 봅니다</span></h3>
-      <div class="team-grid" id="teamGrid"></div>
-    </div>
-
-    <div class="card" id="teamDetail"></div>
-
-    <div class="card">
-      <h3>결원 · 재구성 <span class="badge b-tbd">미확정 §7</span></h3>
-      <p style="font-size:.85rem; line-height:1.7; color:var(--muted)">
-        07팀에서 1명 이탈(환불). 충원·통폐합 규칙은 미확정 — 통폐합은 배치 의도(직무 다르게·커리어 비슷하게)가 깨질 수 있어 신중히 결정할 사안입니다.
-        완강 후 코호트 재구성 시에는 기존 축에 <b>유사 목표(바운더리)</b> 기준이 더해집니다.
-      </p>
-      <div style="margin-top:10px"><button class="btn sm">충원 시뮬레이션 (준비 중)</button> <button class="btn sm">통폐합 시뮬레이션 (준비 중)</button></div>
+      <div class="note">게시를 승인하면 그 에피소드를 여는 유저에게 코치의 대화가 실시간처럼 흘러요. 반려하면 코치에게 다시 요청돼요.</div>
     </div>
   </section>
 
   <!-- ============ 4. 유저 ============ -->
   <section class="view" id="view-users">
     <div class="view-head">
-      <h2>유저 — 3기 채널</h2>
+      <h2>유저</h2>
       <p>모든 유저는 본명으로 활동해요(닉네임 없음). 행을 누르면 상세가 열려요 — 신뢰점수 내역·조개·차단 관계는 어드민에서만 보여요.</p>
     </div>
     <div class="card">
@@ -368,7 +338,7 @@ table{border-collapse:collapse;width:100%}
         <span class="sub">150명 중 표본 12명 표시 (프로토타입)</span>
       </h3>
       <table class="tbl">
-        <thead><tr><th>이름</th><th>팀</th><th>커리어 단계</th><th>직무 <span class="admin-only">어드민 전용</span></th><th>커리큘럼</th><th>신뢰점수</th><th>조개</th><th>상태</th></tr></thead>
+        <thead><tr><th>이름</th><th>광장 게이트</th><th>커리어 단계</th><th>직무 <span class="admin-only">어드민 전용</span></th><th>커리큘럼</th><th>신뢰점수</th><th>조개</th><th>상태</th></tr></thead>
         <tbody id="userRows"></tbody>
       </table>
     </div>
@@ -382,7 +352,7 @@ table{border-collapse:collapse;width:100%}
     </div>
 
     <div class="grid c4">
-      <div class="stat"><div class="label">채널 총 유통량</div><div class="value num shell-chip">11,240</div><div class="foot">3기 · 150명</div></div>
+      <div class="stat"><div class="label">채널 총 유통량</div><div class="value num shell-chip">11,240</div><div class="foot">활성 유저 150명</div></div>
       <div class="stat"><div class="label">이번 주 발행</div><div class="value num">+1,872</div><div class="foot">실행 82% · 도움 정산 11% · 리추얼 7%</div></div>
       <div class="stat"><div class="label">이번 주 소비</div><div class="value num">−318</div><div class="foot">코치 자유 대화 −241 · 도움 요청 −77</div></div>
       <div class="stat"><div class="label">잔액 0 유저</div><div class="value num">3<small>명</small></div><div class="foot">도움 요청 불가 상태 — 관찰 대상</div></div>
@@ -428,7 +398,7 @@ table{border-collapse:collapse;width:100%}
   <!-- ============ 6. 도움 게시판 ============ -->
   <section class="view" id="view-help">
     <div class="view-head">
-      <h2>도움 게시판 — 3기 광장</h2>
+      <h2>도움 게시판 — 광장</h2>
       <p>사람과 사람이 이어지는 유일한 공식 통로예요. 우체통으로 하루 종일 접수받아 개장(16시)에 한 번에 게시돼요. 성사된 대화는 글에 남아 사라지지 않아요.</p>
     </div>
 
@@ -478,7 +448,7 @@ table{border-collapse:collapse;width:100%}
     <div class="split">
       <div class="card">
         <h3>공지 발행</h3>
-        <div class="field"><label>제목</label><input type="text" placeholder="예: 이번 주 코어타임 안내"></div>
+        <div class="field"><label>제목</label><input type="text" placeholder="예: 이번 주 무대 라이브 안내"></div>
         <div class="field"><label>본문</label><textarea placeholder="공식 발행 장소는 광장 게시판입니다."></textarea></div>
         <div class="check"><input type="checkbox" checked disabled> 광장 공지 게시판에 발행 (공식 발행 장소 · 고정)</div>
         <div class="check"><input type="checkbox" checked disabled> 마이스페이스 우편함에 사본 발송 (고정)</div>
@@ -508,8 +478,8 @@ table{border-collapse:collapse;width:100%}
         <table class="tbl">
           <thead><tr><th>일시</th><th>제목</th><th>주체</th><th>상태</th></tr></thead>
           <tbody>
-            <tr><td class="num">오늘 20:00</td><td>3기 중간 점검 라이브</td><td>운영자</td><td><span class="badge b-ok">예고 노출 중</span></td></tr>
-            <tr><td class="num">07-23 20:00</td><td>완강자 사례 공유 (2기 초청)</td><td>운영자 + 승인 유저</td><td><span class="badge b-mute">예정</span></td></tr>
+            <tr><td class="num">오늘 20:00</td><td>중간 점검 라이브</td><td>운영자</td><td><span class="badge b-ok">예고 노출 중</span></td></tr>
+            <tr><td class="num">07-23 20:00</td><td>완강자 사례 공유</td><td>운영자 + 승인 유저</td><td><span class="badge b-mute">예정</span></td></tr>
           </tbody>
         </table>
         <div style="margin-top:10px; padding:10px 12px; border:1px solid var(--line); border-radius:8px; display:flex; align-items:center; gap:10px; font-size:.84rem">
@@ -524,11 +494,9 @@ table{border-collapse:collapse;width:100%}
         <table class="tbl">
           <thead><tr><th>항목</th><th>시각</th><th>비고</th></tr></thead>
           <tbody>
-            <tr><td>광장 개장</td><td class="num">매일 16:00 ~ 24:00</td><td><span class="badge b-ok">확정</span></td></tr>
+            <tr><td>광장 입장 조건</td><td class="num">강의 100% 완강</td><td><span class="badge b-ok">확정</span></td></tr>
             <tr><td>도움 요청 일괄 게시</td><td class="num">매일 16:00</td><td>우체통 접수분</td></tr>
-            <tr><td>코어타임</td><td class="num">21:00 (안)</td><td><span class="badge b-tbd">시각·주기·프로그램 미확정 §7</span></td></tr>
             <tr><td>알림 무음 시간</td><td class="num">00:00 ~ 08:00</td><td>아침에 일괄 발송</td></tr>
-            <tr><td>4기 시작 (팀 배치 + 광장 오픈)</td><td class="num">07-27 (예정)</td><td><span class="badge b-tbd">기수 주기 미확정 §7</span></td></tr>
           </tbody>
         </table>
       </div>
@@ -538,7 +506,7 @@ table{border-collapse:collapse;width:100%}
   <!-- ============ 8. 커리큘럼 · 완강 ============ -->
   <section class="view" id="view-curriculum">
     <div class="view-head">
-      <h2>커리큘럼 · 완강 — 3기</h2>
+      <h2>커리큘럼 · 완강</h2>
       <p>커리큘럼은 순서가 고정이에요: 바운더리 설정 → 숫자언어 → 고객언어 → 문제정의 → 전략 설정. <b>완강 기준은 산출물 5개 완성</b>이에요 — 시청률이 아니에요 (확정 2026-07-18).</p>
     </div>
 
@@ -556,7 +524,7 @@ table{border-collapse:collapse;width:100%}
       <div class="card">
         <h3>완강 현황</h3>
         <div class="grid c2" style="margin-bottom:0">
-          <div class="stat"><div class="label">3기 완강자 (산출물 5/5)</div><div class="value num">0<small>명 · 시작 2주차</small></div></div>
+          <div class="stat"><div class="label">완강자 — 광장 입장 가능</div><div class="value num">41<small>명</small></div></div>
           <div class="stat"><div class="label">완강 임박 (산출물 4/5)</div><div class="value num">9<small>명</small></div></div>
         </div>
         <div class="note"><b>판정 기준</b> — 영상을 다 봐도 산출물이 없으면 완강이 아니에요. 완강 후 모드(자기 일 중심)가 끝점 없이는 성립하지 않기 때문이에요. 완강하면 강의실은 다시보기 아카이브로 바뀌어요.</div>
@@ -594,87 +562,11 @@ function show(view){
 navBtns.forEach(b=>b.addEventListener('click', ()=>show(b.dataset.view)));
 document.querySelectorAll('[data-goto]').forEach(b=>b.addEventListener('click', ()=>show(b.dataset.goto)));
 
-/* ---------- 개장 타임라인 ---------- */
-function renderClock(){
-  const now = new Date();
-  const mins = now.getHours()*60 + now.getMinutes();
-  document.getElementById('tcNow').style.left = (mins/1440*100)+'%';
-  const open = now.getHours() >= 16;
-  const st = document.getElementById('tcStatus');
-  const dash = document.getElementById('dashPlaza');
-  if(open){
-    st.textContent = '개장 중 · 24시 마감'; st.classList.remove('closed');
-    if(dash){ dash.textContent='개장 중'; dash.className='badge b-ok'; }
-  }else{
-    const left = 16*60 - mins;
-    st.textContent = '개장 전 · '+Math.floor(left/60)+'시간 '+(left%60)+'분 후 개장'; st.classList.add('closed');
-    if(dash){ dash.textContent='개장 전'; dash.className='badge b-mute'; }
-  }
-}
-renderClock(); setInterval(renderClock, 30000);
-
-/* ---------- 팀 데이터 ---------- */
-const JOBS = ['마케터','개발자','디자이너','PM','데이터 분석가','영업'];
-const teams = Array.from({length:25}, (_,i)=>{
-  const n = i+1;
-  return {
-    id:n, name:String(n).padStart(2,'0')+'팀',
-    size: n===7 ? 5 : 6,
-    stage: 2 + (n%3),
-    activity: [92,81,77,88,64,90,58,73,85,79,91,68,74,82,87,60,93,71,78,84,66,89,75,80,86][i]
-  };
-});
-const teamGrid = document.getElementById('teamGrid');
-let selectedTeam = 7;
-function renderTeams(){
-  teamGrid.innerHTML = teams.map(t=>`
-    <div class="team-card ${t.size<6?'short':''} ${t.id===selectedTeam?'selected':''}" data-id="${t.id}">
-      <div class="t-name">${t.name} ${t.size<6?'<span class="badge b-warn">결원</span>':''}</div>
-      <div class="t-meta num">${t.size}/6명 · 커리어 ${t.stage}~${t.stage+1}단계<br>주간 활동 ${t.activity}%</div>
-    </div>`).join('');
-  teamGrid.querySelectorAll('.team-card').forEach(c=>c.addEventListener('click',()=>{
-    selectedTeam = +c.dataset.id; renderTeams(); renderTeamDetail();
-  }));
-}
-const detailMembers = {
-  7: [
-    {n:'박준호', job:'개발자', st:3, trust:81, note:'활동 상위'},
-    {n:'문가은', job:'디자이너', st:3, trust:74, note:''},
-    {n:'서도윤', job:'마케터', st:4, trust:69, note:''},
-    {n:'한지운', job:'PM', st:3, trust:77, note:''},
-    {n:'배수현', job:'데이터 분석가', st:4, trust:62, note:'최근 7일 미접속'},
-  ],
-  default: [
-    {n:'김이서', job:'마케터', st:3, trust:84, note:'완강 임박'},
-    {n:'정다인', job:'PM', st:3, trust:79, note:'완강 임박'},
-    {n:'최연우', job:'개발자', st:4, trust:71, note:''},
-    {n:'이하람', job:'데이터 분석가', st:3, trust:76, note:''},
-    {n:'오세진', job:'디자이너', st:4, trust:65, note:'3일 정체'},
-    {n:'강민서', job:'영업', st:3, trust:70, note:''},
-  ]
-};
-function renderTeamDetail(){
-  const t = teams.find(x=>x.id===selectedTeam);
-  const members = detailMembers[t.id] || detailMembers.default;
-  document.getElementById('teamDetail').innerHTML = `
-    <h3>${t.name} 상세 ${t.size<6?'<span class="badge b-warn">결원 1 — 이탈(환불) 07-14</span>':'<span class="badge b-ok">정상</span>'}
-      <span class="sub">배치 근거: 직무 6종 모두 다름 · 커리어 단계 ${t.stage}±1 · 상호 비공개 유지</span></h3>
-    <table class="tbl">
-      <thead><tr><th>이름</th><th>직무 <span class="admin-only">어드민 전용</span></th><th>커리어 단계</th><th>신뢰점수</th><th>비고</th></tr></thead>
-      <tbody>${members.map(m=>`
-        <tr><td class="name">${m.n}</td><td>${m.job}</td><td class="num">${m.st}단계</td><td class="num">${m.trust}</td>
-        <td>${m.note?'<span class="badge b-mute">'+m.note+'</span>':''}</td></tr>`).join('')}
-      </tbody>
-    </table>
-    <div class="note">유저 화면에는 직무·회사가 절대 노출되지 않아요(뼈대 정책 2). 예외는 도움 자리에서 본인이 직접 밝히는 경우뿐이에요.</div>`;
-}
-renderTeams(); renderTeamDetail();
-
 /* ---------- 유저 데이터 ---------- */
 const users = [
   {n:'김이서', team:'03팀', st:3, job:'마케터', cur:'4/5 전략', trust:84, shell:96, status:'활동', done:4,
    trustLog:[['도움 상호 평가 (좋았다 ×6)','+'],['바운더리 실행 31일 연속','+'],['학습 참여 — 문답 정답률 88%','+']],
-   block:'없음', memo:'도움 제공 6회 — 채널 상위. AI 소개문 갱신 제안 1건 대기.'},
+   block:'없음', memo:'도움 제공 6회 — 타운 상위. AI 소개문 갱신 제안 1건 대기.'},
   {n:'박준호', team:'07팀', st:3, job:'개발자', cur:'3/5 고객언어', trust:81, shell:128, status:'활동', done:3,
    trustLog:[['도움 상호 평가 (좋았다 ×4)','+'],['바운더리 실행 24일','+'],['학습 참여 양호','+']],
    block:'없음', memo:'오늘 무대 화면 공유 권한 요청 중.'},
@@ -694,22 +586,22 @@ const users = [
    trustLog:[['최근 3일 바운더리 미세팅','−']], block:'없음', memo:'완강 임박이나 3일 정체 — 코치 넛지 후보.'},
   {n:'배수현', team:'07팀', st:4, job:'데이터 분석가', cur:'2/5 숫자언어', trust:62, shell:12, status:'이탈 위험', done:2,
    trustLog:[['최근 7일 미접속','−']], block:'없음', memo:'조개 잔액 문의 1건. 프레즌스 응원 수신 0 — 관찰.'},
-  {n:'임태오', team:'4기 대기', st:3, job:'영업', cur:'1/5 진행 중', trust:50, shell:20, status:'솔로 모드', done:0,
-   trustLog:[['초기 상태','·']], block:'없음', memo:'4기 대기자 — 기수 시작 시 팀 배치.'},
+  {n:'임태오', team:'-', st:3, job:'영업', cur:'1/5 진행 중', trust:50, shell:20, status:'체험 중', done:0,
+   trustLog:[['초기 상태','·']], block:'없음', memo:'가입 직후 — 무료 체험 중(기능 2개 오픈).'},
   {n:'황보라', team:'02팀', st:2, job:'마케터', cur:'3/5 고객언어', trust:73, shell:67, status:'활동', done:3,
    trustLog:[['목표 100번 쓰기 연속 18일','+']], block:'없음', memo:''},
 ];
 const userRows = document.getElementById('userRows');
 function statusBadge(s){
   if(s==='활동') return '<span class="badge b-ok">활동</span>';
-  if(s==='솔로 모드') return '<span class="badge b-mute">솔로 모드</span>';
+  if(s==='체험 중') return '<span class="badge b-mute">체험 중</span>';
   if(s==='정체') return '<span class="badge b-tbd">정체</span>';
   return '<span class="badge b-warn">'+s+'</span>';
 }
 function renderUsers(filter=''){
   userRows.innerHTML = users.filter(u=>u.n.includes(filter)).map((u,i)=>`
     <tr class="clickable" data-i="${users.indexOf(u)}">
-      <td class="name">${u.n}</td><td>${u.team}</td><td class="num">${u.st}단계</td>
+      <td class="name">${u.n}</td><td>${u.done>=5?'<span class="badge b-ok">입장 가능</span>':'<span class="badge b-mute">잠김 '+u.done+'/5</span>'}</td><td class="num">${u.st}단계</td>
       <td>${u.job}</td><td class="num">${u.cur}</td><td class="num">${u.trust}</td>
       <td class="num shell-chip">${u.shell}</td><td>${statusBadge(u.status)}</td>
     </tr>`).join('');
@@ -725,7 +617,7 @@ function openUser(i){
   drawer.innerHTML = `
     <button class="d-close" id="dClose">✕</button>
     <h3>${u.n}</h3>
-    <div class="d-sub">${u.team} · 커리어 ${u.st}단계 · 직무 ${u.job} <span class="admin-only">어드민 전용</span></div>
+    <div class="d-sub">커리어 ${u.st}단계 · 직무 ${u.job} <span class="admin-only">어드민 전용</span> · ${u.done>=5?"⛲ 광장 입장 가능":"광장 잠김 "+u.done+"/5"}</div>
     <div class="d-section">
       <h4>핵심 지표</h4>
       <div class="kv"><span>신뢰점수</span><b class="num">${u.trust} <span class="badge b-tbd">산식 미확정 §7</span></b></div>

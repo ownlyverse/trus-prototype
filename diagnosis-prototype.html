@@ -95,7 +95,6 @@ const FLOW = [
   {type:'intro'},
   {type:'q', q:'지금 어떤 일을 하고 계세요?', h:'직함 말고, 요즘 하루의 대부분을 쓰는 일이면 돼요.', ph:'예: 마케팅 대행사에서 콘텐츠 만드는 일'},
   {type:'q', q:'요즘 가장 막막한 건 뭐예요?', h:'거창하지 않아도 괜찮아요.', ph:'한 문장이면 충분해요'},
-  {type:'chips', q:'혼자 하는 게 편해요, 같이 하는 게 좋아요?', h:'팀을 짜드릴 때 참고해요.', opts:['혼자가 편해요','같이가 좋아요','반반이에요']},
   {type:'q', q:'지금 마음을 한 단어로 말한다면?', h:'솔직할수록 좋아요.', ph:'예: 조급함'},
   {type:'report'},
   {type:'team'},
@@ -125,7 +124,7 @@ function render(){
 
   if(s.type==='q'){
     host.innerHTML = `<div class="card">
-      <div class="step-label">질문 ${cur} / 4</div>
+      <div class="step-label">질문 ${cur} / 3</div>
       <h1>${s.q}</h1>
       <p class="lede">${s.h}</p>
       <textarea class="q-input" id="qa" placeholder="${s.ph}"></textarea>
@@ -156,7 +155,7 @@ function render(){
   if(s.type==='report'){
     const work = answers[0] || '지금 하는 일';
     const stuck = answers[1] || '막막함';
-    const mood = answers[3] || '조급함';
+    const mood = answers[2] || '조급함';
     host.innerHTML = `<div class="card">
       <div class="step-label">진단 끝</div>
       <h1>눈앞에서, 성적표 한 장이 갈려요</h1>
