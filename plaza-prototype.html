@@ -178,7 +178,7 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
 <div class="scene" id="scene">
   <div class="world" id="world">
     <div class="grass"></div>
-    <span class="prop" style="left:1100px; top:800px; font-size:110px">⛲</span>
+    <img src="assets/fountain.png" alt="" class="prop bench-img" style="left:1100px; top:840px; width:220px">
     <img src="assets/bench.png" alt="" class="prop bench-img" style="left:470px; top:545px; width:88px">
     <img src="assets/bench.png" alt="" class="prop bench-img" style="left:1720px; top:545px; width:88px">
     <img src="assets/bench.png" alt="" class="prop bench-img" style="left:470px; top:1205px; width:88px">
@@ -309,7 +309,7 @@ const OBSTACLES = [
   {x:1674, y:509,  w:92, h:40},
   {x:424,  y:1169, w:92, h:40},
   {x:1674, y:1169, w:92, h:40},
-  {x:1052, y:756,  w:96, h:48},
+  {x:1010, y:760,  w:180, h:80},
 ];
 const blocked = (x, y) => OBSTACLES.some(o => x > o.x && x < o.x + o.w && y > o.y && y < o.y + o.h);
 const KEYMAP = {ArrowLeft:[-1,0], ArrowRight:[1,0], ArrowUp:[0,-1], ArrowDown:[0,1], a:[-1,0], d:[1,0], w:[0,-1], s:[0,1]};
