@@ -291,19 +291,30 @@ function say(el, text, dur=2600){
   setTimeout(()=>bb.classList.remove('show'), dur);
 }
 
-/* 나무 심기 — 맵 가장자리 둘레 */
+/* 나무 심기 — 여러 겹으로 우거진 숲 테두리 */
 (function plantTrees(){
   const spots = [];
-  for(let x = 60; x <= 2140; x += 165) spots.push([x + Math.random()*40 - 20, 150 + Math.random()*45]);
-  for(let x = 140; x <= 2100; x += 185) spots.push([x + Math.random()*40 - 20, 1398 + Math.random()*18]);
-  for(let y = 330; y <= 1250; y += 195){
-    spots.push([66 + Math.random()*34, y + Math.random()*30]);
-    spots.push([2126 + Math.random()*34, y + Math.random()*30]);
+  const jitter = (v, r) => v + Math.random()*r*2 - r;
+  /* 위쪽 3겹 */
+  for(let x = 20; x <= 2180; x += 105) spots.push([jitter(x,26), jitter(66,22)]);
+  for(let x = 75; x <= 2160; x += 112) spots.push([jitter(x,26), jitter(140,24)]);
+  for(let x = 30; x <= 2180; x += 120) spots.push([jitter(x,28), jitter(212,24)]);
+  /* 아래쪽 2겹 */
+  for(let x = 60; x <= 2160; x += 112) spots.push([jitter(x,26), jitter(1345,20)]);
+  for(let x = 115; x <= 2130; x += 118) spots.push([jitter(x,26), jitter(1408,16)]);
+  /* 좌우 2겹 */
+  for(let y = 300; y <= 1280; y += 118){
+    spots.push([jitter(52,26), jitter(y,30)]);
+    spots.push([jitter(128,26), jitter(y+58,30)]);
+    spots.push([jitter(2148,26), jitter(y,30)]);
+    spots.push([jitter(2072,26), jitter(y+58,30)]);
   }
+  /* y 순서로 심어 자연스러운 겹침 */
+  spots.sort((a,b)=>a[1]-b[1]);
   spots.forEach(([x, y])=>{
     const img = document.createElement('img');
     img.src = 'assets/tree.png'; img.alt = ''; img.className = 'prop tree';
-    img.style.width = (96 + Math.random()*46) + 'px';
+    img.style.width = (92 + Math.random()*52) + 'px';
     img.style.left = x + 'px'; img.style.top = y + 'px';
     world.appendChild(img);
   });
