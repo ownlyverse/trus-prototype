@@ -227,7 +227,7 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
   <div class="awning"></div>
   <div class="bg-floor"></div>
   <div class="bg-grass"></div>
-  <div class="neon-sign">⛲ 3기 타운 — 광장 · 접속 41명</div>
+  <div class="neon-sign">⛲ 타운 — 광장 · 접속 41명</div>
 
   <!-- 오브젝트 6종 · 도움 게시판이 중심 구조물 -->
   <div class="obj center" data-obj="help"     style="left:50%; top:33%"><div class="art big">🪧</div><div class="tag">도움 게시판 <small>새 글 9</small></div></div>
@@ -252,12 +252,15 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
   </div>
 </div>
 
-<!-- 개장 전 게이트 -->
+<!-- 완강 게이트 -->
 <div class="gate" id="gate">
   <div class="g-box">
-    <h2>광장은 오후 4시에 열립니다</h2>
-    <p>광장은 오후 4시부터 밤 12시까지 열려요.<br>열리는 시간이 정해져 있어야, 그 시간에 모이게 되니까요.<br><span id="gateLeft"></span></p>
-    <button class="pbtn" id="gateEnter">프로토타입이니 그냥 들어가기</button>
+    <h2>광장은 완강한 사람들의 공간이에요</h2>
+    <p>강의의 모든 에피소드를 100% 마치면 문이 열려요.<br>여기 있는 사람들은 전부 그 여정을 끝낸 사람들이에요.</p>
+    <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap">
+      <button class="pbtn" onclick="location.href='lecture-prototype.html'">📺 강의 들으러 가기</button>
+      <button class="pbtn" id="gateEnter" style="background:#8B95A1; border-color:#6B7684; box-shadow:0 4px 0 #6B7684">프로토타입이니 그냥 들어가기</button>
+    </div>
   </div>
 </div>
 
@@ -294,12 +297,9 @@ document.querySelectorAll('[data-spr]').forEach(el=>{
   el.querySelector('.spr').style.boxShadow = shadows.join(',');
 });
 
-/* ================= 개장 게이트 ================= */
+/* ================= 완강 게이트 — 100% 완강한 사람만 ================= */
 (function(){
-  const h = new Date().getHours();
-  if(h < 16){
-    const mins = 16*60 - (h*60 + new Date().getMinutes());
-    document.getElementById('gateLeft').textContent = '개장까지 ' + Math.floor(mins/60) + '시간 ' + (mins%60) + '분';
+  if(localStorage.getItem('trus_lecture_complete') !== '1'){
     document.getElementById('gate').classList.add('show');
   }
 })();

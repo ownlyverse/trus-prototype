@@ -76,6 +76,15 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
 .trace .peer.blur{filter:blur(5px); user-select:none}
 .trace svg{display:block; margin-top:4px}
 
+/* 코치 실시간 대화 */
+.cochat{margin-top:14px; background:#17131F; border:3px solid #0B0912; border-radius:6px; padding:10px 12px; max-height:132px; overflow-y:auto; display:flex; flex-direction:column; gap:7px}
+.cochat:empty{display:none}
+.co-msg{display:flex; gap:8px; align-items:flex-start; font-size:.78rem; color:#D8CFE8; line-height:1.5; animation:coin .3s ease}
+@keyframes coin{from{opacity:0; transform:translateY(6px)}to{opacity:1; transform:none}}
+.co-msg .co-av{flex-shrink:0; font-size:15px}
+.co-msg .co-who{display:block; font-size:.64rem; font-weight:700; color:#FF9DBE; margin-bottom:1px}
+.co-msg svg{background:#fff; border-radius:4px; padding:2px; margin-top:2px}
+
 /* 게이트 통과 응원 */
 .cheer{position:fixed; z-index:95; font-size:.85rem; font-weight:700; background:#fff; border:2px solid #17131F; border-radius:4px; padding:7px 13px; box-shadow:3px 3px 0 rgba(0,0,0,.35); animation:cheerup 2.2s ease forwards; pointer-events:none}
 @keyframes cheerup{0%{opacity:0; transform:translateY(14px)}15%{opacity:1; transform:none}80%{opacity:1}100%{opacity:0; transform:translateY(-22px)}}
@@ -202,32 +211,75 @@ let cur = 0;
 const host = document.getElementById('cardHost');
 const rail = document.getElementById('rail');
 
-/* 함께 듣는 친구들 — 각자 자기 속도로, 같은 수업 안에 */
-const FRIENDS = [
-  {n:'정다인', c:'#E86CA8', step:3},
-  {n:'박준호', c:'#3E9E58', step:1},
-  {n:'최연우', c:'#5B8FD9', step:6},
+/* 코치 3명 — 이 강의를 먼저 해본 최고의 코치들과 같이 들어요 */
+const COACHES = [
+  {n:'바운더리 코치', av:'🦉', c:'#E86CA8'},
+  {n:'기록 코치', av:'🐢', c:'#46D5B2'},
+  {n:'머니 코치', av:'🦊', c:'#F2C14E'},
 ];
 function renderClassmates(){
   const el = document.getElementById('classmates');
-  el.innerHTML = `<span class="cm-live"><span class="dot"></span>함께 듣는 중 ${FRIENDS.filter(f=>f.step<6).length + 1}명</span>` +
-    FRIENDS.map(f=>{
-      const where = f.step >= 6 ? '✓ 완주' : STEPS[f.step].label.replace(' · ', ' ');
-      return `<span class="cm ${f.step>=6?'done':''}"><span class="av" style="background:${f.c}"></span><b>${f.n}</b>${where}</span>`;
-    }).join('');
+  el.innerHTML = `<span class="cm-live"><span class="dot"></span>코치 3명과 같이 듣는 중</span>` +
+    COACHES.map(f=>`<span class="cm"><span class="av" style="background:${f.c}">${f.av}</span><b>${f.n}</b>같은 화면</span>`).join('');
+}
+
+/* 코치들의 실시간 대화 — 먼저 들은 기록이 지금처럼 흘러요 */
+const COACH_TALK = {
+  video:[
+    ['🦉','바운더리 코치','저는 이 영상을 세 번 봤는데, 볼 때마다 멈추는 데가 달라요.'],
+    ['🐢','기록 코치','받아 적을 준비 완료. 오늘은 어떤 문장이 남을까요?'],
+  ],
+  draw:[
+    ['🦊','머니 코치','저는 오늘 마음을 주황색으로 칠했어요.'],
+    ['DRAW','🦊 머니 코치의 그림','#F2C14E','M6 26 C 20 8, 36 30, 52 10 S 86 28, 114 12'],
+    ['🐢','기록 코치','선이 삐뚤어도 괜찮아요. 저도 그래요.'],
+    ['DRAW','🐢 기록 코치의 그림','#46D5B2','M6 14 C 24 30, 40 6, 58 24 S 92 10, 114 22'],
+  ],
+  read:[
+    ['🦉','바운더리 코치','두 번째 문단, 저는 밑줄을 안 그을 수가 없었어요.'],
+    ['🦊','머니 코치','키 씬이라는 말, 처음엔 저도 낯설었어요.'],
+  ],
+  speak:[
+    ['🐢','기록 코치','소리 내어 말할 때 제일 부끄러웠는데, 제일 오래 남았어요.'],
+    ['🦉','바운더리 코치','작게라도 좋아요. 입 밖으로 꺼내는 게 중요해요.'],
+  ],
+  play:[
+    ['🦉','바운더리 코치','제 한 컷도 아래에 있어요 — 먼저 쓰고 열어보세요.'],
+    ['🦊','머니 코치','완벽한 문장 말고, 솔직한 문장이요.'],
+  ],
+  write:[
+    ['🦊','머니 코치','마지막 한 줄이 내일을 바꿔요. 저도 그렇게 시작했어요.'],
+    ['🐢','기록 코치','내일 아침의 나에게 보내는 쪽지라고 생각해요.'],
+  ],
+};
+let talkTimer = null;
+function streamTalk(type){
+  clearInterval(talkTimer);
+  const box = document.getElementById('cochat');
+  if(!box || !COACH_TALK[type]) return;
+  const lines = COACH_TALK[type];
+  let i = 0;
+  const push = ()=>{
+    if(i >= lines.length){ clearInterval(talkTimer); return; }
+    const L = lines[i++];
+    const d = document.createElement('div');
+    d.className = 'co-msg';
+    if(L[0] === 'DRAW'){
+      d.innerHTML = `<span class="co-who">${L[1]}</span><svg width="120" height="34" viewBox="0 0 120 34"><path d="${L[3]}" fill="none" stroke="${L[2]}" stroke-width="5" stroke-linecap="round"/></svg>`;
+    }else{
+      d.innerHTML = `<span class="co-av">${L[0]}</span><span><span class="co-who">${L[1]}</span>${L[2]}</span>`;
+    }
+    box.appendChild(d); box.scrollTop = box.scrollHeight;
+  };
+  push();
+  talkTimer = setInterval(push, 3800);
 }
 /* 흔적 — 단계마다 먼저 지나간 친구가 남긴 것 */
 const TRACES = {
-  video: `<div class="trace"><div class="t-label">함께 보는 중</div><p>👀 박준호도 지금 이 영상을 보는 중이에요 — 재생 위치가 나란히 흘러가요.</p></div>`,
-  draw:  `<div class="trace"><div class="t-label">정다인의 마음 그림</div>
-          <svg width="120" height="34" viewBox="0 0 120 34"><path d="M6 26 C 22 4, 38 30, 54 12 S 88 26, 114 8" fill="none" stroke="#E86CA8" stroke-width="5" stroke-linecap="round"/></svg>
-          <p>먼저 지나간 친구가 남긴 흔적이에요.</p></div>`,
-  speak: `<div class="trace"><div class="t-label">여기서 들린 목소리</div><p>🎙 32분 전, 정다인이 여기서 소리 내어 말하고 갔어요. 혼자 해도 혼자가 아니에요.</p></div>`,
-  play:  `<div class="trace"><div class="t-label">박준호의 한 컷 — 내가 쓰면 열려요</div><p class="peer blur">"3개월 뒤, 첫 유료 고객 10명과 인터뷰하는 날."</p><p style="margin-top:6px; font-size:.72rem">받고 싶다면, 먼저 내 것을 내어놓아야 해요.</p></div>`,
-  write: `<div class="trace"><div class="t-label">오늘의 마무리들</div><p>✍️ 오늘 팀원 3명이 여기에 마무리를 남기고 갔어요.</p></div>`,
+  play:  `<div class="trace"><div class="t-label">🦉 바운더리 코치의 한 컷 — 내가 쓰면 열려요</div><p class="peer blur">"3개월 뒤, 첫 유료 고객 10명과 인터뷰하는 날."</p><p style="margin-top:6px; font-size:.72rem">받고 싶다면, 먼저 내 것을 내어놓아야 해요.</p></div>`,
 };
 function cheer(){
-  const names = ['정다인 👏','박준호 🔥','최연우 👍'];
+  const names = ['바운더리 코치 👏','기록 코치 🔥','머니 코치 👍'];
   const d = document.createElement('div');
   d.className = 'cheer';
   d.textContent = names[Math.floor(Math.random()*names.length)];
@@ -254,7 +306,7 @@ function openGate(msg='열렸어요!'){
   h.textContent = msg; h.classList.add('ready');
   document.getElementById('btnNext').disabled = false;
   const peer = document.querySelector('.trace .peer.blur');
-  if(peer){ peer.classList.remove('blur'); toast('내가 썼으니, 박준호의 한 컷이 열렸어요'); }
+  if(peer){ peer.classList.remove('blur'); toast('내가 썼으니, 코치의 한 컷이 열렸어요'); }
   cheer();
 }
 
@@ -272,7 +324,7 @@ function render(){
       <button class="sel" style="background:#F26D9C"></button><button style="background:#3182F6"></button>
       <button style="background:#46D5B2"></button><button style="background:#F2C14E"></button><button style="background:#2B2B33"></button>
     </div>`;
-  if(s.type==='read') body = `<div class="reader" id="reader">${s.paras.map((p,i)=>`<p class="sent ${i===1?'friend-ul':''}" data-i="${i}">${p}${i===1?'<span class="ful">🖍 정다인·박준호도 여기 밑줄</span>':''}</p>`).join('')}<p style="color:#B0A793">— 여기까지예요.</p></div>`;
+  if(s.type==='read') body = `<div class="reader" id="reader">${s.paras.map((p,i)=>`<p class="sent ${i===1?'friend-ul':''}" data-i="${i}">${p}${i===1?'<span class="ful">🖍 바운더리·머니 코치도 여기 밑줄</span>':''}</p>`).join('')}<p style="color:#B0A793">— 여기까지예요.</p></div>`;
   if(s.type==='speak') body = `
     <div class="say"><div class="line">${s.say}</div>
     <button class="holdbtn" id="hold"><span>🎙 꾹 누르고 말하기</span><div class="fill" id="holdFill"></div></button></div>`;
@@ -282,8 +334,9 @@ function render(){
 
   host.innerHTML = `<div class="card">
     <div class="step-label">${s.label}</div><h1>${s.title}</h1><p class="lede">${s.lede}</p>
-    ${body}${TRACES[s.type] || ''}${gateHTML(gateHint(s))}</div>`;
+    ${body}${TRACES[s.type] || ''}<div class="cochat" id="cochat"></div>${gateHTML(gateHint(s))}</div>`;
   renderClassmates();
+  streamTalk(s.type);
   bind(s);
   document.getElementById('btnNext').addEventListener('click', ()=>{ cur++; render(); window.scrollTo(0,0); });
 }
@@ -354,6 +407,8 @@ function bind(s){
 }
 
 function renderDone(){
+  clearInterval(talkTimer);
+  localStorage.setItem('trus_lecture_complete','1');
   renderRail();
   host.innerHTML = `<div class="card done-wrap">
     <div class="done-orb" id="dorb"><i></i><span class="emo">🎓</span></div>
@@ -362,7 +417,12 @@ function renderDone(){
     <p class="sub">다섯 조각이 모두 채워져 나만의 일의 프레임이 됐어요.<br>내일부터는 자기 일 중심 모드 — 강의실은 다시보기가 돼요.</p>
     <div style="margin:0 0 16px; padding:12px 16px; border:3px solid #17171C; border-radius:6px; background:#FBE4EE; font-size:.85rem; font-weight:700; color:#8A2D55; box-shadow:3px 3px 0 rgba(0,0,0,.15)">
       📦 오프라인 책 『일의 교과서』가 집으로 출발했어요<br><span style="font-weight:500; font-size:.76rem">여정을 끝낸 사람에게만 오는 졸업장이에요</span></div>
-    <button class="pbtn" onclick="location.href='myspace-prototype.html'">🏠 마이스페이스로 — <b>◗ +1</b></button>
+    <div style="margin:0 0 16px; padding:12px 16px; border:3px solid #17171C; border-radius:6px; background:#E7F6EE; font-size:.85rem; font-weight:700; color:#1F5D3A; box-shadow:3px 3px 0 rgba(0,0,0,.15)">
+      ⛲ 광장 문이 열렸어요!<br><span style="font-weight:500; font-size:.76rem">광장은 100% 완강한 사람들만 들어갈 수 있는 공간이에요</span></div>
+    <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap">
+      <button class="pbtn" onclick="location.href='plaza-prototype.html'">⛲ 광장 입장하기</button>
+      <button class="pbtn" style="background:#8B95A1; border-color:#6B7684; box-shadow:0 4px 0 #6B7684" onclick="location.href='myspace-prototype.html'">🏠 마이스페이스로</button>
+    </div>
   </div>`;
   setTimeout(()=>document.getElementById('dorb').classList.add('fill'), 100);
   toast('PLAY 산출물이 워크툴 책상에 후보로 내려갔어요 ◗ +1');
