@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TRUS — 레트로 에디토리얼 컨셉 예시</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Nanum+Gothic+Coding:wght@400;700&display=swap');
+:root{
+  --tan:#D9CFBB; --paper:#F2EAD8; --card:#F7F1E1;
+  --ink:#26201A; --soft:#6B6152; --line:#26201A;
+  --yellow:#F2CE4B; --orange:#E8622C; --orange-d:#C94F1F;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:'Nanum Gothic Coding','Pretendard Variable',Pretendard,monospace;
+  background:var(--tan); color:var(--ink); letter-spacing:-0.01em; word-break:keep-all;
+  padding:40px 24px 80px;
+}
+.head{max-width:1240px; margin:0 auto 26px}
+.head h1{font-size:1.4rem; font-weight:700; letter-spacing:-0.02em}
+.head p{font-size:.82rem; color:var(--soft); margin-top:6px; line-height:1.7}
+.head a{color:var(--orange)}
+
+.frames{max-width:1240px; margin:0 auto; display:grid; grid-template-columns:1.7fr 1fr 1fr; gap:20px; align-items:start}
+@media(max-width:1050px){.frames{grid-template-columns:1fr}}
+.frame{background:var(--paper); border-radius:22px; padding:18px; box-shadow:0 14px 40px rgba(60,48,30,.18)}
+.frame .f-label{font-size:.68rem; font-weight:700; color:var(--soft); margin-bottom:12px; letter-spacing:.08em}
+
+.screen{background:var(--card); border:1.5px solid var(--line); border-radius:10px; overflow:hidden}
+.hairline{border-bottom:1.5px solid var(--line)}
+
+/* ── A. 데스크탑 강의실 (책 스프레드 + 플레이어) ── */
+.desk{display:grid; grid-template-columns:44px 1fr}
+.rail{border-right:1.5px solid var(--line); display:flex; flex-direction:column; align-items:center; gap:14px; padding:12px 0; font-size:14px}
+.rail span{opacity:.75; cursor:default}
+.rail .on{opacity:1; color:var(--orange)}
+.dmain{min-width:0}
+.dtop{display:flex; align-items:center; gap:10px; padding:9px 12px}
+.search{flex:1; background:var(--yellow); border:1.5px solid var(--line); border-radius:4px; font-size:.68rem; padding:7px 10px; color:#4A3F1E; white-space:nowrap; overflow:hidden}
+.who{display:flex; align-items:center; gap:8px; border:1.5px solid var(--line); border-radius:4px; padding:3px 9px 3px 3px; background:var(--paper)}
+.who img{width:24px; height:24px; object-fit:cover; object-position:top; border-radius:3px; border:1px solid var(--line); background:var(--yellow)}
+.who b{font-size:.64rem; display:block}
+.who small{font-size:.54rem; color:var(--soft)}
+.book{display:grid; grid-template-columns:1fr 1fr; gap:0; padding:18px 20px 14px; position:relative}
+.book .col{padding:0 14px; font-size:.6rem; line-height:1.95; color:#3A3226}
+.book .col+.col{border-left:1px solid rgba(38,32,26,.25)}
+.book h3{font-size:.74rem; font-weight:700; margin-bottom:10px; line-height:1.5}
+.book .pageno{position:absolute; bottom:2px; font-size:.54rem; color:var(--soft)}
+.book .pageno.l{left:34px} .book .pageno.r{right:34px}
+.hl-y{background:linear-gradient(transparent 30%, var(--yellow) 30%)}
+.tools{position:absolute; right:8px; bottom:40px; display:flex; flex-direction:column; gap:6px}
+.tools i{font-style:normal; width:26px; height:26px; border:1.5px solid var(--line); border-radius:4px; display:flex; align-items:center; justify-content:center; font-size:.68rem; background:var(--paper)}
+.tools i.y{background:var(--yellow)}
+.player{display:flex; align-items:center; gap:10px; background:var(--orange); border-top:1.5px solid var(--line); padding:8px 12px; color:#FFF3E8}
+.player .cover{width:26px; height:26px; border:1.5px solid var(--line); border-radius:3px; background:var(--yellow); display:flex; align-items:center; justify-content:center; font-size:13px}
+.player b{font-size:.62rem; display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.player small{font-size:.52rem; opacity:.85}
+.player .grow{flex:1; min-width:0}
+.player .ctl{display:flex; align-items:center; gap:8px; font-size:.7rem; flex-shrink:0}
+.player .bar{width:90px; height:3px; background:rgba(255,243,232,.4); border-radius:2px; position:relative}
+.player .bar i{position:absolute; left:0; top:0; bottom:0; width:55%; background:#FFF3E8; border-radius:2px}
+
+/* ── B·C. 모바일 프레임 ── */
+.phone{max-width:300px; margin:0 auto}
+.statusbar{display:flex; justify-content:space-between; font-size:.56rem; padding:7px 12px 5px; color:var(--soft)}
+.mhead{background:var(--yellow); border-top:1.5px solid var(--line); border-bottom:1.5px solid var(--line); padding:12px 14px}
+.mhead h2{font-size:.95rem; font-weight:700}
+.mhead .msearch{margin-top:9px; background:var(--card); border:1.5px solid var(--line); border-radius:4px; font-size:.62rem; padding:6px 9px; color:var(--soft)}
+.mtabs{display:flex; gap:5px; padding:10px 12px 0}
+.mtabs span{font-size:.56rem; font-weight:700; border:1.5px solid var(--line); border-radius:3px; padding:3px 8px; background:var(--paper)}
+.mtabs span.on{background:var(--orange); color:#FFF3E8}
+.mlist{padding:6px 14px 14px}
+.mrow{display:flex; align-items:center; gap:9px; padding:11px 2px; border-bottom:1px solid rgba(38,32,26,.5); font-size:.66rem}
+.mrow .mi{font-size:.8rem; width:18px; text-align:center}
+.mrow .chev{margin-left:auto; color:var(--soft)}
+.mrow.dim{color:var(--soft)}
+.savecard{border:1.5px solid var(--line); border-radius:6px; background:var(--paper); padding:10px 12px; margin:10px 0}
+.savecard .sc-top{display:flex; gap:9px}
+.savecard .cover{width:34px; height:46px; border:1.5px solid var(--line); border-radius:3px; background:var(--yellow); display:flex; align-items:center; justify-content:center; font-size:15px; flex-shrink:0}
+.savecard b{font-size:.66rem; display:block}
+.savecard small{font-size:.54rem; color:var(--soft); display:block; margin-top:2px; line-height:1.6}
+.obtn{display:block; width:100%; text-align:center; background:var(--orange); color:#FFF3E8; border:1.5px solid var(--line); border-radius:4px; font-size:.64rem; font-weight:700; padding:8px; margin-top:9px}
+.obtn.ghost{background:var(--paper); color:var(--ink)}
+.miniplayer{display:flex; align-items:center; gap:8px; background:var(--orange); border-top:1.5px solid var(--line); padding:7px 11px; color:#FFF3E8; font-size:.6rem}
+.mtabbar{display:flex; border-top:1.5px solid var(--line); background:var(--card)}
+.mtabbar span{flex:1; text-align:center; font-size:.62rem; padding:8px 0; color:var(--soft)}
+.mtabbar span.on{color:var(--orange); font-weight:700}
+
+/* C. 마이스페이스 프로필 */
+.profile{display:flex; align-items:center; gap:11px; padding:13px 14px}
+.profile img{width:44px; height:64px; object-fit:contain; image-rendering:auto}
+.profile b{font-size:.78rem; display:block}
+.profile small{font-size:.56rem; color:var(--soft); display:block; margin-top:3px; letter-spacing:.04em}
+.stat-line{display:flex; gap:6px; padding:0 14px 11px}
+.stat-line span{font-size:.56rem; border:1.5px solid var(--line); border-radius:3px; padding:3px 8px; background:var(--paper)}
+.stat-line span.y{background:var(--yellow)}
+.check{font-family:inherit}
+
+/* 캐릭터 비교 */
+.charrow{max-width:1240px; margin:26px auto 0; background:var(--paper); border-radius:22px; padding:20px 24px; box-shadow:0 14px 40px rgba(60,48,30,.18); display:flex; gap:26px; align-items:center; flex-wrap:wrap}
+.charrow .c-item{text-align:center}
+.charrow img{height:110px; image-rendering:pixelated}
+.charrow .c-item p{font-size:.62rem; color:var(--soft); margin-top:8px}
+.charrow .note{flex:1; min-width:220px; font-size:.72rem; line-height:1.8; color:#3A3226}
+.charrow .note b{color:var(--orange-d)}
+</style>
+</head>
+<body>
+
+<div class="head">
+  <h1>TRUS — 레트로 에디토리얼 컨셉 예시</h1>
+  <p>크림 종이 · 머스타드 옐로 · 오렌지 · 타자기 서체 무드로 옮겼을 때의 세 화면 시안이에요. 실동작 목업이 아니라 룩앤필 확인용! · <a href="index.html">← 전체 화면 목록</a></p>
+</div>
+
+<div class="frames">
+
+  <!-- A. 데스크탑 — 강의실이 '책'이 되는 화면 -->
+  <div class="frame">
+    <div class="f-label">A — 강의실 · 일의 교과서를 '읽으면서 듣는' 화면</div>
+    <div class="screen desk">
+      <div class="rail">
+        <span style="color:var(--orange)">🔥</span><span class="on">🏠</span><span>📖</span><span>🔖</span><span>💬</span>
+        <span style="margin-top:auto">⚙️</span><span>↪</span>
+      </div>
+      <div class="dmain">
+        <div class="dtop hairline">
+          <div class="search">🔍 제목, 저자, 개념, 질문 검색</div>
+          <div class="who"><img src="assets/char-retro.png" alt=""><span><b>김이서</b><small>Learner · ◗96</small></span></div>
+          <span style="font-size:.8rem">🔔</span>
+        </div>
+        <div class="book">
+          <div class="col">
+            <h3>3장. 고객언어 —<br>끝점에 반드시 있어야 하는 말</h3>
+            <p>숫자만으로는 도착지가 완성되지 않는다. 월 구독 300이라는 숫자 옆에는, 그 숫자를 만들어 줄 사람의 문장이 있어야 한다. 우리는 그것을 고객언어라고 부른다.</p>
+            <p style="margin-top:8px">고객언어는 내가 지어내는 말이 아니다. <span class="hl-y">고객이 이미 쓰고 있는 말 중에서 줍는 말이다.</span> 인터뷰에서, 후기에서, 지나가는 불평에서. "혼자서도 굴러가는 팀이면 좋겠어요" — 이 한 문장이 광고 카피 열 줄보다 정확하다.</p>
+          </div>
+          <div class="col">
+            <p>BEFORE는 문제의 말이고, AFTER는 고객언어다. 고객은 언제나 BEFORE의 언어로 찾아와서 AFTER의 언어로 남는다. 그 사이를 잇는 것이 우리의 일이다.</p>
+            <p style="margin-top:8px">고객언어 없이 일하면 방향을 잃는다. 숫자는 올라가는데 마음이 떠나는 일, 우리 모두 겪어 봤다. 그래서 끝점에는 두 언어가 함께 있어야 한다 — 숫자언어, 그리고 고객언어.</p>
+            <p style="margin-top:8px; color:var(--soft)">다음 장에서는 이 문장을 줍는 법을 연습한다. PLAY 워크시트가 이어진다.</p>
+          </div>
+          <span class="pageno l">64</span><span class="pageno r">65</span>
+          <div class="tools"><i>▷</i><i>🖍</i><i class="y">T</i></div>
+        </div>
+        <div class="player">
+          <span class="cover">📕</span>
+          <span class="grow"><b>일의 교과서 — 3장 고객언어</b><small>윤소정 · 코치 3명과 같이 듣는 중</small></span>
+          <span class="ctl">2x ◁ ⏸ ▷ <span class="bar"><i></i></span> -12:40</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- B. 모바일 — 서재/저장 -->
+  <div class="frame">
+    <div class="f-label">B — 모바일 · 나의 서재</div>
+    <div class="screen phone">
+      <div class="statusbar"><span>9:41</span><span>●●● ᯤ ▮</span></div>
+      <div class="mhead"><h2>서재</h2><div class="msearch">🔍 강의 · 밑줄 · 메모에서 검색</div></div>
+      <div class="mtabs"><span class="on">강의</span><span>밑줄</span><span>메모</span><span>기록</span></div>
+      <div class="mlist">
+        <div class="savecard">
+          <div class="sc-top"><span class="cover">📕</span>
+            <span><b>일의 교과서</b><small>윤소정 · 4/5장 진행 중<br>남은 것 — 「3개월 전략」 한 장</small></span></div>
+          <a class="obtn">이어서 듣기 — 3장 고객언어</a>
+        </div>
+        <div class="savecard">
+          <div class="sc-top"><span class="cover">✏️</span>
+            <span><b>내 밑줄 24개</b><small>"고객이 이미 쓰고 있는 말 중에서 줍는 말이다" 외 23개 · 코치들과 겹친 밑줄 6개</small></span></div>
+          <a class="obtn ghost">밑줄 모아 보기</a>
+        </div>
+      </div>
+      <div class="miniplayer"><span>▶</span><span style="flex:1">고객언어 · 코치와 같이 듣는 중</span><span>-12:40</span></div>
+      <div class="mtabbar"><span>홈</span><span class="on">서재</span><span>광장</span><span>나</span></div>
+    </div>
+  </div>
+
+  <!-- C. 모바일 — 마이스페이스 리스트 -->
+  <div class="frame">
+    <div class="f-label">C — 모바일 · 마이스페이스</div>
+    <div class="screen phone">
+      <div class="statusbar"><span>9:41</span><span>●●● ᯤ ▮</span></div>
+      <div class="profile hairline">
+        <img src="assets/char-retro.png" alt="">
+        <span><b>김이서</b><small>STORY SEEKER · 3일째 연속 접속</small></span>
+      </div>
+      <div class="stat-line"><span class="y">◗ 조개 96</span><span>★ 신뢰 84</span><span>🌳 Lv.3</span></div>
+      <div class="mlist" style="padding-top:0">
+        <div class="mrow"><span class="mi check">☑</span>오늘의 바운더리 <b style="margin-left:4px">2/3</b><span class="chev">›</span></div>
+        <div class="mrow"><span class="mi">✍️</span>목표 100번 쓰기 — 34회<span class="chev">›</span></div>
+        <div class="mrow"><span class="mi">📔</span>오늘 일기 — 아직<span class="chev">›</span></div>
+        <div class="mrow"><span class="mi">📮</span>우체통 — 새 소식 1<span class="chev">›</span></div>
+        <div class="mrow dim"><span class="mi">⛲</span>광장 — 완강하면 열려요<span class="chev">🔒</span></div>
+        <a class="obtn" style="margin-top:14px">저녁 마무리하기 — 회고 쓰고 ◗ +1</a>
+      </div>
+      <div class="mtabbar"><span>홈</span><span>서재</span><span>광장</span><span class="on">나</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- 캐릭터 전환 -->
+<div class="charrow">
+  <div class="c-item"><img src="assets/char1.png" alt=""><p>지금 — 게임 픽셀</p></div>
+  <div class="c-item"><img src="assets/char-retro.png" alt="" style="image-rendering:auto"><p>레트로 — 잉크 3톤</p></div>
+  <div class="note"><b>캐릭터 전환</b> — 같은 캐릭터를 잉크·브라운·크림 3톤으로 뽑아 종이에 인쇄된 삽화처럼 보이게 했어요. 프로필 아바타(A 우상단), 마이스페이스 프로필(C)에 들어간 모습이 위 예시에 있습니다. 이 방향이 맞으면 전 화면의 캐릭터·NPC를 이 톤으로 통일할 수 있어요.</div>
+</div>
+
+</body>
+</html>
