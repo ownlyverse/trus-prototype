@@ -58,8 +58,17 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
   background:#17131F; border:3px solid #F26D9C; border-radius:8px;
   text-shadow:0 0 8px #F26D9C, 0 0 18px #F26D9C; box-shadow:0 0 16px rgba(242,109,156,.5), 0 4px 0 rgba(0,0,0,.5);
 }
-.bg-floor{position:absolute; left:0; right:0; top:620px; bottom:0;
-  background:repeating-conic-gradient(#D9A47C 0% 25%, #E5B58E 0% 50%) 0 0/52px 52px}
+.bg-floor{position:absolute; left:0; right:0; top:620px; bottom:0; background-color:#DEA981;
+  background-image:
+    repeating-linear-gradient(90deg, rgba(122,74,44,.30) 0 4px, transparent 4px 104px),
+    repeating-linear-gradient(0deg, rgba(122,74,44,.30) 0 4px, transparent 4px 104px),
+    repeating-conic-gradient(rgba(255,244,224,.10) 0% 25%, rgba(94,56,30,.07) 0% 50%);
+  background-size:104px 104px, 104px 104px, 208px 208px}
+/* 분수 광장 문양 — 중앙 원형 석재 */
+.plaza-ring{position:absolute; left:1100px; top:870px; width:640px; height:320px; transform:translate(-50%,-50%); border-radius:50%; pointer-events:none;
+  background:radial-gradient(closest-side,
+    rgba(214,150,104,.5) 0 30%, rgba(122,74,44,.4) 30% 33%, transparent 33% 56%,
+    rgba(122,74,44,.38) 56% 59%, transparent 59% 76%, rgba(122,74,44,.34) 76% 79%, transparent 79%)}
 .bg-grass{position:absolute; left:0; right:0; bottom:0; height:64px; z-index:1; border-top:4px solid #45703A;
   background:linear-gradient(#6FA34E,#578540)}
 
@@ -178,25 +187,16 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
     <div class="bg-sky"></div>
     <div class="bg-floor"></div>
     <div class="bg-grass"></div>
+    <div class="plaza-ring"></div>
 
     <!-- 광장 소품 — 걸어서 지나칠 수 있어요 (깊이 정렬 적용) -->
     <span class="prop" style="left:1100px; top:840px; font-size:120px">⛲</span>
-    <span class="prop" style="left:180px;  top:700px; font-size:76px">🌳</span>
-    <span class="prop" style="left:640px;  top:672px; font-size:64px">🌳</span>
-    <span class="prop" style="left:1560px; top:690px; font-size:72px">🌳</span>
-    <span class="prop" style="left:2050px; top:710px; font-size:78px">🌳</span>
-    <span class="prop" style="left:340px;  top:1330px; font-size:70px">🌳</span>
-    <span class="prop" style="left:1880px; top:1340px; font-size:66px">🌳</span>
     <span class="prop" style="left:420px;  top:900px; font-size:44px">🏮</span>
     <span class="prop" style="left:1780px; top:900px; font-size:44px">🏮</span>
     <span class="prop" style="left:700px;  top:1240px; font-size:44px">🏮</span>
     <span class="prop" style="left:1500px; top:1240px; font-size:44px">🏮</span>
     <span class="prop" style="left:560px;  top:1060px; font-size:46px">🪑</span>
     <span class="prop" style="left:1660px; top:1060px; font-size:46px">🪑</span>
-    <span class="prop" style="left:900px;  top:1180px; font-size:34px">🌼</span>
-    <span class="prop" style="left:1330px; top:1150px; font-size:34px">🌼</span>
-    <span class="prop" style="left:260px;  top:1150px; font-size:34px">🌷</span>
-    <span class="prop" style="left:1980px; top:1120px; font-size:34px">🌷</span>
 
     <!-- 걸어다니는 사람들 (공개 말풍선) -->
     <div class="char" id="npc-junho"  style="left:420px; top:780px" data-spr="junho"><div class="bubble"></div><div class="nametag">박준호</div><div class="body"><div class="spr"></div></div><div class="shadow"></div></div>
