@@ -2,3 +2,7 @@
 *.zip
 docs/
 .DS_Store
+concept-*.html
+assets/char-retro.png
+assets/char-line.png
+assets/char-story.png
