@@ -68,14 +68,10 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
 .pave::before{content:""; position:absolute; inset:30px; border:4px solid rgba(245,238,220,.55); border-radius:3px}
 .pave::after{content:""; position:absolute; left:50%; top:50%; width:230px; height:230px; transform:translate(-50%,-50%); border:4px solid rgba(245,238,220,.55); border-radius:50%}
 
-.tree{image-rendering:pixelated}
 
 /* 흙 패치 · 벤치 */
 .patch{position:absolute; background:#C89B62; border:5px solid #B98C52; border-radius:48% 52% 55% 45%/55% 48% 52% 45%; opacity:.9}
-.bench{position:absolute; width:116px; height:22px; border-radius:4px; border:3px solid #4A3320;
-  background:repeating-linear-gradient(90deg, #B5713F 0 22px, #A3632F 22px 26px)}
-.bench::before, .bench::after{content:""; position:absolute; top:100%; width:10px; height:10px; background:#4A3320}
-.bench::before{left:12px} .bench::after{right:12px}
+.tree, .bench-img{image-rendering:pixelated}
 
 .prop{position:absolute; transform:translate(-50%,-100%); pointer-events:none; filter:drop-shadow(4px 5px 0 rgba(0,0,0,.25)); line-height:1}
 .bg-sky::before{content:none}
@@ -203,10 +199,10 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
     <div class="patch" style="left:1850px; top:250px; width:160px; height:90px"></div>
     <div class="pave"></div>
     <span class="prop" style="left:1100px; top:800px; font-size:110px">⛲</span>
-    <div class="bench" style="left:420px; top:520px"></div>
-    <div class="bench" style="left:1660px; top:520px"></div>
-    <div class="bench" style="left:420px; top:1180px"></div>
-    <div class="bench" style="left:1660px; top:1180px"></div>
+    <img src="assets/bench.png" alt="" class="prop bench-img" style="left:470px; top:545px; width:120px">
+    <img src="assets/bench.png" alt="" class="prop bench-img" style="left:1720px; top:545px; width:120px">
+    <img src="assets/bench.png" alt="" class="prop bench-img" style="left:470px; top:1205px; width:120px">
+    <img src="assets/bench.png" alt="" class="prop bench-img" style="left:1720px; top:1205px; width:120px">
 
     <!-- 걸어다니는 사람들 (공개 말풍선) -->
     <div class="char" id="npc-junho"  style="left:420px; top:780px" data-spr="junho"><div class="bubble"></div><div class="nametag">박준호</div><div class="body"><div class="spr"></div></div><div class="shadow"></div></div>
