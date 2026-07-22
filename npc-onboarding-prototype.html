@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>바운더리 타운 — 환영 온보딩</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+@font-face{font-family:'NeoDunggeunmo'; src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_two@1.0/NeoDunggeunmo.woff') format('woff'); font-display:swap}
+:root{
+  --ink:#191F28; --paper:#FFF9F1;
+  --night:#231B2E; --night-2:#2E2340;
+  --accent:#F26D9C; --accent-d:#C24C78; --accent-soft:#FBE4EE;
+  --tide:#3182F6; --shell:#F76B1C;
+  --muted:#8B95A1; --line:#E8DFD2;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:"Pretendard Variable",Pretendard,-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+  color:var(--ink); letter-spacing:-0.01em; background:var(--night); min-height:100vh; word-break:keep-all}
+button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
+.pxfont, .hud-btn, .sign .board, .pbtn, .nametag, .skip{font-family:'NeoDunggeunmo','Pretendard Variable',sans-serif; letter-spacing:0}
+
+/* 밤 배경 — 별 + 창밖 불빛 (강의실·광장과 동일) */
+.bg-night{position:fixed; inset:0; pointer-events:none; z-index:0;
+  background:linear-gradient(var(--night) 0%, var(--night-2) 100%)}
+.bg-night::before{content:""; position:absolute; left:5%; top:6%; width:4px; height:4px; background:#fff; opacity:.7;
+  box-shadow:18vw 30px #FFF6C9, 39vw 8px #fff, 57vw 40px #FBE4EE, 74vw 16px #fff, 90vw 34px #C9E9FA, 28vw 70px #fff, 66vw 78px #FFF6C9, 12vw 120px #fff, 48vw 150px #FFF6C9, 82vw 130px #FBE4EE}
+.bg-night::after{content:""; position:absolute; left:0; right:0; bottom:0; height:90px; opacity:.5;
+  background:
+    linear-gradient(#171130,#171130) 4% 100%/9% 70% no-repeat,
+    repeating-linear-gradient(180deg,#F26D9C 0 5px, transparent 5px 14px) 5% 100%/5% 55% no-repeat,
+    linear-gradient(#171130,#171130) 84% 100%/9% 84% no-repeat,
+    repeating-linear-gradient(180deg,#46D5B2 0 5px, transparent 5px 14px) 85% 100%/5% 66% no-repeat}
+
+/* 건너뛰기 (우상단) */
+.skip{position:fixed; top:16px; right:18px; z-index:60; font-size:.72rem; color:#B7AACB;
+  background:rgba(23,19,31,.82); border:2px solid #3E3155; border-radius:20px; padding:7px 14px;
+  box-shadow:0 3px 12px rgba(0,0,0,.4); transition:border-color .12s, color .12s}
+.skip:hover{border-color:#F26D9C; color:#FFE6F0}
+
+/* 무대 */
+.stage{position:relative; z-index:1; min-height:100vh; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; gap:16px; padding:56px 20px 40px}
+
+/* 사인 (강의실 board) */
+.sign{text-align:center}
+.sign .board{display:inline-flex; align-items:center; gap:9px; padding:9px 18px; border-radius:13px;
+  background:rgba(23,19,31,.82); border:2px solid #3E3155; color:#FFE6F0;
+  font-size:clamp(1.05rem,2.6vw,1.32rem); box-shadow:0 3px 0 rgba(0,0,0,.45), 0 0 22px rgba(242,109,156,.28)}
+
+/* 진행 오브 레일 (강의실) */
+.rail{display:flex; align-items:center; justify-content:center; gap:8px}
+.orb{width:24px; height:24px; border-radius:50%; border:3px solid #17171C; background:#3A2E4E; position:relative; overflow:hidden; flex-shrink:0}
+.orb i{position:absolute; left:0; right:0; bottom:0; height:0; background:linear-gradient(180deg,var(--accent),#FF9DBE); transition:height .5s ease}
+.orb.done i{height:100%}
+.orb.cur{border-color:#FFD9E8; box-shadow:0 0 10px rgba(242,109,156,.6)}
+.rail .barlink{width:12px; height:3px; background:#3A2E4E}
+
+/* 코치 — 카드 위에 얹힌 픽셀 이름표 + 🦉 */
+.coach{display:flex; flex-direction:column; align-items:center; gap:8px; margin-bottom:-30px; z-index:2; animation:bob 1.9s ease-in-out infinite}
+.coach.talking{animation:bob 0.9s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)}}
+.owl{width:76px; height:76px; border-radius:16px; background:var(--paper); border:3px solid #17171C;
+  display:flex; align-items:center; justify-content:center; font-size:40px; box-shadow:4px 4px 0 rgba(0,0,0,.4)}
+.nametag{display:inline-flex; align-items:center; gap:6px; font-size:.72rem; color:#FFE6F0;
+  background:rgba(23,19,31,.88); border:2px solid #3E3155; border-radius:5px; padding:4px 11px;
+  box-shadow:0 2px 0 rgba(0,0,0,.4)}
+.nametag .dot{width:7px; height:7px; border-radius:50%; background:#FF4D6D; box-shadow:0 0 7px #FF4D6D; animation:blink 1.4s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* 대사 카드 = 크림 종이 카드 (강의실·광장 카드) */
+.card{position:relative; width:min(500px,92vw); background:var(--paper); border:3px solid #17171C; border-radius:8px;
+  box-shadow:8px 8px 0 rgba(0,0,0,.45); padding:34px 26px 22px; animation:rise .4s ease}
+@keyframes rise{from{opacity:0; transform:translateY(16px)}to{opacity:1; transform:none}}
+.dl-msg{font-size:1.02rem; font-weight:600; line-height:1.68; color:var(--ink); min-height:80px; transition:opacity .25s}
+.dl-msg b{color:var(--accent-d); font-weight:800}
+.dl-msg .shellv{color:var(--shell); font-weight:800}
+.dl-foot{display:flex; align-items:center; justify-content:flex-end; margin-top:18px; padding-top:16px; border-top:2px dashed var(--line)}
+
+/* pbtn (강의실·광장과 동일 — 청크 핑크 버튼) */
+.pbtn{display:inline-flex; align-items:center; gap:6px; font-size:.9rem; padding:11px 22px; border-radius:5px;
+  background:var(--accent); color:#fff; border:2px solid var(--accent-d); box-shadow:0 4px 0 var(--accent-d); transition:transform .08s, box-shadow .08s}
+.pbtn:active{transform:translateY(3px); box-shadow:0 1px 0 var(--accent-d)}
+
+.hint{position:fixed; bottom:16px; left:50%; transform:translateX(-50%); z-index:1;
+  font-size:.7rem; color:#8478A0; text-align:center}
+.hint kbd{font-family:'NeoDunggeunmo',sans-serif; background:rgba(255,255,255,.08); border:1px solid #3E3155;
+  border-radius:3px; padding:1px 6px; color:#B7AACB}
+@media(prefers-reduced-motion:reduce){.card{animation:none} .coach{animation:none}}
+</style>
+</head>
+<body>
+<div class="bg-night"></div>
+
+<button class="skip" onclick="finish()">건너뛰기 →</button>
+
+<div class="stage">
+  <div class="sign"><span class="board">🌙 바운더리 타운</span></div>
+  <div class="rail" id="rail"></div>
+
+  <div class="coach talking" id="coach">
+    <div class="owl">🦉</div>
+    <div class="nametag"><span class="dot"></span>🦉 바운더리 코치</div>
+  </div>
+
+  <div class="card">
+    <div class="dl-msg" id="dlMsg"></div>
+    <div class="dl-foot">
+      <button class="pbtn" id="nextBtn" onclick="advance()">다음 ›</button>
+    </div>
+  </div>
+</div>
+
+<div class="hint"><kbd>Space</kbd> · <kbd>Enter</kbd> 로도 넘길 수 있어요</div>
+
+<script>
+const NAME = localStorage.getItem('trus_name') || '김이서';
+
+const LINES = [
+  `${NAME} 님, <b>바운더리 타운</b>에 오신 걸 환영해요! 👋<br>저는 함께 걸어갈 <b>바운더리 코치</b>예요.`,
+  `여기는 당신만의 공간, <b>마이스페이스</b>예요.<br>작업실이자, 매일 돌아올 집이죠.`,
+  `매일 아침 '오늘의 바운더리'를 세우고<br>저녁에 회고하면 <span class="shellv">◗ 조개</span>가 쌓여요.`,
+  `강의 스크린에서는 저와 코치들이 <b>함께</b> 강의를 들어요.<br>여기선 혼자가 아니에요.`,
+  `모든 강의를 <b>완강</b>하면 <b>광장</b>이 열려요.<br>비슷한 고민을 가진 친구들이 기다리고 있어요.`,
+  `자, 준비됐나요?<br>당신의 <b>마이스페이스</b>로 안내할게요!`
+];
+
+let i = 0;
+const rail = document.getElementById('rail');
+const msg = document.getElementById('dlMsg');
+const nextBtn = document.getElementById('nextBtn');
+const coach = document.getElementById('coach');
+
+/* 진행 오브 레일 만들기 (6단계, 사이 연결선) */
+rail.innerHTML = LINES.map((_, k) =>
+  `<span class="orb" data-k="${k}"><i></i></span>` + (k < LINES.length - 1 ? '<span class="barlink"></span>' : '')
+).join('');
+const orbs = [...rail.querySelectorAll('.orb')];
+
+function render(){
+  /* 대사 페이드 교체 */
+  msg.style.opacity = 0;
+  setTimeout(()=>{ msg.innerHTML = LINES[i]; msg.style.opacity = 1; }, 130);
+
+  /* 오브: 지난 단계 채움(.done), 현재 핑크 글로우(.cur) */
+  orbs.forEach((o, k)=>{
+    o.classList.toggle('done', k < i);
+    o.classList.toggle('cur', k === i);
+  });
+
+  /* 코치 말하는 리듬 */
+  coach.classList.add('talking');
+  clearTimeout(render._t);
+  render._t = setTimeout(()=>coach.classList.remove('talking'), 1400);
+
+  nextBtn.textContent = (i === LINES.length - 1) ? '🏠 마이스페이스로 →' : '다음 ›';
+}
+
+function advance(){
+  if(i < LINES.length - 1){ i++; render(); }
+  else finish();
+}
+function finish(){ location.href = 'myspace-prototype.html?mode=full'; }
+
+document.addEventListener('keydown', e=>{
+  if(e.code === 'Space' || e.code === 'Enter'){ e.preventDefault(); advance(); }
+});
+
+render();
+</script>
+</body>
+</html>

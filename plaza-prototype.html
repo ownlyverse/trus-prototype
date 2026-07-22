@@ -52,6 +52,8 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
 
 /* 바닥 — 돌 텍스처 전체 타일링 */
 .grass{position:absolute; inset:0; background:url('assets/stone.png?v=2') 0 0/240px 240px repeat; image-rendering:pixelated}
+/* 광장별 테마 톤 — 바닥에만 얹히는 은은한 색감 (id별로 다름) */
+.tone{position:absolute; inset:0; z-index:1; pointer-events:none; mix-blend-mode:soft-light; opacity:0}
 
 
 
@@ -175,13 +177,17 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
   <button class="hud-btn" data-panel="stage" title="무대 — 오늘 20시 라이브">🎤</button>
   <button class="hud-btn" data-panel="table" title="약속 테이블">⛱️<span class="badge-n">1</span></button>
   <button class="hud-btn" data-panel="schedule" title="일정 안내판">🕰️</button>
-  <button class="hud-btn" id="chipBack" title="마이스페이스로">🏠</button>
+  <button class="hud-btn" id="navHome" title="마이스페이스로">🏠</button>
+  <button class="hud-btn" id="navWorld" title="월드맵">🗺️</button>
+  <button class="hud-btn" id="navAnder" title="앤더스페이스">🎪</button>
+  <button class="hud-btn" id="navLobby" title="다른 광장 고르기">⛲</button>
 </header>
 
 <!-- ============ 장면 ============ -->
 <div class="scene" id="scene">
   <div class="world" id="world">
-    <div class="grass"></div>
+    <div class="grass" id="grass"></div>
+    <div class="tone" id="tone"></div>
     <img src="assets/fountain.png" alt="" class="prop bench-img" style="left:1100px; top:840px; width:220px">
     <img src="assets/bench.png" alt="" class="prop bench-img" style="left:470px; top:545px; width:88px">
     <img src="assets/bench.png" alt="" class="prop bench-img" style="left:1720px; top:545px; width:88px">
@@ -203,7 +209,7 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
     </div>
   </div>
 
-  <div class="neon-sign">⛲ 광장 · 접속 41명</div>
+  <div class="neon-sign" id="sign">⛲ 광장 · 접속 41명</div>
 </div>
 
 <!-- 완강 게이트 -->
@@ -218,7 +224,7 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
   </div>
 </div>
 
-<div class="hint">방향키·WASD로 걷어요 (클릭도 OK) · 대화는 모두 공개 말풍선 · 게시판·무대·약속은 오른쪽 위 아이콘</div>
+<div class="hint">방향키·WASD로 걷어요 (클릭도 OK) · 가까이 다가가면 그 사람 대화가 보여요 · 게시판·무대·약속은 오른쪽 위 아이콘</div>
 <div class="proto-tag">광장 프로토타입 · 목데이터</div>
 
 <!-- ============ 패널 ============ -->
@@ -258,6 +264,25 @@ document.querySelectorAll('[data-spr]').forEach(el=>{
   }
 })();
 document.getElementById('gateEnter').addEventListener('click', ()=>document.getElementById('gate').classList.remove('show'));
+
+/* ================= 다중 광장 — ?id=<slug> 로 테마 전환 ================= */
+const PLAZAS = {
+  growth:  {title:'성장 광장', sign:'🌱 성장 광장', online:41, hue:8,   sat:1.05, tint:'#8FBF7A', wood:'#5B6E3A'},
+  writing: {title:'기록 광장', sign:'✍️ 기록 광장', online:27, hue:-22, sat:.82,  tint:'#C7A96B', wood:'#6E5236'},
+  money:   {title:'머니 광장', sign:'💰 머니 광장', online:63, hue:26,  sat:1.12, tint:'#E0C24E', wood:'#7A5A24'},
+  plaza:   {title:'광장',      sign:'⛲ 광장',      online:41, hue:0,   sat:1,    tint:null,      wood:'#6E4634'},
+};
+const PLAZA_ID = new URLSearchParams(location.search).get('id');
+const THEME = PLAZAS[PLAZA_ID] || PLAZAS.plaza;
+(function applyTheme(){
+  document.title = `바운더리 타운 — ${THEME.title} (프로토타입)`;
+  document.getElementById('sign').textContent = `${THEME.sign} · 접속 ${THEME.online}명`;
+  const grassEl = document.getElementById('grass');
+  if(THEME.hue || THEME.sat !== 1) grassEl.style.filter = `hue-rotate(${THEME.hue}deg) saturate(${THEME.sat})`;
+  const toneEl = document.getElementById('tone');
+  if(THEME.tint){ toneEl.style.background = THEME.tint; toneEl.style.opacity = '.5'; }
+  if(THEME.wood) document.querySelector('.scene').style.background = THEME.wood;
+})();
 
 /* ================= 내 캐릭터 이동 ================= */
 const me = document.getElementById('me');
@@ -342,10 +367,33 @@ const npcs = [
   {el:document.getElementById('npc-bora'),   x:1760, y:1150, t:null, speed:1.2, lines:['100번 쓰기 18일째!','같이 놀래요 글 올렸어요, 목요일 번개 🍜']},
 ];
 /* NPC는 제자리에 고정 — 배회 없음 */
-setInterval(()=>{
-  const n = npcs[Math.floor(Math.random()*npcs.length)];
-  say(n.el, n.lines[Math.floor(Math.random()*n.lines.length)]);
-}, 4200);
+
+/* ===== 근접 기반 대화 — 가까이 간 NPC만 말풍선을 띄워요 ===== */
+const CHAT_RADIUS = 260;      // 월드 px, 튜닝 가능
+const CHAT_CYCLE  = 3200;     // 곁에 머무는 동안 다음 대사로 넘어가는 간격(ms)
+npcs.forEach(n=>{ n.near = false; n.lineIdx = 0; n.nextCycle = 0; });
+function updateProximityChat(now){
+  npcs.forEach(n=>{
+    const bb = n.el.querySelector('.bubble');
+    const d = Math.hypot(n.x - player.x, n.y - player.y);
+    if(d <= CHAT_RADIUS){
+      if(!n.near){                                   // 막 다가옴 → 대화 시작
+        n.near = true;
+        n.lineIdx = Math.floor(Math.random()*n.lines.length);
+        bb.textContent = n.lines[n.lineIdx];
+        bb.classList.add('show');
+        n.nextCycle = now + CHAT_CYCLE;
+      }else if(now >= n.nextCycle){                   // 계속 곁에 있음 → 다음 대사로 순환
+        n.lineIdx = (n.lineIdx + 1) % n.lines.length;
+        bb.textContent = n.lines[n.lineIdx];
+        n.nextCycle = now + CHAT_CYCLE;
+      }
+    }else if(n.near){                                 // 멀어짐 → 말풍선 숨김
+      n.near = false;
+      bb.classList.remove('show');
+    }
+  });
+}
 
 /* 메인 루프 — 이동 · 카메라 · 깊이 정렬 */
 function moveToward(o, tx, ty, sp){
@@ -405,6 +453,9 @@ function moveToward(o, tx, ty, sp){
   document.querySelectorAll('.char, .prop').forEach(c=>{
     c.style.zIndex = Math.round(parseFloat(c.style.top) || 0);
   });
+
+  /* 근접 대화 갱신 — 가까운 NPC만 말풍선 표시 */
+  updateProximityChat(performance.now());
 
   requestAnimationFrame(loop);
 })();
@@ -539,7 +590,11 @@ function bindPanel(){
   }));
 }
 
-document.getElementById('chipBack').addEventListener('click', ()=>{ location.href = 'myspace-prototype.html'; });
+/* ===== 공간 이동 ===== */
+document.getElementById('navHome').addEventListener('click',  ()=>{ location.href = 'myspace-prototype.html?mode=full'; });
+document.getElementById('navWorld').addEventListener('click', ()=>{ location.href = 'worldmap-prototype.html'; });
+document.getElementById('navAnder').addEventListener('click', ()=>{ location.href = 'anderspace-prototype.html'; });
+document.getElementById('navLobby').addEventListener('click', ()=>{ location.href = 'plaza-lobby-prototype.html'; });
 document.querySelectorAll('.hud-btn[data-panel]').forEach(b=>b.addEventListener('click', ()=>openPanel(b.dataset.panel)));
 
 </script>
