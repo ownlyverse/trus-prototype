@@ -48,29 +48,29 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
 .stage{width:100%; margin:0 auto; padding:78px 20px 44px; position:relative}
 .lesson-col{max-width:640px; margin:0 auto}
 
-/* 라이브 강의실 — 강의자(좌 대형) · 코치2+나(세로 3) · 메모(우 컬럼) */
+/* 라이브 강의실 — 강의자(좌 세로 대형) · 코치2+나(세로 3) · 메모(우 컬럼) */
 .liveroom{
-  --H:min(560px, 62vh, 33vw);              /* 강의자 높이 */
+  --H:min(620px, 72vh, 40vw);              /* 강의자 세로 높이 */
   --s:calc((var(--H) - 32px)/3);           /* 미니 타일 높이 (3개+간격2 = --H) */
   display:grid; justify-content:center; gap:16px; margin:14px auto 8px;
-  grid-template-columns:calc(var(--H)*16/9) calc(var(--s)*16/9) minmax(240px,320px);
+  grid-template-columns:calc(var(--H)*9/16) calc(var(--s)*16/9) minmax(240px,320px);
 }
-.vid.main{height:var(--H)}
+.vid.main{height:var(--H); aspect-ratio:9/16}
 .mid-col{display:flex; flex-direction:column; gap:16px; min-width:0}
 .mid-col .vid{height:var(--s)}
 .liveroom > .memo{height:var(--H); display:flex; flex-direction:column; overflow:hidden; min-width:0}
 .liveroom > .memo .memo-body{flex:1; min-height:0; max-height:none}
 
-/* 좁은 화면: 강의자 → 미니 3개 가로 → 메모 (기본 규칙보다 반드시 뒤) */
+/* 좁은 화면: 강의자(세로) → 미니 3개 가로 → 메모 (기본 규칙보다 반드시 뒤) */
 @media(max-width:860px){
   .liveroom{display:flex; flex-direction:column}
-  .liveroom .vid.main{height:auto; aspect-ratio:16/9}
+  .liveroom .vid.main{height:auto; aspect-ratio:9/16; width:min(66vw,300px); align-self:center}
   .mid-col{flex-direction:row}
   .mid-col .vid{height:auto; aspect-ratio:16/9; flex:1; min-width:0}
   .liveroom > .memo{height:auto; min-height:200px}
 }
 .vid{position:relative; border:3px solid #17171C; border-radius:6px; overflow:hidden; background:#000; box-shadow:4px 4px 0 rgba(0,0,0,.4); aspect-ratio:16/9}
-.vid img{width:100%; height:100%; object-fit:cover; display:block}
+.vid img, .vid video{width:100%; height:100%; object-fit:cover; display:block}
 .vid.main{box-shadow:7px 7px 0 rgba(0,0,0,.45)}
 .vtag{position:absolute; left:8px; bottom:8px; background:rgba(23,19,31,.88); color:#fff; font-size:.74rem; padding:2px 8px; border-radius:2px; font-family:'NeoDunggeunmo','Pretendard Variable',sans-serif; letter-spacing:0}
 .vlive{position:absolute; right:7px; top:7px; width:8px; height:8px; border-radius:50%; background:#FF4D6D; box-shadow:0 0 7px #FF4D6D; animation:blink 1.4s infinite}
@@ -91,8 +91,18 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
   background:linear-gradient(transparent, rgba(10,8,16,.88))}
 .vplay{font-size:1.3rem; color:#fff; flex-shrink:0; filter:drop-shadow(0 0 6px rgba(242,109,156,.6))}
 .vprog{flex:1; height:11px; border-radius:5px; background:rgba(255,255,255,.22); cursor:pointer; overflow:hidden}
-.vprog i{display:block; height:100%; width:0%; background:linear-gradient(90deg,var(--accent),#FF9DBE); border-radius:5px; transition:width 1s linear}
+.vprog i{display:block; height:100%; width:0%; background:linear-gradient(90deg,var(--accent),#FF9DBE); border-radius:5px; transition:width .25s linear}
 .vtime{font-size:.85rem; color:#FFD9E8; flex-shrink:0; font-family:'NeoDunggeunmo',sans-serif; letter-spacing:0}
+
+/* 강의 시작 — 소리 있는 재생은 사용자 탭이 필요해요 */
+.vstart{position:absolute; inset:0; z-index:6; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:13px; cursor:pointer;
+  background:radial-gradient(120% 80% at 50% 40%, rgba(46,35,64,.35), rgba(23,19,31,.72)); backdrop-filter:blur(1.5px);
+  color:#FFD9E8; font-family:'NeoDunggeunmo','Pretendard Variable',sans-serif; font-size:.78rem; text-shadow:0 0 8px rgba(242,109,156,.7)}
+.vstart.hide{display:none}
+.vstart-btn{width:76px; height:76px; border-radius:50%; background:var(--accent); border:3px solid #17131F; color:#fff; font-size:1.9rem;
+  display:flex; align-items:center; justify-content:center; padding-left:5px; box-shadow:0 6px 0 var(--accent-d), 0 0 26px rgba(242,109,156,.65); transition:transform .1s}
+.vstart:hover .vstart-btn{transform:scale(1.06)}
+.vstart:active .vstart-btn{transform:translateY(3px); box-shadow:0 3px 0 var(--accent-d), 0 0 26px rgba(242,109,156,.65)}
 /* 섹션 종료 선택 */
 .sec-overlay{position:fixed; inset:0; z-index:80; background:rgba(20,15,28,.72); backdrop-filter:blur(4px); display:none; align-items:center; justify-content:center}
 .sec-overlay.show{display:flex}
@@ -259,15 +269,19 @@ canvas{display:block; width:100%; height:200px; touch-action:none; cursor:crossh
   <div class="sign pxfont">📺 강의실 — 전략 설정<small>커리큘럼 5단계 중 마지막 · 일의 교과서</small></div>
   <div class="liveroom">
     <div class="vid main">
-      <img src="assets/lecturer.png" alt="강의자">
+      <video id="lecVid" src="assets/lecture.mp4" poster="assets/lecture-poster.jpg" playsinline preload="metadata"></video>
       <span class="vsec" id="vSec">1/9 · 오늘, 잠깐 멈추는 시간</span>
       <span class="vlive"></span>
       <div class="vctrl">
-        <button class="vplay" id="vPlay">⏸</button>
+        <button class="vplay" id="vPlay">▶</button>
         <div class="vprog" id="vProg"><i id="vFill"></i></div>
-        <span class="vtime num" id="vTime">-0:05</span>
+        <span class="vtime num" id="vTime">-0:00</span>
       </div>
       <span class="vtag" style="bottom:44px">윤소정 · 강의</span>
+      <div class="vstart" id="vStart">
+        <button class="vstart-btn">▶</button>
+        <span>탭하여 강의 시작 · 소리 켜짐 🔊</span>
+      </div>
     </div>
     <div class="mid-col">
       <div class="vid"><img src="assets/left1.png" alt="코치"><span class="vtag">🦉 바운더리 코치</span><span class="vlive"></span></div>
@@ -334,38 +348,84 @@ BLOCKS.forEach((b,i)=>{
     console.warn(`에디터 규칙 위반: 블록 ${i+1} 인터랙티브 앞에는 강의가 있어야 해요`);
 });
 
-let bi = 0, elapsed = 0, timer = null, done = false;
-const fmt = s => Math.floor(s/60) + ':' + String(Math.max(0,s)%60).toString().padStart(2,'0');
+let bi = 0, done = false, started = false;
+const fmt = s => Math.floor(s/60) + ':' + String(Math.max(0,Math.round(s))%60).toString().padStart(2,'0');
 const $ = id => document.getElementById(id);
+
+/* ─── 실제 강의 영상 (세로 9:16) ─── */
+const lecVid = $('lecVid');
+let VID_DUR = 66;                                       // 로드되면 실제 길이로 갱신
+const lectureIdx = BLOCKS.map((b,i)=> b.type==='lecture' ? i : -1).filter(i=>i>=0);
+function segOf(blockIdx){                               // 강의 블록 → 영상 구간
+  const k = lectureIdx.indexOf(blockIdx);
+  const len = VID_DUR / lectureIdx.length;
+  return { start:k*len, end:(k+1)*len, len };
+}
+lecVid.addEventListener('loadedmetadata', ()=>{
+  if(isFinite(lecVid.duration) && lecVid.duration > 0){ VID_DUR = lecVid.duration; updateUI(); }
+});
 
 function updateUI(){
   const b = BLOCKS[bi];
   $('vSec').textContent = `${bi+1}/${BLOCKS.length} · ${b.type==='lecture' ? b.t : b.name}`;
   if(b.type==='lecture'){
-    $('vFill').style.width = Math.min(100, elapsed/b.dur*100) + '%';
-    $('vTime').textContent = '-' + fmt(b.dur - elapsed);
+    const seg = segOf(bi);
+    const cur = Math.min(Math.max(lecVid.currentTime, seg.start), seg.end);
+    $('vFill').style.width = ((cur - seg.start)/seg.len*100) + '%';
+    $('vTime').textContent = '-' + fmt(seg.end - cur);
   }
 }
 function runBlock(){
   const b = BLOCKS[bi];
   updateUI();
-  if(b.type==='lecture'){ elapsed = 0; updateUI(); startTick(); }
+  if(b.type==='lecture'){ playLecture(); }
+  else { lecVid.pause(); $('vPlay').textContent = '▶'; }
   if(b.type==='gate') showGate(false);
   if(b.type==='interactive') showInteractive(b);
   if(b.type==='finish') showGate(true);
 }
-function startTick(){
-  clearInterval(timer);
-  timer = setInterval(()=>{
-    elapsed++;
-    updateUI();
-    if(elapsed >= BLOCKS[bi].dur){ clearInterval(timer); nextBlock(); }
-  }, 1000);
+function playLecture(){
+  const seg = segOf(bi);
+  if(lecVid.currentTime < seg.start - 0.3 || lecVid.currentTime >= seg.end - 0.05)
+    lecVid.currentTime = seg.start;                    // 이 섹션 구간 시작으로
+  updateUI();
+  if(started){ lecVid.play().catch(()=>{}); $('vPlay').textContent = '⏸'; }
 }
+/* 영상 재생에 맞춰 진행바·남은시간 갱신, 구간 끝나면 다음 블록으로 */
+lecVid.addEventListener('timeupdate', ()=>{
+  if(BLOCKS[bi].type !== 'lecture') return;
+  const seg = segOf(bi);
+  updateUI();
+  if(lecVid.currentTime >= seg.end - 0.06){ lecVid.pause(); nextBlock(); }
+});
 function nextBlock(){
   if(bi >= BLOCKS.length - 1) return;
   bi++; runBlock();
 }
+
+/* 첫 재생은 사용자 탭이 있어야 소리와 함께 시작돼요 */
+$('vStart').addEventListener('click', ()=>{
+  started = true;
+  lecVid.muted = false;
+  $('vStart').classList.add('hide');
+  playLecture();
+});
+/* 재생/일시정지 — 실제 영상 제어 */
+$('vPlay').addEventListener('click', ()=>{
+  if(!started){ $('vStart').click(); return; }
+  if(done || BLOCKS[bi].type !== 'lecture') return;
+  if(lecVid.paused){ lecVid.play().catch(()=>{}); $('vPlay').textContent = '⏸'; }
+  else { lecVid.pause(); $('vPlay').textContent = '▶'; }
+});
+/* 진행바 클릭 — 현재 섹션 구간 안에서만 이동 (앞 섹션은 못 건너뛰어요) */
+$('vProg').addEventListener('click', e=>{
+  if(!started || done || BLOCKS[bi].type !== 'lecture') return;
+  const seg = segOf(bi);
+  const r = e.currentTarget.getBoundingClientRect();
+  const frac = Math.min(1, Math.max(0, (e.clientX - r.left)/r.width));
+  lecVid.currentTime = seg.start + frac*seg.len;
+  updateUI();
+});
 
 /* 섹션 넘어가기 · 마무리 화면 */
 let gateMode = 'gate';
@@ -470,17 +530,10 @@ $('aoDone').addEventListener('click', ()=>{
   nextBlock();
 });
 
-/* 멈춤·건너뛰기 차단 */
-function blockMsg(){
-  if(done || BLOCKS[bi].type !== 'lecture') return;
-  toast(`이 섹션이 끝나기 전엔 멈추거나 넘길 수 없어요 — 남은 시간 ${fmt(BLOCKS[bi].dur - elapsed)}`);
-}
-$('vPlay').addEventListener('click', blockMsg);
-$('vProg').addEventListener('click', blockMsg);
-
 /* 완강 */
 function finishLecture(){
   done = true;
+  lecVid.pause();
   localStorage.setItem('trus_lecture_complete','1');
   $('vPlay').textContent = '✓';
   $('vTime').textContent = '끝';
