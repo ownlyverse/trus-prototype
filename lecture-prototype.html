@@ -343,23 +343,13 @@ canvas{display:block; width:100%; height:200px; touch-action:none; cursor:crossh
   memo.addEventListener('input', ()=>localStorage.setItem('trus_memo', memo.innerText));
 })();
 
-/* ─── 강의 흐름 — 8개 블록 (강의 에디터에서 조립하는 구조) ─── */
-/* 에디터 규칙: 인터랙티브 블록은 반드시 강의 블록 바로 뒤에만 올 수 있어요 */
+/* ─── 강의 흐름 — 영상 전체를 통으로 본 뒤 활동으로 이어져요 ─── */
 const BLOCKS = [
-  {type:'lecture', name:'강의', t:'오늘, 잠깐 멈추는 시간', dur:5},
-  {type:'gate', name:'섹션 넘어가기'},
-  {type:'lecture', name:'강의', t:'끝까지 생각하는 훈련 — 키 씬', dur:5},
+  {type:'lecture', name:'강의', t:'오늘, 잠깐 멈추는 시간'},
   {type:'interactive', kind:'draw', name:'인터랙티브 — 그림 그리기', t:'지금 마음을 색으로 그려보세요'},
-  {type:'lecture', name:'강의', t:'단 한 컷을 고른다면', dur:5},
-  {type:'gate', name:'섹션 넘어가기'},
-  {type:'lecture', name:'강의', t:'전략을 바운더리로', dur:5},
   {type:'interactive', kind:'write', name:'인터랙티브 — 글쓰기', t:'오늘 배운 것을 한 문장으로 적어보세요', ph:'오늘 나는 …라는 걸 알았다.'},
   {type:'finish', name:'마무리 · 다시 듣기'},
 ];
-BLOCKS.forEach((b,i)=>{
-  if(b.type==='interactive' && (i===0 || BLOCKS[i-1].type!=='lecture'))
-    console.warn(`에디터 규칙 위반: 블록 ${i+1} 인터랙티브 앞에는 강의가 있어야 해요`);
-});
 
 let bi = 0, done = false, started = false;
 const fmt = s => Math.floor(s/60) + ':' + String(Math.max(0,Math.round(s))%60).toString().padStart(2,'0');
@@ -368,12 +358,6 @@ const $ = id => document.getElementById(id);
 /* ─── 실제 강의 영상 (세로 9:16) ─── */
 const lecVid = $('lecVid');
 let VID_DUR = 66;                                       // 로드되면 실제 길이로 갱신
-const lectureIdx = BLOCKS.map((b,i)=> b.type==='lecture' ? i : -1).filter(i=>i>=0);
-function segOf(blockIdx){                               // 강의 블록 → 영상 구간
-  const k = lectureIdx.indexOf(blockIdx);
-  const len = VID_DUR / lectureIdx.length;
-  return { start:k*len, end:(k+1)*len, len };
-}
 lecVid.addEventListener('loadedmetadata', ()=>{
   if(isFinite(lecVid.duration) && lecVid.duration > 0){ VID_DUR = lecVid.duration; updateUI(); }
 });
@@ -382,10 +366,8 @@ function updateUI(){
   const b = BLOCKS[bi];
   $('vSec').textContent = `${bi+1}/${BLOCKS.length} · ${b.type==='lecture' ? b.t : b.name}`;
   if(b.type==='lecture'){
-    const seg = segOf(bi);
-    const cur = Math.min(Math.max(lecVid.currentTime, seg.start), seg.end);
-    $('vFill').style.width = ((cur - seg.start)/seg.len*100) + '%';
-    $('vTime').textContent = '-' + fmt(seg.end - cur);
+    $('vFill').style.width = (lecVid.currentTime / VID_DUR * 100) + '%';
+    $('vTime').textContent = '-' + fmt(VID_DUR - lecVid.currentTime);
   }
 }
 function runBlock(){
@@ -398,18 +380,17 @@ function runBlock(){
   if(b.type==='finish') showGate(true);
 }
 function playLecture(){
-  const seg = segOf(bi);
-  if(lecVid.currentTime < seg.start - 0.3 || lecVid.currentTime >= seg.end - 0.05)
-    lecVid.currentTime = seg.start;                    // 이 섹션 구간 시작으로
+  if(lecVid.currentTime >= VID_DUR - 0.1) lecVid.currentTime = 0;   // 다시 듣기면 처음으로
   updateUI();
   if(started){ lecVid.play().catch(()=>{}); $('vPlay').textContent = '⏸'; }
 }
-/* 영상 재생에 맞춰 진행바·남은시간 갱신, 구간 끝나면 다음 블록으로 */
+/* 영상 재생에 맞춰 진행바·남은시간 갱신, 끝까지 다 보면 다음 활동으로 */
 lecVid.addEventListener('timeupdate', ()=>{
   if(BLOCKS[bi].type !== 'lecture') return;
-  const seg = segOf(bi);
   updateUI();
-  if(lecVid.currentTime >= seg.end - 0.06){ lecVid.pause(); nextBlock(); }
+});
+lecVid.addEventListener('ended', ()=>{
+  if(BLOCKS[bi].type === 'lecture'){ $('vFill').style.width='100%'; $('vTime').textContent='끝'; nextBlock(); }
 });
 function nextBlock(){
   if(bi >= BLOCKS.length - 1) return;
@@ -430,13 +411,12 @@ $('vPlay').addEventListener('click', ()=>{
   if(lecVid.paused){ lecVid.play().catch(()=>{}); $('vPlay').textContent = '⏸'; }
   else { lecVid.pause(); $('vPlay').textContent = '▶'; }
 });
-/* 진행바 클릭 — 현재 섹션 구간 안에서만 이동 (앞 섹션은 못 건너뛰어요) */
+/* 진행바 클릭 — 영상 안에서 자유롭게 이동 */
 $('vProg').addEventListener('click', e=>{
   if(!started || done || BLOCKS[bi].type !== 'lecture') return;
-  const seg = segOf(bi);
   const r = e.currentTarget.getBoundingClientRect();
   const frac = Math.min(1, Math.max(0, (e.clientX - r.left)/r.width));
-  lecVid.currentTime = seg.start + frac*seg.len;
+  lecVid.currentTime = frac * VID_DUR;
   updateUI();
 });
 
