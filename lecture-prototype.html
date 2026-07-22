@@ -297,8 +297,8 @@ canvas{display:block; width:100%; height:200px; touch-action:none; cursor:crossh
       </div>
     </div>
     <div class="mid-col">
-      <div class="vid"><video src="assets/coach-boundary.mp4" autoplay muted loop playsinline preload="auto"></video><span class="vtag">🦉 바운더리 코치</span><span class="vlive"></span></div>
-      <div class="vid"><video src="assets/coach-record.mp4" autoplay muted loop playsinline preload="auto"></video><span class="vtag">🐢 기록 코치</span><span class="vlive"></span></div>
+      <div class="vid"><video id="coachA" src="assets/coach-boundary.mp4" muted loop playsinline preload="auto"></video><span class="vtag">🦉 바운더리 코치</span><span class="vlive"></span></div>
+      <div class="vid"><video id="coachB" src="assets/coach-record.mp4" muted loop playsinline preload="auto"></video><span class="vtag">🐢 기록 코치</span><span class="vlive"></span></div>
       <div class="vid metile"><img src="assets/char1.png" alt="" style="image-rendering:pixelated"><span class="vtag">나 · 김이서</span></div>
     </div>
     <div class="memo">
@@ -363,6 +363,11 @@ lecVid.addEventListener('loadedmetadata', ()=>{
   if(isFinite(lecVid.duration) && lecVid.duration > 0){ VID_DUR = lecVid.duration; updateUI(); }
 });
 
+/* 코치 영상(바운더리·기록) — 강의 재생과 시작점을 맞물려요 */
+const coachVids = [$('coachA'), $('coachB')];
+function coachesStart(){ coachVids.forEach(v=>{ v.currentTime = 0; v.play().catch(()=>{}); }); }
+function coachesPause(){ coachVids.forEach(v=>v.pause()); }
+
 function updateUI(){
   const b = BLOCKS[bi];
   $('vSec').textContent = `${bi+1}/${BLOCKS.length} · ${b.type==='lecture' ? b.t : b.name}`;
@@ -375,7 +380,7 @@ function runBlock(){
   const b = BLOCKS[bi];
   updateUI();
   if(b.type==='lecture'){ playLecture(); }
-  else { lecVid.pause(); $('vPlay').textContent = '▶'; }
+  else { lecVid.pause(); coachesPause(); $('vPlay').textContent = '▶'; }
   if(b.type==='gate') showGate(false);
   if(b.type==='interactive') showInteractive(b);
   if(b.type==='finish') showGate(true);
@@ -390,7 +395,10 @@ function playLecture(){
     lecVid.currentTime = 0;
   }
   updateUI();
-  if(started){ lecVid.play().catch(()=>{}); $('vPlay').textContent = '⏸'; }
+  if(started){
+    lecVid.play().catch(()=>{}); $('vPlay').textContent = '⏸';
+    coachesStart();                                  // 코치 영상도 0초부터 함께 시작
+  }
 }
 /* 영상 재생에 맞춰 진행바·남은시간 갱신, 끝까지 다 보면 다음 활동으로 */
 lecVid.addEventListener('timeupdate', ()=>{
@@ -530,6 +538,7 @@ $('aoDone').addEventListener('click', ()=>{
 function finishLecture(){
   done = true;
   lecVid.pause();
+  coachesPause();
   localStorage.setItem('trus_lecture_complete','1');
   $('vPlay').textContent = '✓';
   $('vTime').textContent = '끝';
