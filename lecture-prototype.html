@@ -282,7 +282,7 @@ canvas{display:block; width:100%; height:200px; touch-action:none; cursor:crossh
   <div class="sign pxfont"><span class="board">1강 · 전략 설정</span><small>커리큘럼 5단계 중 마지막 · 일의 교과서</small></div>
   <div class="liveroom">
     <div class="vid main">
-      <video id="lecVid" src="assets/lecture.mp4" poster="assets/lecture-poster.jpg" playsinline preload="metadata"></video>
+      <video id="lecVid" src="assets/lecture1.mp4" poster="assets/lecture1-poster.jpg" playsinline preload="metadata"></video>
       <span class="vsec" id="vSec">1/9 · 오늘, 잠깐 멈추는 시간</span>
       <span class="vlive"></span>
       <div class="vctrl">
@@ -343,10 +343,11 @@ canvas{display:block; width:100%; height:200px; touch-action:none; cursor:crossh
   memo.addEventListener('input', ()=>localStorage.setItem('trus_memo', memo.innerText));
 })();
 
-/* ─── 강의 흐름 — 영상 전체를 통으로 본 뒤 활동으로 이어져요 ─── */
+/* ─── 강의 흐름 — 각 강의 영상을 통으로 본 뒤 활동으로 이어져요 ─── */
 const BLOCKS = [
-  {type:'lecture', name:'강의', t:'오늘, 잠깐 멈추는 시간'},
+  {type:'lecture', name:'강의', t:'오늘, 잠깐 멈추는 시간', src:'assets/lecture1.mp4', poster:'assets/lecture1-poster.jpg'},
   {type:'interactive', kind:'draw', name:'인터랙티브 — 그림 그리기', t:'지금 마음을 색으로 그려보세요'},
+  {type:'lecture', name:'강의', t:'전략을 바운더리로', src:'assets/lecture2.mp4', poster:'assets/lecture2-poster.jpg'},
   {type:'interactive', kind:'write', name:'인터랙티브 — 글쓰기', t:'오늘 배운 것을 한 문장으로 적어보세요', ph:'오늘 나는 …라는 걸 알았다.'},
   {type:'finish', name:'마무리 · 다시 듣기'},
 ];
@@ -380,7 +381,14 @@ function runBlock(){
   if(b.type==='finish') showGate(true);
 }
 function playLecture(){
-  if(lecVid.currentTime >= VID_DUR - 0.1) lecVid.currentTime = 0;   // 다시 듣기면 처음으로
+  const b = BLOCKS[bi];
+  if(b.src && !lecVid.currentSrc.endsWith(b.src)){   // 이 강의의 영상으로 교체 → 0부터
+    lecVid.src = b.src;
+    if(b.poster) lecVid.poster = b.poster;
+    lecVid.load();
+  } else if(lecVid.currentTime >= VID_DUR - 0.1){    // 같은 영상 다시 듣기면 처음으로
+    lecVid.currentTime = 0;
+  }
   updateUI();
   if(started){ lecVid.play().catch(()=>{}); $('vPlay').textContent = '⏸'; }
 }
