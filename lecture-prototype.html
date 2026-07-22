@@ -39,10 +39,18 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
 .hud{position:fixed; top:0; left:0; right:0; z-index:60; display:flex; align-items:flex-start; gap:8px; padding:12px 14px; pointer-events:none}
 .hud>*{pointer-events:auto}
 .hud .spacer{flex:1; pointer-events:none}
-.hud-btn{width:42px; height:42px; border-radius:10px; background:#FFF9E9; border:3px solid #17171C; box-shadow:0 3px 0 rgba(0,0,0,.5); font-size:1.1rem; display:flex; align-items:center; justify-content:center}
-.hud-btn:active{transform:translateY(2px); box-shadow:0 1px 0 rgba(0,0,0,.5)}
-.pill-stat{display:inline-flex; align-items:center; gap:7px; padding:5px 14px 5px 7px; border-radius:16px; background:#F7E9C4; border:3px solid #17171C; box-shadow:0 3px 0 rgba(0,0,0,.5); font-size:.85rem; color:#4A3A18}
-.pill-stat .ic{width:22px; height:22px; border-radius:50%; display:flex; align-items:center; justify-content:center; background:#F2C14E; border:2px solid #B8860B; font-size:.7rem; color:#7A4E00}
+.hud-btn{width:44px; height:44px; border-radius:50%; background:rgba(23,19,31,.82); border:2px solid #3E3155; color:#FFE6F0;
+  box-shadow:0 3px 12px rgba(0,0,0,.4), 0 0 18px rgba(242,109,156,.14); display:flex; align-items:center; justify-content:center;
+  transition:transform .1s, box-shadow .1s, border-color .12s}
+.hud-btn svg{width:21px; height:21px}
+.hud-btn:hover{border-color:#F26D9C; box-shadow:0 3px 12px rgba(0,0,0,.4), 0 0 22px rgba(242,109,156,.35)}
+.hud-btn:active{transform:translateY(2px); box-shadow:0 1px 6px rgba(0,0,0,.4)}
+.pill-stat{display:inline-flex; align-items:center; gap:8px; padding:6px 16px 6px 6px; border-radius:22px;
+  background:rgba(23,19,31,.82); border:2px solid #3E3155; color:#FFE6F0; font-size:.92rem; font-weight:700;
+  box-shadow:0 3px 12px rgba(0,0,0,.4), 0 0 18px rgba(242,109,156,.14)}
+.pill-stat .ic{width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  background:linear-gradient(135deg,#FFE08A,#F2A73C); border:1px solid #C98A2E; font-size:.82rem; color:#7A4E00;
+  box-shadow:inset 0 1px 2px rgba(255,255,255,.55)}
 
 /* 무대 */
 .stage{width:100%; margin:0 auto; padding:78px 20px 44px; position:relative}
@@ -263,13 +271,15 @@ canvas{display:block; width:100%; height:200px; touch-action:none; cursor:crossh
 <div class="bg-night"></div>
 
 <header class="hud">
-  <button class="hud-btn" onclick="location.href='myspace-prototype.html'" title="마이스페이스로">🏠</button>
+  <button class="hud-btn" onclick="location.href='myspace-prototype.html'" title="마이스페이스로" aria-label="마이스페이스로">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.8 12 3.5l9 7.3"/><path d="M5.5 9.7V20a1 1 0 0 0 1 1H10v-5.4h4V21h3.5a1 1 0 0 0 1-1V9.7"/></svg>
+  </button>
   <span class="spacer"></span>
-  <span class="pill-stat"><span class="ic">◗</span><b class="num">96</b></span>
+  <span class="pill-stat" title="내 조각"><span class="ic">◗</span><b class="num">96</b></span>
 </header>
 
 <div class="stage">
-  <div class="sign pxfont"><span class="board">📺 강의실 — 전략 설정</span><small>커리큘럼 5단계 중 마지막 · 일의 교과서</small></div>
+  <div class="sign pxfont"><span class="board">1강 · 전략 설정</span><small>커리큘럼 5단계 중 마지막 · 일의 교과서</small></div>
   <div class="liveroom">
     <div class="vid main">
       <video id="lecVid" src="assets/lecture.mp4" poster="assets/lecture-poster.jpg" playsinline preload="metadata"></video>
