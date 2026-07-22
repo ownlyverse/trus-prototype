@@ -43,57 +43,65 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
 .hud-btn:active{transform:translateY(2px); box-shadow:0 1px 0 rgba(23,23,28,.35)}
 .hud-btn .badge-n{position:absolute; top:-7px; right:-7px; background:var(--shell); color:#fff; border:2px solid #17171C; border-radius:8px; font-size:.6rem; padding:0 5px; font-weight:700}
 
-/* ---------- 장면 — 파스텔 픽셀 타운 ---------- */
-.scene{position:fixed; inset:0; overflow:hidden; background:#F6D9E2}
-.bg-sky{position:absolute; left:0; right:0; top:0; height:30%;
-  background:linear-gradient(#A8C8EE 0%, #E8C4DD 48%, #F7CFC4 78%, #FBE3C9 100%)}
-.bg-sky::before{ /* 픽셀 구름 */
-  content:""; position:absolute; left:8%; top:22%; width:14px; height:14px; background:#fff;
-  box-shadow:14px 0 #fff, 28px 0 #fff, 42px 0 #fff, 14px -14px #fff, 28px -14px #fff,
-    52vw 10px #FFF3EC, calc(52vw + 14px) 10px #FFF3EC, calc(52vw + 28px) 10px #FFF3EC, calc(52vw + 14px) -4px #FFF3EC,
-    26vw 44px #FFFBF6, calc(26vw + 14px) 44px #FFFBF6, calc(26vw + 28px) 44px #FFFBF6,
-    78vw 30px #FFF3EC, calc(78vw + 14px) 30px #FFF3EC;
-}
-.bg-sky::after{ /* 도시 실루엣 */
-  content:""; position:absolute; left:0; right:0; bottom:0; height:36%; opacity:.6;
+/* ---------- 장면 — 아늑한 우드/크림 방 ---------- */
+.scene{position:fixed; inset:0; overflow:hidden; background:#EFE0C6}
+
+/* 벽 (상단) — 따뜻한 크림, 은은한 세로 패널 */
+.bg-wall{position:absolute; left:0; right:0; top:0; height:58%; z-index:0;
   background:
-    linear-gradient(#8FA0C4,#8FA0C4) 2% 100%/7% 58% no-repeat,
-    linear-gradient(#9AAACB,#9AAACB) 11% 100%/5% 88% no-repeat,
-    linear-gradient(#8FA0C4,#8FA0C4) 19% 100%/9% 48% no-repeat,
-    linear-gradient(#A3B1D1,#A3B1D1) 31% 100%/6% 72% no-repeat,
-    linear-gradient(#8FA0C4,#8FA0C4) 43% 100%/7% 60% no-repeat,
-    linear-gradient(#9AAACB,#9AAACB) 56% 100%/5% 84% no-repeat,
-    linear-gradient(#8FA0C4,#8FA0C4) 67% 100%/9% 52% no-repeat,
-    linear-gradient(#A3B1D1,#A3B1D1) 81% 100%/6% 74% no-repeat,
-    linear-gradient(#8FA0C4,#8FA0C4) 93% 100%/6% 62% no-repeat;
+    repeating-linear-gradient(90deg, rgba(120,90,50,.045) 0 1px, transparent 1px 128px),
+    linear-gradient(#F6E9D1 0%, #EFDDBE 100%);
 }
-.bg-shop{position:absolute; left:0; right:0; top:30%; height:28%;
+/* 챗레일 몰딩 + 하단 웨인스코팅(살짝 짙은 크림 패널) */
+.bg-wainscot{position:absolute; left:0; right:0; top:46%; height:12%; z-index:1;
   background:
-    repeating-linear-gradient(90deg, rgba(0,0,0,.10) 0 4px, transparent 4px 96px),
-    linear-gradient(#7A5A3C, #684C31)}
-.bg-shop::before{ /* 안쪽 선반 */
-  content:""; position:absolute; inset:16% 3% 12%;
+    repeating-linear-gradient(90deg, transparent 0 108px, rgba(110,82,54,.16) 108px 110px, rgba(255,255,255,.28) 110px 112px),
+    linear-gradient(#EAD6B2, #E3CCA4);
+  border-top:5px solid #C9A06C;
+  box-shadow:inset 0 5px 0 rgba(255,255,255,.22), 0 2px 0 rgba(60,40,10,.10);
+}
+
+/* 창문 — 밤하늘(강의실과 연결) */
+.bg-window{position:absolute; left:7%; top:6.5%; width:min(210px,20%); aspect-ratio:16/13; z-index:1;
+  border:7px solid #C9A06C; border-radius:9px; overflow:hidden;
+  background:linear-gradient(#231B2E 0%, #2E2340 55%, #3A2B4E 100%);
+  box-shadow:0 5px 0 rgba(60,40,10,.22), inset 0 0 0 3px #8B6844;
+}
+.bg-window::before{ /* 별 + 달 */
+  content:""; position:absolute; inset:0;
   background:
-    repeating-linear-gradient(180deg, transparent 0 24%, rgba(255,220,160,.15) 24% 28%, transparent 28% 33%),
-    repeating-linear-gradient(90deg, transparent 0 68px, rgba(0,0,0,.20) 68px 72px);
+    radial-gradient(circle 13px at 74% 26%, #FDF3D0 99%, transparent),
+    radial-gradient(circle 2px at 20% 28%, #fff 99%, transparent),
+    radial-gradient(circle 2px at 46% 18%, #FFF6C9 99%, transparent),
+    radial-gradient(circle 1.5px at 62% 54%, #fff 99%, transparent),
+    radial-gradient(circle 2px at 33% 62%, #C9E9FA 99%, transparent),
+    radial-gradient(circle 1.5px at 86% 66%, #fff 99%, transparent);
 }
-.awning{position:absolute; left:5%; right:5%; top:28.4%; height:4.6%; z-index:3;
-  background:repeating-linear-gradient(90deg, #7C8BE0 0 46px, #95A4F1 46px 92px);
-  border:3px solid #2B2B33; border-radius:8px 8px 0 0;
-}
-.awning::after{content:""; position:absolute; left:-3px; right:-3px; top:100%; height:12px;
-  background:radial-gradient(circle at 23px 0, #7C8BE0 0 20px, transparent 21px) 0 0/46px 12px;
-}
-.bg-floor{position:absolute; left:0; right:0; top:58%; bottom:0;
-  background:repeating-conic-gradient(#F0B8C8 0% 25%, #F6CBD7 0% 50%) 0 0/52px 52px}
-.bg-grass{position:absolute; left:0; right:0; bottom:0; height:6%; z-index:2; border-top:4px solid #4E8A38;
+.bg-window::after{ /* 창틀 십자 */
+  content:""; position:absolute; inset:0;
   background:
-    radial-gradient(circle 4px at 12% 40%, #F26D8D 98%, transparent),
-    radial-gradient(circle 4px at 32% 62%, #F2D24E 98%, transparent),
-    radial-gradient(circle 4px at 55% 45%, #fff 98%, transparent),
-    radial-gradient(circle 4px at 76% 58%, #F26D8D 98%, transparent),
-    radial-gradient(circle 4px at 92% 42%, #F2D24E 98%, transparent),
-    linear-gradient(#7CBF5B,#63A748);
+    linear-gradient(#C9A06C,#C9A06C) 50% 0/5px 100% no-repeat,
+    linear-gradient(#C9A06C,#C9A06C) 0 50%/100% 5px no-repeat;
+}
+
+/* 바닥 — 원목 마루 */
+.bg-floor{position:absolute; left:0; right:0; top:58%; bottom:0; z-index:0;
+  background:
+    repeating-linear-gradient(90deg, rgba(60,40,10,.13) 0 2px, transparent 2px 86px),
+    repeating-linear-gradient(180deg, rgba(255,255,255,.035) 0 3px, transparent 3px 7px),
+    linear-gradient(#CBA26E, #B4885A);
+}
+/* 걸레받이 몰딩 (벽/바닥 경계) */
+.bg-floor::before{content:""; position:absolute; left:0; right:0; top:0; height:9px; transform:translateY(-100%);
+  background:#8B6844; border-top:3px solid #A67C4F; box-shadow:0 3px 0 rgba(60,40,10,.18)}
+
+/* 러그 — 캐릭터가 노는 플레이 존 */
+.bg-rug{position:absolute; left:50%; bottom:4%; transform:translateX(-50%); width:min(560px,62%); height:26%; z-index:0;
+  border-radius:48%/42%; opacity:.92;
+  background:
+    radial-gradient(ellipse at center, transparent 0 34%, #C97F86 34% 38%, transparent 38% 44%),
+    radial-gradient(ellipse at center, #EFC9A6 0 58%, #E3B48C 58% 74%, #D89E70 74% 100%);
+  border:4px solid #C58B62; box-shadow:0 3px 0 rgba(60,40,10,.12);
 }
 
 /* ---------- 오브젝트 ---------- */
@@ -263,11 +271,11 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
 
 <!-- ============ 장면 ============ -->
 <div class="scene" id="scene">
-  <div class="bg-sky"></div>
-  <div class="bg-shop"></div>
-  <div class="awning"></div>
+  <div class="bg-wall"></div>
+  <div class="bg-wainscot"></div>
+  <div class="bg-window"></div>
   <div class="bg-floor"></div>
-  <div class="bg-grass"></div>
+  <div class="bg-rug"></div>
 
   <!-- 프레즌스 전광판 — 건물 간판 (항상 보임) -->
   <div class="presence" data-obj="presence" title="프레즌스 전광판">
@@ -340,7 +348,7 @@ function say(text){
 
 /* 바닥 클릭 → 그냥 걷기 */
 scene.addEventListener('click', e=>{
-  if(e.target !== scene && !e.target.classList.contains('bg-floor') && !e.target.classList.contains('bg-grass')) return;
+  if(e.target !== scene && !e.target.classList.contains('bg-floor') && !e.target.classList.contains('bg-rug')) return;
   const r = scene.getBoundingClientRect();
   const x = (e.clientX - r.left) / r.width * 100;
   const yFromTop = (e.clientY - r.top) / r.height * 100;
