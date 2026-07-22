@@ -50,10 +50,10 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
 
 /* 라이브 강의실 — 강의자(좌 세로 대형) · 코치2+나(세로 3) · 메모(우 컬럼) */
 .liveroom{
-  --H:min(620px, 72vh, 40vw);              /* 강의자 세로 높이 */
+  --H:min(760px, 82vh, 48vw);              /* 강의자 세로 높이 */
   --s:calc((var(--H) - 32px)/3);           /* 미니 타일 높이 (3개+간격2 = --H) */
-  display:grid; justify-content:center; gap:16px; margin:14px auto 8px;
-  grid-template-columns:calc(var(--H)*9/16) calc(var(--s)*16/9) minmax(240px,320px);
+  display:grid; justify-content:center; gap:18px; margin:14px auto 8px;
+  grid-template-columns:calc(var(--H)*9/16) calc(var(--s)*16/9) minmax(280px,380px);
 }
 .vid.main{height:var(--H); aspect-ratio:9/16}
 .mid-col{display:flex; flex-direction:column; gap:16px; min-width:0}
