@@ -3,6 +3,7 @@
 docs/
 .DS_Store
 concept-*.html
+game/
 assets/char-retro.png
 assets/char-line.png
 assets/char-story.png
