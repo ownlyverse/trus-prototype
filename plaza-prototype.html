@@ -168,7 +168,7 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
 .chatlog.show{display:flex; animation:clpop .16s ease-out}
 @keyframes clpop{from{transform:translateY(10px); opacity:0}to{transform:translateY(0); opacity:1}}
 .chatlog .cl-head{display:flex; align-items:center; gap:8px; padding:9px 11px; background:#17131F; color:#fff}
-.chatlog .cl-ava{width:22px; height:22px; border-radius:50%; border:2px solid #0B0912; flex-shrink:0; background:#888}
+.chatlog .cl-ava{width:22px; height:22px; border-radius:50%; border:2px solid #0B0912; flex-shrink:0; background:#F7E9C4; display:flex; align-items:center; justify-content:center; font-size:.72rem}
 .chatlog .cl-head b{font-family:'NeoDunggeunmo','Pretendard Variable',Pretendard,sans-serif; letter-spacing:0; font-size:.9rem}
 .chatlog .cl-head .cl-sub{font-size:.6rem; color:#B0B8C1; margin-left:auto; white-space:nowrap}
 .chatlog .cl-body{padding:11px 10px; overflow-y:auto; max-height:38vh; display:flex; flex-direction:column; gap:7px; background:#F2F4F6}
@@ -178,6 +178,7 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
 .cl-bubble{font-size:.76rem; line-height:1.45; padding:6px 10px; border:1.5px solid #17131F; word-break:keep-all}
 .cl-msg.them .cl-bubble{background:#fff; border-radius:11px 11px 11px 2px}
 .cl-msg.me .cl-bubble{background:var(--tide); color:#fff; border-color:#1B4FA0; border-radius:11px 11px 2px 11px}
+.cl-nm{font-size:.6rem; font-weight:700; margin:0 0 2px 3px; color:#4E5968}
 .cl-t{font-size:.58rem; color:#8B95A1; margin-top:2px}
 .chatlog .cl-foot{font-size:.6rem; color:#8B95A1; padding:6px 10px; border-top:1px solid #E5E8EB; background:#fff}
 
@@ -246,9 +247,9 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
 
 <!-- ============ 좌하단 대화 로그 ============ -->
 <div class="chatlog" id="chatLog">
-  <div class="cl-head"><span class="cl-ava" id="clAva"></span><b id="clName"></b><span class="cl-sub">이제까지 나눈 대화</span></div>
+  <div class="cl-head"><span class="cl-ava" id="clAva">👥</span><b id="clName"></b><span class="cl-sub">여기 모인 사람들 대화</span></div>
   <div class="cl-body" id="clBody"></div>
-  <div class="cl-foot">가까이 있는 동안 대화가 이어져요 · 멀어지면 닫혀요</div>
+  <div class="cl-foot">이 자리에 머무는 동안 대화가 이어져요 · 멀어지면 닫혀요</div>
 </div>
 
 <!-- ============ 패널 ============ -->
@@ -383,69 +384,61 @@ scene.addEventListener('click', e=>{
   player.target = { x:clamp(wx, FLOOR.x, FLOOR.x+FLOOR.w), y:clamp(wy, FLOOR.y, FLOOR.y+FLOOR.h) };
 });
 
-/* ================= 광장 사람들 — 무리 지어 모여 있어요 ================= */
+/* ================= 광장 — 존(무리)별 채팅방 ================= */
+/* 각 존 = 그 자리에 모인 사람들이 함께 나눈 '단체 대화' 하나를 공유해요. */
+const ZONES = [
+  {id:'work', title:'🛠 작업 피드백 자리', history:[
+    {name:'박준호', text:'랜딩 카피 피드백, 문서로 정리해서 도움 글에 붙였어요', t:'3일 전'},
+    {me:true,       text:'헐 감사해요, 유도형 질문일까 걱정했는데 딱 짚어주셨어요', t:'3일 전'},
+    {name:'오세진', text:'저는 첫 제안서 목차가 자꾸 막혀요', t:'그저께'},
+    {name:'박준호', text:'전환율이든 목차든 헤드라인·문제부터예요', t:'그저께'},
+    {name:'이하람', text:'지표는 구독자 수보다 재방문을 봐요', t:'어제'},
+    {me:true,       text:'오늘 21시 반에 다 같이 마저 볼까요?', t:'어제'},
+    {name:'박준호', text:'좋아요, 약속 테이블에 잡아둘게요', t:'어제'},
+  ]},
+  {id:'record', title:'✍️ 기록·회고 모임', history:[
+    {name:'정다인', text:'오늘 3개 다 했어요!', t:'어제'},
+    {me:true,       text:'끝점 다시 잡는 거 안 어려워요?', t:'어제'},
+    {name:'한지운', text:'회고 밀리면 시간을 고정해봐요', t:'어제'},
+    {name:'정다인', text:'맞아요, 회고 쓰다 보면 끝점이 보여요', t:'오늘'},
+    {name:'한지운', text:'아침형이면 아침에 어제치 쓰는 것도 방법이에요', t:'오늘'},
+  ]},
+  {id:'fountain', title:'⛲ 분수 앞 수다', history:[
+    {name:'최연우', text:'다들 저녁 회고 몇 시에 쓰세요?', t:'어제'},
+    {me:true,       text:'저는 21시요, 밀리면 아예 안 쓰게 돼요', t:'어제'},
+    {name:'서도윤', text:'포폴은 덜어내는 게 핵심이에요', t:'그저께'},
+    {name:'문가은', text:'네, 도윤 님이 프로젝트 3개로 줄이랬어요', t:'그저께'},
+    {name:'문가은', text:'완료 확정되면 조개 20 넘어가요', t:'어제'},
+    {name:'최연우', text:'나도 도움 글 하나 잡아야지', t:'오늘'},
+  ]},
+  {id:'flash', title:'🍜 목요일 번개 무리', history:[
+    {name:'황보라', text:'목표 100번 쓰기 18일 연속이에요!', t:'오늘'},
+    {me:true,       text:'와 대단… 저는 자꾸 끊겨요', t:'오늘'},
+    {name:'강민서', text:'첫 미팅 긴장돼서 수현 님이랑 리허설했어요', t:'어제'},
+    {name:'배수현', text:'덕분에 안 떨었어요, 평가 좋게 남길게요', t:'오늘'},
+    {name:'황보라', text:'목요일 라멘 번개 🍜 다들 오실래요?', t:'방금 전'},
+    {name:'강민서', text:'저 낄래요!', t:'방금 전'},
+  ]},
+];
+const ZONE_MAP = Object.fromEntries(ZONES.map(z=>[z.id, z]));
+
+/* 사람들 — id·이름·소속 존·좌표·머리 위 대사(말풍선) */
 const NPCS = [
-  /* — 무리 ① 작업·피드백 (왼쪽 위) — */
-  {id:'junho', name:'박준호', x:540, y:560, lines:['랜딩 카피 피드백 정리해서 올렸어요','전환율은 헤드라인부터 손대는 게 나아요','오늘 20시 라이브에서 화면 공유해요'], history:[
-    {who:'them', text:'랜딩 카피 피드백, 문서로 정리해서 도움 글에 붙였어요', t:'3일 전'},
-    {who:'me',   text:'헐 감사해요, 유도형 질문일까 걱정했는데 딱 짚어주셨어요', t:'3일 전'},
-    {who:'them', text:'전환율은 헤드라인부터예요', t:'그저께'},
-    {who:'me',   text:'오늘 21시 반에 마저 볼까요?', t:'어제'},
-    {who:'them', text:'좋아요, 약속 테이블에 잡아둘게요', t:'어제'},
-  ]},
-  {id:'seojin', name:'오세진', x:662, y:588, lines:['첫 제안서 목차가 자꾸 막혀요','준호 님 피드백 방식이 좋더라고요'], history:[
-    {who:'them', text:'제안서 목차, 문제-해법 순서가 맞을까요?', t:'어제'},
-    {who:'me',   text:'저는 고객 언어로 문제부터 크게 잡아요', t:'어제'},
-    {who:'them', text:'아 표부터 그리는 거 보고 배웠어요', t:'오늘'},
-  ]},
-  {id:'haram', name:'이하람', x:600, y:648, lines:['지표는 결국 행동이 바뀌는 숫자여야 하더라고요','다인 님이랑 같이 정리 중이에요'], history:[
-    {who:'me',   text:'지표 뭘로 잡을지 저도 고민이에요', t:'그저께'},
-    {who:'them', text:'구독자 수보다 재방문을 봐요', t:'그저께'},
-    {who:'them', text:'같이 표로 그려봐요', t:'어제'},
-  ]},
-
-  /* — 무리 ② 기록·회고 (오른쪽 위) — */
-  {id:'dain', name:'정다인', x:1600, y:664, lines:['오늘 3개 다 했어요!','이번 주 끝점 다시 잡는 중'], history:[
-    {who:'them', text:'매일 3개는 지키려고요', t:'어제'},
-    {who:'me',   text:'끝점 다시 잡는 거 어렵지 않아요?', t:'어제'},
-    {who:'them', text:'회고 쓰다 보면 보여요', t:'오늘'},
-  ]},
-  {id:'jiwoon', name:'한지운', x:1700, y:702, lines:['회고는 저녁 먹고 바로 쓰는 게 편해요','연우 님 고민 같이 봤어요'], history:[
-    {who:'them', text:'회고 밀리면 시간을 고정해봐요', t:'그저께'},
-    {who:'me',   text:'저는 아침형이라 저녁 회고가 약해요', t:'그저께'},
-    {who:'them', text:'그럼 아침에 어제치 쓰는 것도 방법이에요', t:'어제'},
-  ]},
-
-  /* — 무리 ③ 분수 아래 수다 (가운데 아래) — */
-  {id:'yeonwoo', name:'최연우', x:820, y:1096, lines:['숫자언어 지표 이거 맞나…','도움 글 하나 잡아야지'], history:[
-    {who:'them', text:'다들 저녁 회고 몇 시에 쓰세요?', t:'어제'},
-    {who:'me',   text:'저는 21시요, 밀리면 아예 안 쓰게 돼요', t:'어제'},
-    {who:'them', text:'지운 님이 시간 고정 팁 줬어요', t:'오늘'},
-  ]},
-  {id:'gaeun', name:'문가은', x:932, y:1112, lines:['포트폴리오 도윤 님이 봐주셨어요','이제 정산만 남았네요'], history:[
-    {who:'me',   text:'포폴 순서 조언 구했었죠', t:'3일 전'},
-    {who:'them', text:'네, 도윤 님이 프로젝트 3개로 줄이랬어요', t:'그저께'},
-    {who:'them', text:'완료 확정되면 조개 20 넘어가요', t:'어제'},
-  ]},
-  {id:'doyoon', name:'서도윤', x:876, y:1176, lines:['포폴은 덜어내는 게 핵심이에요','가은 님 거의 다 됐어요'], history:[
-    {who:'them', text:'포폴은 덜어내는 게 핵심이에요', t:'그저께'},
-    {who:'me',   text:'맞아요, 다 넣으려다 망하죠', t:'그저께'},
-  ]},
-
-  /* — 무리 ④ 목요일 번개 (오른쪽 아래) — */
-  {id:'bora', name:'황보라', x:1660, y:1132, lines:['100번 쓰기 18일째!','같이 놀래요 글 올렸어요, 목요일 번개 🍜'], history:[
-    {who:'them', text:'목표 100번 쓰기 18일 연속이에요!', t:'오늘'},
-    {who:'me',   text:'와 대단… 저는 자꾸 끊겨요', t:'오늘'},
-    {who:'them', text:'목요일 라멘 번개 오실래요? 🍜', t:'방금 전'},
-  ]},
-  {id:'minseo', name:'강민서', x:1770, y:1150, lines:['첫 고객 미팅 리허설 도와줬어요','번개 저도 낄래요 🍜'], history:[
-    {who:'them', text:'첫 미팅 긴장돼서 리허설했어요', t:'어제'},
-    {who:'me',   text:'상호 평가 남았죠? 좋았어요', t:'어제'},
-  ]},
-  {id:'sujin', name:'배수현', x:1716, y:1200, lines:['리허설 덕에 미팅 잘 봤어요','평가 남기러 왔어요'], history:[
-    {who:'me',   text:'미팅 어땠어요?', t:'오늘'},
-    {who:'them', text:'덕분에 안 떨었어요, 좋게 남길게요', t:'오늘'},
-  ]},
+  /* 무리 ① 작업·피드백 (왼쪽 위) */
+  {id:'junho',  name:'박준호', zone:'work',     x:540,  y:560,  lines:['랜딩 카피 피드백 정리해서 올렸어요','전환율은 헤드라인부터 손대는 게 나아요','오늘 20시 라이브에서 화면 공유해요']},
+  {id:'seojin', name:'오세진', zone:'work',     x:662,  y:588,  lines:['첫 제안서 목차가 자꾸 막혀요','준호 님 피드백 방식이 좋더라고요']},
+  {id:'haram',  name:'이하람', zone:'work',     x:600,  y:648,  lines:['지표는 행동이 바뀌는 숫자여야 해요','다인 님이랑 같이 정리 중이에요']},
+  /* 무리 ② 기록·회고 (오른쪽 위) */
+  {id:'dain',   name:'정다인', zone:'record',   x:1600, y:664,  lines:['오늘 3개 다 했어요!','이번 주 끝점 다시 잡는 중']},
+  {id:'jiwoon', name:'한지운', zone:'record',   x:1700, y:702,  lines:['회고는 저녁 먹고 바로 쓰는 게 편해요','연우 님 고민 같이 봤어요']},
+  /* 무리 ③ 분수 앞 수다 (가운데 아래) */
+  {id:'yeonwoo',name:'최연우', zone:'fountain', x:820,  y:1096, lines:['숫자언어 지표 이거 맞나…','도움 글 하나 잡아야지']},
+  {id:'gaeun',  name:'문가은', zone:'fountain', x:932,  y:1112, lines:['포트폴리오 도윤 님이 봐주셨어요','이제 정산만 남았네요']},
+  {id:'doyoon', name:'서도윤', zone:'fountain', x:876,  y:1176, lines:['포폴은 덜어내는 게 핵심이에요','가은 님 거의 다 됐어요']},
+  /* 무리 ④ 목요일 번개 (오른쪽 아래) */
+  {id:'bora',   name:'황보라', zone:'flash',    x:1660, y:1132, lines:['100번 쓰기 18일째!','같이 놀래요 글 올렸어요, 목요일 번개 🍜']},
+  {id:'minseo', name:'강민서', zone:'flash',    x:1770, y:1150, lines:['첫 고객 미팅 리허설 도와줬어요','번개 저도 낄래요 🍜']},
+  {id:'sujin',  name:'배수현', zone:'flash',    x:1716, y:1200, lines:['리허설 덕에 미팅 잘 봤어요','평가 남기러 왔어요']},
 ];
 
 /* 팔레트 확장 (기존 me/junho/dain/yeonwoo/bora + 새 인물) */
@@ -458,6 +451,9 @@ Object.assign(PALETTES, {
   minseo: {H:'#7A9E3E', S:'#F2C9A8', E:'#222831', T:'#C0523A', P:'#2B3442', D:'#4A3320'},
   sujin:  {H:'#C99A2E', S:'#F6D2AE', E:'#222831', T:'#5B6ABF', P:'#3A2E52', D:'#5A4630'},
 });
+
+/* 이름 → 색 (채팅방에서 발화자 이름 색으로 구분) */
+const NAME_COLOR = Object.fromEntries(NPCS.map(c=>[c.name, PALETTES[c.id].H]));
 
 /* NPC DOM 생성 + 스프라이트 렌더 (나(me)는 이미지라 제외, me 앞에 넣어 깊이정렬 유지) */
 NPCS.forEach(c=>{
@@ -473,41 +469,47 @@ NPCS.forEach(c=>{
 const npcs = NPCS.map(c=>({
   el: document.getElementById('npc-' + c.id),
   x:c.x, y:c.y, t:null, speed:1.4,
-  name:c.name, lines:c.lines, history:c.history.slice(),
+  name:c.name, zone:c.zone, lines:c.lines,
 }));
 
-/* ===== 근접 기반 대화 — 머리 위 말풍선 + 좌하단 지난 대화 로그 ===== */
+/* ===== 근접 대화 — 머리 위 말풍선 + 존(무리)별 채팅방(좌하단) ===== */
 const CHAT_RADIUS = 260;      // 월드 px, 튜닝 가능
 const CHAT_CYCLE  = 3200;     // 곁에 머무는 동안 다음 대사로 넘어가는 간격(ms)
 npcs.forEach(n=>{ n.near = false; n.lineIdx = 0; n.nextCycle = 0; });
 
-/* 좌하단 로그 패널 */
+/* 좌하단 존 채팅방 패널 */
 const chatLog = document.getElementById('chatLog');
 const clAva   = document.getElementById('clAva');
 const clName  = document.getElementById('clName');
 const clBody  = document.getElementById('clBody');
-let activeChat = null;        // 지금 로그에 떠 있는 NPC
+let activeZone = null;        // 지금 열려 있는 존
 
 function msgNode(m){
   const wrap = document.createElement('div');
-  wrap.className = 'cl-msg ' + (m.who === 'me' ? 'me' : 'them');
+  const mine = !!m.me;
+  wrap.className = 'cl-msg ' + (mine ? 'me' : 'them');
+  if(!mine && m.name){                               // 단체방이라 발화자 이름 표시
+    const nm = document.createElement('div'); nm.className = 'cl-nm';
+    nm.textContent = m.name; nm.style.color = NAME_COLOR[m.name] || '#4E5968';
+    wrap.appendChild(nm);
+  }
   const b = document.createElement('div'); b.className = 'cl-bubble'; b.textContent = m.text;
   const t = document.createElement('div'); t.className = 'cl-t';      t.textContent = m.t || '';
   wrap.append(b, t);
   return wrap;
 }
-function renderChatLog(n){
-  clName.textContent = n.name;
-  clAva.style.background = (PALETTES[n.el.dataset.spr] || PALETTES.me).H;
+function renderZoneLog(z){
+  clAva.textContent = '👥';
+  clName.textContent = z.title;
   clBody.innerHTML = '';
-  n.history.forEach(m => clBody.appendChild(msgNode(m)));
+  z.history.forEach(m => clBody.appendChild(msgNode(m)));
   clBody.scrollTop = clBody.scrollHeight;
 }
-function logLine(n, text){                            // 방금 한 말을 대화 기록에 남김
-  const m = {who:'them', text, t:'방금'};
-  n.history.push(m);
-  if(n.history.length > 40) n.history.shift();
-  if(n === activeChat){ clBody.appendChild(msgNode(m)); clBody.scrollTop = clBody.scrollHeight; }
+function logToZone(z, name, text){                    // 방금 한 말을 그 존 채팅방에 누적
+  const m = {name, text, t:'방금'};
+  z.history.push(m);
+  if(z.history.length > 60) z.history.shift();
+  if(z === activeZone){ clBody.appendChild(msgNode(m)); clBody.scrollTop = clBody.scrollHeight; }
 }
 
 function updateProximityChat(now){
@@ -516,29 +518,30 @@ function updateProximityChat(now){
     const bb = n.el.querySelector('.bubble');
     const d = Math.hypot(n.x - player.x, n.y - player.y);
     if(d <= CHAT_RADIUS){
-      if(!n.near){                                   // 막 다가옴 → 대화 시작
+      if(!n.near){                                   // 막 다가옴 → 발화 시작
         n.near = true;
         n.lineIdx = Math.floor(Math.random()*n.lines.length);
         bb.textContent = n.lines[n.lineIdx];
         bb.classList.add('show');
         n.nextCycle = now + CHAT_CYCLE;
-        logLine(n, n.lines[n.lineIdx]);
+        logToZone(ZONE_MAP[n.zone], n.name, n.lines[n.lineIdx]);
       }else if(now >= n.nextCycle){                   // 계속 곁에 있음 → 다음 대사로 순환
         n.lineIdx = (n.lineIdx + 1) % n.lines.length;
         bb.textContent = n.lines[n.lineIdx];
         n.nextCycle = now + CHAT_CYCLE;
-        logLine(n, n.lines[n.lineIdx]);
+        logToZone(ZONE_MAP[n.zone], n.name, n.lines[n.lineIdx]);
       }
-      if(d < nd){ nd = d; nearest = n; }             // 가장 가까운 사람을 로그에 띄움
+      if(d < nd){ nd = d; nearest = n; }             // 가장 가까운 사람 → 그 사람의 존을 연다
     }else if(n.near){                                 // 멀어짐 → 말풍선 숨김
       n.near = false;
       bb.classList.remove('show');
     }
   });
-  if(nearest){
-    if(nearest !== activeChat){ activeChat = nearest; renderChatLog(nearest); chatLog.classList.add('show'); }
-  }else if(activeChat){
-    activeChat = null; chatLog.classList.remove('show');
+  const zone = nearest ? ZONE_MAP[nearest.zone] : null;
+  if(zone){
+    if(zone !== activeZone){ activeZone = zone; renderZoneLog(zone); chatLog.classList.add('show'); }
+  }else if(activeZone){
+    activeZone = null; chatLog.classList.remove('show');
   }
 }
 
