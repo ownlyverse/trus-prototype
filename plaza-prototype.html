@@ -160,7 +160,28 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
 
 .hint{position:fixed; bottom:14px; left:50%; transform:translateX(-50%); z-index:55; font-size:.76rem; color:#FFFFFF; background:#17131F; border:2px solid #0B0912; border-radius:3px; padding:6px 16px; box-shadow:3px 3px 0 rgba(0,0,0,.4)}
 .proto-tag{position:fixed; bottom:14px; right:14px; font-size:.66rem; color:#B0B8C1; z-index:55}
-@media(prefers-reduced-motion:reduce){.char{transition:none}}
+
+/* ---------- 좌하단 대화 로그 (가까이 간 NPC와 나눈 대화) ---------- */
+.chatlog{position:fixed; left:14px; bottom:14px; z-index:58; width:302px; max-width:calc(100vw - 28px);
+  background:#FFFFFF; border:3px solid #17131F; border-radius:6px; box-shadow:5px 5px 0 rgba(0,0,0,.35);
+  display:none; flex-direction:column; overflow:hidden}
+.chatlog.show{display:flex; animation:clpop .16s ease-out}
+@keyframes clpop{from{transform:translateY(10px); opacity:0}to{transform:translateY(0); opacity:1}}
+.chatlog .cl-head{display:flex; align-items:center; gap:8px; padding:9px 11px; background:#17131F; color:#fff}
+.chatlog .cl-ava{width:22px; height:22px; border-radius:50%; border:2px solid #0B0912; flex-shrink:0; background:#888}
+.chatlog .cl-head b{font-family:'NeoDunggeunmo','Pretendard Variable',Pretendard,sans-serif; letter-spacing:0; font-size:.9rem}
+.chatlog .cl-head .cl-sub{font-size:.6rem; color:#B0B8C1; margin-left:auto; white-space:nowrap}
+.chatlog .cl-body{padding:11px 10px; overflow-y:auto; max-height:38vh; display:flex; flex-direction:column; gap:7px; background:#F2F4F6}
+.cl-msg{display:flex; flex-direction:column; max-width:82%}
+.cl-msg.them{align-self:flex-start; align-items:flex-start}
+.cl-msg.me{align-self:flex-end; align-items:flex-end}
+.cl-bubble{font-size:.76rem; line-height:1.45; padding:6px 10px; border:1.5px solid #17131F; word-break:keep-all}
+.cl-msg.them .cl-bubble{background:#fff; border-radius:11px 11px 11px 2px}
+.cl-msg.me .cl-bubble{background:var(--tide); color:#fff; border-color:#1B4FA0; border-radius:11px 11px 2px 11px}
+.cl-t{font-size:.58rem; color:#8B95A1; margin-top:2px}
+.chatlog .cl-foot{font-size:.6rem; color:#8B95A1; padding:6px 10px; border-top:1px solid #E5E8EB; background:#fff}
+
+@media(prefers-reduced-motion:reduce){.char{transition:none} .chatlog.show{animation:none}}
 </style>
 </head>
 <body>
@@ -194,11 +215,7 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
     <img src="assets/bench.png" alt="" class="prop bench-img" style="left:470px; top:1205px; width:88px">
     <img src="assets/bench.png" alt="" class="prop bench-img" style="left:1720px; top:1205px; width:88px">
 
-    <!-- 걸어다니는 사람들 (공개 말풍선) -->
-    <div class="char" id="npc-junho"  style="left:420px; top:780px" data-spr="junho"><div class="bubble"></div><div class="nametag">박준호</div><div class="body"><div class="spr"></div></div><div class="shadow"></div></div>
-    <div class="char" id="npc-dain"   style="left:1700px; top:860px" data-spr="dain"><div class="bubble"></div><div class="nametag">정다인</div><div class="body"><div class="spr"></div></div><div class="shadow"></div></div>
-    <div class="char" id="npc-yeonwoo" style="left:820px; top:1150px" data-spr="yeonwoo"><div class="bubble"></div><div class="nametag">최연우</div><div class="body"><div class="spr"></div></div><div class="shadow"></div></div>
-    <div class="char" id="npc-bora"   style="left:1900px; top:1190px" data-spr="bora"><div class="bubble"></div><div class="nametag">황보라</div><div class="body"><div class="spr"></div></div><div class="shadow"></div></div>
+    <!-- 광장 사람들은 JS에서 무리 지어 생성됩니다 -->
 
     <!-- 나 -->
     <div class="char me" id="me" style="left:1100px; top:1020px">
@@ -224,8 +241,15 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
   </div>
 </div>
 
-<div class="hint">방향키·WASD로 걷어요 (클릭도 OK) · 가까이 다가가면 그 사람 대화가 보여요 · 게시판·무대·약속은 오른쪽 위 아이콘</div>
+<div class="hint">방향키·WASD로 걷어요 (클릭도 OK) · 가까이 가면 머리 위 말풍선 + 왼쪽 아래에 지난 대화가 열려요 · 게시판·무대는 오른쪽 위 아이콘</div>
 <div class="proto-tag">광장 프로토타입 · 목데이터</div>
+
+<!-- ============ 좌하단 대화 로그 ============ -->
+<div class="chatlog" id="chatLog">
+  <div class="cl-head"><span class="cl-ava" id="clAva"></span><b id="clName"></b><span class="cl-sub">이제까지 나눈 대화</span></div>
+  <div class="cl-body" id="clBody"></div>
+  <div class="cl-foot">가까이 있는 동안 대화가 이어져요 · 멀어지면 닫혀요</div>
+</div>
 
 <!-- ============ 패널 ============ -->
 <div class="panel" id="panel">
@@ -247,7 +271,7 @@ const PALETTES = {
   yeonwoo: {H:'#5B8FD9', S:'#EFC49E', E:'#222831', T:'#8B6844', P:'#2B3442', D:'#333A46'},
   bora:    {H:'#8A5BC4', S:'#F6D2AE', E:'#222831', T:'#F2C14E', P:'#4A2E3E', D:'#5A4630'},
 };
-document.querySelectorAll('[data-spr]').forEach(el=>{
+function renderSprite(el){
   const colors = PALETTES[el.dataset.spr] || PALETTES.me;
   const px = 3, shadows = [];
   SPRITE_MAP.forEach((row, y)=>[...row].forEach((ch, x)=>{
@@ -255,7 +279,7 @@ document.querySelectorAll('[data-spr]').forEach(el=>{
     if(c) shadows.push(`${x*px}px ${y*px}px 0 0 ${c}`);
   }));
   el.querySelector('.spr').style.boxShadow = shadows.join(',');
-});
+}
 
 /* ================= 완강 게이트 — 100% 완강한 사람만 ================= */
 (function(){
@@ -359,20 +383,135 @@ scene.addEventListener('click', e=>{
   player.target = { x:clamp(wx, FLOOR.x, FLOOR.x+FLOOR.w), y:clamp(wy, FLOOR.y, FLOOR.y+FLOOR.h) };
 });
 
-/* NPC — 월드를 어슬렁거려요 */
-const npcs = [
-  {el:document.getElementById('npc-junho'),  x:520,  y:560,  t:null, speed:1.5, lines:['랜딩 카피 피드백 정리해서 올렸어요','오늘 20시 라이브에서 화면 공유해요']},
-  {el:document.getElementById('npc-dain'),   x:1620, y:640,  t:null, speed:1.3, lines:['오늘 3개 다 했어요!','이번 주 끝점 다시 잡는 중']},
-  {el:document.getElementById('npc-yeonwoo'),x:860,  y:1130, t:null, speed:1.6, lines:['숫자언어 지표 이거 맞나…','도움 글 하나 잡아야지']},
-  {el:document.getElementById('npc-bora'),   x:1760, y:1150, t:null, speed:1.2, lines:['100번 쓰기 18일째!','같이 놀래요 글 올렸어요, 목요일 번개 🍜']},
-];
-/* NPC는 제자리에 고정 — 배회 없음 */
+/* ================= 광장 사람들 — 무리 지어 모여 있어요 ================= */
+const NPCS = [
+  /* — 무리 ① 작업·피드백 (왼쪽 위) — */
+  {id:'junho', name:'박준호', x:540, y:560, lines:['랜딩 카피 피드백 정리해서 올렸어요','전환율은 헤드라인부터 손대는 게 나아요','오늘 20시 라이브에서 화면 공유해요'], history:[
+    {who:'them', text:'랜딩 카피 피드백, 문서로 정리해서 도움 글에 붙였어요', t:'3일 전'},
+    {who:'me',   text:'헐 감사해요, 유도형 질문일까 걱정했는데 딱 짚어주셨어요', t:'3일 전'},
+    {who:'them', text:'전환율은 헤드라인부터예요', t:'그저께'},
+    {who:'me',   text:'오늘 21시 반에 마저 볼까요?', t:'어제'},
+    {who:'them', text:'좋아요, 약속 테이블에 잡아둘게요', t:'어제'},
+  ]},
+  {id:'seojin', name:'오세진', x:662, y:588, lines:['첫 제안서 목차가 자꾸 막혀요','준호 님 피드백 방식이 좋더라고요'], history:[
+    {who:'them', text:'제안서 목차, 문제-해법 순서가 맞을까요?', t:'어제'},
+    {who:'me',   text:'저는 고객 언어로 문제부터 크게 잡아요', t:'어제'},
+    {who:'them', text:'아 표부터 그리는 거 보고 배웠어요', t:'오늘'},
+  ]},
+  {id:'haram', name:'이하람', x:600, y:648, lines:['지표는 결국 행동이 바뀌는 숫자여야 하더라고요','다인 님이랑 같이 정리 중이에요'], history:[
+    {who:'me',   text:'지표 뭘로 잡을지 저도 고민이에요', t:'그저께'},
+    {who:'them', text:'구독자 수보다 재방문을 봐요', t:'그저께'},
+    {who:'them', text:'같이 표로 그려봐요', t:'어제'},
+  ]},
 
-/* ===== 근접 기반 대화 — 가까이 간 NPC만 말풍선을 띄워요 ===== */
+  /* — 무리 ② 기록·회고 (오른쪽 위) — */
+  {id:'dain', name:'정다인', x:1600, y:664, lines:['오늘 3개 다 했어요!','이번 주 끝점 다시 잡는 중'], history:[
+    {who:'them', text:'매일 3개는 지키려고요', t:'어제'},
+    {who:'me',   text:'끝점 다시 잡는 거 어렵지 않아요?', t:'어제'},
+    {who:'them', text:'회고 쓰다 보면 보여요', t:'오늘'},
+  ]},
+  {id:'jiwoon', name:'한지운', x:1700, y:702, lines:['회고는 저녁 먹고 바로 쓰는 게 편해요','연우 님 고민 같이 봤어요'], history:[
+    {who:'them', text:'회고 밀리면 시간을 고정해봐요', t:'그저께'},
+    {who:'me',   text:'저는 아침형이라 저녁 회고가 약해요', t:'그저께'},
+    {who:'them', text:'그럼 아침에 어제치 쓰는 것도 방법이에요', t:'어제'},
+  ]},
+
+  /* — 무리 ③ 분수 아래 수다 (가운데 아래) — */
+  {id:'yeonwoo', name:'최연우', x:820, y:1096, lines:['숫자언어 지표 이거 맞나…','도움 글 하나 잡아야지'], history:[
+    {who:'them', text:'다들 저녁 회고 몇 시에 쓰세요?', t:'어제'},
+    {who:'me',   text:'저는 21시요, 밀리면 아예 안 쓰게 돼요', t:'어제'},
+    {who:'them', text:'지운 님이 시간 고정 팁 줬어요', t:'오늘'},
+  ]},
+  {id:'gaeun', name:'문가은', x:932, y:1112, lines:['포트폴리오 도윤 님이 봐주셨어요','이제 정산만 남았네요'], history:[
+    {who:'me',   text:'포폴 순서 조언 구했었죠', t:'3일 전'},
+    {who:'them', text:'네, 도윤 님이 프로젝트 3개로 줄이랬어요', t:'그저께'},
+    {who:'them', text:'완료 확정되면 조개 20 넘어가요', t:'어제'},
+  ]},
+  {id:'doyoon', name:'서도윤', x:876, y:1176, lines:['포폴은 덜어내는 게 핵심이에요','가은 님 거의 다 됐어요'], history:[
+    {who:'them', text:'포폴은 덜어내는 게 핵심이에요', t:'그저께'},
+    {who:'me',   text:'맞아요, 다 넣으려다 망하죠', t:'그저께'},
+  ]},
+
+  /* — 무리 ④ 목요일 번개 (오른쪽 아래) — */
+  {id:'bora', name:'황보라', x:1660, y:1132, lines:['100번 쓰기 18일째!','같이 놀래요 글 올렸어요, 목요일 번개 🍜'], history:[
+    {who:'them', text:'목표 100번 쓰기 18일 연속이에요!', t:'오늘'},
+    {who:'me',   text:'와 대단… 저는 자꾸 끊겨요', t:'오늘'},
+    {who:'them', text:'목요일 라멘 번개 오실래요? 🍜', t:'방금 전'},
+  ]},
+  {id:'minseo', name:'강민서', x:1770, y:1150, lines:['첫 고객 미팅 리허설 도와줬어요','번개 저도 낄래요 🍜'], history:[
+    {who:'them', text:'첫 미팅 긴장돼서 리허설했어요', t:'어제'},
+    {who:'me',   text:'상호 평가 남았죠? 좋았어요', t:'어제'},
+  ]},
+  {id:'sujin', name:'배수현', x:1716, y:1200, lines:['리허설 덕에 미팅 잘 봤어요','평가 남기러 왔어요'], history:[
+    {who:'me',   text:'미팅 어땠어요?', t:'오늘'},
+    {who:'them', text:'덕분에 안 떨었어요, 좋게 남길게요', t:'오늘'},
+  ]},
+];
+
+/* 팔레트 확장 (기존 me/junho/dain/yeonwoo/bora + 새 인물) */
+Object.assign(PALETTES, {
+  seojin: {H:'#C25A3A', S:'#F2C9A8', E:'#222831', T:'#3A7D5B', P:'#2B3442', D:'#4A3320'},
+  haram:  {H:'#2E2A28', S:'#EFC49E', E:'#222831', T:'#D98A3D', P:'#3A2E52', D:'#333A46'},
+  jiwoon: {H:'#4A5568', S:'#F6D2AE', E:'#222831', T:'#6C7A89', P:'#2B3442', D:'#333A46'},
+  gaeun:  {H:'#B0446A', S:'#F6D2AE', E:'#222831', T:'#E8A0C0', P:'#4A2E3E', D:'#5A4630'},
+  doyoon: {H:'#3A3630', S:'#EFC49E', E:'#222831', T:'#2F6E8F', P:'#2B3442', D:'#333A46'},
+  minseo: {H:'#7A9E3E', S:'#F2C9A8', E:'#222831', T:'#C0523A', P:'#2B3442', D:'#4A3320'},
+  sujin:  {H:'#C99A2E', S:'#F6D2AE', E:'#222831', T:'#5B6ABF', P:'#3A2E52', D:'#5A4630'},
+});
+
+/* NPC DOM 생성 + 스프라이트 렌더 (나(me)는 이미지라 제외, me 앞에 넣어 깊이정렬 유지) */
+NPCS.forEach(c=>{
+  const el = document.createElement('div');
+  el.className = 'char'; el.id = 'npc-' + c.id; el.dataset.spr = c.id;
+  el.style.left = c.x + 'px'; el.style.top = c.y + 'px';
+  el.innerHTML = '<div class="bubble"></div><div class="nametag">' + c.name + '</div><div class="body"><div class="spr"></div></div><div class="shadow"></div>';
+  world.insertBefore(el, me);
+  renderSprite(el);
+});
+
+/* NPC는 제자리에 고정 — 배회 없음 */
+const npcs = NPCS.map(c=>({
+  el: document.getElementById('npc-' + c.id),
+  x:c.x, y:c.y, t:null, speed:1.4,
+  name:c.name, lines:c.lines, history:c.history.slice(),
+}));
+
+/* ===== 근접 기반 대화 — 머리 위 말풍선 + 좌하단 지난 대화 로그 ===== */
 const CHAT_RADIUS = 260;      // 월드 px, 튜닝 가능
 const CHAT_CYCLE  = 3200;     // 곁에 머무는 동안 다음 대사로 넘어가는 간격(ms)
 npcs.forEach(n=>{ n.near = false; n.lineIdx = 0; n.nextCycle = 0; });
+
+/* 좌하단 로그 패널 */
+const chatLog = document.getElementById('chatLog');
+const clAva   = document.getElementById('clAva');
+const clName  = document.getElementById('clName');
+const clBody  = document.getElementById('clBody');
+let activeChat = null;        // 지금 로그에 떠 있는 NPC
+
+function msgNode(m){
+  const wrap = document.createElement('div');
+  wrap.className = 'cl-msg ' + (m.who === 'me' ? 'me' : 'them');
+  const b = document.createElement('div'); b.className = 'cl-bubble'; b.textContent = m.text;
+  const t = document.createElement('div'); t.className = 'cl-t';      t.textContent = m.t || '';
+  wrap.append(b, t);
+  return wrap;
+}
+function renderChatLog(n){
+  clName.textContent = n.name;
+  clAva.style.background = (PALETTES[n.el.dataset.spr] || PALETTES.me).H;
+  clBody.innerHTML = '';
+  n.history.forEach(m => clBody.appendChild(msgNode(m)));
+  clBody.scrollTop = clBody.scrollHeight;
+}
+function logLine(n, text){                            // 방금 한 말을 대화 기록에 남김
+  const m = {who:'them', text, t:'방금'};
+  n.history.push(m);
+  if(n.history.length > 40) n.history.shift();
+  if(n === activeChat){ clBody.appendChild(msgNode(m)); clBody.scrollTop = clBody.scrollHeight; }
+}
+
 function updateProximityChat(now){
+  let nearest = null, nd = Infinity;
   npcs.forEach(n=>{
     const bb = n.el.querySelector('.bubble');
     const d = Math.hypot(n.x - player.x, n.y - player.y);
@@ -383,16 +522,24 @@ function updateProximityChat(now){
         bb.textContent = n.lines[n.lineIdx];
         bb.classList.add('show');
         n.nextCycle = now + CHAT_CYCLE;
+        logLine(n, n.lines[n.lineIdx]);
       }else if(now >= n.nextCycle){                   // 계속 곁에 있음 → 다음 대사로 순환
         n.lineIdx = (n.lineIdx + 1) % n.lines.length;
         bb.textContent = n.lines[n.lineIdx];
         n.nextCycle = now + CHAT_CYCLE;
+        logLine(n, n.lines[n.lineIdx]);
       }
+      if(d < nd){ nd = d; nearest = n; }             // 가장 가까운 사람을 로그에 띄움
     }else if(n.near){                                 // 멀어짐 → 말풍선 숨김
       n.near = false;
       bb.classList.remove('show');
     }
   });
+  if(nearest){
+    if(nearest !== activeChat){ activeChat = nearest; renderChatLog(nearest); chatLog.classList.add('show'); }
+  }else if(activeChat){
+    activeChat = null; chatLog.classList.remove('show');
+  }
 }
 
 /* 메인 루프 — 이동 · 카메라 · 깊이 정렬 */
