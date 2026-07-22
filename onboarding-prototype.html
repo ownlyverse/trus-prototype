@@ -63,6 +63,16 @@ h2{font-size:1.5rem; font-weight:800; letter-spacing:-0.035em; line-height:1.35;
 .np-greet{font-size:.82rem; font-weight:600; color:var(--sub); margin-top:6px; line-height:1.45}
 .np-greet b{color:var(--blue-dark)}
 
+/* 정보 기입 — 칩/셀렉트 */
+.field .lh{display:flex; align-items:center; gap:6px; margin-bottom:6px}
+.field .lh label{margin-bottom:0}
+.field .lh small{color:var(--faint); font-size:.7rem; font-weight:600}
+.chips{display:flex; flex-wrap:wrap; gap:7px}
+.chip{font-size:.82rem; font-weight:600; padding:9px 13px; border-radius:12px; background:var(--gray); color:var(--sub); border:1.5px solid transparent; cursor:pointer; transition:.13s}
+.chip.on{background:var(--blue-soft); color:var(--blue-dark); border-color:var(--blue)}
+.chip:active{transform:scale(.96)}
+.pnote.mini{margin-top:0; margin-bottom:14px}
+
 /* 동의 (토스식) */
 .agree-all{display:flex; align-items:center; gap:11px; padding:15px 14px; border:1.5px solid var(--line); border-radius:16px; font-size:.95rem; font-weight:800; margin-bottom:6px; cursor:pointer}
 .agree-all input{width:20px; height:20px; accent-color:var(--blue)}
@@ -158,35 +168,9 @@ h4{font-size:.74rem; font-weight:700; color:var(--muted); margin:14px 0 8px}
     <div style="margin-top:10px"><button class="pbtn" id="btnAgree" disabled onclick="go(1)">다음</button></div>
   </section>
 
-  <!-- ② 사용자 카드 — 내 AI에게 물어오기 -->
-  <section class="stage" id="st1">
-    <div class="step-label">2 / 4 · 사용자 카드</div>
-    <h2>당신을 가장 잘 아는 AI에게<br>물어볼게요</h2>
-    <p class="sub">매일 쓰는 AI(ChatGPT·Claude 등)의 대화창이 당신을 제일 잘 알고 있어요. 아래 프롬프트를 그 AI에게 붙여넣으면 <b>[Trus World 사용자 카드]</b>를 만들어줘요. 이 카드가 <b>팀을 짜는 기준</b>과 <b>코치의 첫 대화</b>가 돼요.</p>
-
-    <div class="howto">
-      <div class="h-step"><i>1</i>아래 프롬프트를 <b>복사</b>해요</div>
-      <div class="h-step"><i>2</i>내가 쓰는 AI 대화창에 <b>붙여넣고</b>, 질문에 답하며 카드를 완성해요</div>
-      <div class="h-step"><i>3</i>완성된 카드를 <b>아래 칸에 붙여넣어요</b></div>
-    </div>
-
-    <div class="promptbox" id="promptBox">
-      <div class="pb-head">
-        <span>📋 사용자 카드 프롬프트</span>
-        <button class="copybtn" id="btnCopy">복사하기</button>
-      </div>
-      <pre class="pb-body" id="promptText"></pre>
-      <button class="pb-toggle" id="pbToggle">전체 보기 ▾</button>
-    </div>
-
-    <textarea class="pastebox" id="cardPaste" placeholder="여기에 AI가 만들어준 [Trus World 사용자 카드]를 붙여넣어 주세요"></textarea>
-    <button class="pbtn" id="btnCard" disabled onclick="saveCard()">다음 — 캐릭터 만들기</button>
-    <div class="pnote">카드에 <b>직무·회사가 적혀 있어도 팀을 짤 때만 쓰고</b>, 타운 안 누구에게도 보여주지 않아요. <button class="skiplink" onclick="go(2)">프로토타입이라 그냥 넘어갈래요 →</button></div>
-  </section>
-
-  <!-- ③ 캐릭터 생성 -->
+  <!-- ② 캐릭터 생성 -->
   <section class="stage" id="st2">
-    <div class="step-label">3 / 4 · 캐릭터</div>
+    <div class="step-label">2 / 5 · 캐릭터</div>
     <h2>타운을 걸어 다닐 내 모습이에요</h2>
     <p class="sub">머리색과 옷을 골라보세요. 이름표는 본명 그대로예요.</p>
     <div class="char-stage">
@@ -213,12 +197,86 @@ h4{font-size:.74rem; font-weight:700; color:var(--muted); margin:14px 0 8px}
         </div>
       </div>
     </div>
-    <button class="pbtn" onclick="go(3)">이 모습으로 시작하기</button>
+    <button class="pbtn" onclick="go(2)">다음 — 나를 알려주기</button>
   </section>
 
-  <!-- ④ 입장 — 랜덤 2개 오픈 -->
+  <!-- ③ 정보 기입 (직접 · 필수) — 광장 추천 4축의 씨앗 -->
+  <section class="stage" id="stInfo">
+    <div class="step-label">3 / 5 · 정보</div>
+    <h2>당신을 조금 알려주세요</h2>
+    <p class="sub">여기 적는 건 <b>딱 맞는 광장·친구 추천</b>과 <b>코치의 첫 대화</b>에 쓰여요. 직무·회사는 <b>추천 계산에만</b> 쓰고 타운엔 안 보여요.</p>
+
+    <div class="field">
+      <div class="lh"><label>지금 커리어 단계</label></div>
+      <div class="chips" id="careerChips">
+        <button type="button" class="chip" data-v="탐색 중">탐색 중</button>
+        <button type="button" class="chip" data-v="실무 1–2년">실무 1–2년</button>
+        <button type="button" class="chip" data-v="혼자 굴리는 중">혼자 굴리는 중</button>
+        <button type="button" class="chip" data-v="리드·성장">리드·성장</button>
+        <button type="button" class="chip" data-v="확장기">확장기</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="lh"><label>직무</label><small>· 추천 계산에만 사용 · 타운 비공개</small></div>
+      <input type="text" id="infoJob" placeholder="예: 마케터 / 창업가 / 개발자" autocomplete="off">
+    </div>
+
+    <div class="field">
+      <label>지금 가장 큰 고민 한 줄</label>
+      <input type="text" id="infoWorry" placeholder="예: 성과를 숫자로 보여주지 못하겠어요" autocomplete="off">
+    </div>
+
+    <div class="field">
+      <div class="lh"><label>관심 주제</label><small>· 여러 개 골라도 돼요</small></div>
+      <div class="chips" id="interestChips">
+        <button type="button" class="chip" data-v="기록">기록</button>
+        <button type="button" class="chip" data-v="전략">전략</button>
+        <button type="button" class="chip" data-v="숫자·매출">숫자·매출</button>
+        <button type="button" class="chip" data-v="고객">고객</button>
+        <button type="button" class="chip" data-v="실행·루틴">실행·루틴</button>
+        <button type="button" class="chip" data-v="글쓰기">글쓰기</button>
+        <button type="button" class="chip" data-v="회고">회고</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="lh"><label>이루고 싶은 것 한 줄</label><small>· 후보여도 좋아요</small></div>
+      <input type="text" id="infoGoal" placeholder="예: 3개월 안에 첫 유료 고객 10명" autocomplete="off">
+    </div>
+
+    <button class="pbtn" id="btnInfo" disabled onclick="saveInfo()">다음</button>
+  </section>
+
+  <!-- ④ 사용자 카드 — AI에게 더 물어오기 (선택 심화) -->
+  <section class="stage" id="st1">
+    <div class="step-label">4 / 5 · 심화 (선택)</div>
+    <h2>더 정확히 알고 싶으면<br>AI에게 물어올게요</h2>
+    <p class="sub">방금 적어주신 것만으로도 충분해요. 더 정교한 추천과 코치의 첫 대화를 원하면, 매일 쓰는 AI(ChatGPT·Claude 등)에게 물어 <b>[Trus World 사용자 카드]</b>를 받아 붙여넣어요. <b>선택이에요.</b></p>
+
+    <div class="howto">
+      <div class="h-step"><i>1</i>아래 프롬프트를 <b>복사</b>해요</div>
+      <div class="h-step"><i>2</i>내가 쓰는 AI 대화창에 <b>붙여넣고</b>, 질문에 답하며 카드를 완성해요</div>
+      <div class="h-step"><i>3</i>완성된 카드를 <b>아래 칸에 붙여넣어요</b></div>
+    </div>
+
+    <div class="promptbox" id="promptBox">
+      <div class="pb-head">
+        <span>📋 사용자 카드 프롬프트</span>
+        <button class="copybtn" id="btnCopy">복사하기</button>
+      </div>
+      <pre class="pb-body" id="promptText"></pre>
+      <button class="pb-toggle" id="pbToggle">전체 보기 ▾</button>
+    </div>
+
+    <textarea class="pastebox" id="cardPaste" placeholder="여기에 AI가 만들어준 [Trus World 사용자 카드]를 붙여넣어 주세요"></textarea>
+    <button class="pbtn" id="btnCard" disabled onclick="saveCard()">카드 반영하고 다음</button>
+    <div class="pnote">직무·회사가 적혀 있어도 <b>추천 계산에만</b> 쓰고 타운 안 누구에게도 보여주지 않아요. <button class="skiplink" onclick="go(4)">이대로 입장할래요 →</button></div>
+  </section>
+
+  <!-- ⑤ 입장 — 랜덤 2개 오픈 -->
   <section class="stage" id="st3">
-    <div class="step-label">4 / 4 · 입장</div>
+    <div class="step-label">5 / 5 · 입장</div>
     <div class="enter-hero">
       <div class="big">🎉</div>
       <h2 id="welcomeName">기능 2개가 열렸어요</h2>
@@ -240,10 +298,39 @@ h4{font-size:.74rem; font-weight:700; color:var(--muted); margin:14px 0 8px}
 /* 단계 이동 */
 function go(n){
   document.querySelectorAll('.stage').forEach((s,i)=>s.classList.toggle('on', i===n));
-  document.getElementById('progBar').style.width = ((n+1)/4*100) + '%';
-  if(n===2){ const nm = document.getElementById('inName').value || '김이서'; document.getElementById('avName').textContent = nm; }
-  if(n===3) revealUnlocks();
+  document.getElementById('progBar').style.width = ((n+1)/5*100) + '%';
+  if(n===1){ const nm = document.getElementById('inName').value || '김이서'; document.getElementById('avName').textContent = nm; }
+  if(n===4) revealUnlocks();
   window.scrollTo(0,0);
+}
+
+/* 정보 기입 스텝 (직접 · 필수) — 광장 추천 4축 씨앗 */
+let selCareer = '';
+const selInterests = [];
+function checkInfoGate(){
+  const worry = document.getElementById('infoWorry').value.trim();
+  document.getElementById('btnInfo').disabled = !(selCareer && worry.length >= 2);
+}
+document.querySelectorAll('#careerChips .chip').forEach(c=>c.addEventListener('click', ()=>{
+  document.querySelectorAll('#careerChips .chip').forEach(x=>x.classList.remove('on'));
+  c.classList.add('on'); selCareer = c.dataset.v; checkInfoGate();
+}));
+document.querySelectorAll('#interestChips .chip').forEach(c=>c.addEventListener('click', ()=>{
+  c.classList.toggle('on');
+  const v = c.dataset.v, i = selInterests.indexOf(v);
+  if(c.classList.contains('on') && i < 0) selInterests.push(v);
+  else if(i >= 0) selInterests.splice(i,1);
+}));
+document.getElementById('infoWorry').addEventListener('input', checkInfoGate);
+function saveInfo(){
+  localStorage.setItem('trus_info', JSON.stringify({
+    career: selCareer,
+    job: document.getElementById('infoJob').value.trim(),
+    worry: document.getElementById('infoWorry').value.trim(),
+    interests: selInterests,
+    goal: document.getElementById('infoGoal').value.trim()
+  }));
+  go(3);
 }
 
 /* 동의 체크 */
@@ -320,7 +407,7 @@ cardPaste.addEventListener('input', ()=>{
 });
 function saveCard(){
   localStorage.setItem('trus_card', cardPaste.value.trim());
-  go(2);
+  go(4);
 }
 
 /* 캐릭터 스와치 */
