@@ -132,9 +132,12 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
 .pbtn.center{justify-content:center; width:100%}
 
 .vsec{position:absolute; left:10px; top:10px; background:rgba(23,19,31,.88); color:#fff; font-size:.78rem; padding:3px 9px; border-radius:2px; font-family:'NeoDunggeunmo','Pretendard Variable',sans-serif; letter-spacing:0}
-.sign{text-align:center; color:#FFD9E8; font-size:1.05rem; margin-bottom:6px;
-  text-shadow:0 0 8px rgba(242,109,156,.8)}
-.sign small{display:block; font-size:.68rem; color:#A092B5; text-shadow:none; margin-top:4px; font-family:"Pretendard Variable",sans-serif}
+.sign{text-align:center; margin:2px 0 22px}
+.sign .board{display:inline-flex; align-items:center; gap:9px; padding:10px 20px; border-radius:13px;
+  background:rgba(23,19,31,.82); border:2px solid #3E3155; color:#FFE6F0;
+  font-size:clamp(1.15rem,2.7vw,1.45rem); letter-spacing:0;
+  box-shadow:0 3px 0 rgba(0,0,0,.45), 0 0 22px rgba(242,109,156,.28)}
+.sign small{display:block; font-size:.82rem; color:#B7AACB; text-shadow:none; margin-top:11px; font-family:"Pretendard Variable",sans-serif; letter-spacing:-0.01em}
 
 /* 진행 오브 레일 */
 .rail{display:flex; align-items:center; justify-content:center; gap:8px; margin:16px 0 22px}
@@ -266,7 +269,7 @@ canvas{display:block; width:100%; height:200px; touch-action:none; cursor:crossh
 </header>
 
 <div class="stage">
-  <div class="sign pxfont">📺 강의실 — 전략 설정<small>커리큘럼 5단계 중 마지막 · 일의 교과서</small></div>
+  <div class="sign pxfont"><span class="board">📺 강의실 — 전략 설정</span><small>커리큘럼 5단계 중 마지막 · 일의 교과서</small></div>
   <div class="liveroom">
     <div class="vid main">
       <video id="lecVid" src="assets/lecture.mp4" poster="assets/lecture-poster.jpg" playsinline preload="metadata"></video>
