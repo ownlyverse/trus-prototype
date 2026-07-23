@@ -46,6 +46,24 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
 .hud-btn .badge-n{position:absolute; top:-7px; right:-7px; background:#F26D9C; color:#fff; border:2px solid #0B0912; border-radius:8px; font-size:.6rem; padding:0 5px; font-weight:700}
 .hud-btn[data-panel]{position:relative}
 
+/* 메뉴 드로어 — 아이콘 옆 이름, 그룹 구분 */
+.menu-drawer{position:fixed; top:60px; right:14px; z-index:66; width:238px; max-width:calc(100vw - 28px);
+  background:var(--paper); border:3px solid #17131F; border-radius:11px; box-shadow:6px 6px 0 rgba(0,0,0,.35);
+  padding:9px; display:none; flex-direction:column;}
+.menu-drawer.open{display:flex; animation:mdpop .16s ease-out}
+@keyframes mdpop{from{opacity:0; transform:translateY(-8px)}to{opacity:1; transform:none}}
+.md-group{display:flex; flex-direction:column; gap:2px}
+.md-group + .md-group{margin-top:7px; padding-top:8px; border-top:2px dashed #E5E8EB}
+.md-label{font-family:'NeoDunggeunmo','Pretendard Variable',Pretendard,sans-serif; letter-spacing:0;
+  font-size:.66rem; font-weight:700; color:#8B95A1; padding:2px 8px 5px}
+.md-item{display:flex; align-items:center; gap:11px; width:100%; padding:9px 10px; border-radius:8px; text-align:left; transition:background .12s}
+.md-item:hover{background:#F2F4F6}
+.md-item:active{background:#E6EAEE}
+.md-ic{font-size:1.18rem; width:24px; text-align:center; flex-shrink:0; line-height:1}
+.md-name{font-size:.84rem; font-weight:600; color:var(--ink); flex:1}
+.md-badge{background:#F26D9C; color:#fff; border:2px solid #0B0912; border-radius:8px; font-size:.6rem; padding:0 5px; font-weight:700;
+  font-family:'NeoDunggeunmo','Pretendard Variable',Pretendard,sans-serif; letter-spacing:0}
+
 /* ---------- 장면 (해질녘 광장) ---------- */
 .scene{position:fixed; inset:0; overflow:hidden; background:#6E4634}
 .world{position:absolute; left:0; top:0; width:2200px; height:1400px; will-change:transform; background-color:#D8C6AC}
@@ -193,17 +211,28 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
   <span class="pill-stat trust"><span class="ic">★</span><b class="num">84</b></span>
   <span class="pill-stat live"><span class="ic">📡</span>20시 라이브</span>
   <span class="spacer"></span>
-  <button class="hud-btn" data-panel="help" title="도움 게시판">🪧<span class="badge-n">9</span></button>
-  <button class="hud-btn" data-panel="board" title="게시판 — 공지·자랑·같이 놀래요">📋</button>
-  <button class="hud-btn" data-panel="members" title="멤버 소개 보드">🪪</button>
-  <button class="hud-btn" data-panel="stage" title="무대 — 오늘 20시 라이브">🎤</button>
-  <button class="hud-btn" data-panel="table" title="약속 테이블">⛱️<span class="badge-n">1</span></button>
-  <button class="hud-btn" data-panel="schedule" title="일정 안내판">🕰️</button>
-  <button class="hud-btn" id="navHome" title="마이스페이스로">🏠</button>
-  <button class="hud-btn" id="navWorld" title="월드맵">🗺️</button>
-  <button class="hud-btn" id="navAnder" title="앤더스페이스">🎪</button>
-  <button class="hud-btn" id="navLobby" title="다른 광장 고르기">⛲</button>
+  <button class="hud-btn" id="menuToggle" title="메뉴 열기" aria-label="메뉴 열기">☰<span class="badge-n" id="menuBadge">10</span></button>
 </header>
+
+<!-- 메뉴 드로어 — 그룹 + 아이콘 옆 이름 -->
+<div class="menu-drawer" id="menuDrawer">
+  <div class="md-group">
+    <div class="md-label">광장 기능</div>
+    <button class="md-item" data-panel="help"><span class="md-ic">🪧</span><span class="md-name">도움 게시판</span><span class="md-badge">9</span></button>
+    <button class="md-item" data-panel="board"><span class="md-ic">📋</span><span class="md-name">게시판</span></button>
+    <button class="md-item" data-panel="members"><span class="md-ic">🪪</span><span class="md-name">멤버 소개</span></button>
+    <button class="md-item" data-panel="stage"><span class="md-ic">🎤</span><span class="md-name">무대 · 라이브</span></button>
+    <button class="md-item" data-panel="table"><span class="md-ic">⛱️</span><span class="md-name">약속 테이블</span><span class="md-badge">1</span></button>
+    <button class="md-item" data-panel="schedule"><span class="md-ic">🕰️</span><span class="md-name">일정 안내판</span></button>
+  </div>
+  <div class="md-group">
+    <div class="md-label">이동</div>
+    <button class="md-item" id="navHome"><span class="md-ic">🏠</span><span class="md-name">마이스페이스</span></button>
+    <button class="md-item" id="navWorld"><span class="md-ic">🗺️</span><span class="md-name">월드맵</span></button>
+    <button class="md-item" id="navAnder"><span class="md-ic">🎪</span><span class="md-name">앤더스페이스</span></button>
+    <button class="md-item" id="navLobby"><span class="md-ic">⛲</span><span class="md-name">다른 광장 고르기</span></button>
+  </div>
+</div>
 
 <!-- ============ 장면 ============ -->
 <div class="scene" id="scene">
@@ -242,7 +271,7 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
   </div>
 </div>
 
-<div class="hint">방향키·WASD로 걷어요 (클릭도 OK) · 가까이 가면 머리 위 말풍선 + 왼쪽 아래에 지난 대화가 열려요 · 게시판·무대는 오른쪽 위 아이콘</div>
+<div class="hint">방향키·WASD로 걷어요 (클릭도 OK) · 가까이 가면 머리 위 말풍선 + 왼쪽 아래에 지난 대화가 열려요 · 게시판·무대·이동은 오른쪽 위 ☰ 메뉴</div>
 <div class="proto-tag">광장 프로토타입 · 목데이터</div>
 
 <!-- ============ 좌하단 대화 로그 ============ -->
@@ -744,12 +773,28 @@ function bindPanel(){
   }));
 }
 
-/* ===== 공간 이동 ===== */
+/* ===== 메뉴 드로어 ===== */
+const menuToggle = document.getElementById('menuToggle');
+const menuDrawer = document.getElementById('menuDrawer');
+function closeMenu(){ menuDrawer.classList.remove('open'); }
+menuToggle.addEventListener('click', e=>{ e.stopPropagation(); menuDrawer.classList.toggle('open'); });
+document.addEventListener('click', e=>{
+  if(menuDrawer.classList.contains('open') && !menuDrawer.contains(e.target) && !menuToggle.contains(e.target)) closeMenu();
+});
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeMenu(); });
+/* 배지 합계 = 메뉴 안 알림 수 */
+(function(){
+  const total = [...menuDrawer.querySelectorAll('.md-badge')].reduce((s,b)=>s + (parseInt(b.textContent)||0), 0);
+  const mb = document.getElementById('menuBadge');
+  if(total>0){ mb.textContent = total; } else { mb.style.display='none'; }
+})();
+
+/* ===== 메뉴 항목 → 기능 패널 / 공간 이동 ===== */
+menuDrawer.querySelectorAll('.md-item[data-panel]').forEach(b=>b.addEventListener('click', ()=>{ openPanel(b.dataset.panel); closeMenu(); }));
 document.getElementById('navHome').addEventListener('click',  ()=>{ location.href = 'myspace-prototype.html?mode=full'; });
 document.getElementById('navWorld').addEventListener('click', ()=>{ location.href = 'worldmap-prototype.html'; });
 document.getElementById('navAnder').addEventListener('click', ()=>{ location.href = 'anderspace-prototype.html'; });
 document.getElementById('navLobby').addEventListener('click', ()=>{ location.href = 'plaza-lobby-prototype.html'; });
-document.querySelectorAll('.hud-btn[data-panel]').forEach(b=>b.addEventListener('click', ()=>openPanel(b.dataset.panel)));
 
 </script>
 </body>
