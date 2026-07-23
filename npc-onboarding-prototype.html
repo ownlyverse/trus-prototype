@@ -50,34 +50,80 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
 
 /* 진행 오브 레일 (강의실) */
 .rail{display:flex; align-items:center; justify-content:center; gap:8px}
-.orb{width:24px; height:24px; border-radius:50%; border:3px solid #17171C; background:#3A2E4E; position:relative; overflow:hidden; flex-shrink:0}
+.orb{width:22px; height:22px; border-radius:50%; border:3px solid #17171C; background:#3A2E4E; position:relative; overflow:hidden; flex-shrink:0}
 .orb i{position:absolute; left:0; right:0; bottom:0; height:0; background:linear-gradient(180deg,var(--accent),#FF9DBE); transition:height .5s ease}
 .orb.done i{height:100%}
 .orb.cur{border-color:#FFD9E8; box-shadow:0 0 10px rgba(242,109,156,.6)}
 .rail .barlink{width:12px; height:3px; background:#3A2E4E}
 
-/* 코치 — 카드 위에 얹힌 픽셀 이름표 + 🦉 */
-.coach{display:flex; flex-direction:column; align-items:center; gap:8px; margin-bottom:-30px; z-index:2; animation:bob 1.9s ease-in-out infinite}
-.coach.talking{animation:bob 0.9s ease-in-out infinite}
-@keyframes bob{0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)}}
-.owl{width:76px; height:76px; border-radius:16px; background:var(--paper); border:3px solid #17171C;
-  display:flex; align-items:center; justify-content:center; font-size:40px; box-shadow:4px 4px 0 rgba(0,0,0,.4)}
+/* 코치 — 카드 위에 얹힌 픽셀 프레임 + 살아있는 사람 얼굴 */
+.coach{display:flex; flex-direction:column; align-items:center; gap:8px; margin-bottom:-34px; z-index:2; animation:bob 2.4s ease-in-out infinite}
+.coach.talking{animation:bob 1.1s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translateY(0)} 50%{transform:translateY(-7px)}}
+.portrait{width:96px; height:96px; border-radius:18px; background:var(--paper); border:3px solid #17171C;
+  display:flex; align-items:center; justify-content:center; box-shadow:4px 4px 0 rgba(0,0,0,.4); overflow:hidden}
+.portrait svg{width:100%; height:100%; display:block}
 .nametag{display:inline-flex; align-items:center; gap:6px; font-size:.72rem; color:#FFE6F0;
   background:rgba(23,19,31,.88); border:2px solid #3E3155; border-radius:5px; padding:4px 11px;
   box-shadow:0 2px 0 rgba(0,0,0,.4)}
 .nametag .dot{width:7px; height:7px; border-radius:50%; background:#FF4D6D; box-shadow:0 0 7px #FF4D6D; animation:blink 1.4s infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
 
+/* ── SVG 얼굴 파츠 ── */
+#face .eye{transform-box:fill-box; transform-origin:center; transition:transform .09s ease}
+#face .brow{transform-box:fill-box; transform-origin:center; transition:transform .18s ease}
+#face #blush{opacity:.18; transition:opacity .25s}
+#face .mouth{opacity:0; transition:opacity .06s}
+/* 깜빡임 */
+#face.blink .eye{transform:scaleY(.08)}
+/* 표정: 반가움 */
+#face.exp-greet .brow{transform:translateY(-3px)}
+#face.exp-greet #mouthSmile{opacity:1}
+#face.exp-greet #blush{opacity:.4}
+/* 표정: 미소 */
+#face.exp-smile .eye{transform:scaleY(.62) translateY(2px)}
+#face.exp-smile #mouthSmile{opacity:1}
+#face.exp-smile #blush{opacity:.34}
+/* 표정: 집중(질문) */
+#face.exp-focus .brow{transform:translateY(1px)}
+#face.exp-focus #mouthNeutral{opacity:1}
+/* 표정: 공감(따뜻) */
+#face.exp-warm .eye{transform:scaleY(.7) translateY(2px)}
+#face.exp-warm .brow{transform:translateY(-1px)}
+#face.exp-warm #mouthSmile{opacity:1}
+#face.exp-warm #blush{opacity:.5}
+/* 말하는 중(립싱크) — 벌린 입이 다른 입을 덮음 */
+#face.mo #mouthOpen{opacity:1}
+#face.mo #mouthSmile, #face.mo #mouthNeutral{opacity:0}
+@media(prefers-reduced-motion:reduce){#face .eye,#face .brow,#face .mouth{transition:none}}
+
 /* 대사 카드 = 크림 종이 카드 (강의실·광장 카드) */
 .card{position:relative; width:min(500px,92vw); background:var(--paper); border:3px solid #17171C; border-radius:8px;
-  box-shadow:8px 8px 0 rgba(0,0,0,.45); padding:34px 26px 22px; animation:rise .4s ease}
+  box-shadow:8px 8px 0 rgba(0,0,0,.45); padding:38px 26px 22px; animation:rise .4s ease}
 @keyframes rise{from{opacity:0; transform:translateY(16px)}to{opacity:1; transform:none}}
-.dl-msg{font-size:1.02rem; font-weight:600; line-height:1.68; color:var(--ink); min-height:80px; transition:opacity .25s}
+.dl-msg{font-size:1.02rem; font-weight:600; line-height:1.7; color:var(--ink); min-height:84px}
 .dl-msg b{color:var(--accent-d); font-weight:800}
 .dl-msg .shellv{color:var(--shell); font-weight:800}
-.dl-foot{display:flex; align-items:center; justify-content:flex-end; margin-top:18px; padding-top:16px; border-top:2px dashed var(--line)}
+.caret{display:inline-block; width:8px; height:1.05em; margin-left:1px; vertical-align:-2px;
+  background:var(--accent); animation:caret .7s steps(1) infinite}
+@keyframes caret{0%,50%{opacity:1}50.01%,100%{opacity:0}}
+
+.dl-foot{margin-top:18px; padding-top:16px; border-top:2px dashed var(--line)}
+
+/* 선택지 칩 (크림 카드 위에서 읽히는 톤) */
+.choices{display:flex; flex-direction:column; gap:9px}
+.choice{display:flex; align-items:center; gap:10px; width:100%; text-align:left;
+  padding:12px 14px; border-radius:8px; background:#fff; border:2px solid var(--line);
+  color:var(--ink); font-size:.96rem; font-weight:700; transition:border-color .1s, background .1s, transform .06s}
+.choice:hover{border-color:var(--accent); background:var(--accent-soft)}
+.choice:active{transform:translateY(2px)}
+.choice .key{font-family:'NeoDunggeunmo',sans-serif; font-size:.72rem; color:#fff; background:var(--accent-d);
+  border-radius:4px; min-width:20px; height:20px; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0}
+.choice.entering{opacity:0; transform:translateY(8px); animation:choiceIn .28s ease forwards}
+@keyframes choiceIn{to{opacity:1; transform:none}}
 
 /* pbtn (강의실·광장과 동일 — 청크 핑크 버튼) */
+.next-row{display:flex; justify-content:flex-end}
 .pbtn{display:inline-flex; align-items:center; gap:6px; font-size:.9rem; padding:11px 22px; border-radius:5px;
   background:var(--accent); color:#fff; border:2px solid var(--accent-d); box-shadow:0 4px 0 var(--accent-d); transition:transform .08s, box-shadow .08s}
 .pbtn:active{transform:translateY(3px); box-shadow:0 1px 0 var(--accent-d)}
@@ -86,7 +132,7 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
   font-size:.7rem; color:#8478A0; text-align:center}
 .hint kbd{font-family:'NeoDunggeunmo',sans-serif; background:rgba(255,255,255,.08); border:1px solid #3E3155;
   border-radius:3px; padding:1px 6px; color:#B7AACB}
-@media(prefers-reduced-motion:reduce){.card{animation:none} .coach{animation:none}}
+@media(prefers-reduced-motion:reduce){.card{animation:none} .coach{animation:none} .choice.entering{animation:none; opacity:1; transform:none}}
 </style>
 </head>
 <body>
@@ -99,74 +145,222 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
   <div class="rail" id="rail"></div>
 
   <div class="coach talking" id="coach">
-    <div class="owl">🦉</div>
-    <div class="nametag"><span class="dot"></span>🦉 바운더리 코치</div>
+    <div class="portrait">
+      <!-- 웹툰풍 사람 얼굴: 깜빡임·립싱크·표정 (JS로 클래스 제어) -->
+      <svg id="face" class="exp-greet" viewBox="0 0 120 120" aria-hidden="true">
+        <!-- 목 -->
+        <rect x="50" y="92" width="20" height="18" rx="6" fill="#EDBFA0"/>
+        <!-- 얼굴 -->
+        <ellipse cx="60" cy="62" rx="33" ry="35" fill="#F6D2B8"/>
+        <!-- 귀 -->
+        <ellipse cx="28" cy="64" rx="6" ry="8" fill="#F1C6A6"/>
+        <ellipse cx="92" cy="64" rx="6" ry="8" fill="#F1C6A6"/>
+        <!-- 머리카락 -->
+        <path d="M24 66 Q22 24 60 21 Q98 24 96 66 Q92 46 79 40 Q71 52 60 50 Q49 52 41 40 Q28 46 24 66 Z" fill="#4A3626"/>
+        <!-- 볼터치 -->
+        <g id="blush">
+          <ellipse cx="40" cy="72" rx="8" ry="5" fill="#F7A8C4"/>
+          <ellipse cx="80" cy="72" rx="8" ry="5" fill="#F7A8C4"/>
+        </g>
+        <!-- 눈썹 -->
+        <rect class="brow" x="38" y="47" width="16" height="4" rx="2" fill="#4A3626"/>
+        <rect class="brow" x="66" y="47" width="16" height="4" rx="2" fill="#4A3626"/>
+        <!-- 눈 (흰자 + 눈동자) -->
+        <g class="eye">
+          <ellipse cx="46" cy="60" rx="7.5" ry="9" fill="#fff"/>
+          <circle cx="47" cy="61" r="4.6" fill="#3A2A22"/>
+          <circle cx="48.6" cy="59.4" r="1.5" fill="#fff"/>
+        </g>
+        <g class="eye">
+          <ellipse cx="74" cy="60" rx="7.5" ry="9" fill="#fff"/>
+          <circle cx="73" cy="61" r="4.6" fill="#3A2A22"/>
+          <circle cx="74.6" cy="59.4" r="1.5" fill="#fff"/>
+        </g>
+        <!-- 코 -->
+        <path d="M60 66 Q58 72 61 74" fill="none" stroke="#E0A987" stroke-width="2.4" stroke-linecap="round"/>
+        <!-- 입: 미소 / 중립 / 벌린입(말하는중) -->
+        <path id="mouthSmile" class="mouth" d="M49 80 Q60 90 71 80" fill="none" stroke="#C24C78" stroke-width="3.4" stroke-linecap="round"/>
+        <path id="mouthNeutral" class="mouth" d="M51 82 L69 82" fill="none" stroke="#C24C78" stroke-width="3.4" stroke-linecap="round"/>
+        <ellipse id="mouthOpen" class="mouth" cx="60" cy="82" rx="8" ry="6" fill="#B23A66"/>
+      </svg>
+    </div>
+    <div class="nametag"><span class="dot"></span>바운더리 코치</div>
   </div>
 
   <div class="card">
     <div class="dl-msg" id="dlMsg"></div>
-    <div class="dl-foot">
-      <button class="pbtn" id="nextBtn" onclick="advance()">다음 ›</button>
+    <div class="dl-foot" id="dlFoot">
+      <div class="choices" id="choices" style="display:none"></div>
+      <div class="next-row" id="nextRow" style="display:none">
+        <button class="pbtn" id="nextBtn" onclick="advance()">다음 ›</button>
+      </div>
     </div>
   </div>
 </div>
 
-<div class="hint"><kbd>Space</kbd> · <kbd>Enter</kbd> 로도 넘길 수 있어요</div>
+<div class="hint"><kbd>숫자키</kbd> 선택 · <kbd>Space</kbd>/<kbd>Enter</kbd> 넘기기</div>
 
 <script>
 const NAME = localStorage.getItem('trus_name') || '김이서';
 
-const LINES = [
-  `${NAME} 님, <b>바운더리 타운</b>에 오신 걸 환영해요! 👋<br>저는 함께 걸어갈 <b>바운더리 코치</b>예요.`,
-  `여기는 당신만의 공간, <b>마이스페이스</b>예요.<br>작업실이자, 매일 돌아올 집이죠.`,
-  `매일 아침 '오늘의 바운더리'를 세우고<br>저녁에 회고하면 <span class="shellv">◗ 조개</span>가 쌓여요.`,
-  `강의 스크린에서는 저와 코치들이 <b>함께</b> 강의를 들어요.<br>여기선 혼자가 아니에요.`,
-  `모든 강의를 <b>완강</b>하면 <b>광장</b>이 열려요.<br>비슷한 고민을 가진 친구들이 기다리고 있어요.`,
-  `자, 준비됐나요?<br>당신의 <b>마이스페이스</b>로 안내할게요!`
-];
+/* ── 대화 그래프 ──
+   각 노드: exp(표정) · step(진행 오브) · text(세그먼트 배열, b=강조/shell=조개색)
+   · choices[] (분기) 또는 next(자동 다음) 또는 final(입장) */
+const NODES = {
+  start: { exp:'greet', step:0, text:[
+      {t:`${NAME} 님… 맞죠? 드디어 만났어요.\n앞으로 옆에서 같이 걸어갈 `},{t:'바운더리 코치',b:1},{t:`예요. 반가워요 👋`}
+    ], choices:[ {t:'저도 반가워요', to:'r_glad'}, {t:'조금 떨려요…', to:'r_nervous'} ] },
 
-let i = 0;
-const rail = document.getElementById('rail');
-const msg = document.getElementById('dlMsg');
+  r_glad:    { exp:'warm', step:0, text:[{t:'저도 오래 기다렸어요.\n이제 우리, 자주 볼 사이예요 😊'}], next:'mood' },
+  r_nervous: { exp:'warm', step:0, text:[{t:'처음이니까 떨리는 게 당연해요.\n괜찮아요, 제가 옆에 있을게요.'}], next:'mood' },
+
+  mood: { exp:'focus', step:1, text:[
+      {t:'그럼 하나만 물어볼게요.\n지금 '},{t:'마음',b:1},{t:'은 어때요?'}
+    ], choices:[ {t:'설레요', to:'m_ex'}, {t:'좀 피곤해요', to:'m_ti'}, {t:'잘 모르겠어요', to:'m_du'} ] },
+
+  m_ex: { exp:'smile', step:1, text:[{t:'설렘, 참 좋아요.\n그 마음 잊지 않게 제가 도울게요.'}], next:'space' },
+  m_ti: { exp:'warm',  step:1, text:[{t:'피곤한 날도 있죠.\n오늘은 딱 한 걸음만, 같이 가봐요.'}], next:'space' },
+  m_du: { exp:'warm',  step:1, text:[{t:'몰라도 괜찮아요.\n천천히 알아가면 되니까요.'}], next:'space' },
+
+  space:  { exp:'smile', step:2, text:[
+      {t:'여기는 '},{t:`${NAME} 님만의 공간`,b:1},{t:', '},{t:'마이스페이스',b:1},{t:'예요.\n매일 돌아올 작업실이자 집이죠.'}
+    ], next:'shell' },
+
+  shell:  { exp:'smile', step:3, text:[
+      {t:'매일 아침 '},{t:'‘오늘의 바운더리’',b:1},{t:' 하나를 세우고\n저녁에 돌아보면 '},{t:'◗ 조개',shell:1},{t:'가 쌓여요.'}
+    ], next:'lecture' },
+
+  lecture:{ exp:'warm', step:4, text:[
+      {t:'강의는 혼자 안 들어요.\n저랑 코치들이 '},{t:'옆자리',b:1},{t:'에서 같이 들어요.\n다 들으면 '},{t:'광장',b:1},{t:'도 열리고요.'}
+    ], next:'end' },
+
+  end:    { exp:'greet', step:5, text:[
+      {t:'자, 준비됐나요?\n'},{t:`${NAME} 님의 마이스페이스`,b:1},{t:'로 안내할게요!'}
+    ], final:true },
+};
+const STEPS = 6;
+
+const rail    = document.getElementById('rail');
+const msg     = document.getElementById('dlMsg');
+const choices = document.getElementById('choices');
+const nextRow = document.getElementById('nextRow');
 const nextBtn = document.getElementById('nextBtn');
-const coach = document.getElementById('coach');
+const coach   = document.getElementById('coach');
+const face    = document.getElementById('face');
 
-/* 진행 오브 레일 만들기 (6단계, 사이 연결선) */
-rail.innerHTML = LINES.map((_, k) =>
-  `<span class="orb" data-k="${k}"><i></i></span>` + (k < LINES.length - 1 ? '<span class="barlink"></span>' : '')
+/* 진행 오브 레일 */
+rail.innerHTML = Array.from({length:STEPS}, (_,k)=>
+  `<span class="orb" data-k="${k}"><i></i></span>` + (k < STEPS-1 ? '<span class="barlink"></span>' : '')
 ).join('');
 const orbs = [...rail.querySelectorAll('.orb')];
-
-function render(){
-  /* 대사 페이드 교체 */
-  msg.style.opacity = 0;
-  setTimeout(()=>{ msg.innerHTML = LINES[i]; msg.style.opacity = 1; }, 130);
-
-  /* 오브: 지난 단계 채움(.done), 현재 핑크 글로우(.cur) */
-  orbs.forEach((o, k)=>{
-    o.classList.toggle('done', k < i);
-    o.classList.toggle('cur', k === i);
-  });
-
-  /* 코치 말하는 리듬 */
-  coach.classList.add('talking');
-  clearTimeout(render._t);
-  render._t = setTimeout(()=>coach.classList.remove('talking'), 1400);
-
-  nextBtn.textContent = (i === LINES.length - 1) ? '🏠 마이스페이스로 →' : '다음 ›';
+function renderRail(step){
+  orbs.forEach((o,k)=>{ o.classList.toggle('done', k<step); o.classList.toggle('cur', k===step); });
 }
 
+/* ── 얼굴 연출 ── */
+const EXPRESSIONS = ['exp-greet','exp-smile','exp-focus','exp-warm'];
+function setExpression(exp){
+  EXPRESSIONS.forEach(c=>face.classList.remove(c));
+  face.classList.add('exp-'+exp);
+}
+let lipIv=null;
+function startLip(){ clearInterval(lipIv); let on=false; coach.classList.add('talking');
+  lipIv=setInterval(()=>{ on=!on; face.classList.toggle('mo', on); }, 130); }
+function stopLip(){ clearInterval(lipIv); lipIv=null; face.classList.remove('mo'); coach.classList.remove('talking'); }
+/* 깜빡임 (랜덤 간격, idle) */
+(function blinkLoop(){
+  const wait = 1900 + Math.random()*3200;
+  setTimeout(()=>{ face.classList.add('blink');
+    setTimeout(()=>{ face.classList.remove('blink'); blinkLoop(); }, 140); }, wait);
+})();
+
+/* ── 타이핑(세그먼트) ── */
+function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function seg2html(sg, txt){
+  const h = esc(txt).replace(/\n/g,'<br>');
+  if(sg.b) return `<b>${h}</b>`;
+  if(sg.shell) return `<span class="shellv">${h}</span>`;
+  return h;
+}
+let typing=false, skipType=null, typeIv=null;
+function typeSegments(segs, done){
+  typing=true; let s=0, c=0;
+  clearInterval(typeIv); startLip();
+  const finishAll=()=>{
+    clearInterval(typeIv); typing=false; stopLip(); skipType=null;
+    msg.innerHTML = segs.map(sg=>seg2html(sg, sg.t)).join('');
+    done && done();
+  };
+  skipType = finishAll;
+  typeIv = setInterval(()=>{
+    if(s>=segs.length){ finishAll(); return; }
+    if(c>=segs[s].t.length){ s++; c=0; if(s>=segs.length){ finishAll(); return; } }
+    c++;
+    let html='';
+    for(let i=0;i<segs.length;i++){
+      if(i<s) html += seg2html(segs[i], segs[i].t);
+      else if(i===s) html += seg2html(segs[i], segs[i].t.slice(0,c));
+    }
+    msg.innerHTML = html + '<span class="caret"></span>';
+  }, 30);
+}
+
+/* ── 노드 진행 ── */
+let current=null;
+function clearFoot(){ choices.style.display='none'; choices.innerHTML=''; nextRow.style.display='none'; }
+function renderChoices(list){
+  choices.innerHTML = list.map((ch,idx)=>
+    `<button class="choice entering" style="animation-delay:${idx*70}ms" data-to="${ch.to}">
+       <span class="key">${idx+1}</span><span>${esc(ch.t)}</span></button>`
+  ).join('');
+  choices.style.display='flex';
+  [...choices.querySelectorAll('.choice')].forEach(b=>
+    b.addEventListener('click', ()=>goto(b.dataset.to)));
+}
+function showNext(node){
+  nextBtn.textContent = node.final ? '🏠 마이스페이스로 →' : '다음 ›';
+  nextRow.style.display='flex';
+}
+function goto(id){
+  const n = NODES[id]; if(!n) return;
+  current = id;
+  setExpression(n.exp);
+  renderRail(n.step);
+  clearFoot();
+  typeSegments(n.text, ()=>{
+    if(n.choices) renderChoices(n.choices);
+    else showNext(n);
+  });
+}
+
+/* 자동 다음/입장 버튼 */
 function advance(){
-  if(i < LINES.length - 1){ i++; render(); }
-  else finish();
+  const n = NODES[current];
+  if(n.final){ finish(); return; }
+  if(n.next){ goto(n.next); }
 }
 function finish(){ location.href = 'myspace-prototype.html?mode=full'; }
 
+/* ── 키보드 ── */
 document.addEventListener('keydown', e=>{
-  if(e.code === 'Space' || e.code === 'Enter'){ e.preventDefault(); advance(); }
+  // 타이핑 중 → 즉시 완성
+  if(typing){
+    if(e.code==='Space'||e.code==='Enter'){ e.preventDefault(); skipType && skipType(); }
+    return;
+  }
+  // 선택지 노출 중 → 숫자키 선택
+  if(choices.style.display!=='none'){
+    const k = parseInt(e.key,10);
+    if(k>=1){ const btn = choices.querySelectorAll('.choice')[k-1]; if(btn){ e.preventDefault(); goto(btn.dataset.to); } }
+    return;
+  }
+  // 자동 다음 버튼 노출 중
+  if(nextRow.style.display!=='none' && (e.code==='Space'||e.code==='Enter')){ e.preventDefault(); advance(); }
 });
+/* 타이핑 중 카드 클릭 → 완성 */
+document.querySelector('.card').addEventListener('click', ()=>{ if(typing) skipType && skipType(); });
 
-render();
+goto('start');
 </script>
 </body>
 </html>
