@@ -387,7 +387,7 @@ scene.addEventListener('click', e=>{
 /* ================= 광장 — 존(무리)별 채팅방 ================= */
 /* 각 존 = 그 자리에 모인 사람들이 함께 나눈 '단체 대화' 하나를 공유해요. */
 const ZONES = [
-  {id:'work', title:'🛠 작업 피드백 자리', history:[
+  {id:'work', history:[
     {name:'박준호', text:'랜딩 카피 피드백, 문서로 정리해서 도움 글에 붙였어요', t:'3일 전'},
     {me:true,       text:'헐 감사해요, 유도형 질문일까 걱정했는데 딱 짚어주셨어요', t:'3일 전'},
     {name:'오세진', text:'저는 첫 제안서 목차가 자꾸 막혀요', t:'그저께'},
@@ -396,14 +396,14 @@ const ZONES = [
     {me:true,       text:'오늘 21시 반에 다 같이 마저 볼까요?', t:'어제'},
     {name:'박준호', text:'좋아요, 약속 테이블에 잡아둘게요', t:'어제'},
   ]},
-  {id:'record', title:'✍️ 기록·회고 모임', history:[
+  {id:'record', history:[
     {name:'정다인', text:'오늘 3개 다 했어요!', t:'어제'},
     {me:true,       text:'끝점 다시 잡는 거 안 어려워요?', t:'어제'},
     {name:'한지운', text:'회고 밀리면 시간을 고정해봐요', t:'어제'},
     {name:'정다인', text:'맞아요, 회고 쓰다 보면 끝점이 보여요', t:'오늘'},
     {name:'한지운', text:'아침형이면 아침에 어제치 쓰는 것도 방법이에요', t:'오늘'},
   ]},
-  {id:'fountain', title:'⛲ 분수 앞 수다', history:[
+  {id:'fountain', history:[
     {name:'최연우', text:'다들 저녁 회고 몇 시에 쓰세요?', t:'어제'},
     {me:true,       text:'저는 21시요, 밀리면 아예 안 쓰게 돼요', t:'어제'},
     {name:'서도윤', text:'포폴은 덜어내는 게 핵심이에요', t:'그저께'},
@@ -411,7 +411,7 @@ const ZONES = [
     {name:'문가은', text:'완료 확정되면 조개 20 넘어가요', t:'어제'},
     {name:'최연우', text:'나도 도움 글 하나 잡아야지', t:'오늘'},
   ]},
-  {id:'flash', title:'🍜 목요일 번개 무리', history:[
+  {id:'flash', history:[
     {name:'황보라', text:'목표 100번 쓰기 18일 연속이에요!', t:'오늘'},
     {me:true,       text:'와 대단… 저는 자꾸 끊겨요', t:'오늘'},
     {name:'강민서', text:'첫 미팅 긴장돼서 수현 님이랑 리허설했어요', t:'어제'},
@@ -424,18 +424,18 @@ const ZONE_MAP = Object.fromEntries(ZONES.map(z=>[z.id, z]));
 
 /* 사람들 — id·이름·소속 존·좌표·머리 위 대사(말풍선) */
 const NPCS = [
-  /* 무리 ① 작업·피드백 (왼쪽 위) */
+  /* 무리 ① 왼쪽 위 */
   {id:'junho',  name:'박준호', zone:'work',     x:540,  y:560,  lines:['랜딩 카피 피드백 정리해서 올렸어요','전환율은 헤드라인부터 손대는 게 나아요','오늘 20시 라이브에서 화면 공유해요']},
   {id:'seojin', name:'오세진', zone:'work',     x:662,  y:588,  lines:['첫 제안서 목차가 자꾸 막혀요','준호 님 피드백 방식이 좋더라고요']},
   {id:'haram',  name:'이하람', zone:'work',     x:600,  y:648,  lines:['지표는 행동이 바뀌는 숫자여야 해요','다인 님이랑 같이 정리 중이에요']},
-  /* 무리 ② 기록·회고 (오른쪽 위) */
+  /* 무리 ② 오른쪽 위 */
   {id:'dain',   name:'정다인', zone:'record',   x:1600, y:664,  lines:['오늘 3개 다 했어요!','이번 주 끝점 다시 잡는 중']},
   {id:'jiwoon', name:'한지운', zone:'record',   x:1700, y:702,  lines:['회고는 저녁 먹고 바로 쓰는 게 편해요','연우 님 고민 같이 봤어요']},
-  /* 무리 ③ 분수 앞 수다 (가운데 아래) */
+  /* 무리 ③ 분수 앞 (가운데 아래) */
   {id:'yeonwoo',name:'최연우', zone:'fountain', x:820,  y:1096, lines:['숫자언어 지표 이거 맞나…','도움 글 하나 잡아야지']},
   {id:'gaeun',  name:'문가은', zone:'fountain', x:932,  y:1112, lines:['포트폴리오 도윤 님이 봐주셨어요','이제 정산만 남았네요']},
   {id:'doyoon', name:'서도윤', zone:'fountain', x:876,  y:1176, lines:['포폴은 덜어내는 게 핵심이에요','가은 님 거의 다 됐어요']},
-  /* 무리 ④ 목요일 번개 (오른쪽 아래) */
+  /* 무리 ④ 오른쪽 아래 */
   {id:'bora',   name:'황보라', zone:'flash',    x:1660, y:1132, lines:['100번 쓰기 18일째!','같이 놀래요 글 올렸어요, 목요일 번개 🍜']},
   {id:'minseo', name:'강민서', zone:'flash',    x:1770, y:1150, lines:['첫 고객 미팅 리허설 도와줬어요','번개 저도 낄래요 🍜']},
   {id:'sujin',  name:'배수현', zone:'flash',    x:1716, y:1200, lines:['리허설 덕에 미팅 잘 봤어요','평가 남기러 왔어요']},
@@ -498,9 +498,13 @@ function msgNode(m){
   wrap.append(b, t);
   return wrap;
 }
+function zoneMembers(zid){                              // 위치 기반 — 지금 이 근처에 있는 사람들(테마·타이틀 없음)
+  const names = NPCS.filter(n => n.zone === zid).map(n => n.name);
+  return names.length ? names.join(' · ') : '이 근처';
+}
 function renderZoneLog(z){
   clAva.textContent = '👥';
-  clName.textContent = z.title;
+  clName.textContent = zoneMembers(z.id);
   clBody.innerHTML = '';
   z.history.forEach(m => clBody.appendChild(msgNode(m)));
   clBody.scrollTop = clBody.scrollHeight;
