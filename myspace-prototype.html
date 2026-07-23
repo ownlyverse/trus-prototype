@@ -250,6 +250,45 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
 .ptabs button{font-size:.76rem; font-weight:700; padding:5px 12px; border-radius:16px; background:#F2F4F6; color:#8B95A1}
 .ptabs button.active{background:var(--ink); color:#fff}
 
+/* ===== 집중 루프 — 구글 캘린더(목) + 오늘의 바운더리 ===== */
+.gcal-box{border:2px dashed #C6CDD5; border-radius:10px; padding:14px; text-align:center; background:#F8FAFC; margin-bottom:12px}
+.gcal-box .g-ttl{font-size:.86rem; font-weight:700; margin-bottom:4px}
+.gcal-box p{font-size:.73rem; color:#8B95A1; margin-bottom:10px; line-height:1.5}
+.gbtn{display:inline-flex; align-items:center; gap:8px; font-size:.82rem; font-weight:600; padding:9px 16px; border-radius:6px; background:#fff; color:#3c4043; border:1px solid #DADCE0; box-shadow:0 1px 2px rgba(0,0,0,.12)}
+.gbtn:hover{background:#F7F8F8}
+.gbadge{display:inline-flex; align-items:center; gap:6px; font-size:.74rem; font-weight:700; color:#1BA664}
+.evt{display:flex; align-items:center; gap:9px; padding:8px 10px; border:1px solid #E5E8EB; border-radius:8px; margin-bottom:6px; font-size:.83rem; background:#fff}
+.evt .evt-t{font-variant-numeric:tabular-nums; color:#8B95A1; font-size:.72rem; min-width:88px}
+.evt .evt-add{margin-left:auto; font-size:.68rem; font-weight:700; color:var(--tide); background:var(--tide-soft); border-radius:14px; padding:3px 9px; white-space:nowrap}
+.evt .evt-add.added{color:#8B95A1; background:#F2F4F6; cursor:default}
+.task-row{display:flex; align-items:center; gap:9px; padding:8px 10px; border:1px solid #E5E8EB; border-radius:9px; margin-bottom:7px; font-size:.85rem; background:#fff}
+.task-row input{width:16px; height:16px; accent-color:var(--tide)}
+.task-row .t-text{flex:1}
+.task-row.done .t-text{text-decoration:line-through; color:#8B95A1}
+.task-row .t-focus{font-size:.72rem; font-weight:700; color:#fff; background:var(--shell); border:2px solid #C4531A; border-radius:6px; padding:4px 10px; box-shadow:0 2px 0 #C4531A; white-space:nowrap}
+.task-row .t-focus:active{transform:translateY(2px); box-shadow:none}
+.task-row.done .t-focus{display:none}
+
+/* 떠 있는 뽀모도로 위젯 — 화면 돌아다녀도 계속 돎 */
+.pomo{position:fixed; left:14px; bottom:14px; z-index:75; width:232px;
+  background:#23283A; color:#F1E9DA; border:3px solid #17171C; border-radius:10px;
+  box-shadow:5px 5px 0 rgba(0,0,0,.4); padding:12px 13px; display:none}
+.pomo.show{display:block; animation:prise .18s ease-out}
+@keyframes prise{from{transform:translateY(10px); opacity:0}to{transform:translateY(0); opacity:1}}
+.pomo-top{display:flex; align-items:center; gap:8px; margin-bottom:6px}
+.pomo-phase{font-size:.72rem; font-weight:800; padding:2px 9px; border-radius:12px; background:var(--shell); color:#fff}
+.pomo.rest .pomo-phase{background:#1BA664}
+.pomo-x{margin-left:auto; color:#9AA3B0; font-size:.9rem}
+.pomo-task{font-size:.73rem; color:#C7CEDA; margin-bottom:4px; line-height:1.35; min-height:2.4em}
+.pomo-time{font-family:'NeoDunggeunmo','Pretendard Variable',Pretendard,sans-serif; font-size:2.6rem; line-height:1; text-align:center; letter-spacing:1px; margin:2px 0 9px}
+.pomo-ctrls{display:flex; gap:6px}
+.pomo-ctrls button{flex:1; font-size:.72rem; font-weight:700; padding:7px 0; border-radius:6px; background:#39415A; color:#F1E9DA; border:2px solid #10131C}
+.pomo-ctrls button:active{transform:translateY(1px)}
+.pomo-ctrls .pri{background:var(--shell); border-color:#C4531A}
+.pomo-retro{margin-top:9px; display:none}
+.pomo-retro.show{display:block}
+.pomo-retro input{width:100%; font:inherit; font-size:.78rem; border:2px solid #10131C; border-radius:6px; padding:7px 9px; background:#F1E9DA; color:#191F28; margin-bottom:6px}
+.pomo-retro .pr-save{width:100%; font-size:.73rem; font-weight:700; padding:7px 0; border-radius:6px; background:#1BA664; color:#fff; border:2px solid #148F55}
 
 .hint{
   position:fixed; bottom:14px; left:50%; transform:translateX(-50%); z-index:55;
@@ -264,7 +303,7 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
 <!-- ============ 게임 HUD ============ -->
 <header class="hud">
   <span class="pill-stat lv"><span class="ic">🌳</span>Lv.3</span>
-  <span class="pill-stat"><span class="ic">◗</span><b class="num">96</b></span>
+  <span class="pill-stat"><span class="ic">◗</span><b class="num" id="shellCount">96</b></span>
   <span class="pill-stat trust"><span class="ic">★</span><b class="num">84</b></span>
   <span class="spacer"></span>
   <button class="hud-btn" id="chipMap" title="월드맵">🗺️</button>
@@ -298,6 +337,7 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
   <div class="obj" data-obj="tree"     style="left:88%; top:26%"><div class="art" style="font-size:64px">🌳</div><div class="tag">성과열매 나무 <small>Lv.3</small></div></div>
   <div class="obj" data-obj="coachR"   style="left:66%; top:35%"><div class="art small">🐢</div><div class="tag">기록 코치</div></div>
   <div class="obj" data-obj="worktool" style="left:28%; top:62%"><div class="art">🗒️</div><div class="tag">워크툴 책상 <small>오늘 2/3</small></div></div>
+  <div class="obj" data-obj="focus"    style="left:45%; top:58%"><div class="art small">🍅</div><div class="tag">집중 데스크 <small>뽀모도로</small></div></div>
   <div class="obj" data-obj="goal100"  style="left:11%; top:66%"><div class="art small">📓</div><div class="tag">목표 100번 쓰기</div></div>
   <div class="obj" data-obj="diary"    style="left:7%;  top:82%"><div class="art small">📔</div><div class="tag">개인 일기장</div></div>
   <div class="obj" data-obj="coachB"   style="left:58%; top:68%"><div class="art">🦉</div><div class="tag">바운더리 코치</div></div>
@@ -314,6 +354,21 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
 
 <div class="hint">방향키·WASD로 걸어요 · 가까이 가면 Space로 열기 · 클릭해도 돼요</div>
 <div class="proto-tag">마이스페이스 프로토타입 · 목데이터</div>
+
+<!-- ============ 떠 있는 뽀모도로 위젯 ============ -->
+<div class="pomo" id="pomo">
+  <div class="pomo-top"><span class="pomo-phase" id="pomoPhase">🍅 집중</span><button class="pomo-x" id="pomoX" title="종료">✕</button></div>
+  <div class="pomo-task" id="pomoTask"></div>
+  <div class="pomo-time num" id="pomoTime">25:00</div>
+  <div class="pomo-ctrls">
+    <button id="pomoToggle">⏸ 일시정지</button>
+    <button id="pomoSkip" class="pri">⏭ 완료</button>
+  </div>
+  <div class="pomo-retro" id="pomoRetro">
+    <input id="pomoRetroIn" placeholder="🐢 한 줄 회고 남기기" maxlength="60">
+    <button class="pr-save" id="pomoRetroSave">회고 저장 <span>+◗1</span></button>
+  </div>
+</div>
 
 <!-- ============ 패널 (장면 위에 얹힘) ============ -->
 <div class="panel" id="panel">
@@ -365,7 +420,8 @@ scene.addEventListener('click', e=>{
 /* 오브젝트 클릭 → 다가가서 열기 */
 const objTargets = { // 캐릭터가 설 위치 (left%, bottom%)
   lecture:[16,38], records:[36,38], tree:[85,36], coachR:[66,36],
-  worktool:[28,28], goal100:[13,26], diary:[9,11], coachB:[56,24], mailbox:[87,26], presence:[50,40]
+  worktool:[28,28], goal100:[13,26], diary:[9,11], coachB:[56,24], mailbox:[87,26], presence:[50,40],
+  focus:[45,26]
 };
 document.querySelectorAll('[data-obj]').forEach(el=>{
   el.addEventListener('click', e=>{
@@ -435,7 +491,7 @@ document.querySelectorAll('.obj').forEach(o=>{
 const panel = document.getElementById('panel');
 const panelBody = document.getElementById('panelBody');
 document.getElementById('panelClose').addEventListener('click', closePanel);
-function closePanel(){ panel.classList.remove('open'); document.querySelectorAll('.obj').forEach(o=>o.classList.remove('near')); }
+function closePanel(){ panel.classList.remove('open'); currentPanelId = null; document.querySelectorAll('.obj').forEach(o=>o.classList.remove('near')); }
 document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ closePanel(); document.querySelectorAll('.modal-bg').forEach(m=>m.classList.remove('open')); }});
 
 const P = {};
@@ -454,25 +510,7 @@ P.lecture = `
   <div style="margin-top:12px"><button class="pbtn" onclick="location.href='lecture-prototype.html'">강의실 전체 화면 열기 →</button></div>
   <div class="pnote">다섯 조각 중 넷을 만들었어요 — <b>「3개월 전략」 하나만 남았어요!</b></div>`;
 
-P.worktool = `
-  <h3>🗒️ 오늘의 바운더리</h3>
-  <div class="p-sub">오늘 할 일은 딱 3개만 골라요 — 성과의 80%를 만드는 20%의 일만요. 나머지는 과감하게 미뤄두는 게 이곳의 규칙이에요.</div>
-  <div class="stat-duo">
-    <div class="stat-box"><span>오늘 완료</span><b class="num">2<small> / 3</small></b><div class="pxbar"><i style="width:67%"></i></div></div>
-    <div class="stat-box"><span>다 하면</span><b class="num shellv" style="font-size:1.1rem">+3</b><div class="p-mini">완료 1개당 조개 +1 — 하루 최대 수입원이에요</div></div>
-  </div>
-  <div class="check-item done"><input type="checkbox" checked><span>고객 인터뷰 질문 5개 확정</span></div>
-  <div class="check-item done"><input type="checkbox" checked><span>구독 전환 지표 시트 업데이트</span></div>
-  <div class="check-item"><input type="checkbox" id="bd3"><span>3개월 전략 초안 1페이지 (강의 미션)</span></div>
-  <button class="pbtn" id="bdDone">완료 체크 <span class="shellv">+1</span></button>
-  <h4>프롬프트 4단 깔때기</h4>
-  <div class="funnel4">
-    <div class="f"><b>끝점</b> — 월 구독 300명 · "혼자서도 굴러가는 팀"</div>
-    <div class="f"><b>3개월</b> — 구독 결제 전환 퍼널 완성 (전략 작성 중)</div>
-    <div class="f"><b>이번 주</b> — 고객 인터뷰 3건 + 전략 초안</div>
-    <div class="f"><b>오늘</b> — 위 3개</div>
-  </div>
-  <div class="pnote">할 일을 끝낼 때마다 조개를 받아요 — 성실한 하루면 <b>◗ 6개!</b></div>`;
+/* P.worktool 은 renderWorktool() 로 동적 생성 (집중 데스크·뽀모도로와 상태 공유) */
 
 P.records = `
   <h3>나의 업무 기록</h3>
@@ -601,8 +639,21 @@ P.noti = `
   <div class="row"><span>💬 내 도움 글 답변 도착</span><span class="pill sh">광장으로</span></div>
   <div class="pnote">밤 12시부터 아침 8시까지는 조용히 모아뒀다가 아침에 보여드려요.</div>`;
 
+let currentPanelId = null;
 function openPanel(id){
+  /* 집중 데스크 · 오늘의 바운더리 — 상태에서 동적 생성 (뽀모도로와 공유) */
+  if(id==='focus' || id==='worktool'){
+    if(MODE==='trial' && !UNLOCKED.includes(id)){
+      panelBody.innerHTML = lockPanel(id); panel.classList.add('open'); currentPanelId = null; say('여긴 아직 잠겨 있네'); return;
+    }
+    panelBody.innerHTML = id==='focus' ? renderFocus() : renderWorktool();
+    panel.classList.add('open'); currentPanelId = id;
+    bindFocusPanel();
+    say(id==='focus' ? '오늘 뭐부터 집중할까' : '오늘 세 개만!');
+    return;
+  }
   if(!P[id]) return;
+  currentPanelId = id;
   if(MODE==='trial' && !UNLOCKED.includes(id)){
     panelBody.innerHTML = lockPanel(id);
     panel.classList.add('open');
@@ -649,8 +700,183 @@ function bindPanel(id){
   });
 }
 
+/* ================= 집중 루프 — 캘린더(목) · 오늘의 바운더리 · 뽀모도로 ================= */
+/* 오늘의 바운더리 = 단일 상태원. worktool·focus 패널과 뽀모도로가 공유 */
+const TASKS = [
+  {id:'t1', text:'고객 인터뷰 질문 5개 확정',        done:true},
+  {id:'t2', text:'구독 전환 지표 시트 업데이트',      done:true},
+  {id:'t3', text:'3개월 전략 초안 1페이지 (강의 미션)', done:false},
+];
+/* 구글 캘린더 — 목 연동 */
+let gcalConnected = localStorage.getItem('trus_gcal') === '1';
+const GCAL_EVENTS = [
+  {id:'e1', time:'10:00–11:00', title:'팀 스탠드업',            added:false},
+  {id:'e2', time:'14:00–15:30', title:'고객 인터뷰 (2건)',      added:false},
+  {id:'e3', time:'16:00',       title:'광장 도움글 게시 확인',   added:false},
+];
+const esc = s => String(s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+function taskRowsHtml(){
+  return TASKS.map(t=>`<div class="task-row ${t.done?'done':''}" data-task="${t.id}">
+    <input type="checkbox" ${t.done?'checked':''}>
+    <span class="t-text">${esc(t.text)}</span>
+    <button class="t-focus" data-focus="${t.id}">▶ 집중</button></div>`).join('');
+}
+
+function renderFocus(){
+  const gcal = gcalConnected
+    ? `<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span class="gbadge">🟢 구글 캘린더 연동됨</span><span style="font-size:.68rem;color:#8B95A1;margin-left:auto">보기 전용</span></div>`
+      + GCAL_EVENTS.map(e=>`<div class="evt"><span class="evt-t">${e.time}</span><span>${esc(e.title)}</span>`
+        + `<button class="evt-add ${e.added?'added':''}" data-evt="${e.id}">${e.added?'추가됨 ✓':'＋ 오늘 할 일'}</button></div>`).join('')
+    : `<div class="gcal-box"><div class="g-ttl">📅 구글 캘린더 연동</div>
+        <p>오늘 일정을 불러와 '오늘의 바운더리'로 내려요.<br>(프로토타입 — 실제 계정은 연결되지 않아요)</p>
+        <button class="gbtn" id="gcalConnect"><span>🔗</span> 구글 계정으로 연동</button></div>`;
+  return `<h3>🍅 집중 데스크</h3>
+    <div class="p-sub">일정을 불러오고 → 오늘의 3개를 고르고 → 25분 뽀모도로로 집중해요. 하나 끝낼 때마다 조개가 쌓여요.</div>
+    <h4>오늘 일정 (구글 캘린더)</h4>${gcal}
+    <h4>오늘의 바운더리</h4>${taskRowsHtml()}
+    <div class="pnote">▶ 집중을 누르면 왼쪽 아래에 <b>뽀모도로 타이머</b>가 떠요. 다른 걸 하는 동안에도 계속 돌아가고, 25분을 채우면 그 일이 완료돼요.</div>`;
+}
+function renderWorktool(){
+  const doneN = TASKS.filter(t=>t.done).length;
+  const pct = Math.round(doneN / TASKS.length * 100);
+  return `<h3>🗒️ 오늘의 바운더리</h3>
+    <div class="p-sub">오늘 할 일은 딱 3개만 골라요 — 성과의 80%를 만드는 20%의 일만요. 나머지는 과감하게 미뤄두는 게 이곳의 규칙이에요.</div>
+    <div class="stat-duo">
+      <div class="stat-box"><span>오늘 완료</span><b class="num">${doneN}<small> / ${TASKS.length}</small></b><div class="pxbar"><i style="width:${pct}%"></i></div></div>
+      <div class="stat-box"><span>완료 1개당</span><b class="num shellv" style="font-size:1.1rem">+1</b><div class="p-mini">완료할 때마다 조개 — 하루 최대 수입원이에요</div></div>
+    </div>
+    ${taskRowsHtml()}
+    <div class="pnote">▶ 집중을 누르면 <b>뽀모도로</b>가 떠요. 25분을 채우면 그 일이 완료되고 <b>◗ +1</b>!</div>`;
+}
+function refreshFocusPanels(){
+  if(!panel.classList.contains('open')) return;
+  if(currentPanelId==='focus'){ panelBody.innerHTML = renderFocus();   bindFocusPanel(); }
+  else if(currentPanelId==='worktool'){ panelBody.innerHTML = renderWorktool(); bindFocusPanel(); }
+}
+function bindFocusPanel(){
+  const gc = panelBody.querySelector('#gcalConnect');
+  if(gc) gc.addEventListener('click', ()=>{
+    /* 가짜 구글 동의 카드 (실제 OAuth 아님) */
+    gc.closest('.gcal-box').innerHTML = `
+      <div style="font-size:.82rem;font-weight:700;margin-bottom:8px">Google 계정 선택</div>
+      <div style="display:flex;align-items:center;gap:9px;border:1px solid #DADCE0;border-radius:8px;padding:9px;background:#fff;text-align:left;margin-bottom:10px">
+        <span style="width:28px;height:28px;border-radius:50%;background:#F76B1C;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700">이</span>
+        <div><div style="font-size:.8rem;font-weight:600">${esc(myName.textContent)}</div><div style="font-size:.66rem;color:#8B95A1">iseo@trus.town</div></div>
+      </div>
+      <p style="font-size:.68rem;color:#8B95A1;margin-bottom:10px">바운더리 타운이 캘린더 <b>일정 보기</b> 권한을 요청해요.</p>
+      <button class="gbtn" id="gcalAllow"><span>✅</span> 허용</button>`;
+    panelBody.querySelector('#gcalAllow').addEventListener('click', ()=>{
+      gcalConnected = true; localStorage.setItem('trus_gcal','1');
+      refreshFocusPanels(); say('캘린더 연동됐다!');
+    });
+  });
+  panelBody.querySelectorAll('[data-evt]').forEach(b=>b.addEventListener('click', ()=>{
+    const ev = GCAL_EVENTS.find(e=>e.id===b.dataset.evt);
+    if(!ev || ev.added) return;
+    ev.added = true;
+    TASKS.push({id:'ev-'+ev.id, text:`${ev.title} (${ev.time})`, done:false});
+    refreshFocusPanels(); say('오늘 할 일로 내렸어');
+  }));
+  panelBody.querySelectorAll('[data-focus]').forEach(b=>b.addEventListener('click', ()=>startPomodoro(b.dataset.focus)));
+  panelBody.querySelectorAll('.task-row input').forEach(cb=>cb.addEventListener('change', ()=>{
+    const row = cb.closest('.task-row'); const t = TASKS.find(x=>x.id===row.dataset.task);
+    if(t){ t.done = cb.checked; row.classList.toggle('done', cb.checked); }
+  }));
+}
+
+/* ---------- 뽀모도로 엔진 (localStorage로 화면 이동 후에도 이어짐) ---------- */
+const FOCUS_MS = 25*60*1000, BREAK_MS = 5*60*1000;
+const pomoEl=document.getElementById('pomo'), pomoPhase=document.getElementById('pomoPhase'),
+      pomoTask=document.getElementById('pomoTask'), pomoTime=document.getElementById('pomoTime'),
+      pomoToggle=document.getElementById('pomoToggle'), pomoSkip=document.getElementById('pomoSkip'),
+      pomoX=document.getElementById('pomoX'), pomoRetro=document.getElementById('pomoRetro'),
+      pomoRetroIn=document.getElementById('pomoRetroIn'), pomoRetroSave=document.getElementById('pomoRetroSave');
+const shellCountEl=document.getElementById('shellCount');
+function addShell(n){ shellCountEl.textContent = (parseInt(shellCountEl.textContent,10)||0)+n; }
+
+let pomo = null;
+try{ pomo = JSON.parse(localStorage.getItem('trus_pomo')) || null; }catch(e){ pomo = null; }
+function savePomo(){ pomo ? localStorage.setItem('trus_pomo', JSON.stringify(pomo)) : localStorage.removeItem('trus_pomo'); }
+
+function taskLabel(id){ const t = TASKS.find(x=>x.id===id); return t ? t.text : '집중'; }
+function fmt(ms){ const s=Math.max(0,Math.ceil(ms/1000)); return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0'); }
+
+function renderPomo(){
+  if(!pomo){ pomoEl.classList.remove('show'); return; }
+  pomoEl.classList.add('show');
+  pomoEl.classList.toggle('rest', pomo.phase==='break');
+  pomoPhase.textContent = pomo.phase==='break' ? '🌿 휴식' : '🍅 집중';
+  pomoTask.textContent = pomo.phase==='break' ? '5분 쉬어가요 — 물 한 잔 ☕' : taskLabel(pomo.taskId);
+  pomoToggle.textContent = pomo.paused ? '▶ 이어서' : '⏸ 일시정지';
+  pomoRetro.classList.toggle('show', !!pomo.awaitingRetro);
+  updatePomoTime();
+}
+function updatePomoTime(){
+  if(!pomo){ return; }
+  const rem = pomo.paused ? pomo.remainingMs : pomo.endsAt - Date.now();
+  pomoTime.textContent = fmt(rem);
+}
+function startPomodoro(taskId){
+  const t = TASKS.find(x=>x.id===taskId);
+  if(t && t.done){ say('이미 끝낸 일이야'); return; }
+  pomo = {taskId, phase:'focus', endsAt:Date.now()+FOCUS_MS, paused:false, remainingMs:FOCUS_MS, awaitingRetro:false};
+  savePomo(); renderPomo(); say('집중 시작! 25분 간다 🍅');
+}
+function beep(){
+  try{
+    const ctx = new (window.AudioContext||window.webkitAudioContext)();
+    const o=ctx.createOscillator(), g=ctx.createGain(); o.connect(g); g.connect(ctx.destination);
+    o.type='sine'; g.gain.value=0.09; o.frequency.setValueAtTime(880, ctx.currentTime);
+    o.frequency.setValueAtTime(660, ctx.currentTime+0.16); o.frequency.setValueAtTime(990, ctx.currentTime+0.32);
+    o.start(); setTimeout(()=>{ o.stop(); ctx.close(); }, 480);
+  }catch(e){}
+}
+function completePhase(){
+  beep();
+  if(pomo.phase==='focus'){
+    const t = TASKS.find(x=>x.id===pomo.taskId);
+    if(t && !t.done){ t.done = true; addShell(1); }
+    say('하나 끝! ◗ +1 🎉');
+    pomo = {taskId:pomo.taskId, phase:'break', endsAt:Date.now()+BREAK_MS, paused:false, remainingMs:BREAK_MS, awaitingRetro:true};
+    savePomo(); renderPomo(); refreshFocusPanels();
+  } else {
+    say('휴식 끝 — 다음 집중?'); stopPomodoro();
+  }
+}
+function stopPomodoro(){ pomo = null; savePomo(); pomoEl.classList.remove('show'); pomoRetro.classList.remove('show'); }
+
+pomoToggle.addEventListener('click', ()=>{
+  if(!pomo) return;
+  if(pomo.paused){ pomo.endsAt = Date.now() + pomo.remainingMs; pomo.paused = false; }
+  else { pomo.remainingMs = pomo.endsAt - Date.now(); pomo.paused = true; }
+  savePomo(); renderPomo();
+});
+pomoSkip.addEventListener('click', ()=>{ if(pomo) completePhase(); });
+pomoX.addEventListener('click', ()=>{ stopPomodoro(); say('타이머 접었어'); });
+pomoRetroSave.addEventListener('click', ()=>{
+  const v = pomoRetroIn.value.trim();
+  addShell(1); pomoRetroIn.value = '';
+  if(pomo) pomo.awaitingRetro = false; savePomo();
+  pomoRetro.classList.remove('show');
+  say(v ? '회고 남겼다 ◗ +1' : '회고 스킵');
+});
+
+/* 250ms 틱 — 타이머 진행 · 완료 감지 */
+setInterval(()=>{
+  if(!pomo || pomo.paused) return;
+  if(pomo.endsAt - Date.now() <= 0){ completePhase(); }
+  else updatePomoTime();
+}, 250);
+
+/* 로드 시 복원 — 자리 비운 사이 끝났으면 완료 처리 */
+if(pomo){
+  if(!pomo.paused && pomo.endsAt - Date.now() <= 0) completePhase();
+  else renderPomo();
+}
+
 /* 상단바 */
-document.getElementById('chipRank').addEventListener('click', ()=>{ panelBody.innerHTML = P.rank; panel.classList.add('open'); });
+document.getElementById('chipRank').addEventListener('click', ()=>{ panelBody.innerHTML = P.rank; panel.classList.add('open'); currentPanelId='rank'; });
 document.getElementById('chipNoti').addEventListener('click', ()=>{ panelBody.innerHTML = P.noti; panel.classList.add('open'); });
 document.getElementById('chipMap').addEventListener('click', ()=>{
   say('마을로 나가볼까!');
@@ -661,7 +887,7 @@ document.getElementById('chipMap').addEventListener('click', ()=>{
 const params = new URLSearchParams(location.search);
 const MODE = params.get('mode') || localStorage.getItem('trus_mode') || 'full';
 const UNLOCKED = JSON.parse(localStorage.getItem('trus_unlocked') || '[]');
-const FEAT_NAMES = {lecture:'강의 스크린', worktool:'워크툴 책상', records:'업무 기록 책장', goal100:'목표 100번 쓰기', diary:'개인 일기장', coachB:'바운더리 코치', coachR:'기록 코치', mailbox:'우체통', tree:'성과열매 나무', presence:'프레즌스 전광판'};
+const FEAT_NAMES = {lecture:'강의 스크린', worktool:'오늘의 바운더리', focus:'집중 데스크', records:'업무 기록 책장', goal100:'목표 100번 쓰기', diary:'개인 일기장', coachB:'바운더리 코치', coachR:'기록 코치', mailbox:'우체통', tree:'성과열매 나무', presence:'프레즌스 전광판'};
 const banner = document.getElementById('modeBanner');
 const myName = me.querySelector('.nametag');
 
