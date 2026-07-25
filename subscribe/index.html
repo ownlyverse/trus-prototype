@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>윤소정의 생각구독 — 19년째 해본 것을 글로 씁니다</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+@font-face{font-family:'NeoDunggeunmo'; src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_two@1.0/NeoDunggeunmo.woff') format('woff'); font-display:swap}
+:root{
+  --paper:#FFFFFF; --ink:#121212; --ink-2:#212121; --sub:#666666; --line:#E5E5E5; --line-d:#DADADA;
+  --blue:#00B8FF; --blue-d:#067CAF; --blue-soft:#E5F7FF; --cream:#FAFBED; --olive:#E0E2C6;
+  --night:#231B2E; --night-2:#2E2340; --accent:#F26D9C; --accent-d:#C24C78;
+  --muted:#8B95A1;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:"Pretendard Variable",Pretendard,-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+  background:var(--paper); color:var(--ink-2); letter-spacing:-0.01em; word-break:keep-all; line-height:1.6}
+button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
+a{color:inherit;text-decoration:none}
+.pxfont{font-family:'NeoDunggeunmo','Pretendard Variable',sans-serif; letter-spacing:0}
+:focus-visible{outline:3px solid #3182F6; outline-offset:2px}
+.wrap{max-width:920px; margin:0 auto; padding:0 24px}
+
+/* 헤더 */
+.top{position:sticky; top:0; z-index:50; background:rgba(255,255,255,.94); backdrop-filter:blur(8px);
+  border-bottom:1px solid var(--line)}
+.top .in{max-width:920px; margin:0 auto; padding:14px 24px; display:flex; align-items:center; gap:14px}
+.logo{font-weight:800; letter-spacing:.14em; font-size:1rem}
+.wordmark{font-size:1rem; font-weight:800; border-left:1px solid var(--line-d); padding-left:14px; letter-spacing:-0.02em}
+.top .spacer{flex:1}
+.top-login{font-weight:700; font-size:.88rem; padding:9px 12px; border-radius:9px; color:var(--sub)}
+.top-login:hover{background:#F5F5F5; color:var(--ink)}
+.top-join{font-weight:800; font-size:.88rem; color:#fff; background:var(--ink); padding:9px 16px; border-radius:10px;
+  transition:transform .1s, background .12s}
+.top-join:hover{transform:translateY(-1px); background:var(--blue-d)}
+
+/* 히어로 */
+.hero{padding:92px 0 60px}
+.hero .kicker{display:inline-block; font-size:.8rem; font-weight:800; color:var(--blue-d); background:var(--blue-soft);
+  padding:6px 12px; border-radius:8px; margin-bottom:20px}
+.hero h1{font-size:clamp(2rem,4.8vw,3.3rem); font-weight:900; line-height:1.24; letter-spacing:-0.03em; margin-bottom:16px}
+.hero h1 u{text-decoration:none; box-shadow:inset 0 -0.34em var(--blue-soft)}
+.hero .lead{font-size:1.08rem; color:var(--sub); max-width:44ch; margin-bottom:32px}
+.hero .cta-row{display:flex; gap:10px; flex-wrap:wrap}
+.cta{display:inline-flex; align-items:center; gap:8px; background:var(--ink); color:#fff; font-weight:800;
+  font-size:.96rem; padding:15px 26px; border-radius:12px; transition:transform .12s, background .12s}
+.cta:hover{background:var(--blue-d); transform:translateY(-2px)}
+.cta.ghost{background:none; color:var(--ink); border:1.5px solid var(--line-d)}
+.cta.ghost:hover{border-color:var(--ink); background:none}
+
+/* 숫자 스트립 (크림) */
+.stats{background:var(--cream); border-top:1px solid var(--olive); border-bottom:1px solid var(--olive)}
+.stats .in{max-width:920px; margin:0 auto; padding:28px 24px; display:grid; grid-template-columns:repeat(3,1fr); gap:18px}
+.stat{text-align:center}
+.stat b{display:block; font-size:1.6rem; font-weight:900; letter-spacing:-0.02em}
+.stat span{font-size:.82rem; color:var(--sub)}
+
+/* E-book 그리드 */
+.section{padding:60px 0; border-bottom:1px solid var(--line)}
+.section-h{display:flex; align-items:baseline; gap:12px; margin-bottom:8px; flex-wrap:wrap}
+.section-h h2{font-size:1.55rem; font-weight:900; letter-spacing:-0.02em}
+.section-h small{font-size:.84rem; color:var(--sub)}
+.section-sub{font-size:.9rem; color:var(--sub); margin-bottom:28px}
+.books{display:grid; grid-template-columns:repeat(3,1fr); gap:16px}
+.book{display:block; border:1px solid var(--line-d); border-radius:14px; padding:22px 20px;
+  transition:transform .12s, border-color .12s, box-shadow .12s}
+.book:hover{transform:translateY(-3px); border-color:var(--blue); box-shadow:0 8px 22px rgba(0,184,255,.12)}
+.book .tag{display:inline-block; font-size:.68rem; font-weight:800; color:var(--blue-d); background:var(--blue-soft);
+  padding:3px 9px; border-radius:6px; margin-bottom:12px}
+.book h3{font-size:1.05rem; font-weight:800; line-height:1.45; margin-bottom:10px; letter-spacing:-0.02em}
+.book .read{font-size:.8rem; font-weight:700; color:var(--blue-d)}
+.book:hover .read{text-decoration:underline}
+.limited{margin-top:18px; font-size:.84rem; color:var(--sub); display:flex; align-items:center; gap:8px}
+.limited b{color:var(--ink)}
+
+/* 구매평 스트림 */
+.reviews{display:flex; flex-direction:column; gap:0; border-top:2px solid var(--ink)}
+.rv{display:flex; gap:14px; align-items:baseline; padding:16px 4px; border-bottom:1px solid var(--line); flex-wrap:wrap}
+.rv .bk{font-size:.8rem; font-weight:800; color:var(--blue-d); flex-shrink:0}
+.rv p{font-size:.92rem; flex:1; min-width:200px}
+.rv .who{font-size:.78rem; color:var(--sub); flex-shrink:0}
+
+/* 구독 플랜 */
+.plan-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:18px; max-width:660px}
+.plan{border:1px solid var(--line-d); border-radius:16px; padding:26px 24px; position:relative}
+.plan.year{border:2px solid var(--blue)}
+.plan .badge{position:absolute; top:-12px; left:22px; background:var(--blue); color:#04364A; font-size:.72rem;
+  font-weight:800; padding:4px 10px; border-radius:7px}
+.plan .nm{font-size:.9rem; font-weight:800; color:var(--sub); margin-bottom:10px}
+.plan .price{font-size:1.7rem; font-weight:900; margin-bottom:4px; letter-spacing:-0.02em}
+.plan .price small{font-size:.85rem; font-weight:600; color:var(--sub)}
+.plan p{font-size:.84rem; color:var(--sub); margin-bottom:18px}
+.plan button{width:100%; border:1.5px solid var(--ink); border-radius:11px; padding:12px; font-weight:800; font-size:.9rem;
+  transition:background .12s, color .12s}
+.plan button:hover{background:var(--ink); color:#fff}
+.plan.year button{background:var(--ink); color:#fff}
+.plan.year button:hover{background:var(--blue-d); border-color:var(--blue-d)}
+
+/* 오프라인 */
+.off-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:16px}
+.off{background:var(--cream); border:1px solid var(--olive); border-radius:14px; padding:24px 22px}
+.off h3{font-size:1.05rem; font-weight:800; margin-bottom:6px}
+.off p{font-size:.86rem; color:var(--sub); margin-bottom:14px}
+.off button{font-size:.82rem; font-weight:800; color:var(--ink); border:1.5px solid var(--ink); border-radius:9px;
+  padding:8px 14px; transition:background .12s, color .12s}
+.off button:hover{background:var(--ink); color:#fff}
+
+/* 모드 진입 */
+.mode-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:18px}
+.mode{display:block; border:1px solid var(--line-d); border-radius:16px; padding:26px 24px;
+  transition:transform .12s, border-color .12s}
+.mode:hover{transform:translateY(-3px); border-color:var(--blue)}
+.mode .tag{display:inline-block; font-size:.72rem; font-weight:800; padding:4px 10px; border-radius:7px; margin-bottom:14px;
+  background:var(--blue-soft); color:var(--blue-d)}
+.mode h3{font-size:1.18rem; font-weight:800; margin-bottom:6px}
+.mode p{font-size:.88rem; color:var(--sub)}
+.mode .go{display:inline-block; margin-top:16px; font-size:.86rem; font-weight:800; color:var(--blue-d)}
+
+/* 초안 목업 — 모드 진입 크게 */
+.mode-stage{min-height:calc(100vh - 66px); display:flex; flex-direction:column; justify-content:center;
+  align-items:center; padding:56px 0 44px}
+.ms-h{text-align:center; margin-bottom:40px}
+.kicker-l{display:inline-block; font-size:.82rem; font-weight:800; color:var(--blue-d); background:var(--blue-soft);
+  padding:6px 12px; border-radius:8px; margin-bottom:18px}
+.ms-h h1{font-size:clamp(1.9rem,4.4vw,2.9rem); font-weight:900; letter-spacing:-0.03em; margin-bottom:12px}
+.ms-sub{font-size:.98rem; color:var(--sub)}
+.mode-grid.big{width:100%; max-width:860px; gap:22px}
+.mode-grid.big .mode{padding:38px 34px}
+.mode-grid.big .tag{font-size:.8rem; padding:6px 13px; margin-bottom:18px}
+.mode-grid.big h3{font-size:1.5rem; margin-bottom:10px}
+.mode-grid.big p{font-size:.98rem}
+.mode-grid.big .go{font-size:.95rem; margin-top:22px}
+.ms-cross{margin-top:38px; font-size:.9rem; font-weight:700; color:var(--sub)}
+.ms-cross:hover{color:var(--ink); text-decoration:underline}
+
+/* 크로스링크 — 트루스월드 (밤 톤 미니) */
+.cross{position:relative; overflow:hidden; margin:60px 0; border-radius:18px; padding:44px 36px; color:#FFE6F0;
+  background:linear-gradient(var(--night) 0%, var(--night-2) 100%)}
+.cross .stars{position:absolute; inset:0; pointer-events:none}
+.cross .stars::before{content:""; position:absolute; left:6%; top:16%; width:4px; height:4px; background:#fff; opacity:.7;
+  box-shadow:12vw 26px #FFF6C9, 26vw 4px #fff, 40vw 40px #FBE4EE, 55vw 12px #fff, 66vw 34px #C9E9FA, 20vw 66px #fff, 48vw 72px #FFF6C9}
+.cross .in{position:relative; z-index:1; display:flex; align-items:center; gap:22px; flex-wrap:wrap; justify-content:space-between}
+.cross .kicker{font-size:.74rem; color:#B7AACB; margin-bottom:10px}
+.cross h2{font-size:1.4rem; color:#fff; line-height:1.45; text-shadow:0 0 18px rgba(242,109,156,.35)}
+.px-cta{display:inline-flex; align-items:center; gap:8px; font-size:.9rem; padding:13px 22px; border-radius:6px;
+  background:var(--accent); color:#fff; border:2px solid var(--accent-d); box-shadow:0 4px 0 var(--accent-d);
+  transition:transform .08s, box-shadow .08s; flex-shrink:0}
+.px-cta:active{transform:translateY(3px); box-shadow:0 1px 0 var(--accent-d)}
+
+/* 푸터 */
+.foot{padding:40px 0 70px; display:flex; align-items:center; gap:16px; flex-wrap:wrap; justify-content:space-between}
+.foot p{font-size:.88rem; color:var(--sub)}
+.foot b{color:var(--ink)}
+.foot-join{font-size:.86rem; font-weight:800; color:#fff; background:var(--ink); padding:11px 18px; border-radius:11px;
+  transition:transform .1s, background .12s}
+.foot-join:hover{transform:translateY(-1px); background:var(--blue-d)}
+
+/* ── 통합 auth 모달 (공용 블록) ── */
+.auth-ovl{position:fixed; inset:0; z-index:100; background:rgba(12,10,16,.6); display:flex;
+  align-items:center; justify-content:center; padding:20px; opacity:0; visibility:hidden; transition:opacity .18s}
+.auth-ovl.on{opacity:1; visibility:visible}
+.auth-card{position:relative; width:min(400px,100%); background:#fff; color:#191F28; border-radius:18px;
+  padding:30px 26px 26px; box-shadow:0 24px 60px rgba(0,0,0,.35); max-height:88vh; overflow:auto}
+.auth-x{position:absolute; top:14px; right:14px; width:34px; height:34px; border-radius:50%; font-size:.95rem;
+  color:var(--muted); display:flex; align-items:center; justify-content:center}
+.auth-x:hover{background:#F2F4F6}
+.auth-card h3{font-size:1.22rem; font-weight:800; margin-bottom:6px}
+.auth-sub{font-size:.88rem; color:var(--muted); line-height:1.55; margin-bottom:18px}
+.auth-card label{display:flex; align-items:center; gap:10px; font-size:.9rem; padding:11px 12px; border-radius:10px; cursor:pointer}
+.auth-card label:hover{background:#F7F8FA}
+.auth-card input[type=checkbox]{width:18px; height:18px; accent-color:#111; flex-shrink:0}
+.t-all{font-weight:800; border:1.5px solid #E5E8EB; border-radius:12px; margin-bottom:8px}
+.auth-note{font-size:.78rem; color:var(--muted); line-height:1.55; background:#F7F8FA; border-radius:10px;
+  padding:10px 12px; margin:12px 0 16px}
+.auth-cta{width:100%; background:#111; color:#fff; font-weight:800; font-size:.98rem; padding:15px; border-radius:13px;
+  transition:opacity .12s, transform .1s}
+.auth-cta:hover{transform:translateY(-1px)}
+.auth-cta:disabled{opacity:.35; cursor:not-allowed; transform:none}
+.auth-card input[type=text], .auth-card input[type=email], .auth-card input[type=password]{
+  width:100%; font:inherit; font-size:.95rem; padding:13px 14px; border:1.5px solid #E5E8EB; border-radius:12px;
+  margin-bottom:10px; background:#fff; color:#191F28}
+.auth-card input:focus{outline:none; border-color:#111}
+.auth-form-gap{margin-top:6px}
+.toast{position:fixed; left:50%; bottom:30px; transform:translateX(-50%) translateY(14px); z-index:120;
+  background:rgba(17,17,17,.94); color:#fff; font-size:.88rem; font-weight:600; line-height:1.5;
+  padding:13px 20px; border-radius:12px; max-width:min(420px,88vw); text-align:center;
+  opacity:0; visibility:hidden; transition:opacity .2s, transform .2s}
+.toast.on{opacity:1; visibility:visible; transform:translateX(-50%) translateY(0)}
+
+@media (prefers-reduced-motion:reduce){ *{transition:none!important; animation:none!important} }
+/* 모바일 (기본 규칙 뒤!) */
+@media (max-width:720px){
+  .stats .in{grid-template-columns:1fr; gap:14px}
+  .books{grid-template-columns:1fr}
+  .plan-grid,.mode-grid,.off-grid{grid-template-columns:1fr}
+  .cross .in{flex-direction:column; align-items:flex-start}
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="in">
+    <a class="logo" href="../">TRUS</a>
+    <span class="wordmark">윤소정의 생각구독</span>
+    <div class="spacer"></div>
+    <button class="top-login" onclick="openAuth('login')">로그인</button>
+    <button class="top-join" onclick="openAuth('signup')">회원가입</button>
+  </div>
+</header>
+
+<main>
+
+  <!-- ── 초안 목업: 모드 진입만 크게 ── -->
+  <div class="wrap">
+    <section class="mode-stage">
+      <div class="ms-h">
+        <p class="kicker-l">윤소정의 생각구독 · 프로토타입</p>
+        <h1>모드로 들어가 보기</h1>
+        <p class="ms-sub">두 시점을 오가며 확인해요</p>
+      </div>
+      <div class="mode-grid big">
+        <a class="mode" href="../ebook-editor/">
+          <span class="tag">관리자 모드</span>
+          <h3>이북 편집기</h3>
+          <p>챕터를 쓰고 다듬어서 이번 달 책으로 발행하는 작업실이에요.</p>
+          <span class="go">편집기 열기 →</span>
+        </a>
+        <a class="mode" href="../ebook-reader/">
+          <span class="tag">구독자 모드</span>
+          <h3>이북 리더기</h3>
+          <p>도착한 책을 목차로 넘기며 읽는 구독자의 서재예요.</p>
+          <span class="go">리더기 열기 →</span>
+        </a>
+      </div>
+      <a class="ms-cross" href="../world/">트루스월드 보러가기 →</a>
+    </section>
+  </div>
+
+</main>
+
+<!-- ── 이전 풀 원페이지 (초안 단계라 숨김 — 다시 살릴 때 주석 해제) ──
+  <div class="wrap">
+    <section class="hero">
+      <p class="kicker">매달 1권 발행</p>
+      <h1><u>19년째 해본 것</u>을<br>글로 씁니다</h1>
+      <p class="lead">윤소정의 생각을 매달 1권의 책으로 받아보세요. 흘러가는 피드가 아니라, 쌓이는 책장이에요.</p>
+      <div class="cta-row">
+        <button class="cta" onclick="openAuth('signup')">구독 신청하기 <span aria-hidden="true">→</span></button>
+        <button class="cta ghost" onclick="toast('처음이라면 — 윤소정 연대기는 준비 중이에요')">처음이라면?</button>
+      </div>
+    </section>
+  </div>
+
+  <section class="stats" aria-label="생각구독 숫자">
+    <div class="in">
+      <div class="stat"><b>80편</b><span>발행한 윤소정의 생각</span></div>
+      <div class="stat"><b>매달 1권</b><span>이북으로 도착해요</span></div>
+      <div class="stat"><b>19년</b><span>해본 것만 글로 씁니다</span></div>
+    </div>
+  </section>
+
+  <div class="wrap">
+
+    <section class="section">
+      <div class="section-h"><h2>윤소정의 생각 80편</h2><small>E-book</small></div>
+      <p class="section-sub">한 편이 한 권이에요. 궁금한 제목부터 열어보세요.</p>
+      <div class="books">
+        <a class="book" href="../ebook-reader/">
+          <span class="tag">E-book</span>
+          <h3>나는 '언러닝' 합니다</h3>
+          <span class="read">미리 읽기 →</span>
+        </a>
+        <a class="book" href="../ebook-reader/">
+          <span class="tag">E-book</span>
+          <h3>눈치보고 싶지 않아.</h3>
+          <span class="read">미리 읽기 →</span>
+        </a>
+        <a class="book" href="../ebook-reader/">
+          <span class="tag">E-book</span>
+          <h3>일의 수명, 넌 2년짜리야 20년짜리야</h3>
+          <span class="read">미리 읽기 →</span>
+        </a>
+        <a class="book" href="../ebook-reader/">
+          <span class="tag">E-book</span>
+          <h3>용기도 새로울 수 있나요?</h3>
+          <span class="read">미리 읽기 →</span>
+        </a>
+        <a class="book" href="../ebook-reader/">
+          <span class="tag">E-book</span>
+          <h3>딥 다이브</h3>
+          <span class="read">미리 읽기 →</span>
+        </a>
+        <a class="book" href="../ebook-reader/">
+          <span class="tag">E-book</span>
+          <h3>기다리는 실력</h3>
+          <span class="read">미리 읽기 →</span>
+        </a>
+      </div>
+      <p class="limited">📕 <b>한정판 실물도서</b>도 있어요 — 소장하고 싶은 생각은 종이로.</p>
+    </section>
+
+    <section class="section">
+      <div class="section-h"><h2>구독자의 말</h2><small>구매평</small></div>
+      <p class="section-sub">먼저 읽은 사람들이 남긴 기록이에요. (목데이터)</p>
+      <div class="reviews">
+        <div class="rv"><span class="bk">[E-book] 딥 다이브</span><p>한 문장에서 며칠을 머물렀어요. 빨리 읽히지 않는 글이라 좋아요.</p><span class="who">구독자 김** · 3일 전</span></div>
+        <div class="rv"><span class="bk">[E-book] 기다리는 실력</span><p>조급해질 때마다 꺼내 읽으려고 저장해뒀습니다.</p><span class="who">구독자 이** · 5일 전</span></div>
+        <div class="rv"><span class="bk">[E-book] 나는 '언러닝' 합니다</span><p>배우는 것보다 비우는 게 먼저라는 말이 오래 남아요.</p><span class="who">구독자 박** · 1주 전</span></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-h"><h2>구독 신청</h2><small>언제든 해지할 수 있어요</small></div>
+      <p class="section-sub">매달 1권, 윤소정의 새 생각이 도착해요.</p>
+      <div class="plan-grid">
+        <div class="plan">
+          <p class="nm">월간 구독</p>
+          <p class="price">9,900원 <small>/ 월</small></p>
+          <p>매달 새 책 1권 + 지난 생각 열람</p>
+          <button onclick="toast('결제는 프로토타입에서 준비 중이에요')">월간으로 시작하기</button>
+        </div>
+        <div class="plan year">
+          <span class="badge">2달 무료</span>
+          <p class="nm">연간 구독</p>
+          <p class="price">99,000원 <small>/ 년</small></p>
+          <p>매달 새 책 + 80편 전체 열람 + 연말 소장본</p>
+          <button onclick="toast('결제는 프로토타입에서 준비 중이에요')">연간으로 시작하기</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-h"><h2>오프라인</h2><small>글 바깥에서 만나요</small></div>
+      <div class="off-grid">
+        <div class="off">
+          <h3>인사이드룸 방문하기</h3>
+          <p>생각이 태어나는 공간에 직접 와보세요.</p>
+          <button onclick="toast('인사이드룸 안내는 준비 중이에요')">안내 보기</button>
+        </div>
+        <div class="off">
+          <h3>생각 마라톤</h3>
+          <p>같은 글을 읽고 함께 생각을 완주하는 모임이에요.</p>
+          <button onclick="toast('생각 마라톤 일정은 준비 중이에요')">일정 보기</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-h"><h2>모드로 들어가 보기</h2><small>프로토타입 — 두 시점을 오가며 확인해요</small></div>
+      <div class="mode-grid">
+        <a class="mode" href="../ebook-editor/">
+          <span class="tag">관리자 모드</span>
+          <h3>이북 편집기</h3>
+          <p>챕터를 쓰고 다듬어서 이번 달 책으로 발행하는 작업실이에요.</p>
+          <span class="go">편집기 열기 →</span>
+        </a>
+        <a class="mode" href="../ebook-reader/">
+          <span class="tag">구독자 모드</span>
+          <h3>이북 리더기</h3>
+          <p>도착한 책을 목차로 넘기며 읽는 구독자의 서재예요.</p>
+          <span class="go">리더기 열기 →</span>
+        </a>
+      </div>
+    </section>
+
+    <section class="cross" aria-label="트루스월드 안내">
+      <div class="stars" aria-hidden="true"></div>
+      <div class="in">
+        <div>
+          <p class="kicker pxfont">TRUS WORLD</p>
+          <h2 class="pxfont">강의와 타운이 있는<br>또 하나의 세계</h2>
+        </div>
+        <a class="px-cta pxfont" href="../world/">트루스월드 보러가기 <span aria-hidden="true">→</span></a>
+      </div>
+    </section>
+
+    <footer class="foot">
+      <p><b>TRUS 통합회원</b> — 하나의 계정으로 두 세계를 이용해요</p>
+      <button class="foot-join" onclick="openAuth('signup')">통합회원 가입</button>
+    </footer>
+
+  </div>
+-->
+
+<!-- 통합 auth 모달 (공용 블록 — index/world와 동일) -->
+<div class="auth-ovl" id="authOvl" onclick="if(event.target===this)closeAuth()">
+  <div class="auth-card" role="dialog" aria-modal="true" aria-label="TRUS 통합회원">
+    <button class="auth-x" onclick="closeAuth()" aria-label="닫기">✕</button>
+
+    <div id="authTerms">
+      <h3>TRUS 통합회원 가입</h3>
+      <p class="auth-sub">생각구독·트루스월드를 하나의 계정으로 이용해요</p>
+      <label class="t-all"><input type="checkbox" id="tAll"> 전체 동의</label>
+      <label><input type="checkbox" class="t-req"> [필수] TRUS 통합회원 이용약관</label>
+      <label><input type="checkbox" class="t-req"> [필수] 개인정보 수집·이용 동의</label>
+      <label><input type="checkbox" class="t-opt"> [선택] 마케팅 정보 수신 동의</label>
+      <p class="auth-note">서비스별 약관은 각 서비스를 처음 이용할 때 따로 동의받아요</p>
+      <button class="auth-cta" id="tNext" disabled onclick="authStep(2)">동의하고 계속하기</button>
+    </div>
+
+    <div id="authForm" hidden>
+      <h3>거의 다 됐어요</h3>
+      <p class="auth-sub">이 계정 하나면 두 세계 모두 열려요</p>
+      <div class="auth-form-gap">
+        <input type="email" placeholder="이메일" aria-label="이메일">
+        <input type="password" placeholder="비밀번호" aria-label="비밀번호">
+        <input type="text" placeholder="이름" aria-label="이름">
+      </div>
+      <button class="auth-cta" onclick="authDone()">가입 완료하기</button>
+    </div>
+
+    <div id="authLogin" hidden>
+      <h3>로그인</h3>
+      <p class="auth-sub">TRUS 통합 계정으로 로그인해요</p>
+      <div class="auth-form-gap">
+        <input type="email" placeholder="이메일" aria-label="이메일">
+        <input type="password" placeholder="비밀번호" aria-label="비밀번호">
+      </div>
+      <button class="auth-cta" onclick="toast('로그인 완료! (목)');closeAuth()">로그인</button>
+    </div>
+
+  </div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+// ── 통합 auth 모달 (공용 블록 — index/world와 동일)
+function openAuth(mode){
+  document.getElementById('authOvl').classList.add('on');
+  document.getElementById('authTerms').hidden = mode !== 'signup';
+  document.getElementById('authLogin').hidden = mode !== 'login';
+  document.getElementById('authForm').hidden = true;
+}
+function closeAuth(){ document.getElementById('authOvl').classList.remove('on'); }
+function authStep(n){
+  if(n===2){
+    document.getElementById('authTerms').hidden = true;
+    document.getElementById('authForm').hidden = false;
+  }
+}
+function authDone(){
+  closeAuth();
+  toast('가입 완료! 하나의 계정으로 생각구독·트루스월드 어디서나 만나요');
+}
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('on');
+  clearTimeout(t._h); t._h = setTimeout(()=>t.classList.remove('on'), 2600);
+}
+(function(){
+  const all = document.getElementById('tAll');
+  const req = [...document.querySelectorAll('.t-req')];
+  const opt = [...document.querySelectorAll('.t-opt')];
+  const next = document.getElementById('tNext');
+  function sync(){
+    next.disabled = !req.every(c=>c.checked);
+    all.checked = req.every(c=>c.checked) && opt.every(c=>c.checked);
+  }
+  all.addEventListener('change', ()=>{ [...req,...opt].forEach(c=>c.checked=all.checked); sync(); });
+  [...req,...opt].forEach(c=>c.addEventListener('change', sync));
+})();
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeAuth(); });
+</script>
+</body>
+</html>
