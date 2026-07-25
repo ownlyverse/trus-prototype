@@ -12,9 +12,9 @@
 :root{
   /* 공통 */
   --ink:#191F28; --muted:#8B95A1;
-  /* 생각구독 — 에디토리얼 */
-  --paper-ed:#FDFBF7; --ink-ed:#1C1B18; --sub-ed:#6E685D; --line-ed:#E7E1D6;
-  --green:#2F5D50; --green-d:#24483E; --green-soft:#E7EFEA;
+  /* 생각구독 — 윤소정의 생각구독 톤 (화이트+하늘색) */
+  --paper-ed:#FFFFFF; --ink-ed:#121212; --sub-ed:#666666; --line-ed:#E5E5E5;
+  --blue:#00B8FF; --blue-d:#067CAF; --cream:#FAFBED;
   /* 트루스월드 — 픽셀 캐넌 */
   --paper:#FFF9F1; --night:#231B2E; --night-2:#2E2340;
   --accent:#F26D9C; --accent-d:#C24C78; --accent-soft:#FBE4EE;
@@ -51,19 +51,19 @@ a{color:inherit;text-decoration:none}
   transition:flex .45s cubic-bezier(.22,.7,.3,1)}
 .split:has(.half:hover) .half:hover{flex:1.28}
 
-/* 좌 — 생각구독 */
+/* 좌 — 생각구독 (윤소정의 생각구독 톤) */
 .half.sub{background:var(--paper-ed); color:var(--ink-ed); border-right:1px solid rgba(0,0,0,.35)}
-.sub .kicker{font-size:.8rem; font-weight:700; color:var(--green); margin-bottom:18px}
-.sub h2{font-size:clamp(2.1rem,4.2vw,3.4rem); font-weight:900; line-height:1.16; margin-bottom:14px}
+.sub .kicker{font-size:.82rem; font-weight:800; color:var(--blue-d); margin-bottom:18px}
+.sub h2{font-size:clamp(2.1rem,4.2vw,3.4rem); font-weight:900; line-height:1.16; margin-bottom:14px; letter-spacing:-0.03em}
 .sub .lead{font-size:1.02rem; color:var(--sub-ed); line-height:1.7; margin-bottom:34px; max-width:34ch}
-.sub .titles{list-style:none; border-top:1px solid var(--line-ed); max-width:420px; margin-bottom:38px}
+.sub .titles{list-style:none; border-top:2px solid var(--ink-ed); max-width:420px; margin-bottom:38px}
 .sub .titles li{border-bottom:1px solid var(--line-ed); padding:13px 2px; font-size:.95rem; color:var(--ink-ed);
   display:flex; align-items:baseline; gap:10px}
-.sub .titles .no{font-size:.72rem; color:var(--green); font-weight:700; flex-shrink:0}
+.sub .titles .no{font-size:.72rem; color:var(--blue-d); font-weight:800; flex-shrink:0}
 .ed-cta{display:inline-flex; align-items:center; gap:8px; align-self:flex-start;
-  background:var(--green); color:#fff; font-weight:800; font-size:.95rem;
+  background:var(--ink-ed); color:#fff; font-weight:800; font-size:.95rem;
   padding:14px 24px; border-radius:12px; transition:transform .12s, background .12s}
-.ed-cta:hover{background:var(--green-d); transform:translateY(-2px)}
+.ed-cta:hover{background:var(--blue-d); transform:translateY(-2px)}
 
 /* 우 — 트루스월드 */
 .half.world{color:#FFE6F0; background:linear-gradient(var(--night) 0%, var(--night-2) 100%)}
@@ -158,13 +158,13 @@ a{color:inherit;text-decoration:none}
 
   <!-- 좌 — 생각구독 -->
   <section class="half sub" onclick="go(event,'subscribe-prototype.html')" aria-label="생각구독">
-    <p class="kicker">THINK · SUBSCRIBE</p>
-    <h2 class="serif">생각구독</h2>
-    <p class="lead">일과 관계의 경계에 대한 에세이를 매주 한 편, 이북으로 보내드려요.</p>
-    <ul class="titles serif" aria-label="최근 발행된 글">
-      <li><span class="no">08</span>거절에도 예의가 있다</li>
-      <li><span class="no">07</span>경계는 벽이 아니라 문이다</li>
-      <li><span class="no">06</span>관계를 남기는 말투</li>
+    <p class="kicker">윤소정의 생각구독</p>
+    <h2>생각구독</h2>
+    <p class="lead">19년째 해본 것을 글로 씁니다. 매달 1권의 책을 발행하고 있어요.</p>
+    <ul class="titles" aria-label="최근 발행된 생각">
+      <li><span class="no">E-BOOK</span>나는 '언러닝' 합니다</li>
+      <li><span class="no">E-BOOK</span>딥 다이브</li>
+      <li><span class="no">E-BOOK</span>기다리는 실력</li>
     </ul>
     <a class="ed-cta" href="subscribe-prototype.html">생각구독 들어가기 <span aria-hidden="true">→</span></a>
   </section>

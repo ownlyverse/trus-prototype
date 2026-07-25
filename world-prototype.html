@@ -14,7 +14,7 @@
   --night:#231B2E; --night-2:#2E2340;
   --accent:#F26D9C; --accent-d:#C24C78; --accent-soft:#FBE4EE;
   --muted:#8B95A1; --line:#E8DFD2;
-  --paper-ed:#FDFBF7; --ink-ed:#1C1B18; --sub-ed:#6E685D; --green:#2F5D50; --green-d:#24483E;
+  --paper-ed:#FFFFFF; --ink-ed:#121212; --sub-ed:#666666; --blue:#00B8FF; --blue-d:#067CAF;
 }
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:"Pretendard Variable",Pretendard,-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
@@ -101,11 +101,11 @@ a{color:inherit;text-decoration:none}
 .cross{margin:56px 0; border-radius:18px; padding:44px 36px; background:var(--paper-ed); color:var(--ink-ed);
   border:3px solid #17171C; box-shadow:5px 5px 0 rgba(0,0,0,.4);
   display:flex; align-items:center; gap:22px; flex-wrap:wrap; justify-content:space-between}
-.cross .kicker{font-size:.76rem; font-weight:700; color:var(--green); margin-bottom:10px}
+.cross .kicker{font-size:.76rem; font-weight:800; color:var(--blue-d); margin-bottom:10px}
 .cross h2{font-size:1.4rem; font-weight:900; line-height:1.4}
-.ed-cta{display:inline-flex; align-items:center; gap:8px; background:var(--green); color:#fff; font-weight:800;
+.ed-cta{display:inline-flex; align-items:center; gap:8px; background:var(--ink-ed); color:#fff; font-weight:800;
   font-size:.92rem; padding:13px 22px; border-radius:12px; transition:transform .12s, background .12s; flex-shrink:0}
-.ed-cta:hover{background:var(--green-d); transform:translateY(-2px)}
+.ed-cta:hover{background:var(--blue-d); transform:translateY(-2px)}
 
 /* 푸터 */
 .foot{padding:8px 0 76px; display:flex; align-items:center; gap:16px; flex-wrap:wrap; justify-content:space-between; color:#D8CFE8}
@@ -224,8 +224,8 @@ a{color:inherit;text-decoration:none}
 
   <section class="cross" aria-label="생각구독 안내">
     <div>
-      <p class="kicker">THINK · SUBSCRIBE</p>
-      <h2 class="serif">글로 만나는<br>또 하나의 세계</h2>
+      <p class="kicker">윤소정의 생각구독</p>
+      <h2>글로 만나는<br>또 하나의 세계</h2>
     </div>
     <a class="ed-cta" href="subscribe-prototype.html">생각구독 보러가기 <span aria-hidden="true">→</span></a>
   </section>
