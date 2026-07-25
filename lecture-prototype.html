@@ -21,7 +21,7 @@ body{
 }
 button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
 .num{font-variant-numeric:tabular-nums}
-.pxfont, .hud-btn, .pill-stat, .step-label, .pbtn, .sign{font-family:'NeoDunggeunmo','Pretendard Variable',sans-serif; letter-spacing:0}
+.pxfont, .hud-btn, .step-label, .pbtn, .sign{font-family:'NeoDunggeunmo','Pretendard Variable',sans-serif; letter-spacing:0}
 
 /* 밤 자습실 배경 — 별 + 창밖 불빛 */
 .bg-night{position:fixed; inset:0; pointer-events:none;
@@ -45,24 +45,53 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
 .hud-btn svg{width:21px; height:21px}
 .hud-btn:hover{border-color:#F26D9C; box-shadow:0 3px 12px rgba(0,0,0,.4), 0 0 22px rgba(242,109,156,.35)}
 .hud-btn:active{transform:translateY(2px); box-shadow:0 1px 6px rgba(0,0,0,.4)}
-.pill-stat{display:inline-flex; align-items:center; gap:8px; padding:6px 16px 6px 6px; border-radius:22px;
-  background:rgba(23,19,31,.82); border:2px solid #3E3155; color:#FFE6F0; font-size:.92rem; font-weight:700;
-  box-shadow:0 3px 12px rgba(0,0,0,.4), 0 0 18px rgba(242,109,156,.14)}
-.pill-stat .ic{width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center;
-  background:linear-gradient(135deg,#FFE08A,#F2A73C); border:1px solid #C98A2E; font-size:.82rem; color:#7A4E00;
-  box-shadow:inset 0 1px 2px rgba(255,255,255,.55)}
+
+/* 메뉴 드로어 — 목차 · 커리큘럼 */
+.menu-drawer{position:fixed; top:62px; right:14px; z-index:66; width:284px; max-width:calc(100vw - 28px);
+  max-height:calc(100vh - 80px); overflow-y:auto;
+  background:var(--paper); border:3px solid #17131F; border-radius:11px; box-shadow:6px 6px 0 rgba(0,0,0,.35);
+  padding:9px; display:none; flex-direction:column}
+.menu-drawer.open{display:flex; animation:mdpop .16s ease-out}
+@keyframes mdpop{from{opacity:0; transform:translateY(-8px)}to{opacity:1; transform:none}}
+.md-group{display:flex; flex-direction:column; gap:2px}
+.md-group + .md-group{margin-top:7px; padding-top:8px; border-top:2px dashed var(--line)}
+.md-label{font-family:'NeoDunggeunmo','Pretendard Variable',sans-serif; letter-spacing:0;
+  font-size:.66rem; font-weight:700; color:var(--muted); padding:2px 8px 5px}
+.md-item{display:flex; align-items:center; gap:11px; width:100%; padding:9px 10px; border-radius:8px; text-align:left; transition:background .12s}
+.md-item:hover{background:#F2F4F6}
+.md-item:active{background:#E6EAEE}
+.md-ic{font-size:1.05rem; width:22px; text-align:center; flex-shrink:0; line-height:1}
+.md-name{font-size:.84rem; font-weight:600; color:var(--ink); flex:1; min-width:0}
+
+.toc-item.now{background:var(--accent-soft)}
+.toc-item.now:hover{background:var(--accent-soft)}
+.toc-item.now .md-name{color:var(--accent-d); font-weight:800}
+.toc-item.done .md-ic{color:#1BA664}
+.toc-item.lock{opacity:.45}
+.toc-item.lock:hover{background:transparent}
+.cur-item{cursor:default}
+.cur-item:hover{background:transparent}
+.cur-item:active{background:transparent}
+.cur-item .md-name small{display:block; font-size:.68rem; font-weight:500; color:var(--muted); margin-top:1px}
+.cur-item.now{background:var(--accent-soft)}
+.cur-item.now .md-name{color:var(--accent-d); font-weight:800}
+.cur-item.done .md-ic{color:#1BA664}
+.cur-badge{font-size:.6rem; font-weight:700; color:#1BA664; background:#E7F6EE; border-radius:6px; padding:2px 6px; white-space:nowrap; flex-shrink:0}
 
 /* 무대 */
 .stage{width:100%; margin:0 auto; padding:78px 20px 44px; position:relative}
 .lesson-col{max-width:640px; margin:0 auto}
 
-/* 라이브 강의실 — 강의자(좌 세로 대형) · 코치2+나(세로 3) · 메모(우 컬럼) */
+/* 라이브 강의실 — 코치2+나(좌 세로 3) · 강의자(가운데 세로 대형) · 메모(우 컬럼) */
 .liveroom{
   --H:min(760px, 82vh, 48vw);              /* 강의자 세로 높이 */
   --s:calc((var(--H) - 32px)/3);           /* 미니 타일 높이 (3개+간격2 = --H) */
   display:grid; justify-content:center; gap:18px; margin:14px auto 8px;
-  grid-template-columns:calc(var(--H)*9/16) calc(var(--s)*16/9) minmax(280px,380px);
+  grid-template-columns:calc(var(--s)*16/9) calc(var(--H)*9/16) minmax(280px,380px);
 }
+.mid-col{order:1}
+.vid.main{order:2}
+.liveroom > .memo{order:3}
 .vid.main{height:var(--H); aspect-ratio:9/16}
 .mid-col{display:flex; flex-direction:column; gap:16px; min-width:0}
 .mid-col .vid{height:var(--s)}
@@ -72,8 +101,9 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
 /* 좁은 화면: 강의자(세로) → 미니 3개 가로 → 메모 (기본 규칙보다 반드시 뒤) */
 @media(max-width:860px){
   .liveroom{display:flex; flex-direction:column}
-  .liveroom .vid.main{height:auto; aspect-ratio:9/16; width:min(66vw,300px); align-self:center}
-  .mid-col{flex-direction:row}
+  .liveroom .vid.main{height:auto; aspect-ratio:9/16; width:min(66vw,300px); align-self:center; order:1}
+  .mid-col{flex-direction:row; order:2}
+  .liveroom > .memo{order:3}
   .mid-col .vid{height:auto; aspect-ratio:16/9; flex:1; min-width:0}
   .liveroom > .memo{height:auto; min-height:200px}
 }
@@ -119,7 +149,13 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
 .sec-card h2{font-size:1.3rem; font-weight:800; letter-spacing:-0.03em; margin-bottom:8px}
 .sec-card p{font-size:.86rem; color:#7A7264; line-height:1.65; margin-bottom:20px}
 .sec-card .btns{display:flex; flex-direction:column; gap:9px}
-.sec-card.wide{width:min(720px,94vw); text-align:left}
+.sec-card.wide{width:min(880px,94vw); text-align:left; position:relative}
+.ao-timer{position:absolute; top:16px; right:18px; font-family:'NeoDunggeunmo','Pretendard Variable',sans-serif; letter-spacing:0;
+  font-size:.95rem; color:#8A2D55; background:#FBE4EE; border:2px solid #17131C; padding:4px 12px; border-radius:5px}
+.ao-timer.hot{background:#FF4D6D; color:#fff; animation:blink 1s infinite}
+.miss-item{display:flex; align-items:center; gap:10px; border:2px dashed #E0CFA8; background:#FDF8EC; border-radius:6px;
+  padding:11px 13px; margin-bottom:8px; font-size:.86rem; font-weight:600; text-align:left}
+.miss-item .sp{flex:1}
 .ao-grid{display:grid; grid-template-columns:minmax(0,1fr) 230px; gap:14px; align-items:start}
 @media(max-width:640px){.ao-grid{grid-template-columns:1fr}}
 .ao-peers{display:flex; flex-direction:column; gap:10px}
@@ -221,11 +257,13 @@ canvas{display:block; width:100%; height:200px; touch-action:none; cursor:crossh
 .colors button.sel{border-color:#17171C}
 
 /* 03 읽기 */
-.reader{border:3px solid #17171C; border-radius:6px; background:#fff; height:220px; overflow-y:auto; padding:18px 20px}
-.reader p{font-size:.88rem; line-height:1.85; color:#3A3428; margin-bottom:14px}
+.reader{border:3px solid #17171C; border-radius:6px; background:#fff; height:340px; overflow-y:auto; padding:22px 26px}
+.reader p{font-size:.94rem; line-height:2; color:#3A3428; margin-bottom:16px}
 .reader p b{background:linear-gradient(transparent 58%, #FFE0A3 58%)}
-.reader p.sent{cursor:pointer; border-radius:4px; padding:2px 4px; margin-left:-4px}
-.reader p.sent:hover{background:#FFF6E4}
+.reader .sent{cursor:pointer; border-radius:3px; padding:1px 2px}
+.reader .sent:hover{background:#FFF3D2}
+.reader .sent.my-ul{background:linear-gradient(transparent 55%, #FFE08A 55%)}
+.reader .sent.friend-ul{border-bottom:2px dotted var(--accent)}
 .reader p.my-ul{background:linear-gradient(transparent 62%, #FFE0A3 62%)}
 .reader p.friend-ul{border-bottom:2px dotted var(--accent)}
 .reader .ful{display:block; font-size:.68rem; color:var(--accent-d); margin-top:4px; font-weight:700}
@@ -240,6 +278,24 @@ canvas{display:block; width:100%; height:200px; touch-action:none; cursor:crossh
 /* 05 PLAY */
 .playbox textarea{width:100%; font-family:inherit; font-size:1rem; border:3px solid #17171C; border-radius:6px; padding:14px 16px; background:#fff; min-height:110px; resize:vertical; line-height:1.8}
 .playbox textarea:focus{outline:3px solid var(--accent-soft)}
+
+/* 퀴즈 */
+.quizbox{background:#fff; border:3px solid #17171C; border-radius:6px; padding:18px 20px}
+.quiz-q{font-size:.95rem; font-weight:800; margin-bottom:12px; line-height:1.6}
+.qopts{display:flex; flex-direction:column; gap:8px}
+.qopt{text-align:left; font-size:.86rem; font-weight:600; padding:11px 14px; border:2px solid #17171C; border-radius:6px; background:#FDF8EC; transition:.12s}
+.qopt:hover{background:#FFF3D9}
+.qopt.good{background:var(--accent); color:#fff; border-color:var(--accent-d)}
+.qopt.bad{background:#F2E3E3; color:#B03A3A; border-color:#B03A3A; opacity:.7}
+.qopt.pick{background:#FBE4EE; border-color:var(--accent-d)}
+.qq{margin-bottom:16px} .qq:last-child{margin-bottom:0}
+.quiz-q small{color:#A8834A; font-weight:700; font-size:.74rem}
+.qcheck{margin-top:12px; width:100%; font-size:.85rem; font-weight:700; padding:11px 16px; border:2px solid #17171C; border-radius:5px; background:#FDF8EC}
+.qcheck:hover{background:#FFF3D9}
+.qcheck:disabled{opacity:.4; cursor:not-allowed}
+.q-verdict{margin-top:8px; font-size:.8rem; font-weight:800; display:none}
+.q-verdict.good{display:block; color:#1B9E80}
+.q-verdict.bad{display:block; color:#C0392B}
 
 /* 06 마무리 */
 .fin .field{margin-bottom:12px}
@@ -275,8 +331,20 @@ canvas{display:block; width:100%; height:200px; touch-action:none; cursor:crossh
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.8 12 3.5l9 7.3"/><path d="M5.5 9.7V20a1 1 0 0 0 1 1H10v-5.4h4V21h3.5a1 1 0 0 0 1-1V9.7"/></svg>
   </button>
   <span class="spacer"></span>
-  <span class="pill-stat" title="내 조각"><span class="ic">◗</span><b class="num">96</b></span>
+  <button class="hud-btn" id="menuToggle" title="목차 열기" aria-label="목차 열기" aria-expanded="false" aria-controls="menuDrawer">☰</button>
 </header>
+
+<!-- 목차 · 커리큘럼 드로어 -->
+<div class="menu-drawer" id="menuDrawer" aria-label="목차와 커리큘럼">
+  <div class="md-group">
+    <div class="md-label">이 강의 · 1강 전략 설정</div>
+    <div id="tocList"></div>
+  </div>
+  <div class="md-group">
+    <div class="md-label">커리큘럼 · 일의 교과서</div>
+    <div id="curList"></div>
+  </div>
+</div>
 
 <div class="stage">
   <div class="sign pxfont"><span class="board">1강 · 전략 설정</span><small>커리큘럼 5단계 중 마지막 · 일의 교과서</small></div>
@@ -325,11 +393,12 @@ canvas{display:block; width:100%; height:200px; touch-action:none; cursor:crossh
 <div class="sec-overlay" id="actOverlay">
   <div class="sec-card wide">
     <div class="step-label" id="aoLabel"></div>
+    <span class="ao-timer" id="aoTimer">⏱ 0:00</span>
     <h2 id="aoTitle"></h2>
     <p id="aoText" style="text-align:left; margin-bottom:14px"></p>
     <div id="aoBody"></div>
     <div class="gate"><span class="hint" id="aoHint"></span>
-    <button class="pbtn" id="aoDone" disabled>완료 — 이어서 듣기 ›</button></div>
+    <button class="pbtn" id="aoDone" disabled>시간이 끝나면 다 같이 나가요</button></div>
   </div>
 </div>
 
@@ -346,18 +415,23 @@ canvas{display:block; width:100%; height:200px; touch-action:none; cursor:crossh
 /* ─── 강의 흐름 — 각 강의 영상을 통으로 본 뒤 활동으로 이어져요 ─── */
 const BLOCKS = [
   {type:'lecture', name:'강의', t:'오늘, 잠깐 멈추는 시간', src:'assets/lecture1.mp4', poster:'assets/lecture1-poster.jpg'},
-  {type:'interactive', kind:'draw', name:'인터랙티브 — 그림 그리기', t:'지금 마음을 색으로 그려보세요'},
+  {type:'interactive', kind:'read',  name:'인터랙티브 — 밑줄 읽기', t:'오늘의 글, 밑줄 치며 읽기', dur:25},
+  {type:'interactive', kind:'draw',  name:'인터랙티브 — 그림 그리기', t:'지금 마음을 색으로 그려보세요', dur:20},
   {type:'lecture', name:'강의', t:'전략을 바운더리로', src:'assets/lecture2.mp4', poster:'assets/lecture2-poster.jpg'},
-  {type:'interactive', kind:'write', name:'인터랙티브 — 글쓰기', t:'오늘 배운 것을 한 문장으로 적어보세요', ph:'오늘 나는 …라는 걸 알았다.'},
+  {type:'interactive', kind:'quiz',  name:'인터랙티브 — 잠깐, 퀴즈', t:'방금 이야기의 핵심은 무엇이었나요?', dur:25},
+  {type:'interactive', kind:'speak', name:'인터랙티브 — 소리 내어 말하기', t:'방금 배운 것을 입으로 말해보세요', dur:18},
+  {type:'interactive', kind:'write', name:'인터랙티브 — 글쓰기', t:'오늘 배운 것을 한 문장으로 적어보세요', ph:'오늘 나는 …라는 걸 알았다.', dur:20},
+  {type:'interactive', kind:'play',  name:'인터랙티브 — PLAY 워크시트', t:'워크시트를 내려받아, 오늘 밤 따라 써보세요', dur:25},
   {type:'finish', name:'마무리 · 다시 듣기'},
 ];
 
-let bi = 0, done = false, started = false;
+let bi = 0, maxBi = 0, done = false, started = false;   // maxBi = 지금까지 도달한 최대 블록 (bi는 soReplay로 되감겨요)
 const fmt = s => Math.floor(s/60) + ':' + String(Math.max(0,Math.round(s))%60).toString().padStart(2,'0');
 const $ = id => document.getElementById(id);
 
 /* ─── 실제 강의 영상 (세로 9:16) ─── */
 const lecVid = $('lecVid');
+const TEST_SEC = 4;                                     // 테스트: 각 강의 구간을 4초만 재생
 let VID_DUR = 66;                                       // 로드되면 실제 길이로 갱신
 lecVid.addEventListener('loadedmetadata', ()=>{
   if(isFinite(lecVid.duration) && lecVid.duration > 0){ VID_DUR = lecVid.duration; updateUI(); }
@@ -368,16 +442,18 @@ const coachVids = [$('coachA'), $('coachB')];
 function coachesStart(){ coachVids.forEach(v=>{ v.currentTime = 0; v.play().catch(()=>{}); }); }
 function coachesPause(){ coachVids.forEach(v=>v.pause()); }
 
+const effDur = () => Math.min(VID_DUR, TEST_SEC);
 function updateUI(){
   const b = BLOCKS[bi];
   $('vSec').textContent = `${bi+1}/${BLOCKS.length} · ${b.type==='lecture' ? b.t : b.name}`;
   if(b.type==='lecture'){
-    $('vFill').style.width = (lecVid.currentTime / VID_DUR * 100) + '%';
-    $('vTime').textContent = '-' + fmt(VID_DUR - lecVid.currentTime);
+    $('vFill').style.width = Math.min(100, lecVid.currentTime / effDur() * 100) + '%';
+    $('vTime').textContent = '-' + fmt(Math.max(0, effDur() - lecVid.currentTime));
   }
 }
 function runBlock(){
   const b = BLOCKS[bi];
+  maxBi = Math.max(maxBi, bi);
   updateUI();
   if(b.type==='lecture'){ playLecture(); }
   else { lecVid.pause(); coachesPause(); $('vPlay').textContent = '▶'; }
@@ -391,7 +467,7 @@ function playLecture(){
     lecVid.src = b.src;
     if(b.poster) lecVid.poster = b.poster;
     lecVid.load();
-  } else if(lecVid.currentTime >= VID_DUR - 0.1){    // 같은 영상 다시 듣기면 처음으로
+  } else if(lecVid.currentTime >= effDur() - 0.1){   // 같은 영상 다시 듣기면 처음으로
     lecVid.currentTime = 0;
   }
   updateUI();
@@ -404,6 +480,11 @@ function playLecture(){
 lecVid.addEventListener('timeupdate', ()=>{
   if(BLOCKS[bi].type !== 'lecture') return;
   updateUI();
+  if(!lecVid.paused && lecVid.currentTime >= effDur() - 0.05){    // 테스트 4초 컷
+    lecVid.pause();
+    $('vFill').style.width = '100%'; $('vTime').textContent = '끝';
+    nextBlock();
+  }
 });
 lecVid.addEventListener('ended', ()=>{
   if(BLOCKS[bi].type === 'lecture'){ $('vFill').style.width='100%'; $('vTime').textContent='끝'; nextBlock(); }
@@ -423,7 +504,7 @@ $('vStart').addEventListener('click', ()=>{
 /* 강의는 멈추거나 건너뛸 수 없어요 — 끝까지 들어야 다음으로 넘어가요 */
 function blockMsg(){
   if(done || BLOCKS[bi].type !== 'lecture') return;
-  toast(`강의는 멈추거나 건너뛸 수 없어요 — 남은 시간 ${fmt(VID_DUR - lecVid.currentTime)}`);
+  toast(`강의는 멈추거나 건너뛸 수 없어요 — 남은 시간 ${fmt(Math.max(0, effDur() - lecVid.currentTime))}`);
 }
 $('vPlay').addEventListener('click', ()=>{
   if(!started){ $('vStart').click(); return; }   // 소리와 함께 첫 재생만 허용
@@ -465,36 +546,194 @@ const PEER_WRITES = [
   {n:'🦉 바운더리 코치', text:'오늘 나는, 끝점을 한 문장으로 줄이는 법을 배웠다.'},
   {n:'🐢 기록 코치', text:'내일 아침엔 키 씬부터 다시 그려봐야지.'},
 ];
+const PEER_NOTES = {
+  read: [
+    {n:'🦉 바운더리 코치', text:'"경계에서 시작된다"에 밑줄 쳤어요.'},
+    {n:'🐢 기록 코치', text:'네 번째 문단, 두 번째 읽는 중이에요.'},
+  ],
+  quiz: [
+    {n:'🦉 바운더리 코치', text:'저는 2번이요 — 멈춰야 보이니까요.'},
+    {n:'🐢 기록 코치', text:'고민하다가 2번 골랐어요.'},
+  ],
+  speak: [
+    {n:'🦉 바운더리 코치', text:'지금 소리 내어 말하는 중이에요…'},
+    {n:'🐢 기록 코치', text:'두 번 말했더니 진짜 제 것이 됐어요.'},
+  ],
+  play: [
+    {n:'🦉 바운더리 코치', text:'내려받았어요 — 오늘 밤에 조용히 써볼게요.'},
+    {n:'🐢 기록 코치', text:'저는 프린트해서 책상에 붙여뒀어요.'},
+  ],
+};
+const AO_TEXT = {
+  draw:'정답은 없어요. 손 가는 대로 조금만 그리면 이어서 들을 수 있어요.',
+  write:'한 문장이면 충분해요. 솔직한 문장이 제일 좋아요.',
+  read:'마음에 남는 문장을 누르면 하이라이트돼요. 끝까지 읽어야 다음이 열려요.',
+  quiz:'모든 문항의 답을 고른 뒤, 선택 완료를 누르면 채점 결과가 보여요.',
+  speak:'눈으로만 넘기지 말고, 버튼을 꾹 누른 채 소리 내어 말해보세요. 말로 꺼내야 내 것이 돼요.',
+  play:'내려받아 손으로 채운 뒤, 작성본을 올려야 다음이 열려요.',
+};
+const AO_HINT = {
+  draw:'조금이라도 그리면 완료돼요',
+  write:'한 문장을 적으면 완료돼요',
+  read:'끝까지 읽고, 문장을 눌러 1곳 이상 하이라이트하면 완료돼요',
+  quiz:'모든 문항을 고르고, 선택 완료를 누르면 채점돼요',
+  speak:'3초 이상 꾹 누르고 말하면 완료돼요',
+  play:'내려받아 작성하고, 올리면 완료돼요',
+};
+const READ_PARAS = [
+  ['일은 해야 할 것들의 목록이 아니라, 하지 않을 것들의 <b>경계</b>에서 시작됩니다.'],
+  ['우리는 늘 더하는 쪽으로 달립니다.','할 일을 더하고, 목표를 더하고, 채널을 더합니다.','그런데 이상하게, 더할수록 방향은 흐려집니다.'],
+  ['전략이란 결국 멈춤의 기술입니다.','무엇을 하지 않을지 정하는 순간, 남은 것들이 또렷해집니다.'],
+  ['오늘 하루를 떠올려 보세요.','가장 오래 붙잡고 있던 일이, 정말 가장 중요한 일이었나요?'],
+  ['바운더리는 나를 가두는 벽이 아니라, 내 힘이 새어나가지 않게 하는 그릇입니다.'],
+  ['이제 한 문장만 남기면 됩니다.','"나는 __을 하지 않기로 했다."','그 문장이 3개월 전략의 첫 줄이 됩니다.'],
+];
+const QUIZ_SET = [
+  {q:'방금 이야기에서, 전략의 시작은 무엇이라고 했나요?', multi:false, ans:[1],
+   opts:['더 많이 하는 것','하지 않을 것을 정하는 것','더 빨리 하는 것','남들처럼 하는 것']},
+  {q:'바운더리를 설명한 말을 모두 골라보세요.', multi:true, ans:[0,2],
+   opts:['힘이 새어나가지 않게 하는 그릇','나를 가두는 벽','하지 않을 것의 경계','남들이 정해주는 규칙']},
+];
+
 function showInteractive(b){
   $('aoLabel').textContent = `${bi+1}/${BLOCKS.length} · ${b.name}`;
   $('aoTitle').textContent = b.t;
-  $('aoText').textContent = b.kind==='draw'
-    ? '정답은 없어요. 손 가는 대로 조금만 그리면 이어서 들을 수 있어요.'
-    : '한 문장이면 충분해요. 솔직한 문장이 제일 좋아요.';
-  const task = b.kind==='draw'
-    ? `<div class="padwrap"><canvas id="pad"></canvas></div>
+  $('aoText').textContent = AO_TEXT[b.kind] || '';
+  let task = '';
+  if(b.kind==='draw'){
+    task = `<div class="padwrap"><canvas id="pad"></canvas></div>
        <div class="colors" id="colors">
          <button class="sel" style="background:#F26D9C"></button><button style="background:#3182F6"></button>
          <button style="background:#46D5B2"></button><button style="background:#F2C14E"></button><button style="background:#2B2B33"></button>
-       </div>`
-    : `<textarea class="ao-ta" id="aoTa" placeholder="${b.ph}"></textarea>`;
-  const src = b.kind==='draw' ? PEER_DRAWS : PEER_WRITES;
-  const peers = src.map((pr,i)=> b.kind==='draw'
-    ? `<div class="peer-card"><div class="pc-name">${pr.n}<span class="pc-live"></span></div><svg viewBox="0 0 158 52" class="pc-svg"><path d="${pr.d}" fill="none" stroke="${pr.c}" stroke-width="5" stroke-linecap="round" style="animation-delay:${i*1.4}s"/></svg></div>`
-    : `<div class="peer-card"><div class="pc-name">${pr.n}<span class="pc-live"></span></div><p class="pc-text" data-full="${pr.text}"></p></div>`
-  ).join('');
-  $('aoBody').innerHTML = `<div class="ao-grid"><div>${task}</div><div class="ao-peers"><div class="pc-cap">👀 지금 각자 하는 중</div>${peers}</div></div>`;
+       </div>`;
+  } else if(b.kind==='write'){
+    task = `<textarea class="ao-ta" id="aoTa" placeholder="${b.ph}"></textarea>`;
+  } else if(b.kind==='read'){
+    task = `<div class="reader" id="reader">` +
+      READ_PARAS.map((sents,pi)=>`<p>${sents.map((sn,si)=>{
+        const fr = (pi===2 && si===0);
+        return `<span class="sent${fr?' friend-ul':''}">${sn}</span>${fr?'<span class="ful">🐢 기록 코치가 밑줄 친 문장이에요</span>':''} `;
+      }).join('')}</p>`).join('') +
+      `<p style="text-align:center;color:#B0A793;font-size:.74rem;margin-top:16px">— 여기까지 —</p></div>`;
+  } else if(b.kind==='quiz'){
+    task = `<div class="quizbox">` + QUIZ_SET.map((qz,qi)=>`
+      <div class="qq">
+        <div class="quiz-q">✎ 문항 ${qi+1}. ${qz.q}${qz.multi?' <small>(복수 선택)</small>':''}</div>
+        <div class="qopts">${qz.opts.map((o,oi)=>`<button class="qopt" data-qi="${qi}" data-oi="${oi}">${oi+1}. ${o}</button>`).join('')}</div>
+        <div class="q-verdict" id="qv${qi}"></div>
+      </div>`).join('') + `<button class="qcheck" id="qSubmit" disabled>선택 완료 — 채점하기</button></div>`;
+  } else if(b.kind==='speak'){
+    task = `<div class="say"><div class="line">“나는 <b>하지 않을 것</b>을 정하는 데서<br>전략을 시작한다.”</div>
+      <button class="holdbtn" id="holdBtn"><span class="fill" id="holdFill"></span><span id="holdLabel">🎤 꾹 누르고 소리 내어 말하기</span></button></div>`;
+  } else if(b.kind==='play'){
+    task = `<div class="say"><div class="line" style="font-size:.95rem">PLAY. 나에게 ‘일’은 어떤 감정이었나?<br><span style="font-size:.78rem;color:#7A7264">인쇄해서 책상 위에 두고, 자기 전에 한 줄씩 채워보세요.</span></div>
+      <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap">
+        <button class="pbtn" id="wsBtn">⬇ 워크시트 내려받기</button>
+        <button class="pbtn" id="wsUp" disabled>⬆ 작성한 워크시트 올리기</button>
+      </div></div>`;
+  }
+  const HIDE_PEERS = ['read','quiz','speak'];                     // 혼자 집중하는 활동 — 남의 것 안 보여요
+  if(HIDE_PEERS.includes(b.kind)){
+    $('aoBody').innerHTML = task;
+  } else {
+    const peers = (b.kind==='draw'
+      ? PEER_DRAWS.map((pr,i)=>`<div class="peer-card"><div class="pc-name">${pr.n}<span class="pc-live"></span></div><svg viewBox="0 0 158 52" class="pc-svg"><path d="${pr.d}" fill="none" stroke="${pr.c}" stroke-width="5" stroke-linecap="round" style="animation-delay:${i*1.4}s"/></svg></div>`)
+      : (b.kind==='write' ? PEER_WRITES : (PEER_NOTES[b.kind] || [])).map(pr=>`<div class="peer-card"><div class="pc-name">${pr.n}<span class="pc-live"></span></div><p class="pc-text" data-full="${pr.text}"></p></div>`)
+    ).join('');
+    $('aoBody').innerHTML = `<div class="ao-grid"><div>${task}</div><div class="ao-peers"><div class="pc-cap">👀 지금 각자 하는 중</div>${peers}</div></div>`;
+  }
   const h = $('aoHint');
-  h.textContent = b.kind==='draw' ? '조금이라도 그리면 완료돼요' : '한 문장을 적으면 완료돼요';
+  h.textContent = AO_HINT[b.kind] || '';
   h.classList.remove('ready');
   $('aoDone').disabled = true;
   $('actOverlay').classList.add('show');
+  const ok = msg => { actMet = true; h.textContent = msg + ' — 시간이 끝나면 다 같이 넘어가요'; h.classList.add('ready'); $('aoDone').textContent = '다 했어요 ✓ — 함께 나가요'; };
+  actMet = false;
+  $('aoDone').textContent = '시간이 끝나면 다 같이 나가요';
+  startActTimer(b.dur || 30);
+
   if(b.kind==='draw') setTimeout(initPad, 60);
-  else{
+  if(b.kind==='write'){
     const ta = $('aoTa');
     setTimeout(()=>ta.focus(), 60);
-    ta.addEventListener('input', ()=>{
-      if(ta.value.trim().length >= 8){ $('aoDone').disabled = false; h.textContent = '좋아요! 완료할 수 있어요'; h.classList.add('ready'); }
+    ta.addEventListener('input', ()=>{ if(ta.value.trim().length >= 8) ok('좋아요! 완료할 수 있어요'); });
+  }
+  if(b.kind==='read'){
+    const rd = $('reader'); let ul=false, bottom=false;
+    const check = ()=>{ if(ul && bottom) ok('밑줄이 남았어요 — 완료할 수 있어요'); };
+    rd.querySelectorAll('.sent').forEach(p=>p.addEventListener('click', ()=>{
+      p.classList.toggle('my-ul'); ul = !!rd.querySelector('.my-ul'); check();
+    }));
+    rd.addEventListener('scroll', ()=>{ if(rd.scrollTop + rd.clientHeight >= rd.scrollHeight - 8){ bottom = true; check(); } });
+  }
+  if(b.kind==='quiz'){
+    const picked = QUIZ_SET.map(()=>new Set());
+    let graded = false;
+    const canSubmit = () => picked.every(p=>p.size>0);
+    document.querySelectorAll('.qopt').forEach(btn=>btn.addEventListener('click', ()=>{
+      if(graded) return;
+      const qi = +btn.dataset.qi, oi = +btn.dataset.oi, qz = QUIZ_SET[qi];
+      if(!qz.multi){                                        // 단일 선택 — 라디오처럼
+        document.querySelectorAll(`.qopt[data-qi="${qi}"]`).forEach(x=>x.classList.remove('pick'));
+        picked[qi].clear();
+        btn.classList.add('pick'); picked[qi].add(oi);
+      } else {                                              // 복수 선택 — 토글
+        btn.classList.toggle('pick');
+        if(btn.classList.contains('pick')) picked[qi].add(oi); else picked[qi].delete(oi);
+      }
+      $('qSubmit').disabled = !canSubmit();
+    }));
+    $('qSubmit').addEventListener('click', ()=>{
+      if(graded || $('qSubmit').disabled) return;
+      graded = true;
+      let right = 0;
+      QUIZ_SET.forEach((qz,qi)=>{
+        const okq = [...qz.ans].sort().join(',') === [...picked[qi]].sort().join(',');
+        if(okq) right++;
+        document.querySelectorAll(`.qopt[data-qi="${qi}"]`).forEach(x=>{
+          const oi = +x.dataset.oi;
+          if(qz.ans.includes(oi)) x.classList.add('good');
+          else if(x.classList.contains('pick')) x.classList.add('bad');
+        });
+        const v = $('qv'+qi);
+        v.textContent = okq ? '✔ 정답이에요!' : '✘ 아쉬워요 — 초록으로 표시된 게 정답이에요';
+        v.className = 'q-verdict ' + (okq ? 'good' : 'bad');
+      });
+      $('qSubmit').textContent = `채점 완료 — ${right}/${QUIZ_SET.length} 정답`;
+      $('qSubmit').disabled = true;
+      ok(`채점 끝! ${right}/${QUIZ_SET.length} 정답`);
+    });
+  }
+  if(b.kind==='speak'){
+    const btn=$('holdBtn'), fill=$('holdFill'), lab=$('holdLabel');
+    let t=null, p=0, held=false;
+    const startH = e => { if(held) return; e.preventDefault();
+      t = setInterval(()=>{ p += 100/30; fill.style.width = Math.min(100,p)+'%';
+        if(p >= 100){ clearInterval(t); held = true; lab.textContent = '말했어요 ✓'; ok('목소리가 남았어요 — 완료할 수 있어요'); }
+      }, 100); };
+    const endH = ()=>{ if(held) return; clearInterval(t); p = 0; fill.style.width = '0'; };
+    btn.addEventListener('mousedown', startH); btn.addEventListener('touchstart', startH);
+    ['mouseup','mouseleave','touchend'].forEach(ev=>btn.addEventListener(ev, endH));
+  }
+  if(b.kind==='play'){
+    $('wsBtn').addEventListener('click', ()=>{
+      const c = document.createElement('canvas'); c.width = 800; c.height = 1000;
+      const x = c.getContext('2d');
+      x.fillStyle = '#FFF9F1'; x.fillRect(0,0,800,1000);
+      x.strokeStyle = '#17171C'; x.lineWidth = 6; x.strokeRect(20,20,760,960);
+      x.fillStyle = '#17171C'; x.font = 'bold 38px sans-serif'; x.fillText('PLAY. 나에게 일은 어떤 감정이었나?', 50, 100);
+      x.font = '22px sans-serif'; x.fillStyle = '#7A7264'; x.fillText('일의 교과서 · 전략 설정 워크시트', 50, 142);
+      x.strokeStyle = '#C9BFAE'; x.lineWidth = 2;
+      for(let y = 240; y < 940; y += 70){ x.beginPath(); x.moveTo(50,y); x.lineTo(750,y); x.stroke(); }
+      const a = document.createElement('a'); a.href = c.toDataURL('image/png'); a.download = 'PLAY-일-회고.png'; a.click();
+      $('wsBtn').textContent = '내려받았어요 ✓';
+      $('wsUp').disabled = false;
+      const h2 = $('aoHint'); h2.textContent = '작성해서 올리면 완료돼요';
+    });
+    $('wsUp').addEventListener('click', ()=>{
+      if($('wsUp').disabled) return;
+      $('wsUp').textContent = '올렸어요 ✓';
+      ok('작성본이 남았어요 — 완료할 수 있어요');
     });
   }
   document.querySelectorAll('.pc-text').forEach((el,i)=>{
@@ -528,14 +767,75 @@ function initPad(){
     btn.classList.add('sel'); ctx.strokeStyle = btn.style.background;
   }));
 }
-$('aoDone').addEventListener('click', ()=>{
+/* 인터랙티브 타이머 — 다 같이 나가요 */
+let actTimer = null, actLeft = 0, actMet = false;
+const missed = [];                                       // 시간 안에 못 채운 활동들
+function beep(){
+  try{
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    o.frequency.value = 880; g.gain.value = .12;
+    o.start(); setTimeout(()=>{ o.stop(); ctx.close(); }, 350);
+  }catch(e){}
+}
+function startActTimer(sec){
+  clearInterval(actTimer);
+  actLeft = sec;
+  const t = $('aoTimer');
+  t.classList.remove('hot');
+  t.textContent = '⏱ ' + fmt(actLeft);
+  actTimer = setInterval(()=>{
+    actLeft--;
+    t.textContent = '⏱ ' + fmt(Math.max(0, actLeft));
+    if(actLeft === 10){ t.classList.add('hot'); beep(); toast('10초 남았어요 — 마무리해 주세요!'); }
+    if(actLeft <= 0){ clearInterval(actTimer); endInteractive(); }
+  }, 1000);
+}
+function endInteractive(){
+  const b = BLOCKS[bi];
   $('actOverlay').classList.remove('show');
-  toast(BLOCKS[bi].kind==='draw' ? '그림이 남았어요 — 코치들도 볼 수 있어요' : '문장이 남았어요 — 코치들도 볼 수 있어요');
+  $('aoTimer').classList.remove('hot');
+  if(actMet) toast(DONE_TOAST[b.kind] || '기록이 남았어요');
+  else { missed.push({kind:b.kind, t:b.t}); toast('시간 종료 — 이 활동은 강의가 끝난 뒤 마저 완료해야 해요'); }
   nextBlock();
-});
+}
 
-/* 완강 */
+const DONE_TOAST = {
+  draw:'그림이 남았어요 — 코치들도 볼 수 있어요',
+  write:'문장이 남았어요 — 코치들도 볼 수 있어요',
+  read:'밑줄이 남았어요 — 코치들도 볼 수 있어요',
+  quiz:'정답! 흐름이 이어져요',
+  speak:'목소리로 말한 건 진짜 내 것이 돼요',
+  play:'작성한 워크시트가 남았어요 — 코치들도 볼 수 있어요',
+};
+
+
+/* 완강 — 미완료 활동이 있으면 보충해야 다음이 열려요 */
+const MISS_LABEL = {read:'📖 밑줄 읽기', draw:'🎨 그리기', quiz:'✍️ 퀴즈', speak:'🎤 소리 내어 말하기', write:'📝 글쓰기', play:'📄 워크시트'};
 function finishLecture(){
+  if(missed.length){ showMissed(); return; }
+  realFinish();
+}
+function showMissed(){
+  $('doneHost').innerHTML = `<div class="card done-wrap">
+    <div style="font-size:44px; margin-bottom:10px">⏳</div>
+    <h1>거의 다 왔어요 — 못 채운 활동이 있어요</h1>
+    <p class="sub">시간 안에 못 마친 활동을 완료해서 올려야<br><b>다음 에피소드가 열려요.</b></p>
+    <div style="text-align:left; max-width:440px; margin:0 auto 6px">
+      ${missed.map((m,k)=>`<div class="miss-item"><span>${MISS_LABEL[m.kind] || m.kind}</span><span style="color:#7A7264; font-weight:500">${m.t}</span><span class="sp"></span>
+        <button class="pbtn" style="padding:7px 14px; font-size:.78rem" onclick="clearMiss(${k})">완료하고 올리기</button></div>`).join('')}
+    </div>
+  </div>`;
+  $('doneHost').scrollIntoView({behavior:'smooth'});
+}
+function clearMiss(k){
+  missed.splice(k,1);
+  toast('올라갔어요 ✓');
+  if(missed.length) showMissed();
+  else realFinish();
+}
+function realFinish(){
   done = true;
   lecVid.pause();
   coachesPause();
@@ -566,6 +866,72 @@ function toast(msg){
   t.textContent = msg; t.classList.add('show');
   clearTimeout(t._h); t._h = setTimeout(()=>t.classList.remove('show'), 3000);
 }
+
+/* ===== ☰ 목차 드로어 ===== */
+const menuToggle = $('menuToggle');
+const menuDrawer = $('menuDrawer');
+function menuOpen(){ return menuDrawer.classList.contains('open'); }
+function closeMenu(){
+  menuDrawer.classList.remove('open');
+  menuToggle.setAttribute('aria-expanded','false');
+}
+function openMenu(){
+  if($('secOverlay').classList.contains('show')) return;   // 게이트 화면이 떠 있으면 열지 않아요
+  renderToc();
+  menuDrawer.classList.add('open');
+  menuToggle.setAttribute('aria-expanded','true');
+}
+/* 목차 항목 상태 — 위에서부터 먼저 걸리는 조건이 우선이에요 */
+function tocState(i){
+  if(i === bi)    return 'now';
+  if(i <= maxBi)  return 'done';
+  return 'lock';
+}
+function renderToc(){
+  $('tocList').innerHTML = BLOCKS.map((b,i)=>{
+    const st = tocState(i);
+    const ic = st==='now' ? '▶' : st==='done' ? '✓' : '🔒';
+    const label = b.type==='lecture' ? b.t : b.name;
+    // 잠긴 항목도 클릭은 받아요 — 왜 못 여는지 토스트로 알려주려고요 (disabled면 클릭이 안 잡혀요)
+    return `<button class="md-item toc-item ${st}" data-i="${i}"`
+      + (st==='lock' ? ' aria-disabled="true"' : '')
+      + (st==='now'  ? ' aria-current="step"' : '')
+      + `><span class="md-ic">${ic}</span><span class="md-name">${i+1}. ${label}</span></button>`;
+  }).join('');
+}
+function jumpTo(i){
+  if(i === bi){ closeMenu(); return; }                      // 지금 블록 — 다시 시작하지 않아요 (강의는 되감기 대상이 아니에요)
+  if(i > maxBi){ toast('앞 블록을 먼저 마쳐야 열려요'); return; }
+  bi = i; runBlock(); closeMenu();
+}
+$('tocList').addEventListener('click', e=>{
+  const btn = e.target.closest('.toc-item');
+  if(!btn) return;
+  jumpTo(Number(btn.dataset.i));
+});
+/* 커리큘럼 5단계 — 표시 전용이에요 (강의 페이지가 하나뿐이라 이동은 안 걸어요) */
+const CURRICULUM = [
+  {n:1, name:'바운더리 설정', prod:'나의 바운더리', state:'done'},
+  {n:2, name:'숫자언어',      prod:'숫자언어',      state:'done'},
+  {n:3, name:'고객언어',      prod:'고객언어',      state:'done'},
+  {n:4, name:'문제정의',      prod:'문제 한 문장',  state:'done'},
+  {n:5, name:'전략 설정',     prod:'3개월 전략',    state:'now'},
+];
+function renderCurriculum(){
+  $('curList').innerHTML = CURRICULUM.map(c=>
+    `<div class="md-item cur-item ${c.state}"`
+    + (c.state==='now' ? ' aria-current="step"' : '')
+    + `><span class="md-ic">${c.state==='done' ? '✓' : '▶'}</span>`
+    + `<span class="md-name">${c.n}. ${c.name}<small>${c.prod}</small></span>`
+    + (c.state==='done' ? '<span class="cur-badge">산출물 완료</span>' : '')
+    + `</div>`).join('');
+}
+renderCurriculum();
+menuToggle.addEventListener('click', e=>{ e.stopPropagation(); menuOpen() ? closeMenu() : openMenu(); });
+document.addEventListener('click', e=>{
+  if(menuOpen() && !menuDrawer.contains(e.target) && !menuToggle.contains(e.target)) closeMenu();
+});
+document.addEventListener('keydown', e=>{ if(e.key==='Escape' && menuOpen()) closeMenu(); });
 
 runBlock();
 </script>

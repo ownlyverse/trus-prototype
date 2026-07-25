@@ -11,7 +11,6 @@
   --bg:#F5F6F8; --card:#FFFFFF; --line:#E4E6EA; --line-2:#D5D8DE; --soft:#F3F4F6;
   --blue:#3182F6; --blue-d:#1B64DA; --blue-bg:#EEF5FF;
   --green:#12B76A; --red:#E5484D;
-  --dark:#262B36; --dark-2:#3A4150;
 }
 *{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth}
@@ -23,7 +22,7 @@ input,select,textarea{font:inherit;color:inherit}
 .num{font-variant-numeric:tabular-nums}
 :focus-visible{outline:2px solid var(--blue); outline-offset:1px}
 
-/* ── 상단바 (유데미식) ── */
+/* ── 상단바 ── */
 .topbar{position:sticky; top:0; z-index:50; height:56px; background:#fff; border-bottom:1px solid var(--line);
   display:flex; align-items:center; gap:12px; padding:0 16px}
 .topbar .back{display:flex; align-items:center; gap:6px; font-size:.86rem; font-weight:600; color:var(--sub); padding:7px 10px; border-radius:6px}
@@ -38,8 +37,8 @@ input,select,textarea{font:inherit;color:inherit}
 .tbtn.pri{background:var(--blue); color:#fff} .tbtn.pri:hover{background:var(--blue-d)}
 .tbtn.pri:disabled{background:var(--line); color:var(--faint); cursor:not-allowed}
 
-/* ── 본문 레이아웃 ── */
-.wrap{display:flex; gap:24px; max-width:1120px; margin:0 auto; padding:24px 20px 90px; align-items:flex-start}
+/* ── 본문 ── */
+.wrap{display:flex; gap:28px; max-width:1440px; margin:0 auto; padding:24px 28px 90px; align-items:flex-start}
 .side{position:sticky; top:80px; width:230px; flex-shrink:0}
 @media(max-width:860px){.wrap{flex-direction:column}.side{position:static; width:100%}}
 .side .sd-title{font-size:.78rem; font-weight:800; color:var(--muted); padding:4px 12px 10px}
@@ -63,11 +62,8 @@ input,select,textarea{font:inherit;color:inherit}
 .field{margin-bottom:14px}
 .field:last-child{margin-bottom:0}
 .field label{display:block; font-size:.78rem; font-weight:700; color:var(--sub); margin-bottom:6px}
-.field label small{color:var(--faint); font-weight:500}
 .inp,.sel{width:100%; border:1px solid var(--line-2); border-radius:7px; padding:10px 12px; background:#fff; font-size:.9rem; transition:.13s}
 .inp:focus,.sel:focus{outline:none; border-color:var(--blue); box-shadow:0 0 0 3px rgba(49,130,246,.14)}
-.two{display:grid; grid-template-columns:1fr 1fr; gap:12px}
-@media(max-width:560px){.two{grid-template-columns:1fr}}
 .eps{background:var(--soft); border-radius:8px; padding:11px 14px; margin-bottom:14px}
 .eps .el{font-size:.74rem; font-weight:700; color:var(--muted); margin-bottom:7px}
 .eps .ei{display:flex; align-items:center; gap:9px; font-size:.84rem; color:var(--sub); padding:3px 0}
@@ -75,81 +71,119 @@ input,select,textarea{font:inherit;color:inherit}
 .eps .ei.new{color:var(--blue-d); font-weight:800}
 .eps .ei.new .no{background:var(--blue); border-color:var(--blue); color:#fff}
 
-/* ── 출연자 · 영상 (사람별) ── */
+/* ── ② 강의 구성 (구조만) ── */
+.meta{display:flex; align-items:center; gap:14px; font-size:.78rem; color:var(--muted); margin-bottom:12px; flex-wrap:wrap}
+.meta b{color:var(--text)}
+.sgwrap{overflow-x:auto}
+.sgtable{border:1px solid var(--line); border-radius:8px; min-width:1020px}
+.sghead,.sgrow,.arow{display:grid; grid-template-columns:28px 168px minmax(200px,1fr) 190px minmax(230px,330px) 90px; gap:12px; align-items:center}
+.sghead{padding:8px 12px; background:var(--soft); border-bottom:1px solid var(--line); font-size:.7rem; font-weight:700; color:var(--muted); border-radius:8px 8px 0 0}
+.sgrow{padding:11px 12px; border-bottom:1px solid var(--line); background:#fff}
+.sgrow .drag{color:var(--faint); font-size:.78rem; cursor:grab; text-align:center; user-select:none}
+.sg-no{font-size:.72rem; font-weight:800; color:var(--blue-d); background:var(--blue-bg); border-radius:5px; padding:5px 12px; text-align:center; white-space:nowrap; justify-self:start}
+.dim{font-size:.74rem; color:var(--faint)}
+.sg-t{border:1px solid transparent; border-radius:6px; padding:7px 9px; font-size:.9rem; font-weight:700; width:100%; min-width:0; background:transparent}
+.sg-t:hover{border-color:var(--line-2)} .sg-t:focus{outline:none; border-color:var(--blue); background:#fff}
+.ops{display:flex; gap:2px; justify-content:flex-end}
+.ops button{width:26px; height:26px; border-radius:5px; color:var(--faint); font-size:.7rem; display:flex; align-items:center; justify-content:center}
+.ops button:hover{background:var(--soft); color:var(--text)}
+.ops .dl:hover{background:#FDECEC; color:var(--red)}
+/* 인터랙티브 구간 서브행 — 헤더와 동일 그리드 */
+.arow{padding:8px 12px; border-bottom:1px dashed var(--line); background:#FAFBFC}
+.arow .lk{color:var(--line-2); text-align:center; font-size:.8rem}
+.a-tag{display:flex; align-items:center; gap:5px; font-size:.74rem; font-weight:700; color:var(--sub); background:#fff;
+  border:1px solid var(--line); border-left:3px solid var(--blue); border-radius:4px; padding:4px 9px; white-space:nowrap;
+  justify-self:start; max-width:100%; overflow:hidden; text-overflow:ellipsis}
+.a-t{border:1px solid transparent; border-radius:5px; padding:5px 8px; font-size:.84rem; font-weight:600; width:100%; min-width:0; background:transparent}
+.a-t:hover{border-color:var(--line-2)} .a-t:focus{outline:none; border-color:var(--blue); background:#fff}
+.cond{display:flex; gap:6px; align-items:center; font-size:.76rem; color:var(--muted); white-space:nowrap; flex-wrap:wrap}
+.tcell{display:flex; gap:5px; align-items:center; font-size:.76rem; color:var(--muted); white-space:nowrap}
+.tcell input{border:1px solid var(--line-2); border-radius:5px; padding:4px 7px; font-size:.76rem; width:52px; background:#fff}
+.tcell input:focus{outline:none; border-color:var(--blue)}
+.cond input{border:1px solid var(--line-2); border-radius:5px; padding:4px 7px; font-size:.76rem; width:56px; background:#fff}
+.cond input.wide{width:150px}
+.cond input:focus{outline:none; border-color:var(--blue)}
+.arm{width:24px; height:24px; border-radius:5px; color:var(--faint); font-size:.68rem; display:flex; align-items:center; justify-content:center; justify-self:end}
+.arm:hover{background:#FDECEC; color:var(--red)}
+.fbtn{font-size:.74rem; font-weight:700; color:var(--blue-d); border:1px dashed var(--line-2); border-radius:5px; padding:5px 9px}
+.fbtn:hover{border-color:var(--blue); background:var(--blue-bg)}
+.fbtn.miss{color:var(--red); border-color:#F2C4C7}
+.fchip{display:inline-flex; align-items:center; gap:5px; font-size:.74rem; font-weight:600; color:var(--sub);
+  background:var(--soft); border:1px solid var(--line); border-radius:5px; padding:4px 8px}
+.fchip button{color:var(--faint); font-size:.7rem} .fchip button:hover{color:var(--red)}
+/* 퀴즈 구성 편집기 */
+.qedit{padding:14px 14px 14px 52px; background:#F6F8FB; border-bottom:1px solid var(--line); display:flex; flex-direction:column; gap:12px}
+.qe-q{background:#fff; border:1px solid var(--line); border-radius:8px; padding:13px}
+.qe-head{display:flex; align-items:center; gap:10px; margin-bottom:9px}
+.qe-no{font-size:.7rem; font-weight:800; color:var(--blue-d); background:var(--blue-bg); padding:3px 9px; border-radius:4px}
+.qe-multi{display:flex; align-items:center; gap:5px; font-size:.76rem; color:var(--sub); font-weight:600; cursor:pointer}
+.qe-multi input{accent-color:var(--blue); width:14px; height:14px}
+.qe-head .sp{flex:1}
+.qe-question{width:100%; border:1px solid var(--line-2); border-radius:6px; padding:9px 11px; font-size:.88rem; font-weight:600; margin-bottom:9px}
+.qe-question:focus{outline:none; border-color:var(--blue)}
+.qe-opt{display:flex; align-items:center; gap:7px; margin-bottom:6px}
+.qe-opt input{flex:1; border:1px solid var(--line-2); border-radius:6px; padding:7px 10px; font-size:.84rem}
+.qe-opt input:focus{outline:none; border-color:var(--blue)}
+.qe-ans{width:27px; height:27px; border-radius:6px; border:1px solid var(--line-2); color:var(--faint); font-size:.78rem; flex-shrink:0; display:flex; align-items:center; justify-content:center}
+.qe-ans:hover{border-color:var(--green); color:var(--green)}
+.qe-ans.on{background:var(--green); border-color:var(--green); color:#fff}
+.qe-hint{font-size:.7rem; color:var(--faint); margin:2px 0 0 34px}
+.qe-add{font-size:.76rem; font-weight:700; color:var(--blue-d); padding:5px 8px; border-radius:5px; align-self:flex-start}
+.qe-add:hover{background:var(--blue-bg)}
+.qe-addq{font-size:.8rem; font-weight:700; color:var(--blue-d); border:1px dashed var(--line-2); border-radius:6px; padding:9px; text-align:center}
+.qe-addq:hover{border-color:var(--blue); background:var(--blue-bg)}
+.addact{position:relative; display:flex; align-items:center; padding:6px 12px 6px 52px; border-bottom:1px solid var(--line); background:#FAFBFC}
+.addab{font-size:.78rem; font-weight:700; color:var(--blue-d); padding:5px 9px; border-radius:5px}
+.addab:hover{background:var(--blue-bg)}
+.tmenu{position:absolute; top:calc(100% - 2px); left:52px; z-index:20; background:#fff; border:1px solid var(--line);
+  border-radius:8px; box-shadow:0 8px 24px rgba(16,24,40,.14); padding:5px; display:none; flex-direction:column; min-width:140px}
+.tmenu.open{display:flex}
+.tmenu button{display:flex; align-items:center; gap:8px; font-size:.84rem; font-weight:600; color:var(--sub); padding:7px 10px; border-radius:5px; text-align:left}
+.tmenu button:hover{background:var(--soft); color:var(--text)}
+.addseg{padding:10px 12px}
+.addsb{width:100%; font-size:.86rem; font-weight:700; color:var(--blue-d); border:1px dashed var(--line-2); border-radius:6px; padding:11px; text-align:center}
+.addsb:hover{border-color:var(--blue); background:var(--blue-bg)}
+
+
+/* ── ③ 출연자 ── */
 .prow{display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid var(--line)}
 .prow:last-child{border-bottom:none}
-.prow .role{font-size:.72rem; font-weight:700; color:var(--muted); background:var(--soft); border:1px solid var(--line); padding:4px 10px; border-radius:5px; width:74px; text-align:center; flex-shrink:0}
+.prow .role{font-size:.72rem; font-weight:700; color:var(--muted); background:var(--soft); border:1px solid var(--line); padding:5px 10px; border-radius:5px; width:82px; text-align:center; flex-shrink:0}
 .prow.host .role{color:var(--blue-d); background:var(--blue-bg); border-color:#CBDFFC}
-.prow .nm{width:180px; min-width:0; border:1px solid var(--line-2); border-radius:6px; padding:8px 11px; font-size:.86rem; font-weight:600}
+.prow .nm{width:240px; min-width:0; border:1px solid var(--line-2); border-radius:6px; padding:9px 12px; font-size:.88rem; font-weight:600}
 .prow .nm:focus{outline:none; border-color:var(--blue)}
 @media(max-width:560px){.prow{flex-wrap:wrap}.prow .nm{width:100%}}
-.vslot{flex:1; min-width:180px; display:flex; align-items:center; gap:9px; border:1px dashed var(--line-2); border-radius:6px; padding:8px 11px; font-size:.8rem; color:var(--muted); cursor:pointer; transition:.12s}
-.vslot:hover{border-color:var(--blue); color:var(--blue-d); background:var(--blue-bg)}
-.vslot.on{border-style:solid; border-color:var(--line); background:var(--soft); color:var(--sub); cursor:default}
-.vslot.on b{color:var(--text)}
-.vslot .x{margin-left:auto; color:var(--faint); padding:2px 6px; border-radius:4px}
-.vslot .x:hover{background:#fff; color:var(--red)}
+.prow .pdesc{flex:1; font-size:.78rem; color:var(--faint)}
 .prm{width:30px; height:30px; border-radius:6px; color:var(--faint); flex-shrink:0}
 .prm:hover{background:#FDECEC; color:var(--red)}
 .paddrow{padding-top:12px}
-.padd{font-size:.82rem; font-weight:700; color:var(--blue-d); padding:8px 12px; border:1px dashed var(--line-2); border-radius:6px; width:100%; text-align:center}
+.padd{font-size:.84rem; font-weight:700; color:var(--blue-d); padding:9px 12px; border:1px dashed var(--line-2); border-radius:6px; width:100%; text-align:center}
 .padd:hover{border-color:var(--blue); background:var(--blue-bg)}
-.pnote{margin-top:12px; font-size:.76rem; color:var(--muted); background:var(--soft); border-radius:6px; padding:9px 12px; line-height:1.55}
+.pnote{margin-top:12px; font-size:.78rem; color:var(--muted); background:var(--soft); border-radius:6px; padding:10px 13px; line-height:1.6}
+.pnote b{color:var(--sub)}
 
-/* ── 타임라인 (구간 + 표현) ── */
-.tl-meta{display:flex; align-items:center; gap:14px; font-size:.78rem; color:var(--muted); margin-bottom:14px; flex-wrap:wrap}
-.tl-meta b{color:var(--text)}
-.tl-scroll{overflow-x:auto; padding:4px 2px 10px}
-.tl{display:flex; align-items:stretch; gap:0; min-width:min-content}
-.tseg{position:relative; flex-shrink:0; background:var(--dark); border-radius:8px; padding:10px 12px 9px; color:#E7EAF0;
-  display:flex; flex-direction:column; gap:7px; cursor:pointer; border:2px solid transparent; transition:border-color .12s}
-.tseg:hover{border-color:var(--dark-2)}
-.tseg.sel{border-color:var(--blue)}
-.tseg .th{display:flex; align-items:center; justify-content:space-between; gap:10px; font-size:.68rem; color:#9AA3B2; font-weight:700}
-.tseg .th .tc{font-variant-numeric:tabular-nums}
-.tseg .tt{font-size:.84rem; font-weight:700; color:#fff; background:transparent; border:none; width:100%; min-width:0; padding:0}
-.tseg .tt:focus{outline:none; border-bottom:1px solid var(--blue)}
-.tseg .strip{height:26px; border-radius:4px; background:repeating-linear-gradient(90deg,#3A4150 0 26px,#333947 26px 52px); position:relative; overflow:hidden}
-.tseg .strip::after{content:"▶"; position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); font-size:.6rem; color:#9AA3B2}
-.tseg .tcoach{display:flex; gap:5px}
-.cg{font-size:.66rem; font-weight:700; padding:3px 8px; border-radius:4px; background:#333947; color:#79808F; border:1px solid transparent}
-.cg.on{background:#2C3A55; color:#8FBAFF; border-color:#3D588C}
-.tseg .tops{position:absolute; top:-11px; right:8px; display:none; gap:4px}
-.tseg:hover .tops,.tseg.sel .tops{display:flex}
-.tops button{width:22px; height:22px; border-radius:5px; background:#fff; border:1px solid var(--line-2); color:var(--sub); font-size:.62rem; display:flex; align-items:center; justify-content:center; box-shadow:0 1px 3px rgba(16,24,40,.15)}
-.tops button:hover{border-color:var(--blue); color:var(--blue-d)}
-.tops .dl:hover{border-color:var(--red); color:var(--red)}
+/* ── ④ 영상 업로드 매트릭스 (강의 구간 × 출연자) ── */
+.mxwrap{overflow-x:auto}
+.mx{border:1px solid var(--line); border-radius:8px; min-width:min-content}
+.mxhead,.mxrow{display:grid; gap:10px; align-items:center}
+.mxhead{padding:9px 12px; background:var(--soft); border-bottom:1px solid var(--line); font-size:.72rem; font-weight:700; color:var(--muted); border-radius:8px 8px 0 0}
+.mxhead .who{display:flex; align-items:center; gap:6px}
+.mxhead .who .tag{font-size:.62rem; font-weight:700; color:var(--blue-d); background:var(--blue-bg); padding:1px 6px; border-radius:3px}
+.mxrow{padding:10px 12px; border-bottom:1px solid var(--line); background:#fff}
+.mxrow:last-child{border-bottom:none; border-radius:0 0 8px 8px}
+.mx-seg{font-size:.8rem; font-weight:800; color:var(--text); display:flex; flex-direction:column; gap:2px}
+.mx-seg small{font-size:.7rem; font-weight:600; color:var(--faint)}
+.uslot{display:flex; align-items:center; gap:8px; border:1px dashed var(--line-2); border-radius:6px; padding:8px 11px;
+  font-size:.78rem; color:var(--muted); cursor:pointer; transition:.12s; min-width:0}
+.uslot:hover{border-color:var(--blue); color:var(--blue-d); background:var(--blue-bg)}
+.uslot.on{border-style:solid; border-color:var(--line); background:var(--soft); color:var(--sub); cursor:default}
+.uslot.on b{color:var(--text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0}
+.uslot .x{margin-left:auto; color:var(--faint); padding:2px 6px; border-radius:4px; flex-shrink:0}
+.uslot .x:hover{background:#fff; color:var(--red)}
+.uslot.req{border-color:#F2C4C7; color:var(--red)}
+.uslot.req:hover{border-color:var(--red); background:#FDECEC; color:var(--red)}
 
-/* 구간 사이 — 표현 게이트 */
-.tgap{flex-shrink:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px; padding:0 10px; position:relative}
-.tgap::before{content:""; position:absolute; left:0; right:0; top:50%; height:2px; background:var(--line-2); z-index:0}
-.achip{position:relative; z-index:1; display:flex; align-items:center; gap:5px; font-size:.72rem; font-weight:700; color:var(--sub);
-  background:#fff; border:1px solid var(--line-2); border-left:3px solid var(--blue); border-radius:5px; padding:5px 9px; white-space:nowrap;
-  box-shadow:0 1px 2px rgba(16,24,40,.06)}
-.achip:hover{border-color:var(--blue)}
-.achip.sel{border-color:var(--blue); box-shadow:0 0 0 3px rgba(49,130,246,.14)}
-.addw{position:relative; z-index:1}
-.addb{width:24px; height:24px; border-radius:50%; background:#fff; border:1px solid var(--line-2); color:var(--muted); font-size:.8rem; display:flex; align-items:center; justify-content:center}
-.addb:hover{border-color:var(--blue); color:var(--blue-d)}
-.tmenu{position:absolute; top:calc(100% + 6px); left:50%; transform:translateX(-50%); z-index:20; background:#fff; border:1px solid var(--line);
-  border-radius:8px; box-shadow:0 8px 24px rgba(16,24,40,.14); padding:5px; display:none; flex-direction:column; min-width:130px}
-.tmenu.open{display:flex}
-.tmenu button{display:flex; align-items:center; gap:8px; font-size:.82rem; font-weight:600; color:var(--sub); padding:7px 10px; border-radius:5px; text-align:left}
-.tmenu button:hover{background:var(--soft); color:var(--text)}
-
-/* 선택 상세 */
-.detail{margin-top:14px; border:1px solid var(--line); border-radius:8px; background:var(--soft); padding:14px 16px}
-.detail .dh{display:flex; align-items:center; gap:8px; margin-bottom:11px}
-.detail .dh .tag{font-size:.7rem; font-weight:700; color:var(--blue-d); background:var(--blue-bg); padding:3px 9px; border-radius:4px}
-.detail .dh .sp{flex:1}
-.detail .del{font-size:.76rem; font-weight:700; color:var(--red); padding:5px 10px; border-radius:5px}
-.detail .del:hover{background:#FDECEC}
-.detail .drow{display:flex; flex-wrap:wrap; gap:10px; align-items:center; font-size:.82rem; color:var(--sub)}
-.detail .drow input{border:1px solid var(--line-2); border-radius:6px; padding:7px 10px; font-size:.84rem; background:#fff}
-.detail .drow input:focus{outline:none; border-color:var(--blue)}
-.detail .dempty{font-size:.8rem; color:var(--faint); text-align:center; padding:6px}
-
-/* 게시 */
+/* ── 제출 ── */
 .pubnote{display:flex; gap:10px; font-size:.84rem; color:var(--sub); line-height:1.6; background:var(--blue-bg); border-radius:8px; padding:13px 15px; margin-bottom:14px}
 .pubnote b{color:var(--blue-d)}
 .pubrow{display:flex; gap:10px}
@@ -158,9 +192,21 @@ input,select,textarea{font:inherit;color:inherit}
 .bigbtn.pri{background:var(--blue); color:#fff} .bigbtn.pri:hover{background:var(--blue-d)}
 .bigbtn.pri:disabled{background:var(--line); color:var(--faint); cursor:not-allowed}
 .bigbtn.line{border:1px solid var(--line-2); color:var(--sub); background:#fff} .bigbtn.line:hover{background:var(--soft)}
-.valid{margin-top:12px; font-size:.8rem; font-weight:600; padding:10px 13px; border-radius:7px}
+.valid{margin-top:12px; font-size:.8rem; font-weight:600; padding:10px 13px; border-radius:7px; line-height:1.6}
 .valid.ok{color:#0E7C4F; background:#EBF9F1}
 .valid.no{color:var(--red); background:#FDECEC}
+
+/* 퀴즈 구성 모달 */
+.mbg{position:fixed; inset:0; background:rgba(16,24,40,.5); z-index:80; display:none; align-items:center; justify-content:center; padding:20px}
+.mbg.on{display:flex}
+.qmodal{background:#fff; border-radius:12px; width:min(680px,94vw); max-height:86vh; display:flex; flex-direction:column; box-shadow:0 20px 60px rgba(16,24,40,.3)}
+.qm-head{display:flex; align-items:center; gap:10px; padding:15px 18px; border-bottom:1px solid var(--line)}
+.qm-head b{font-size:.95rem}
+.qm-sub{font-size:.78rem; color:var(--muted); flex:1; overflow:hidden; white-space:nowrap; text-overflow:ellipsis}
+.qm-x{color:var(--faint); font-size:1rem; padding:4px 9px; border-radius:6px}
+.qm-x:hover{background:var(--soft)}
+.qm-body{padding:16px 18px; overflow-y:auto; display:flex; flex-direction:column; gap:12px}
+.qm-foot{display:flex; justify-content:flex-end; gap:8px; padding:12px 18px; border-top:1px solid var(--line)}
 
 .toast{position:fixed; left:50%; bottom:24px; transform:translateX(-50%) translateY(10px); z-index:90; background:var(--text); color:#fff;
   padding:11px 18px; border-radius:8px; font-size:.84rem; font-weight:600; box-shadow:0 8px 24px rgba(16,24,40,.25); opacity:0; transition:.2s; pointer-events:none}
@@ -185,10 +231,11 @@ input,select,textarea{font:inherit;color:inherit}
   <aside class="side">
     <div class="sd-title">에피소드 만들기</div>
     <nav class="snav" id="snav">
-      <a href="#s1" class="on done" data-s="0"><span class="ck">✓</span>강의 정보</a>
-      <a href="#s2" data-s="1"><span class="ck">✓</span>출연자 · 영상</a>
-      <a href="#s3" data-s="2"><span class="ck">✓</span>타임라인 — 구간 · 표현</a>
-      <a href="#s4" data-s="3"><span class="ck">✓</span>제출</a>
+      <a href="#s1" class="on"><span class="ck">✓</span>강의 정보</a>
+      <a href="#s2"><span class="ck">✓</span>강의 구성</a>
+      <a href="#s3"><span class="ck">✓</span>출연자</a>
+      <a href="#s4"><span class="ck">✓</span>영상 업로드</a>
+      <a href="#s5"><span class="ck">✓</span>제출</a>
     </nav>
   </aside>
 
@@ -207,36 +254,43 @@ input,select,textarea{font:inherit;color:inherit}
       </div>
     </section>
 
-    <!-- ② 출연자 · 영상 (사람별) -->
+    <!-- ② 강의 구성 -->
     <section class="card" id="s2">
-      <div class="chead"><h2>출연자 · 영상</h2><span class="hint">사람별로 영상을 하나씩 올려요</span></div>
+      <div class="chead"><h2>강의 구성</h2><span class="hint">구간 나누기 · 인터랙티브 배치 · 제한 시간 — 시간이 끝나면 모두 함께 다음으로 넘어가요</span></div>
+      <div class="cbody">
+        <div class="meta">
+          <span>강의 구간 <b id="mSeg">2</b>개</span>
+          <span>인터랙티브 구간 <b id="mAct">6</b>개</span>
+          <span style="color:var(--faint)">영상은 다음 단계에서 올려요 · 제한 시간을 못 채우면 학생은 강의 후 보충해야 다음 에피소드가 열려요</span>
+        </div>
+        <div class="sgwrap"><div class="sgtable" id="sgtable"></div></div>
+      </div>
+    </section>
+
+    <!-- ③ 출연자 -->
+    <section class="card" id="s3">
+      <div class="chead"><h2>출연자</h2><span class="hint">이 에피소드에 나오는 사람들</span></div>
       <div class="cbody">
         <div id="peopleList"></div>
         <div class="paddrow"><button class="padd" id="pAdd" onclick="addCoach()">＋ 코치 추가</button></div>
-        <div class="pnote">강의자 영상이 <b>원본</b>이에요 — 아래 타임라인에서 구간으로 잘라요. 코치 영상은 각 구간 시작에 맞춰 함께 재생돼요. 나(학생) 자리는 실시간이라 업로드가 없어요.</div>
+        <div class="pnote"><b>나(학생) 자리는 자동</b>이에요 — 학생 본인이 실시간으로 채워서 업로드가 없어요. 이름은 학생 화면 이름표로 그대로 보여요.</div>
       </div>
     </section>
 
-    <!-- ③ 타임라인 -->
-    <section class="card" id="s3">
-      <div class="chead"><h2>타임라인 — 구간 · 표현</h2><span class="hint">영상을 구간으로 자르고, 사이에 표현을 끼워요</span></div>
-      <div class="cbody">
-        <div class="tl-meta">
-          <span>원본 <b id="mLen">12:40</b></span>
-          <span>구간 <b id="mSeg">2</b>개</span>
-          <span>표현 <b id="mAct">6</b>개</span>
-          <span style="color:var(--faint)">구간에 마우스를 올리면 ✂ 나누기가 보여요 · 구간 사이 ＋로 표현을 추가해요</span>
-        </div>
-        <div class="tl-scroll"><div class="tl" id="tl"></div></div>
-        <div class="detail" id="detail"><div class="dempty">구간이나 표현을 누르면 여기서 편집해요</div></div>
-      </div>
-    </section>
-
-    <!-- ④ 제출 -->
+    <!-- ④ 영상 업로드 -->
     <section class="card" id="s4">
+      <div class="chead"><h2>영상 업로드</h2><span class="hint">강의 구간 × 출연자별로 올려요</span></div>
+      <div class="cbody">
+        <div class="mxwrap"><div class="mx" id="mx"></div></div>
+        <div class="pnote"><b>강의자 영상은 구간마다 필수</b>예요. 코치 칸을 비워두면 그 구간에는 그 코치가 나오지 않아요. 코치 영상은 구간 시작에 맞춰 함께 재생돼요.</div>
+      </div>
+    </section>
+
+    <!-- ⑤ 제출 -->
+    <section class="card" id="s5">
       <div class="chead"><h2>제출</h2><span class="hint">검수 후 학생에게 열려요</span></div>
       <div class="cbody">
-        <div class="pubnote"><span>🎬</span><span>이 에피소드는 <b id="pmCourse">일의 교과서</b>에 추가돼요. 학생은 구간을 끝까지 보고, 사이의 표현을 마쳐야 다음 구간이 열려요.</span></div>
+        <div class="pubnote"><span>🎬</span><span>이 에피소드는 <b id="pmCourse">일의 교과서</b>에 추가돼요. 학생은 각 강의 구간을 끝까지 보고, 이어지는 인터랙티브 구간을 마쳐야 다음으로 넘어가요.</span></div>
         <div class="pubrow">
           <button class="bigbtn line" onclick="preview()">▶ 강의실에서 미리보기</button>
           <button class="bigbtn pri" id="btnPub" onclick="publish()">검수 요청하고 제출하기</button>
@@ -248,12 +302,19 @@ input,select,textarea{font:inherit;color:inherit}
   </div>
 </div>
 
+<div class="mbg" id="qmbg">
+  <div class="qmodal">
+    <div class="qm-head"><b>퀴즈 구성</b><span class="qm-sub" id="qmSub"></span><button class="qm-x" onclick="qClose()">✕</button></div>
+    <div class="qm-body" id="qmBody"></div>
+    <div class="qm-foot"><button class="tbtn pri" onclick="qClose()">완료</button></div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
-const fmt = s => Math.floor(s/60) + ':' + String(Math.round(s)%60).padStart(2,'0');
 
 /* ── 강의 상품 ── */
 const COURSES = [
@@ -285,118 +346,91 @@ function renderCourse(){
   $('crumbCourse').textContent = c.name;
 }
 
-/* ── 출연자 (사람별 영상) ── */
+/* ── 데이터: 출연자 · 강의 구간(구조) · 업로드(구간×출연자) ── */
 let people = [
-  {role:'강의자', name:'윤소정', video:true, host:true},
-  {role:'코치',   name:'바운더리 코치', video:true},
-  {role:'코치',   name:'기록 코치', video:true},
+  {name:'윤소정', host:true},
+  {name:'바운더리 코치'},
+  {name:'기록 코치'},
 ];
 const MAXC = 3, MINC = 1;
-const coachCount = () => people.filter(p=>!p.host).length;
+const coachCount = () => people.length - 1;
 
-function renderPeople(){
-  $('peopleList').innerHTML = people.map((p,i)=>`
-    <div class="prow ${p.host?'host':''}">
-      <span class="role">${p.host?'강의자':'코치 '+(people.filter((q,j)=>!q.host&&j<i).length+1)}</span>
-      <input class="nm" value="${esc(p.name)}" onchange="pName(${i},this.value)" placeholder="화면 이름표">
-      ${p.video
-        ? `<div class="vslot on"><span>🎬</span><b>${p.host?'lecture-full.mp4':'coach'+i+'.mp4'}</b><span>· ${p.host?'12:40':'루프'}</span><button class="x" onclick="pVid(${i},false)">✕</button></div>`
-        : `<div class="vslot" onclick="pVid(${i},true)"><span>⬆</span> 영상 올리기 (목업)</div>`}
-      ${!p.host && coachCount()>MINC ? `<button class="prm" onclick="rmCoach(${i})" title="자리 삭제">✕</button>` : ''}
-    </div>`).join('')
-    + `<div class="prow"><span class="role">나 · 학생</span><span style="font-size:.8rem;color:var(--faint)">학생 본인 실시간 — 업로드 없음</span></div>`;
-  $('pAdd').style.display = coachCount() >= MAXC ? 'none' : '';
-}
-function pName(i,v){ people[i].name = v; renderPeople(); renderTL(); saved(); }
-function pVid(i,on){ people[i].video = on; renderPeople(); refresh(); if(on) toast('영상이 올라갔어요 (목업)'); }
-function addCoach(){
-  if(coachCount() >= MAXC) return;
-  const pool = ['바운더리 코치','기록 코치','머니 코치'];
-  people.push({role:'코치', name:pool[coachCount()] || '코치', video:false});
-  segs.forEach(s=>s.coach.push(true));
-  renderPeople(); renderTL(); saved();
-}
-function rmCoach(i){
-  const ci = people.filter((q,j)=>!q.host && j<i).length;   // 코치 인덱스
-  people.splice(i,1);
-  segs.forEach(s=>s.coach.splice(ci,1));
-  renderPeople(); renderTL(); saved();
-}
-
-/* ── 타임라인: 구간 + 경계 표현 ── */
-const VID = 760;                                            // 원본 12:40 (목업)
+/* segs[i].vids[k] = k번째 출연자의 이 구간 영상 업로드 여부 */
 let segs = [
-  {t:'오늘, 잠깐 멈추는 시간', end:380, coach:[true,true]},
-  {t:'전략을 바운더리로',     end:760, coach:[true,true]},
-];
-/* acts[i] = 구간 i 가 끝난 뒤 이어지는 표현들 */
-let acts = [
-  [ {k:'read', t:'오늘의 글, 밑줄 치며 읽기', done:1}, {k:'draw', t:'지금 마음을 색으로 그려보세요', done:12} ],
-  [ {k:'quiz', t:'방금 이야기의 핵심은?'}, {k:'speak', t:'소리 내어 말해보세요', done:3},
-    {k:'write', t:'오늘 배운 것을 한 문장으로', done:8}, {k:'play', t:'PLAY 워크시트', file:'PLAY-일-회고.png'} ],
+  {t:'오늘, 잠깐 멈추는 시간', vids:[true,true,true],
+   acts:[ {k:'read', t:'오늘의 글, 밑줄 치며 읽기', done:1, dur:180}, {k:'draw', t:'지금 마음을 색으로 그려보세요', done:12, dur:120} ]},
+  {t:'전략을 바운더리로', vids:[true,true,false],
+   acts:[ {k:'quiz', t:'방금 이야기의 핵심은?', dur:120, qs:[
+     {q:'방금 이야기에서, 전략의 시작은 무엇이라고 했나요?', opts:['더 많이 하는 것','하지 않을 것을 정하는 것','더 빨리 하는 것','남들처럼 하는 것'], ans:[1], multi:false},
+     {q:'바운더리를 설명한 말을 모두 골라보세요.', opts:['힘이 새어나가지 않게 하는 그릇','나를 가두는 벽','하지 않을 것의 경계','남들이 정해주는 규칙'], ans:[0,2], multi:true},
+   ]}, {k:'speak', t:'소리 내어 말해보세요', done:3, dur:60},
+          {k:'write', t:'오늘 배운 것을 한 문장으로', done:8, dur:120}, {k:'play', t:'PLAY 워크시트', file:'PLAY-일-회고.png', up:true, dur:300} ]},
 ];
 const AT = {
   read:{ic:'📖', n:'읽기'}, draw:{ic:'🎨', n:'그리기'}, quiz:{ic:'✍️', n:'퀴즈'},
   speak:{ic:'🎤', n:'말하기'}, write:{ic:'📝', n:'글쓰기'}, play:{ic:'📄', n:'워크시트'},
 };
-let sel = null;   // {kind:'seg'|'act', i, j}
 
-const segStart = i => i === 0 ? 0 : segs[i-1].end;
-
-function renderTL(){
-  const coaches = people.filter(p=>!p.host);
-  let html = '';
+/* ── ② 강의 구성 (구조만) ── */
+function timeHtml(i,j,a){
+  if(a.dur == null) a.dur = 120;
+  const mm = Math.floor(a.dur/60), ss = a.dur%60;
+  return `⏱ <input type="number" min="0" value="${mm}" onchange="actDurM(${i},${j},this.value)"> 분 <input type="number" min="0" max="59" value="${ss}" onchange="actDurS(${i},${j},this.value)"> 초`;
+}
+function condBody(i,j,a){
+  if(a.k==='read')  return `끝까지 + 밑줄 <input type="number" min="1" value="${a.done||1}" onchange="actDone(${i},${j},this.value)"> 곳`;
+  if(a.k==='draw')  return `스트로크 <input type="number" min="1" value="${a.done||12}" onchange="actDone(${i},${j},this.value)"> 회`;
+  if(a.k==='quiz'){
+    if(!a.qs) a.qs = [{q:'', opts:['',''], ans:[], multi:false}];
+    return `객관식 문항 ${a.qs.length}개 · 모두 정답 <button class="fbtn" onclick="qOpen(${i},${j})">퀴즈 구성</button>`;
+  }
+  if(a.k==='speak') return `꾹 누르고 <input type="number" min="1" value="${a.done||3}" onchange="actDone(${i},${j},this.value)"> 초`;
+  if(a.k==='write') return `<input type="number" min="1" value="${a.done||8}" onchange="actDone(${i},${j},this.value)"> 자 이상`;
+  if(a.k==='play')  return (a.up
+    ? `<span class="fchip">📄 ${esc(a.file||'워크시트.png')}<button onclick="actUp(${i},${j},false)" title="파일 제거">✕</button></span> 작성본 올려야 통과`
+    : `<button class="fbtn miss" onclick="actUp(${i},${j},true)">⬆ 워크시트 파일 올리기 (필수)</button> 작성본 올려야 통과`);
+  return '';
+}
+function renderStruct(){
+  let h = `<div class="sghead"><span></span><span>구간</span><span>제목</span><span>구간 시간</span><span>완료 조건</span><span style="text-align:right">순서</span></div>`;
   segs.forEach((s,i)=>{
-    const st = segStart(i), dur = s.end - st;
-    const w = Math.max(180, Math.round(dur / VID * 620));
-    const isSel = sel && sel.kind==='seg' && sel.i===i;
-    html += `<div class="tseg ${isSel?'sel':''}" style="width:${w}px" onclick="selSeg(${i},event)">
-      <div class="tops">
-        <button title="반으로 나누기" onclick="event.stopPropagation();splitSeg(${i})">✂</button>
-        ${segs.length>1?`<button class="dl" title="구간 삭제(앞 구간에 합침)" onclick="event.stopPropagation();rmSeg(${i})">✕</button>`:''}
-      </div>
-      <div class="th"><span>구간 ${i+1}</span><span class="tc">${fmt(st)}–${fmt(s.end)}</span></div>
-      <input class="tt" value="${esc(s.t)}" onclick="event.stopPropagation()" onchange="segTitle(${i},this.value)">
-      <div class="strip"></div>
-      <div class="tcoach">${coaches.map((c,ci)=>`
-        <button class="cg ${s.coach[ci]?'on':''}" onclick="event.stopPropagation();togCoach(${i},${ci})" title="${esc(c.name)} 같이 듣기">${esc(c.name.slice(0,4))}${s.coach[ci]?' ✓':''}</button>`).join('')}
+    h += `<div class="sgrow">
+      <span class="drag" title="드래그 (목업)">⠿</span>
+      <span class="sg-no">강의 구간 ${i+1}</span>
+      <input class="sg-t" value="${esc(s.t)}" onchange="segTitle(${i},this.value)">
+      <span class="dim">영상 길이만큼</span>
+      <span class="dim">영상 끝까지 시청</span>
+      <div class="ops">
+        <button onclick="mvSeg(${i},-1)" ${i===0?'disabled style=opacity:.3':''}>▲</button>
+        <button onclick="mvSeg(${i},1)" ${i===segs.length-1?'disabled style=opacity:.3':''}>▼</button>
+        <button class="dl" onclick="rmSeg(${i})" ${segs.length<=1?'disabled style=opacity:.3':''}>✕</button>
       </div>
     </div>`;
-    /* 경계: 표현 게이트 */
-    const gap = acts[i] || [];
-    html += `<div class="tgap">
-      ${gap.map((a,j)=>`<button class="achip ${sel&&sel.kind==='act'&&sel.i===i&&sel.j===j?'sel':''}" onclick="selAct(${i},${j})">${AT[a.k].ic} ${AT[a.k].n}</button>`).join('')}
-      <div class="addw">
-        <button class="addb" onclick="togMenu(${i},event)">＋</button>
-        <div class="tmenu" id="menu${i}">${Object.keys(AT).map(k=>`<button onclick="addAct(${i},'${k}')">${AT[k].ic} ${AT[k].n}</button>`).join('')}</div>
-      </div>
+    s.acts.forEach((a,j)=>{
+      h += `<div class="arow">
+        <span class="lk">└</span>
+        <span class="a-tag">${AT[a.k].ic} 인터랙티브 · ${AT[a.k].n}</span>
+        <input class="a-t" value="${esc(a.t)}" onchange="actTitle(${i},${j},this.value)">
+        <span class="tcell">${timeHtml(i,j,a)}</span>
+        <span class="cond">${condBody(i,j,a)}</span>
+        <button class="arm" onclick="rmAct(${i},${j})" title="삭제">✕</button>
+      </div>`;
+    });
+    h += `<div class="addact">
+      <button class="addab" onclick="togMenu(${i},event)">＋ 인터랙티브 구간 추가</button>
+      <div class="tmenu" id="menu${i}">${Object.keys(AT).map(k=>`<button onclick="addAct(${i},'${k}')">${AT[k].ic} ${AT[k].n}</button>`).join('')}</div>
     </div>`;
   });
-  $('tl').innerHTML = html;
-  $('mLen').textContent = fmt(VID);
+  h += `<div class="addseg"><button class="addsb" onclick="addSeg()">＋ 강의 구간 추가</button></div>`;
+  $('sgtable').innerHTML = h;
   $('mSeg').textContent = segs.length;
-  $('mAct').textContent = acts.flat().length;
-  renderDetail(); refresh();
+  $('mAct').textContent = segs.reduce((n,x)=>n+x.acts.length,0);
+  renderMatrix();
 }
-
-/* 조작 */
-function splitSeg(i){
-  const st = segStart(i), mid = Math.round((st + segs[i].end) / 2);
-  segs.splice(i, 0, {t:segs[i].t, end:mid, coach:[...segs[i].coach]});
-  segs[i+1].t += ' (이어서)';
-  acts.splice(i, 0, []);
-  sel = {kind:'seg', i}; renderTL(); saved();
-}
-function rmSeg(i){
-  if(segs.length <= 1) return;
-  const removed = segs.splice(i,1)[0];
-  const gap = acts.splice(i,1)[0];
-  if(i > 0){ segs[i-1].end = removed.end; acts[i-1] = (acts[i-1]||[]).concat(gap); }
-  else { acts[0] = gap.concat(acts[0]||[]); }
-  sel = null; renderTL(); saved();
-}
-function segTitle(i,v){ segs[i].t = v; saved(); }
-function togCoach(i,ci){ segs[i].coach[ci] = !segs[i].coach[ci]; renderTL(); saved(); }
+function segTitle(i,v){ segs[i].t = v; renderMatrix(); saved(); }
+function mvSeg(i,d){ const j = i+d; if(j<0 || j>=segs.length) return; [segs[i],segs[j]] = [segs[j],segs[i]]; renderStruct(); saved(); }
+function rmSeg(i){ if(segs.length<=1) return; segs.splice(i,1); renderStruct(); saved(); }
+function addSeg(){ segs.push({t:'새 강의 구간', vids:people.map(()=>false), acts:[]}); renderStruct(); saved(); }
 function togMenu(i,e){
   e.stopPropagation();
   document.querySelectorAll('.tmenu').forEach(m=>{ if(m.id !== 'menu'+i) m.classList.remove('open'); });
@@ -404,72 +438,162 @@ function togMenu(i,e){
 }
 document.addEventListener('click', ()=>document.querySelectorAll('.tmenu').forEach(m=>m.classList.remove('open')));
 function addAct(i,k){
-  const def = {read:{done:1}, draw:{done:12}, quiz:{}, speak:{done:3}, write:{done:8}, play:{file:'워크시트.png'}}[k] || {};
+  const def = {read:{done:1, dur:180}, draw:{done:12, dur:120}, quiz:{qs:[{q:'', opts:['',''], ans:[], multi:false}], dur:120}, speak:{done:3, dur:60}, write:{done:8, dur:120}, play:{file:'', up:false, dur:300}}[k] || {};
   const names = {read:'밑줄 치며 읽기', draw:'마음을 색으로', quiz:'잠깐, 퀴즈', speak:'소리 내어 말하기', write:'한 문장으로', play:'워크시트 내려받기'};
-  acts[i] = acts[i] || [];
-  acts[i].push(Object.assign({k, t:names[k]}, def));
-  sel = {kind:'act', i, j:acts[i].length-1};
-  renderTL(); saved();
+  segs[i].acts.push(Object.assign({k, t:names[k]}, def));
+  renderStruct(); saved();
 }
-function selSeg(i){ sel = {kind:'seg', i}; renderTL(); }
-function selAct(i,j){ sel = {kind:'act', i, j}; renderTL(); }
+function actTitle(i,j,v){ segs[i].acts[j].t = v; saved(); }
+function actDone(i,j,v){ segs[i].acts[j].done = +v; saved(); }
+function actFile(i,j,v){ segs[i].acts[j].file = v; saved(); }
+function actDurM(i,j,v){ const a = segs[i].acts[j]; a.dur = Math.max(0,+v)*60 + (a.dur%60); saved(); refresh(); }
+function actDurS(i,j,v){ const a = segs[i].acts[j]; a.dur = Math.floor(a.dur/60)*60 + Math.min(59, Math.max(0,+v)); saved(); refresh(); }
+function actUp(i,j,on){
+  const a = segs[i].acts[j];
+  a.up = on;
+  if(on && !a.file) a.file = '워크시트.png';
+  renderStruct(); saved();
+  toast(on ? '워크시트 파일이 올라갔어요 (목업)' : '워크시트 파일을 제거했어요');
+}
+function rmAct(i,j){ segs[i].acts.splice(j,1); renderStruct(); saved(); }
+let qCur = null;
+function qOpen(i,j){ qCur = {i,j}; renderQModal(); document.getElementById('qmbg').classList.add('on'); }
+function qClose(){ document.getElementById('qmbg').classList.remove('on'); qCur = null; renderStruct(); }
+document.getElementById('qmbg').addEventListener('click', e=>{ if(e.target === e.currentTarget) qClose(); });
+document.addEventListener('keydown', e=>{ if(e.key === 'Escape' && qCur) qClose(); });
+function renderQModal(){
+  if(!qCur) return;
+  const {i,j} = qCur, a = segs[i].acts[j];
+  $('qmSub').textContent = `강의 구간 ${i+1} · ${a.t}`;
+  $('qmBody').innerHTML = a.qs.map((qz,qi)=>`
+    <div class="qe-q">
+      <div class="qe-head">
+        <span class="qe-no">문항 ${qi+1}</span>
+        <label class="qe-multi"><input type="checkbox" ${qz.multi?'checked':''} onchange="qMulti(${i},${j},${qi},this.checked)"> 복수 선택 허용</label>
+        <span class="sp"></span>
+        ${a.qs.length>1?`<button class="arm" onclick="qRmQ(${i},${j},${qi})" title="문항 삭제">✕</button>`:''}
+      </div>
+      <input class="qe-question" placeholder="질문을 입력하세요" value="${esc(qz.q)}" onchange="qSetQ(${i},${j},${qi},this.value)">
+      ${qz.opts.map((o,oi)=>`
+        <div class="qe-opt">
+          <button class="qe-ans ${qz.ans.includes(oi)?'on':''}" title="정답으로 표시" onclick="qAns(${i},${j},${qi},${oi})">✓</button>
+          <input placeholder="보기 ${oi+1}" value="${esc(o)}" onchange="qSetOpt(${i},${j},${qi},${oi},this.value)">
+          ${qz.opts.length>2?`<button class="arm" onclick="qRmOpt(${i},${j},${qi},${oi})" title="보기 삭제">✕</button>`:''}
+        </div>`).join('')}
+      <div class="qe-hint">✓를 눌러 정답을 표시해요${qz.multi?' — 복수 선택은 여러 개 가능':''}</div>
+      <button class="qe-add" onclick="qAddOpt(${i},${j},${qi})">＋ 보기 추가</button>
+    </div>`).join('')
+  + `<button class="qe-addq" onclick="qAddQ(${i},${j})">＋ 문항 추가</button>`;
+}
+function qAddQ(i,j){ segs[i].acts[j].qs.push({q:'', opts:['',''], ans:[], multi:false}); renderQModal(); saved(); }
+function qRmQ(i,j,qi){ const qs = segs[i].acts[j].qs; if(qs.length<=1) return; qs.splice(qi,1); renderQModal(); saved(); }
+function qSetQ(i,j,qi,v){ segs[i].acts[j].qs[qi].q = v; saved(); refresh(); }
+function qSetOpt(i,j,qi,oi,v){ segs[i].acts[j].qs[qi].opts[oi] = v; saved(); refresh(); }
+function qAddOpt(i,j,qi){ segs[i].acts[j].qs[qi].opts.push(''); renderQModal(); saved(); }
+function qRmOpt(i,j,qi,oi){
+  const qz = segs[i].acts[j].qs[qi];
+  if(qz.opts.length<=2) return;
+  qz.opts.splice(oi,1);
+  qz.ans = qz.ans.filter(x=>x!==oi).map(x=>x>oi?x-1:x);
+  renderQModal(); saved();
+}
+function qAns(i,j,qi,oi){
+  const qz = segs[i].acts[j].qs[qi];
+  if(qz.multi){ const k = qz.ans.indexOf(oi); if(k>=0) qz.ans.splice(k,1); else qz.ans.push(oi); }
+  else qz.ans = [oi];
+  renderQModal(); saved();
+}
+function qMulti(i,j,qi,on){
+  const qz = segs[i].acts[j].qs[qi];
+  qz.multi = on;
+  if(!on && qz.ans.length>1) qz.ans = [qz.ans[0]];
+  renderQModal(); saved();
+}
 
-/* 상세 패널 */
-function renderDetail(){
-  const d = $('detail');
-  if(!sel){ d.innerHTML = '<div class="dempty">구간이나 표현을 누르면 여기서 편집해요</div>'; return; }
-  if(sel.kind === 'seg'){
-    const s = segs[sel.i], st = segStart(sel.i);
-    d.innerHTML = `<div class="dh"><span class="tag">구간 ${sel.i+1}</span>
-        <span style="font-size:.78rem;color:var(--muted)" class="num">${fmt(st)} – ${fmt(s.end)} · ${fmt(s.end-st)}</span>
-        <span class="sp"></span>${segs.length>1?`<button class="del" onclick="rmSeg(${sel.i})">구간 삭제</button>`:''}</div>
-      <div class="drow">제목 <input style="flex:1;min-width:160px" value="${esc(s.t)}" onchange="segTitle(${sel.i},this.value);renderTL()">
-        <span style="color:var(--faint)">시간 조절은 ✂ 나누기 · ✕ 합치기로 (목업)</span></div>`;
-    return;
-  }
-  const a = acts[sel.i][sel.j], T = AT[a.k];
-  let cond = '';
-  if(a.k==='read')  cond = `끝까지 읽기 + 밑줄 <input type="number" min="1" style="width:60px" value="${a.done||1}" onchange="actDone(this.value)"> 곳 이상`;
-  if(a.k==='draw')  cond = `스트로크 <input type="number" min="1" style="width:60px" value="${a.done||12}" onchange="actDone(this.value)"> 회 이상`;
-  if(a.k==='quiz')  cond = `선택지 4 · 정답 1개 — 정답을 골라야 통과 <span style="color:var(--faint)">(문항 편집 목업)</span>`;
-  if(a.k==='speak') cond = `꾹 누르고 <input type="number" min="1" style="width:60px" value="${a.done||3}" onchange="actDone(this.value)"> 초 이상 말하기`;
-  if(a.k==='write') cond = `<input type="number" min="1" style="width:60px" value="${a.done||8}" onchange="actDone(this.value)"> 자 이상 쓰기`;
-  if(a.k==='play')  cond = `파일 <input style="width:160px" value="${esc(a.file||'')}" onchange="actFile(this.value)"> — 내려받으면 통과`;
-  d.innerHTML = `<div class="dh"><span class="tag">${T.ic} 표현 · ${T.n}</span>
-      <span style="font-size:.78rem;color:var(--muted)">구간 ${sel.i+1} 다음</span>
-      <span class="sp"></span><button class="del" onclick="rmAct()">표현 삭제</button></div>
-    <div class="drow">제목 <input style="flex:1;min-width:160px" value="${esc(a.t)}" onchange="actTitle(this.value)"></div>
-    <div class="drow" style="margin-top:8px">완료 조건 · ${cond}</div>`;
+/* ── ③ 출연자 ── */
+function renderPeople(){
+  $('peopleList').innerHTML = people.map((p,i)=>`
+    <div class="prow ${p.host?'host':''}">
+      <span class="role">${p.host?'강의자':'코치 '+i}</span>
+      <input class="nm" value="${esc(p.name)}" onchange="pName(${i},this.value)" placeholder="화면 이름표">
+      <span class="pdesc">${p.host?'구간마다 영상 필수':'구간별로 영상을 올린 곳에만 나와요'}</span>
+      ${!p.host && coachCount()>MINC ? `<button class="prm" onclick="rmCoach(${i})" title="출연자 삭제">✕</button>` : ''}
+    </div>`).join('')
+    + `<div class="prow"><span class="role">나 · 학생</span><span class="pdesc">학생 본인 실시간 — 업로드 없음</span></div>`;
+  $('pAdd').style.display = coachCount() >= MAXC ? 'none' : '';
 }
-function actTitle(v){ acts[sel.i][sel.j].t = v; renderTL(); saved(); }
-function actDone(v){ acts[sel.i][sel.j].done = +v; saved(); }
-function actFile(v){ acts[sel.i][sel.j].file = v; saved(); }
-function rmAct(){ acts[sel.i].splice(sel.j,1); sel = null; renderTL(); saved(); }
+function pName(i,v){ people[i].name = v; renderPeople(); renderMatrix(); saved(); }
+function addCoach(){
+  if(coachCount() >= MAXC) return;
+  const pool = ['바운더리 코치','기록 코치','머니 코치'];
+  people.push({name:pool[coachCount()] || '코치'});
+  segs.forEach(s=>s.vids.push(false));
+  renderPeople(); renderMatrix(); saved();
+}
+function rmCoach(i){
+  people.splice(i,1);
+  segs.forEach(s=>s.vids.splice(i,1));
+  renderPeople(); renderMatrix(); saved();
+}
+
+/* ── ④ 영상 업로드 매트릭스 ── */
+function renderMatrix(){
+  const cols = `150px repeat(${people.length}, minmax(220px,1fr))`;
+  let h = `<div class="mxhead" style="grid-template-columns:${cols}">
+    <span>강의 구간</span>
+    ${people.map(p=>`<span class="who">${esc(p.name)}${p.host?'<span class="tag">강의자</span>':''}</span>`).join('')}
+  </div>`;
+  segs.forEach((s,i)=>{
+    h += `<div class="mxrow" style="grid-template-columns:${cols}">
+      <span class="mx-seg">강의 구간 ${i+1}<small>${esc(s.t)}</small></span>
+      ${people.map((p,k)=>{
+        if(s.vids[k]) return `<div class="uslot on"><span>🎬</span><b>s${i+1}-${esc(p.name)}.mp4</b><button class="x" onclick="uVid(${i},${k},false)">✕</button></div>`;
+        const req = p.host ? ' req' : '';
+        return `<div class="uslot${req}" onclick="uVid(${i},${k},true)"><span>⬆</span> ${p.host?'영상 올리기 (필수)':'영상 올리기'}</div>`;
+      }).join('')}
+    </div>`;
+  });
+  $('mx').innerHTML = h;
+  refresh();
+}
+function uVid(i,k,on){ segs[i].vids[k] = on; renderMatrix(); saved(); if(on) toast('영상이 올라갔어요 (목업)'); }
 
 /* ── 체크리스트 · 검증 ── */
 function refresh(){
-  const host = people.find(p=>p.host);
   const okInfo = !!$('fTitle').value.trim();
-  const okVid = people.every(p=>p.video !== false || false) && host.video;   // 강의자 필수, 코치는 올라간 것 기준 표시만
-  const allVid = people.every(p=>p.video);
-  const okTl = segs.length >= 1 && host.video;
+  const okStruct = segs.length >= 1;
+  const okPeople = people.length >= 2;
+  const hostOk = segs.every(s=>s.vids[0]);
   const nav = document.querySelectorAll('.snav a');
   nav[0].classList.toggle('done', okInfo);
-  nav[1].classList.toggle('done', allVid);
-  nav[2].classList.toggle('done', okTl);
+  nav[1].classList.toggle('done', okStruct);
+  nav[2].classList.toggle('done', okPeople);
+  nav[3].classList.toggle('done', hostOk);
   const errs = [];
   if(!okInfo) errs.push('에피소드 제목이 필요해요');
-  if(!host.video) errs.push('강의자 원본 영상이 필요해요');
-  people.filter(p=>!p.host && !p.video).forEach(p=>errs.push(`${p.name} 영상이 아직 없어요`));
-  if(!segs.length) errs.push('구간이 최소 1개 필요해요');
+  segs.forEach((s,i)=>{ if(!s.vids[0]) errs.push(`강의 구간 ${i+1}의 강의자 영상이 없어요`); });
+  segs.forEach((s,i)=>s.acts.forEach(a=>{ if(a.k==='play' && !a.up) errs.push(`강의 구간 ${i+1}의 워크시트 파일이 없어요`); }));
+  segs.forEach((s,i)=>s.acts.forEach((a,j)=>{ if((a.dur||0) < 20) errs.push(`강의 구간 ${i+1}의 인터랙티브 ${j+1} 제한 시간은 20초 이상이어야 해요`); }));
+  segs.forEach((s,i)=>s.acts.forEach(a=>{
+    if(a.k==='quiz' && a.qs) a.qs.forEach((qz,qi)=>{
+      if(!qz.q.trim()) errs.push(`강의 구간 ${i+1} 퀴즈 문항 ${qi+1}의 질문이 비어 있어요`);
+      if(qz.opts.filter(o=>o.trim()).length < 2) errs.push(`강의 구간 ${i+1} 퀴즈 문항 ${qi+1}의 보기가 2개 이상 필요해요`);
+      if(!qz.ans.length) errs.push(`강의 구간 ${i+1} 퀴즈 문항 ${qi+1}의 정답을 정해주세요`);
+    });
+  }));
   const v = $('valid');
-  nav[3].classList.toggle('done', !errs.length);
+  nav[4].classList.toggle('done', !errs.length);
   if(errs.length){ v.className = 'valid no'; v.textContent = '✗ ' + errs.join(' · '); $('btnPub').disabled = true; $('btnTop').disabled = true; }
-  else { v.className = 'valid ok'; v.textContent = `✓ 제출 준비 완료 — 구간 ${segs.length} · 표현 ${acts.flat().length} · 출연 ${people.length+1}명(학생 포함)`; $('btnPub').disabled = false; $('btnTop').disabled = false; }
+  else {
+    const upN = segs.reduce((n,s)=>n+s.vids.filter(Boolean).length,0);
+    v.className = 'valid ok';
+    v.textContent = `✓ 제출 준비 완료 — 강의 구간 ${segs.length} · 인터랙티브 ${segs.reduce((n,x)=>n+x.acts.length,0)} · 영상 ${upN}개 · 출연 ${people.length+1}명(학생 포함)`;
+    $('btnPub').disabled = false; $('btnTop').disabled = false;
+  }
 }
 
 /* 네비 활성 */
-const secs = ['s1','s2','s3','s4'].map(id=>$(id));
+const secs = ['s1','s2','s3','s4','s5'].map(id=>$(id));
 const navIO = new IntersectionObserver(es=>{
   es.forEach(e=>{ if(e.isIntersecting){
     const i = secs.indexOf(e.target);
@@ -491,7 +615,7 @@ $('fTitle').addEventListener('input', refresh);
 ['fTitle','fDesc'].forEach(id=>$(id).addEventListener('change', saved));
 
 /* 초기 렌더 */
-renderCourseSelect(); renderCourse(); renderPeople(); renderTL();
+renderCourseSelect(); renderCourse(); renderPeople(); renderStruct();
 </script>
 </body>
 </html>
