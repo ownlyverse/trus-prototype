@@ -9,8 +9,9 @@ assets/char-line.png
 assets/char-story.png
 .superpowers/
 
-# 생각구독 76호 유료 원고를 담고 있어 공개 배포에서 제외한다
-reader-prototype.html
+# 생각구독 76호 유료 원고 — step 파일은 로컬 전용.
+# reader-prototype.html은 여기 넣지 않는다: feat-reader-highlight 브랜치에서
+# 버전 관리해야 롤백이 되기 때문. 대신 그 브랜치를 main에 머지하지 않는다(CLAUDE.md 참조).
 phases/reader-*/
 
 # 하네스 실행 산출물

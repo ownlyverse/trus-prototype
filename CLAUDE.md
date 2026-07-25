@@ -62,7 +62,16 @@ python3 -m pytest scripts/ -q           # 하네스 스크립트 테스트
 
 - `concept-*.html`, `assets/char-*.png` — 컨셉 시안, 로컬 전용
 - `docs/` — 기획서·설계서, 로컬 전용
-- `reader-prototype.html`, `phases/reader-*` — 생각구독 76호 유료 원고를 담고 있다
+- `phases/reader-*/` — 생각구독 76호 작업 지시서, 로컬 전용
+
+### `reader-prototype.html` — 브랜치 격리
+
+이 파일은 생각구독 76호 **유료 원고 전문과 사진**을 담고 있어 공개되면 안 된다. 그런데 `.gitignore`에 넣으면 이력이 남지 않아 롤백이 불가능하다. 그래서 다음 방식으로 격리한다.
+
+- **`feat-reader-highlight` 브랜치에서만 추적한다.** 하네스가 step마다 커밋하므로 특정 step 상태로 되돌릴 수 있다.
+- **CRITICAL: `feat-reader-highlight`를 `main`에 머지하지 마라.** GitHub Pages가 `main`을 서빙하므로 머지하는 순간 유료 원고가 공개된다.
+- `main`에서 작업할 때 이 파일이 워킹트리에 있으면 **스테이징하지 마라.** `git add -A`를 쓰기 전에 `git status`로 확인한다.
+- 리더기 작업 결과를 `main`에 반영해야 할 일이 생기면, 파일을 옮기지 말고 사람에게 물어라.
 
 ## 개발 프로세스
 
