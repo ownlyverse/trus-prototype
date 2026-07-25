@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TRUS 스튜디오 — 강의 만들기</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+:root{
+  --text:#191F28; --sub:#4E5968; --muted:#8B95A1; --faint:#B0B8C1;
+  --bg:#FFFFFF; --gray:#F2F4F6; --gray-2:#E8EBEE; --line:#EDF0F3; --line-2:#E5E8EB;
+  --blue:#3182F6; --blue-dark:#1B64DA; --blue-soft:#EEF4FE;
+  --red:#E5484D;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:"Pretendard Variable",Pretendard,-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+  color:var(--text); letter-spacing:-0.02em; background:var(--gray); word-break:keep-all}
+button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
+a{color:inherit;text-decoration:none}
+input,select,textarea{font:inherit;color:inherit}
+.num{font-variant-numeric:tabular-nums}
+
+/* 상단 앱바 */
+.appbar{position:sticky; top:0; z-index:50; height:60px; background:rgba(255,255,255,.92); backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--line-2); display:flex; align-items:center; gap:14px; padding:0 20px}
+.appbar .back{font-size:.86rem; color:var(--sub); font-weight:600; padding:8px 10px; border-radius:9px}
+.appbar .back:hover{background:var(--gray)}
+.appbar .ttl{font-size:.98rem; font-weight:800}
+.appbar .ttl span{color:var(--blue)}
+.appbar .crumb{font-size:.8rem; color:var(--muted); font-weight:600}
+.appbar .crumb b{color:var(--text); font-weight:700}
+@media(max-width:700px){.appbar .crumb{display:none}}
+.appbar .stat{font-size:.7rem; font-weight:800; color:var(--muted); background:var(--gray); padding:4px 10px; border-radius:8px}
+.appbar .save-state{font-size:.76rem; color:var(--muted); font-weight:600}
+.appbar .spacer{flex:1}
+.abtn{font-size:.86rem; font-weight:700; padding:9px 16px; border-radius:11px; transition:.15s}
+.abtn.ghost{color:var(--sub)} .abtn.ghost:hover{background:var(--gray)}
+.abtn.blue{background:var(--blue); color:#fff} .abtn.blue:hover{background:var(--blue-dark)}
+.abtn.blue:disabled{background:var(--gray-2); color:var(--faint); cursor:not-allowed}
+.abtn:active{transform:scale(.97)}
+
+/* 레이아웃 */
+.wrap{display:flex; gap:26px; max-width:1080px; margin:0 auto; padding:26px 20px 80px; align-items:flex-start}
+.side{position:sticky; top:86px; width:216px; flex-shrink:0}
+@media(max-width:820px){.wrap{flex-direction:column} .side{position:static; width:100%}}
+.snav{display:flex; flex-direction:column; gap:3px}
+@media(max-width:820px){.snav{flex-direction:row; overflow-x:auto; gap:6px; padding-bottom:4px}}
+.snav a{display:flex; align-items:center; gap:11px; padding:11px 12px; border-radius:12px; font-size:.88rem; font-weight:600; color:var(--sub); white-space:nowrap}
+.snav a:hover{background:var(--gray)}
+.snav a.on{background:var(--blue-soft); color:var(--blue-dark); font-weight:700}
+.snav .sn-no{width:24px; height:24px; border-radius:50%; background:var(--gray-2); color:var(--muted); font-size:.74rem; font-weight:800; display:flex; align-items:center; justify-content:center; flex-shrink:0}
+.snav a.on .sn-no{background:var(--blue); color:#fff}
+.snav a.done .sn-no{background:var(--blue); color:#fff}
+.side .tip{margin-top:14px; font-size:.74rem; color:var(--muted); line-height:1.6; background:#fff; border:1px solid var(--line-2); border-radius:14px; padding:14px}
+.side .tip b{color:var(--sub)}
+@media(max-width:820px){.side .tip{display:none}}
+.main{flex:1; min-width:0; display:flex; flex-direction:column; gap:16px}
+
+/* 카드 */
+.card{background:#fff; border:1px solid var(--line-2); border-radius:20px; padding:24px}
+.card .kh{display:flex; align-items:center; gap:10px; margin-bottom:5px}
+.card .kh .kno{font-size:.72rem; font-weight:800; color:var(--blue)}
+.card h2{font-size:1.18rem; font-weight:800; letter-spacing:-0.03em}
+.card .desc{font-size:.86rem; color:var(--muted); line-height:1.65; margin-bottom:18px; font-weight:500}
+.card .desc b{color:var(--sub)}
+
+/* 필드 */
+.field{margin-bottom:15px}
+.field:last-child{margin-bottom:0}
+.field label{display:block; font-size:.78rem; font-weight:700; color:var(--sub); margin-bottom:7px}
+.field label small{color:var(--muted); font-weight:500}
+.inp,.sel,.ta{width:100%; border:1.5px solid var(--line-2); border-radius:12px; padding:13px 15px; background:var(--gray); font-size:.92rem; font-weight:500; transition:.15s}
+.inp:focus,.sel:focus,.ta:focus{outline:none; border-color:var(--blue); background:#fff}
+.ta{resize:vertical; min-height:72px; line-height:1.6}
+.two{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+@media(max-width:520px){.two{grid-template-columns:1fr}}
+
+/* 강의 상품 에피소드 미리보기 */
+.course-eps{background:var(--gray); border-radius:14px; padding:13px 15px; margin-bottom:15px}
+.course-eps .ce-label{font-size:.76rem; font-weight:700; color:var(--muted); margin-bottom:9px}
+.ce-item{display:flex; align-items:center; gap:10px; font-size:.85rem; font-weight:600; color:var(--sub); padding:5px 0}
+.ce-item .ce-no{font-size:.66rem; font-weight:800; color:var(--blue-dark); background:var(--blue-soft); padding:3px 7px; border-radius:6px; min-width:40px; text-align:center}
+.ce-item.new{color:var(--blue-dark); font-weight:800}
+.ce-item.new .ce-no{background:var(--blue); color:#fff}
+
+/* ── STEP2 배치 미리보기 ── */
+.layout-prev{display:flex; gap:10px; background:#191F28; border-radius:16px; padding:16px; margin-bottom:8px}
+.lp-host{width:30%; aspect-ratio:9/16; max-height:210px; border-radius:9px; background:linear-gradient(160deg,#2B3442,#191F28); border:1.5px solid #3A4658; position:relative; display:flex; align-items:center; justify-content:center; overflow:hidden}
+.lp-mid{flex:1; display:flex; flex-direction:column; gap:8px}
+.lp-tile{flex:1; border-radius:9px; background:#232B36; border:1.5px solid #3A4658; position:relative; display:flex; align-items:center; justify-content:center; min-height:0}
+.lp-tile.me{border-style:dashed}
+.lp-memo{width:20%; border-radius:9px; background:#FCFCFD; border:1.5px solid #3A4658; padding:10px 9px; display:flex; flex-direction:column; gap:7px}
+.lp-memo .mt{font-size:.56rem; font-weight:800; color:var(--muted)}
+.lp-memo .ml{height:5px; border-radius:3px; background:var(--gray-2)}
+.lp-av{width:30px; height:30px; border-radius:50%; background:#3A4658; color:#C9D6E8; font-size:.72rem; font-weight:800; display:flex; align-items:center; justify-content:center}
+.lp-host .lp-av{width:44px; height:44px; font-size:.95rem}
+.lp-badge{position:absolute; left:6px; bottom:6px; font-size:.6rem; font-weight:700; background:rgba(0,0,0,.62); color:#fff; padding:2px 7px; border-radius:4px; white-space:nowrap; max-width:calc(100% - 12px); overflow:hidden; text-overflow:ellipsis}
+.lp-cam{position:absolute; top:6px; right:6px; font-size:.6rem; color:#C9D6E8}
+.lp-cam.no{color:#6B7684}
+.lp-cap{font-size:.74rem; color:var(--muted); font-weight:500; margin-bottom:12px; line-height:1.5}
+.lp-cap b{color:var(--sub)}
+
+/* 인원 조절 */
+.count-ctl{display:flex; align-items:center; gap:12px; background:var(--gray); border-radius:14px; padding:12px 16px; margin:14px 0}
+.count-ctl .cl{font-size:.86rem; font-weight:700; flex:1}
+.count-ctl .cl small{display:block; color:var(--muted); font-weight:500; font-size:.74rem; margin-top:2px}
+.stepper{display:flex; align-items:center; gap:10px}
+.stepper button{width:34px; height:34px; border-radius:10px; background:#fff; border:1.5px solid var(--line-2); font-size:1.1rem; font-weight:700; color:var(--sub); display:flex; align-items:center; justify-content:center}
+.stepper button:hover{border-color:var(--blue); color:var(--blue)}
+.stepper button:disabled{opacity:.35; cursor:not-allowed}
+.stepper .cnum{font-size:1.05rem; font-weight:800; min-width:20px; text-align:center}
+
+/* 참가자 자리 */
+.seat{display:flex; gap:14px; border:1.5px solid var(--line-2); border-radius:16px; padding:14px; margin-bottom:11px; align-items:flex-start}
+.seat.host{background:var(--gray)}
+.seat.student{border-style:dashed; background:var(--gray); align-items:center}
+.seat .avup{width:52px; height:52px; border-radius:12px; border:1.5px dashed var(--gray-2); background:#fff; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1px; font-size:.9rem; color:var(--muted); cursor:pointer; flex-shrink:0; transition:.13s}
+.seat .avup span{font-size:.56rem; font-weight:700}
+.seat .avup:hover{border-color:var(--blue); color:var(--blue)}
+.seat .avup.filled{border-style:solid; border-color:var(--line-2); background:var(--gray-2); color:var(--text); font-size:1.05rem; font-weight:800}
+.seat .avst{width:52px; height:52px; border-radius:12px; background:var(--gray-2); color:var(--sub); display:flex; align-items:center; justify-content:center; font-size:.74rem; font-weight:800; flex-shrink:0}
+.seat .sbody{flex:1; min-width:0}
+.seat .srow{display:flex; align-items:center; gap:8px; margin-bottom:9px}
+.seat .role{font-size:.68rem; font-weight:800; padding:3px 9px; border-radius:7px; white-space:nowrap}
+.seat .role{background:var(--gray-2); color:var(--sub)}
+.seat .sname{flex:1; min-width:0; border:1.5px solid var(--line-2); border-radius:10px; padding:9px 12px; background:#fff; font-size:.88rem; font-weight:600}
+.seat .sname:focus{outline:none; border-color:var(--blue)}
+.seat .srm{width:30px; height:30px; border-radius:9px; color:var(--muted); font-size:.8rem; flex-shrink:0}
+.seat .srm:hover{background:#FDECEC; color:#E5484D}
+.seat .vup{display:flex; align-items:center; gap:10px; border:1.5px dashed var(--gray-2); border-radius:11px; padding:10px 12px; cursor:pointer; transition:.13s; background:#fff}
+.seat .vup:hover{border-color:var(--blue); background:var(--blue-soft)}
+.seat .vup.filled{border-style:solid; border-color:#CBEBD9; background:#F1FAF5; cursor:default}
+.seat .vup .vi{font-size:18px}
+.seat .vup .vtx{flex:1; font-size:.82rem; font-weight:600}
+.seat .vup .vtx small{display:block; color:var(--muted); font-weight:500; font-size:.72rem}
+.seat .vup .vrm{color:var(--muted); font-size:.82rem; padding:4px}
+.seat .hostnote{margin-top:9px; font-size:.76rem; color:var(--muted); background:#fff; border:1px solid var(--line-2); border-radius:9px; padding:8px 11px; line-height:1.5; font-weight:500}
+.seat.student .stx{font-size:.84rem; color:var(--sub); font-weight:600}
+.seat.student .stx small{display:block; color:var(--muted); font-weight:500; margin-top:2px}
+
+/* 블록 편성 */
+.blk-tools{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px}
+.chip{font-size:.82rem; font-weight:700; padding:10px 14px; border-radius:11px; background:var(--gray); color:var(--sub); border:1.5px solid transparent; transition:.13s}
+.chip:hover{border-color:var(--gray-2)} .chip:active{transform:scale(.97)}
+.chip .ci{margin-right:4px; font-weight:800; color:var(--blue)}
+.blk-list{display:flex; flex-direction:column}
+.blk{display:flex; align-items:flex-start; gap:12px}
+.blk .rail{display:flex; flex-direction:column; align-items:center; align-self:stretch; padding-top:16px}
+.blk .rail .num{width:26px; height:26px; border-radius:50%; background:var(--gray); border:1.5px solid var(--line-2); color:var(--sub); font-size:.72rem; font-weight:800; display:flex; align-items:center; justify-content:center; flex-shrink:0}
+.blk .rail .line{width:2px; flex:1; background:var(--line-2); margin:4px 0; min-height:12px}
+.blk:last-child .rail .line{display:none}
+.blk .box{flex:1; min-width:0; border:1.5px solid var(--line-2); border-radius:14px; background:#fff; padding:13px 15px; margin:8px 0}
+.blk.act .box{border-left:3px solid var(--blue)}
+.blk .bhead{display:flex; align-items:center; gap:8px}
+.blk .drag{color:var(--faint); font-size:.82rem; cursor:grab; user-select:none}
+.blk .bt{font-size:.68rem; font-weight:800; padding:3px 9px; border-radius:7px; background:var(--gray); color:var(--muted)}
+.blk.act .bt{color:var(--blue); background:var(--blue-soft)}
+.blk .btitle{font-size:.9rem; font-weight:700; border:none; background:transparent; flex:1; min-width:0; padding:3px 4px; border-radius:6px}
+.blk .btitle:focus{outline:none; background:#fff; box-shadow:0 0 0 2px var(--blue-soft)}
+.blk .bctl{display:flex; gap:3px; flex-shrink:0}
+.blk .bctl button{width:26px; height:26px; border-radius:7px; color:var(--muted); font-size:.72rem; display:flex; align-items:center; justify-content:center}
+.blk .bctl button:hover{background:rgba(0,0,0,.05)}
+.blk .bctl .del:hover{background:#FDECEC; color:#E5484D}
+.blk .sub{margin-top:10px; display:flex; flex-wrap:wrap; gap:8px; align-items:center; font-size:.78rem; color:var(--sub); font-weight:500}
+.blk .sub b{color:var(--blue-dark)}
+.blk .sub input{border:1.5px solid var(--line-2); border-radius:8px; padding:6px 9px; font-size:.78rem; background:#fff}
+.blk .sub input:focus{outline:none; border-color:var(--blue)}
+.blk .warn{margin-top:9px; font-size:.76rem; color:#E5484D; font-weight:700; display:none; align-items:center; gap:5px}
+.blk.bad .box{border-color:#F5B5B5; background:#FEF5F5} .blk.bad .warn{display:flex}
+.empty{text-align:center; color:var(--faint); font-size:.84rem; padding:24px; border:1.5px dashed var(--gray-2); border-radius:14px}
+.valid{margin-top:16px; display:flex; align-items:center; gap:9px; font-size:.84rem; font-weight:700; padding:12px 15px; border-radius:12px}
+.valid.ok{color:var(--sub); background:var(--gray)} .valid.no{color:#E5484D; background:var(--gray)}
+
+
+/* 게시 */
+.prod{display:flex; align-items:flex-start; gap:11px; font-size:.84rem; color:var(--sub); line-height:1.6; background:var(--gray); border-radius:14px; padding:14px 16px; margin-bottom:16px; font-weight:500}
+.prod .pe{font-size:22px} .prod b{color:var(--text)}
+.pubrow{display:flex; gap:10px}
+@media(max-width:520px){.pubrow{flex-direction:column}}
+.pbtn{flex:1; display:flex; align-items:center; justify-content:center; gap:7px; font-size:.92rem; font-weight:800; padding:15px; border-radius:14px; transition:.15s}
+.pbtn:active{transform:scale(.98)}
+.pbtn.blue{background:var(--blue); color:#fff} .pbtn.blue:hover{background:var(--blue-dark)}
+.pbtn.blue:disabled{background:var(--gray-2); color:var(--faint); cursor:not-allowed}
+.pbtn.ghost{background:var(--gray); color:var(--text)} .pbtn.ghost:hover{background:var(--gray-2)}
+
+.toast{position:fixed; left:50%; bottom:26px; transform:translateX(-50%) translateY(10px); z-index:90; background:var(--text); color:#fff;
+  padding:12px 20px; border-radius:14px; font-size:.86rem; font-weight:600; box-shadow:0 10px 30px rgba(25,31,40,.25); opacity:0; transition:.2s; pointer-events:none}
+.toast.on{opacity:1; transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+
+<header class="appbar">
+  <a class="back" href="admin-prototype.html">← 나가기</a>
+  <div class="ttl"><span>TRUS</span> 스튜디오</div>
+  <span class="crumb">강의 관리 · <b id="crumbCourse">일의 교과서</b> · 새 에피소드</span>
+  <span class="stat">초안</span>
+  <span class="save-state" id="saveState">자동 저장됨</span>
+  <div class="spacer"></div>
+  <button class="abtn ghost" onclick="preview()">미리보기</button>
+  <button class="abtn blue" id="btnTop" onclick="publish()">게시하기</button>
+</header>
+
+<div class="wrap">
+  <aside class="side">
+    <nav class="snav" id="snav">
+      <a href="#s1" class="on"><span class="sn-no">1</span>강의 정보</a>
+      <a href="#s2"><span class="sn-no">2</span>화면 배치 · 영상</a>
+      <a href="#s3"><span class="sn-no">3</span>커리큘럼 · 블록</a>
+      <a href="#s5"><span class="sn-no">4</span>미리보기 · 게시</a>
+    </nav>
+    <div class="tip">💡 강의실은 <b>강의자 화면 + 코치 자리 + 나(학생)</b>로 구성돼요. 각 자리에 이름과 영상을 넣으면 그대로 라이브처럼 보여요.</div>
+  </aside>
+
+  <div class="main">
+
+    <!-- ① 강의 정보 -->
+    <section class="card" id="s1">
+      <div class="kh"><span class="kno">STEP 1</span></div>
+      <h2>강의 정보</h2>
+      <p class="desc">이 <b>에피소드</b>가 어떤 <b>강의(상품)</b>에 들어가는지 정해요. 학생은 결제한 강의 상품 안에서 에피소드를 하나씩 들어요.</p>
+      <div class="field"><label>강의 상품</label>
+        <select class="sel" id="fCourse" onchange="onCourse()"></select>
+      </div>
+      <div class="course-eps" id="courseEps"></div>
+      <div class="field"><label>에피소드 제목</label><input class="inp" id="fTitle" value="전략을 바운더리로"></div>
+      <div class="field"><label>한 줄 소개</label><input class="inp" id="fDesc" value="흩어진 계획을 3개월 실행 전략 한 장으로 좁혀요"></div>
+    </section>
+
+    <!-- ② 화면 배치 & 영상 -->
+    <section class="card" id="s2">
+      <div class="kh"><span class="kno">STEP 2</span></div>
+      <h2>화면 배치 · 영상</h2>
+      <p class="desc">강의실에 <b>누가 몇 명</b> 나올지 정하고, 각 자리에 <b>이름과 영상</b>을 넣어요. 강의자 영상은 아래 블록 수만큼 자동 분할돼요.</p>
+
+      <div class="layout-prev" id="layoutPrev"></div>
+      <div class="lp-cap">실제 강의실 배치 그대로예요 — 학생 화면에는 <b>이름표와 영상만</b> 보여요. 자리 번호는 편집용이에요.</div>
+      <div class="count-ctl">
+        <div class="cl">코치 자리<small>강의자 1명 + 나(학생)는 고정이에요</small></div>
+        <div class="stepper">
+          <button id="cMinus" onclick="setCoaches(-1)">－</button>
+          <span class="cnum" id="cNum">2</span>
+          <button id="cPlus" onclick="setCoaches(1)">＋</button>
+        </div>
+      </div>
+
+      <div id="seatList"></div>
+    </section>
+
+    <!-- ③ 블록 -->
+    <section class="card" id="s3">
+      <div class="kh"><span class="kno">STEP 3</span></div>
+      <h2>커리큘럼 · 블록 편성</h2>
+      <p class="desc">블록을 추가해 강의 흐름을 만들어요. <b>표현 블록은 강의 블록 뒤에</b> 이어져요 — 표현끼리 연달아 붙여도 돼요 (읽기 → 그리기처럼).</p>
+      <div class="blk-tools">
+        <button class="chip" onclick="addBlock('lecture')"><span class="ci">＋</span>강의</button>
+        <button class="chip" onclick="addBlock('read')"><span class="ci">＋</span>읽기</button>
+        <button class="chip" onclick="addBlock('draw')"><span class="ci">＋</span>그리기</button>
+        <button class="chip" onclick="addBlock('quiz')"><span class="ci">＋</span>퀴즈</button>
+        <button class="chip" onclick="addBlock('speak')"><span class="ci">＋</span>말하기</button>
+        <button class="chip" onclick="addBlock('write')"><span class="ci">＋</span>글쓰기</button>
+        <button class="chip" onclick="addBlock('play')"><span class="ci">＋</span>워크시트</button>
+        <button class="chip" onclick="addBlock('finish')"><span class="ci">＋</span>마무리</button>
+      </div>
+      <div class="blk-list" id="blkList"></div>
+      <div class="valid" id="valid"></div>
+    </section>
+
+    <!-- ④ 게시 -->
+    <section class="card" id="s5">
+      <div class="kh"><span class="kno">STEP 4</span></div>
+      <h2>미리보기 · 게시</h2>
+      <div class="prod"><span class="pe">🎬</span><span>이 에피소드는 <b id="pmCourse">일의 교과서</b>에 추가돼요. 학생이 블록을 모두 통과하면 이 에피소드는 완강 처리돼요.</span></div>
+      <div class="pubrow">
+        <button class="pbtn ghost" onclick="preview()">▶ 강의실에서 미리보기</button>
+        <button class="pbtn blue" id="btnPub" onclick="publish()">검수 요청하고 게시하기</button>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const esc = s => String(s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+
+/* ===== 참가자(자리) 모델 ===== */
+// host 1 (고정) + coach N + student(나, 자동) — coach만 가감
+let host = {name:'윤소정', video:true, photo:true};
+let coaches = [
+  {name:'바운더리 코치', video:true, photo:true},
+  {name:'기록 코치',    video:true, photo:false},
+];
+const COACH_POOL = [
+  {name:'바운더리 코치'}, {name:'기록 코치'}, {name:'머니 코치'},
+];
+const MAX_COACH = 3, MIN_COACH = 1;
+const initial = n => (n||'').trim().charAt(0) || '?';
+
+function setCoaches(d){
+  const n = coaches.length + d;
+  if(n < MIN_COACH || n > MAX_COACH) return;
+  if(d > 0){ const p = COACH_POOL[coaches.length] || {name:'코치 '+(coaches.length+1)}; coaches.push({name:p.name, video:false, photo:false}); }
+  else coaches.pop();
+  renderSeats(); renderLayout(); saved();
+}
+
+function renderLayout(){
+  const midTiles = coaches.map((c)=>`
+    <div class="lp-tile"><span class="lp-av">${esc(initial(c.name))}</span>
+      <span class="lp-cam ${c.video?'':'no'}">${c.video?'●':'○'}</span>
+      <span class="lp-badge">${esc(c.name)}</span></div>`).join('')
+    + `<div class="lp-tile me"><span class="lp-av">나</span><span class="lp-badge">나 · 학생</span></div>`;
+  document.getElementById('layoutPrev').innerHTML = `
+    <div class="lp-mid">${midTiles}</div>
+    <div class="lp-host"><span class="lp-av">${esc(initial(host.name))}</span>
+      <span class="lp-cam ${host.video?'':'no'}">${host.video?'●':'○'}</span>
+      <span class="lp-badge">${esc(host.name)} · 강의</span></div>
+    <div class="lp-memo"><span class="mt">내 메모</span><span class="ml" style="width:88%"></span><span class="ml" style="width:66%"></span><span class="ml" style="width:76%"></span><span class="ml" style="width:50%"></span></div>`;
+  document.getElementById('cNum').textContent = coaches.length;
+  document.getElementById('cMinus').disabled = coaches.length<=MIN_COACH;
+  document.getElementById('cPlus').disabled = coaches.length>=MAX_COACH;
+}
+
+function vupHtml(who, filled){
+  return filled
+    ? `<div class="vup filled"><span class="vi">✅</span><span class="vtx">영상 업로드됨<small>lecture.mp4 · 1:06 · 24.3MB</small></span><span class="vrm" onclick="event.stopPropagation();setVid('${who}',false)">✕</span></div>`
+    : `<div class="vup" onclick="setVid('${who}',true)"><span class="vi">🎬</span><span class="vtx">영상 올리기<small>클릭해서 업로드 (목업)</small></span></div>`;
+}
+function renderSeats(){
+  let html = `
+    <div class="seat host">
+      ${avHtml('host',0,host)}
+      <div class="sbody">
+        <div class="srow"><span class="role">강의자 · 호스트</span>
+          <input class="sname" value="${esc(host.name)}" onchange="setName('host',0,this.value)" placeholder="화면 이름표 (예: 윤소정)">
+        </div>
+        ${vupHtml('host', host.video)}
+        <div class="hostnote">이 영상이 블록 수만큼 자동 분할돼 섹션마다 재생돼요 · 학생 화면 이름표 "${esc(host.name)} · 강의"</div>
+      </div>
+    </div>`;
+  coaches.forEach((c,i)=>{
+    html += `
+    <div class="seat coach">
+      ${avHtml('coach',i,c)}
+      <div class="sbody">
+        <div class="srow"><span class="role">코치 자리 ${i+1}</span>
+          <input class="sname" value="${esc(c.name)}" onchange="setName('coach',${i},this.value)" placeholder="화면 이름표 (예: 바운더리 코치)">
+          ${coaches.length>MIN_COACH?`<button class="srm" onclick="removeCoach(${i})" title="자리 삭제">✕</button>`:''}
+        </div>
+        ${vupHtml('coach'+i, c.video)}
+      </div>
+    </div>`;
+  });
+  html += `
+    <div class="seat student">
+      <div class="avst">나</div>
+      <div class="stx">나 (학생) 자리<small>학생 본인이 실시간으로 채워요 · 업로드 없음</small></div>
+    </div>`;
+  document.getElementById('seatList').innerHTML = html;
+}
+function avHtml(kind,i,o){
+  return o.photo
+    ? `<button class="avup filled" onclick="togPhoto('${kind}',${i})" title="프로필 사진 바꾸기">${esc(initial(o.name))}</button>`
+    : `<button class="avup" onclick="togPhoto('${kind}',${i})" title="프로필 사진 올리기">📷<span>사진</span></button>`;
+}
+function togPhoto(kind,i){
+  const o = kind==='host' ? host : coaches[i];
+  o.photo = !o.photo;
+  renderSeats(); saved();
+  toast(o.photo ? '프로필 사진 업로드됨 (목업)' : '프로필 사진 제거됨');
+}
+function setName(kind,i,v){ if(kind==='host') host.name=v; else coaches[i].name=v; renderLayout(); renderSeats(); saved(); }
+function setVid(who,on){
+  if(who==='host') host.video=on;
+  else coaches[+who.slice(5)].video=on;
+  renderSeats(); renderLayout(); validate(); saved();
+  if(on) toast('영상 업로드됨 (목업)');
+}
+function removeCoach(i){ if(coaches.length<=MIN_COACH) return; coaches.splice(i,1); renderSeats(); renderLayout(); saved(); }
+
+/* ===== 블록 ===== */
+const TYPE = {
+  lecture:{bt:'강의', cls:'lec', def:'새 강의 섹션'},
+  read:{bt:'표현 · 읽기', cls:'act', def:'오늘의 글, 밑줄 치며 읽기'},
+  draw:{bt:'표현 · 그리기', cls:'act', def:'지금 마음을 색으로 그려보세요'},
+  quiz:{bt:'표현 · 퀴즈', cls:'act', def:'잠깐, 퀴즈'},
+  speak:{bt:'표현 · 말하기', cls:'act', def:'소리 내어 말해보세요'},
+  write:{bt:'표현 · 글쓰기', cls:'act', def:'오늘 배운 것을 한 문장으로'},
+  play:{bt:'표현 · 워크시트', cls:'act', def:'워크시트를 내려받아 따라해요'},
+  finish:{bt:'마무리', cls:'fin', def:'마지막 섹션까지 다 들었어요'},
+};
+let blocks = [
+  {type:'lecture', title:'오늘, 잠깐 멈추는 시간'},
+  {type:'read',    title:'오늘의 글, 밑줄 치며 읽기', done:1},
+  {type:'draw',    title:'지금 마음을 색으로 그려보세요', done:12},
+  {type:'lecture', title:'전략을 바운더리로'},
+  {type:'quiz',    title:'방금 이야기의 핵심은 무엇이었나요?'},
+  {type:'speak',   title:'방금 배운 것을 입으로 말해보세요', done:3},
+  {type:'write',   title:'오늘 배운 것을 한 문장으로', ph:'오늘 나는 …라는 걸 알았다.', done:8},
+  {type:'play',    title:'워크시트를 내려받아 따라 써보세요', file:'PLAY-일-회고.png'},
+  {type:'finish',  title:'마무리 · 다시 듣기'},
+];
+const VID_LEN = 66;
+const isInteractive = t => ['draw','write','read','quiz','speak','play'].includes(t);
+const chainOk = i => i>0 && (blocks[i-1].type==='lecture' || isInteractive(blocks[i-1].type));
+const fmt = s => `${Math.floor(s/60)}:${String(Math.round(s%60)).padStart(2,'0')}`;
+
+function renderBlocks(){
+  const list = document.getElementById('blkList');
+  if(!blocks.length){ list.innerHTML = '<div class="empty">블록을 추가해서 강의 흐름을 만들어요 ↑</div>'; validate(); return; }
+  list.innerHTML = blocks.map((b,i)=>{
+    const t = TYPE[b.type];
+    const bad = isInteractive(b.type) && !chainOk(i);
+    let sub = '';
+    if(b.type==='draw') sub = `<div class="sub">완료 조건 · 스트로크 <input type="number" min="1" value="${b.done||12}" onchange="setDone(${i},this.value)" style="width:56px"> 회</div>`;
+    if(b.type==='write') sub = `<div class="sub">완료 조건 · <input type="number" min="1" value="${b.done||8}" onchange="setDone(${i},this.value)" style="width:56px"> 자 이상 · <input placeholder="입력칸 안내문" value="${esc(b.ph||'')}" onchange="setPh(${i},this.value)" style="flex:1;min-width:130px"></div>`;
+    if(b.type==='read') sub = `<div class="sub">완료 조건 · 끝까지 읽기 + 밑줄 <input type="number" min="1" value="${b.done||1}" onchange="setDone(${i},this.value)" style="width:56px"> 곳 이상</div>`;
+    if(b.type==='quiz') sub = `<div class="sub">선택지 4 · 정답 1개 — <b>정답을 골라야 통과</b> <span style="color:var(--faint)">(문항 편집은 목업)</span></div>`;
+    if(b.type==='speak') sub = `<div class="sub">완료 조건 · 꾹 누르고 <input type="number" min="1" value="${b.done||3}" onchange="setDone(${i},this.value)" style="width:56px"> 초 이상 말하기</div>`;
+    if(b.type==='play') sub = `<div class="sub">워크시트 파일 · <input value="${esc(b.file||'워크시트.png')}" onchange="setFile(${i},this.value)" style="width:170px"> — 내려받으면 통과</div>`;
+    if(b.type==='lecture') sub = `<div class="sub">🎬 이 강의의 영상 · <b id="seg${i}">개별 업로드</b></div>`;
+    return `<div class="blk ${t.cls} ${bad?'bad':''}">
+      <div class="rail"><div class="num">${i+1}</div><div class="line"></div></div>
+      <div class="box">
+        <div class="bhead"><span class="drag" title="드래그로 순서 이동 (목업)">⠿</span><span class="bt">${t.bt}</span>
+          <input class="btitle" value="${esc(b.title)}" onchange="setTitle(${i},this.value)">
+          <span class="bctl">
+            <button onclick="move(${i},-1)" ${i===0?'disabled style=opacity:.3':''}>▲</button>
+            <button onclick="move(${i},1)" ${i===blocks.length-1?'disabled style=opacity:.3':''}>▼</button>
+            <button class="del" onclick="del(${i})">✕</button></span>
+        </div>${sub}
+        <div class="warn">⚠ 표현 블록은 강의 블록 뒤에 이어져야 해요 (표현끼리 연달아 붙이는 건 OK)</div>
+      </div></div>`;
+  }).join('');
+  updateSegments(); validate();
+}
+function updateSegments(){
+  const lecIdx = blocks.map((b,i)=>b.type==='lecture'?i:-1).filter(i=>i>=0);
+  const n = lecIdx.length; if(!n) return;
+  lecIdx.forEach((bi,k)=>{ const el=document.getElementById('seg'+bi); if(el) el.textContent = `lecture${k+1}.mp4 (${k+1}/${n}) — 강의마다 개별 영상`; });
+}
+function validate(){
+  const v = document.getElementById('valid');
+  const problems = [];
+  blocks.forEach((b,i)=>{ if(isInteractive(b.type) && !chainOk(i)) problems.push(i+1); });
+  const errs = [];
+  if(!host.video) errs.push('강의자 영상 없음');
+  if(!blocks.some(b=>b.type==='lecture')) errs.push('강의 블록 최소 1개');
+  if(!(blocks.length && blocks[blocks.length-1].type==='finish')) errs.push('마지막은 마무리 블록');
+  if(problems.length) errs.push('표현 블록 배치 규칙 위반 ('+problems.join(',')+'번)');
+  const dis = d => { document.getElementById('btnPub').disabled=d; document.getElementById('btnTop').disabled=d; };
+  if(errs.length){ v.className='valid no'; v.innerHTML='✗ '+errs.join(' · '); dis(true); }
+  else { v.className='valid ok'; v.innerHTML=`✓ ${blocks.length}블록 유효 · 강의 ${blocks.filter(b=>b.type==='lecture').length} · 표현 ${blocks.filter(b=>isInteractive(b.type)).length} · 게시 준비 완료`; dis(false); }
+  document.querySelectorAll('.snav a')[2].classList.toggle('done', !errs.length);
+  document.querySelectorAll('.snav a')[1].classList.toggle('done', host.video);
+}
+function addBlock(type){
+  const finAt = blocks.findIndex(b=>b.type==='finish');
+  const item = {type, title:TYPE[type].def};
+  if(type==='draw') item.done=12;
+  if(type==='write'){ item.done=8; item.ph='오늘의 한 문장…'; }
+  if(type==='read') item.done=1;
+  if(type==='speak') item.done=3;
+  if(type==='play') item.file='워크시트.png';
+  if(type==='finish'){ if(finAt>=0){ toast('마무리 블록은 하나만 있어요'); return; } blocks.push(item); }
+  else if(finAt>=0) blocks.splice(finAt,0,item); else blocks.push(item);
+  renderBlocks(); saved();
+}
+function del(i){ blocks.splice(i,1); renderBlocks(); saved(); }
+function move(i,d){ const j=i+d; if(j<0||j>=blocks.length) return; [blocks[i],blocks[j]]=[blocks[j],blocks[i]]; renderBlocks(); saved(); }
+function setTitle(i,v){ blocks[i].title=v; saved(); }
+function setDone(i,v){ blocks[i].done=+v; saved(); }
+function setPh(i,v){ blocks[i].ph=v; saved(); }
+function setFile(i,v){ blocks[i].file=v; saved(); }
+
+/* 산출물 안내 */
+/* 강의 상품 · 에피소드 계층 */
+const COURSES = [
+  {id:'ilgyo', name:'일의 교과서', episodes:['오리엔테이션 — 왜 멈춰야 하나','나의 바운더리 세우기','숫자언어 — 나만의 지표','고객언어 — 듣는 법','문제를 한 문장으로']},
+];
+let curCourse = 0;
+function renderCourseSelect(){
+  const sel = document.getElementById('fCourse');
+  sel.innerHTML = COURSES.map((c,i)=>`<option value="${i}">${esc(c.name)}</option>`).join('') + `<option value="new">＋ 새 강의 상품 만들기</option>`;
+  sel.value = String(curCourse);
+}
+function onCourse(){
+  const v = document.getElementById('fCourse').value;
+  if(v==='new'){ const nm=(prompt('새 강의 상품 이름')||'').trim(); if(nm){ COURSES.push({id:'c'+COURSES.length, name:nm, episodes:[]}); curCourse=COURSES.length-1; toast('새 강의 상품 만들어짐 (목업)'); } renderCourseSelect(); }
+  else curCourse = +v;
+  renderCourse(); saved();
+}
+function renderCourse(){
+  const c = COURSES[curCourse];
+  const eps = document.getElementById('courseEps');
+  eps.innerHTML = (c.episodes.length
+    ? `<div class="ce-label">${esc(c.name)} · 지금 에피소드 ${c.episodes.length}개</div>`
+      + c.episodes.map((e,i)=>`<div class="ce-item"><span class="ce-no">EP${i+1}</span>${esc(e)}</div>`).join('')
+      + `<div class="ce-item new"><span class="ce-no">EP${c.episodes.length+1}</span>지금 만드는 에피소드</div>`
+    : `<div class="ce-label">${esc(c.name)} · 첫 에피소드예요</div>`);
+  syncPub();
+}
+function syncPub(){
+  document.getElementById('pmCourse').textContent = COURSES[curCourse].name;
+  document.getElementById('crumbCourse').textContent = COURSES[curCourse].name;
+}
+['fTitle','fDesc'].forEach(id=>document.getElementById(id).addEventListener('change', saved));
+
+/* 스텝 네비 */
+const navLinks = [...document.querySelectorAll('.snav a')];
+const secs = ['s1','s2','s3','s5'].map(id=>document.getElementById(id));
+const navIO = new IntersectionObserver(es=>{ es.forEach(e=>{ if(e.isIntersecting){ const i=secs.indexOf(e.target); navLinks.forEach((a,k)=>a.classList.toggle('on', k===i)); } }); }, {rootMargin:'-45% 0px -50% 0px'});
+secs.forEach(s=>navIO.observe(s));
+
+/* 액션 */
+function preview(){ toast('강의실 미리보기로 이동해요…'); setTimeout(()=>location.href='lecture-prototype.html', 700); }
+function publish(){ if(document.getElementById('btnPub').disabled){ toast('아직 게시할 수 없어요 — 확인이 필요해요'); return; } toast('검수 요청됨 · 코치 세션 게시 후 학생에게 열려요 ✓'); }
+let st, tt;
+function saved(){ const s=document.getElementById('saveState'); s.textContent='저장 중…'; clearTimeout(st); st=setTimeout(()=>s.textContent='자동 저장됨',600); }
+function toast(m){ const t=document.getElementById('toast'); t.textContent=m; t.classList.add('on'); clearTimeout(tt); tt=setTimeout(()=>t.classList.remove('on'),1900); }
+
+/* 초기 렌더 */
+renderCourseSelect(); renderCourse(); renderLayout(); renderSeats(); renderBlocks();
+</script>
+</body>
+</html>
