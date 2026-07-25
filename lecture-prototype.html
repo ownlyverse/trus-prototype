@@ -56,13 +56,16 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
 .stage{width:100%; margin:0 auto; padding:78px 20px 44px; position:relative}
 .lesson-col{max-width:640px; margin:0 auto}
 
-/* 라이브 강의실 — 강의자(좌 세로 대형) · 코치2+나(세로 3) · 메모(우 컬럼) */
+/* 라이브 강의실 — 코치2+나(좌 세로 3) · 강의자(가운데 세로 대형) · 메모(우 컬럼) */
 .liveroom{
   --H:min(760px, 82vh, 48vw);              /* 강의자 세로 높이 */
   --s:calc((var(--H) - 32px)/3);           /* 미니 타일 높이 (3개+간격2 = --H) */
   display:grid; justify-content:center; gap:18px; margin:14px auto 8px;
-  grid-template-columns:calc(var(--H)*9/16) calc(var(--s)*16/9) minmax(280px,380px);
+  grid-template-columns:calc(var(--s)*16/9) calc(var(--H)*9/16) minmax(280px,380px);
 }
+.mid-col{order:1}
+.vid.main{order:2}
+.liveroom > .memo{order:3}
 .vid.main{height:var(--H); aspect-ratio:9/16}
 .mid-col{display:flex; flex-direction:column; gap:16px; min-width:0}
 .mid-col .vid{height:var(--s)}
@@ -72,8 +75,9 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
 /* 좁은 화면: 강의자(세로) → 미니 3개 가로 → 메모 (기본 규칙보다 반드시 뒤) */
 @media(max-width:860px){
   .liveroom{display:flex; flex-direction:column}
-  .liveroom .vid.main{height:auto; aspect-ratio:9/16; width:min(66vw,300px); align-self:center}
-  .mid-col{flex-direction:row}
+  .liveroom .vid.main{height:auto; aspect-ratio:9/16; width:min(66vw,300px); align-self:center; order:1}
+  .mid-col{flex-direction:row; order:2}
+  .liveroom > .memo{order:3}
   .mid-col .vid{height:auto; aspect-ratio:16/9; flex:1; min-width:0}
   .liveroom > .memo{height:auto; min-height:200px}
 }
@@ -241,6 +245,15 @@ canvas{display:block; width:100%; height:200px; touch-action:none; cursor:crossh
 .playbox textarea{width:100%; font-family:inherit; font-size:1rem; border:3px solid #17171C; border-radius:6px; padding:14px 16px; background:#fff; min-height:110px; resize:vertical; line-height:1.8}
 .playbox textarea:focus{outline:3px solid var(--accent-soft)}
 
+/* 퀴즈 */
+.quizbox{background:#fff; border:3px solid #17171C; border-radius:6px; padding:18px 20px}
+.quiz-q{font-size:.95rem; font-weight:800; margin-bottom:12px; line-height:1.6}
+.qopts{display:flex; flex-direction:column; gap:8px}
+.qopt{text-align:left; font-size:.86rem; font-weight:600; padding:11px 14px; border:2px solid #17171C; border-radius:6px; background:#FDF8EC; transition:.12s}
+.qopt:hover{background:#FFF3D9}
+.qopt.good{background:var(--accent); color:#fff; border-color:var(--accent-d)}
+.qopt.bad{background:#F2E3E3; color:#B03A3A; border-color:#B03A3A; opacity:.7}
+
 /* 06 마무리 */
 .fin .field{margin-bottom:12px}
 .fin label{display:block; font-size:.74rem; font-weight:700; color:#7A7264; margin-bottom:6px}
@@ -346,9 +359,13 @@ canvas{display:block; width:100%; height:200px; touch-action:none; cursor:crossh
 /* ─── 강의 흐름 — 각 강의 영상을 통으로 본 뒤 활동으로 이어져요 ─── */
 const BLOCKS = [
   {type:'lecture', name:'강의', t:'오늘, 잠깐 멈추는 시간', src:'assets/lecture1.mp4', poster:'assets/lecture1-poster.jpg'},
-  {type:'interactive', kind:'draw', name:'인터랙티브 — 그림 그리기', t:'지금 마음을 색으로 그려보세요'},
+  {type:'interactive', kind:'read',  name:'인터랙티브 — 밑줄 읽기', t:'오늘의 글, 밑줄 치며 읽기'},
+  {type:'interactive', kind:'draw',  name:'인터랙티브 — 그림 그리기', t:'지금 마음을 색으로 그려보세요'},
   {type:'lecture', name:'강의', t:'전략을 바운더리로', src:'assets/lecture2.mp4', poster:'assets/lecture2-poster.jpg'},
+  {type:'interactive', kind:'quiz',  name:'인터랙티브 — 잠깐, 퀴즈', t:'방금 이야기의 핵심은 무엇이었나요?'},
+  {type:'interactive', kind:'speak', name:'인터랙티브 — 소리 내어 말하기', t:'방금 배운 것을 입으로 말해보세요'},
   {type:'interactive', kind:'write', name:'인터랙티브 — 글쓰기', t:'오늘 배운 것을 한 문장으로 적어보세요', ph:'오늘 나는 …라는 걸 알았다.'},
+  {type:'interactive', kind:'play',  name:'인터랙티브 — PLAY 워크시트', t:'워크시트를 내려받아, 오늘 밤 따라 써보세요'},
   {type:'finish', name:'마무리 · 다시 듣기'},
 ];
 
@@ -465,36 +482,136 @@ const PEER_WRITES = [
   {n:'🦉 바운더리 코치', text:'오늘 나는, 끝점을 한 문장으로 줄이는 법을 배웠다.'},
   {n:'🐢 기록 코치', text:'내일 아침엔 키 씬부터 다시 그려봐야지.'},
 ];
+const PEER_NOTES = {
+  read: [
+    {n:'🦉 바운더리 코치', text:'"경계에서 시작된다"에 밑줄 쳤어요.'},
+    {n:'🐢 기록 코치', text:'네 번째 문단, 두 번째 읽는 중이에요.'},
+  ],
+  quiz: [
+    {n:'🦉 바운더리 코치', text:'저는 2번이요 — 멈춰야 보이니까요.'},
+    {n:'🐢 기록 코치', text:'고민하다가 2번 골랐어요.'},
+  ],
+  speak: [
+    {n:'🦉 바운더리 코치', text:'지금 소리 내어 말하는 중이에요…'},
+    {n:'🐢 기록 코치', text:'두 번 말했더니 진짜 제 것이 됐어요.'},
+  ],
+  play: [
+    {n:'🦉 바운더리 코치', text:'내려받았어요 — 오늘 밤에 조용히 써볼게요.'},
+    {n:'🐢 기록 코치', text:'저는 프린트해서 책상에 붙여뒀어요.'},
+  ],
+};
+const AO_TEXT = {
+  draw:'정답은 없어요. 손 가는 대로 조금만 그리면 이어서 들을 수 있어요.',
+  write:'한 문장이면 충분해요. 솔직한 문장이 제일 좋아요.',
+  read:'문장을 누르면 밑줄이 쳐져요. 끝까지 읽어야 다음이 열려요.',
+  quiz:'방금 들은 이야기에서 나왔어요. 하나만 골라보세요.',
+  speak:'눈으로만 넘기지 말고, 버튼을 꾹 누른 채 소리 내어 말해보세요. 말로 꺼내야 내 것이 돼요.',
+  play:'내려받아 두고, 오늘 밤 조용히 따라 써보세요.',
+};
+const AO_HINT = {
+  draw:'조금이라도 그리면 완료돼요',
+  write:'한 문장을 적으면 완료돼요',
+  read:'끝까지 읽고 밑줄을 1곳 이상 치면 완료돼요',
+  quiz:'정답을 고르면 완료돼요',
+  speak:'3초 이상 꾹 누르고 말하면 완료돼요',
+  play:'워크시트를 내려받으면 완료돼요',
+};
+const READ_TEXT = [
+  '일은 해야 할 것들의 목록이 아니라, 하지 않을 것들의 <b>경계</b>에서 시작됩니다.',
+  '우리는 늘 더하는 쪽으로 달립니다. 할 일을 더하고, 목표를 더하고, 채널을 더합니다. 그런데 이상하게, 더할수록 방향은 흐려집니다.',
+  '전략이란 결국 멈춤의 기술입니다. 무엇을 하지 않을지 정하는 순간, 남은 것들이 또렷해집니다.',
+  '오늘 하루를 떠올려 보세요. 가장 오래 붙잡고 있던 일이, 정말 가장 중요한 일이었나요?',
+  '바운더리는 나를 가두는 벽이 아니라, 내 힘이 새어나가지 않게 하는 그릇입니다.',
+  '이제 한 문장만 남기면 됩니다. "나는 __을 하지 않기로 했다." 그 문장이 3개월 전략의 첫 줄이 됩니다.',
+];
+const QUIZ = { q:'방금 이야기에서, 전략의 시작은 무엇이라고 했나요?',
+  opts:['더 많이 하는 것','하지 않을 것을 정하는 것','더 빨리 하는 것','남들처럼 하는 것'], ans:1 };
+
 function showInteractive(b){
   $('aoLabel').textContent = `${bi+1}/${BLOCKS.length} · ${b.name}`;
   $('aoTitle').textContent = b.t;
-  $('aoText').textContent = b.kind==='draw'
-    ? '정답은 없어요. 손 가는 대로 조금만 그리면 이어서 들을 수 있어요.'
-    : '한 문장이면 충분해요. 솔직한 문장이 제일 좋아요.';
-  const task = b.kind==='draw'
-    ? `<div class="padwrap"><canvas id="pad"></canvas></div>
+  $('aoText').textContent = AO_TEXT[b.kind] || '';
+  let task = '';
+  if(b.kind==='draw'){
+    task = `<div class="padwrap"><canvas id="pad"></canvas></div>
        <div class="colors" id="colors">
          <button class="sel" style="background:#F26D9C"></button><button style="background:#3182F6"></button>
          <button style="background:#46D5B2"></button><button style="background:#F2C14E"></button><button style="background:#2B2B33"></button>
-       </div>`
-    : `<textarea class="ao-ta" id="aoTa" placeholder="${b.ph}"></textarea>`;
-  const src = b.kind==='draw' ? PEER_DRAWS : PEER_WRITES;
-  const peers = src.map((pr,i)=> b.kind==='draw'
-    ? `<div class="peer-card"><div class="pc-name">${pr.n}<span class="pc-live"></span></div><svg viewBox="0 0 158 52" class="pc-svg"><path d="${pr.d}" fill="none" stroke="${pr.c}" stroke-width="5" stroke-linecap="round" style="animation-delay:${i*1.4}s"/></svg></div>`
-    : `<div class="peer-card"><div class="pc-name">${pr.n}<span class="pc-live"></span></div><p class="pc-text" data-full="${pr.text}"></p></div>`
+       </div>`;
+  } else if(b.kind==='write'){
+    task = `<textarea class="ao-ta" id="aoTa" placeholder="${b.ph}"></textarea>`;
+  } else if(b.kind==='read'){
+    task = `<div class="reader" id="reader">` +
+      READ_TEXT.map((s,i)=>`<p class="sent${i===2?' friend-ul':''}" data-i="${i}">${s}${i===2?'<span class="ful">🐢 기록 코치가 밑줄 친 문장이에요</span>':''}</p>`).join('') +
+      `<p style="text-align:center;color:#B0A793;font-size:.74rem;margin-top:16px">— 여기까지 —</p></div>`;
+  } else if(b.kind==='quiz'){
+    task = `<div class="quizbox"><div class="quiz-q">✎ ${QUIZ.q}</div><div class="qopts" id="qopts">` +
+      QUIZ.opts.map((o,i)=>`<button class="qopt" data-i="${i}">${i+1}. ${o}</button>`).join('') + `</div></div>`;
+  } else if(b.kind==='speak'){
+    task = `<div class="say"><div class="line">“나는 <b>하지 않을 것</b>을 정하는 데서<br>전략을 시작한다.”</div>
+      <button class="holdbtn" id="holdBtn"><span class="fill" id="holdFill"></span><span id="holdLabel">🎤 꾹 누르고 소리 내어 말하기</span></button></div>`;
+  } else if(b.kind==='play'){
+    task = `<div class="say"><div class="line" style="font-size:.95rem">PLAY. 나에게 ‘일’은 어떤 감정이었나?<br><span style="font-size:.78rem;color:#7A7264">인쇄해서 책상 위에 두고, 자기 전에 한 줄씩 채워보세요.</span></div>
+      <button class="pbtn" id="wsBtn">⬇ 워크시트 내려받기 (PNG)</button></div>`;
+  }
+  const peers = (b.kind==='draw'
+    ? PEER_DRAWS.map((pr,i)=>`<div class="peer-card"><div class="pc-name">${pr.n}<span class="pc-live"></span></div><svg viewBox="0 0 158 52" class="pc-svg"><path d="${pr.d}" fill="none" stroke="${pr.c}" stroke-width="5" stroke-linecap="round" style="animation-delay:${i*1.4}s"/></svg></div>`)
+    : (b.kind==='write' ? PEER_WRITES : (PEER_NOTES[b.kind] || [])).map(pr=>`<div class="peer-card"><div class="pc-name">${pr.n}<span class="pc-live"></span></div><p class="pc-text" data-full="${pr.text}"></p></div>`)
   ).join('');
   $('aoBody').innerHTML = `<div class="ao-grid"><div>${task}</div><div class="ao-peers"><div class="pc-cap">👀 지금 각자 하는 중</div>${peers}</div></div>`;
   const h = $('aoHint');
-  h.textContent = b.kind==='draw' ? '조금이라도 그리면 완료돼요' : '한 문장을 적으면 완료돼요';
+  h.textContent = AO_HINT[b.kind] || '';
   h.classList.remove('ready');
   $('aoDone').disabled = true;
   $('actOverlay').classList.add('show');
+  const ok = msg => { $('aoDone').disabled = false; h.textContent = msg; h.classList.add('ready'); };
+
   if(b.kind==='draw') setTimeout(initPad, 60);
-  else{
+  if(b.kind==='write'){
     const ta = $('aoTa');
     setTimeout(()=>ta.focus(), 60);
-    ta.addEventListener('input', ()=>{
-      if(ta.value.trim().length >= 8){ $('aoDone').disabled = false; h.textContent = '좋아요! 완료할 수 있어요'; h.classList.add('ready'); }
+    ta.addEventListener('input', ()=>{ if(ta.value.trim().length >= 8) ok('좋아요! 완료할 수 있어요'); });
+  }
+  if(b.kind==='read'){
+    const rd = $('reader'); let ul=false, bottom=false;
+    const check = ()=>{ if(ul && bottom) ok('밑줄이 남았어요 — 완료할 수 있어요'); };
+    rd.querySelectorAll('p.sent').forEach(p=>p.addEventListener('click', ()=>{
+      p.classList.toggle('my-ul'); ul = !!rd.querySelector('.my-ul'); check();
+    }));
+    rd.addEventListener('scroll', ()=>{ if(rd.scrollTop + rd.clientHeight >= rd.scrollHeight - 8){ bottom = true; check(); } });
+  }
+  if(b.kind==='quiz'){
+    document.querySelectorAll('.qopt').forEach(btn=>btn.addEventListener('click', ()=>{
+      if(+btn.dataset.i === QUIZ.ans){
+        document.querySelectorAll('.qopt').forEach(x=>x.classList.remove('bad'));
+        btn.classList.add('good'); ok('정답! 완료할 수 있어요');
+      } else { btn.classList.add('bad'); toast('다시 한 번 — 방금 이야기를 떠올려 보세요'); }
+    }));
+  }
+  if(b.kind==='speak'){
+    const btn=$('holdBtn'), fill=$('holdFill'), lab=$('holdLabel');
+    let t=null, p=0, held=false;
+    const startH = e => { if(held) return; e.preventDefault();
+      t = setInterval(()=>{ p += 100/30; fill.style.width = Math.min(100,p)+'%';
+        if(p >= 100){ clearInterval(t); held = true; lab.textContent = '말했어요 ✓'; ok('목소리가 남았어요 — 완료할 수 있어요'); }
+      }, 100); };
+    const endH = ()=>{ if(held) return; clearInterval(t); p = 0; fill.style.width = '0'; };
+    btn.addEventListener('mousedown', startH); btn.addEventListener('touchstart', startH);
+    ['mouseup','mouseleave','touchend'].forEach(ev=>btn.addEventListener(ev, endH));
+  }
+  if(b.kind==='play'){
+    $('wsBtn').addEventListener('click', ()=>{
+      const c = document.createElement('canvas'); c.width = 800; c.height = 1000;
+      const x = c.getContext('2d');
+      x.fillStyle = '#FFF9F1'; x.fillRect(0,0,800,1000);
+      x.strokeStyle = '#17171C'; x.lineWidth = 6; x.strokeRect(20,20,760,960);
+      x.fillStyle = '#17171C'; x.font = 'bold 38px sans-serif'; x.fillText('PLAY. 나에게 일은 어떤 감정이었나?', 50, 100);
+      x.font = '22px sans-serif'; x.fillStyle = '#7A7264'; x.fillText('일의 교과서 · 전략 설정 워크시트', 50, 142);
+      x.strokeStyle = '#C9BFAE'; x.lineWidth = 2;
+      for(let y = 240; y < 940; y += 70){ x.beginPath(); x.moveTo(50,y); x.lineTo(750,y); x.stroke(); }
+      const a = document.createElement('a'); a.href = c.toDataURL('image/png'); a.download = 'PLAY-일-회고.png'; a.click();
+      $('wsBtn').textContent = '내려받았어요 ✓';
+      ok('책상 위에 붙여두면 최고예요 — 완료할 수 있어요');
     });
   }
   document.querySelectorAll('.pc-text').forEach((el,i)=>{
@@ -528,9 +645,17 @@ function initPad(){
     btn.classList.add('sel'); ctx.strokeStyle = btn.style.background;
   }));
 }
+const DONE_TOAST = {
+  draw:'그림이 남았어요 — 코치들도 볼 수 있어요',
+  write:'문장이 남았어요 — 코치들도 볼 수 있어요',
+  read:'밑줄이 남았어요 — 코치들도 볼 수 있어요',
+  quiz:'정답! 흐름이 이어져요',
+  speak:'목소리로 말한 건 진짜 내 것이 돼요',
+  play:'워크시트가 저장됐어요 — 오늘 밤에 만나요',
+};
 $('aoDone').addEventListener('click', ()=>{
   $('actOverlay').classList.remove('show');
-  toast(BLOCKS[bi].kind==='draw' ? '그림이 남았어요 — 코치들도 볼 수 있어요' : '문장이 남았어요 — 코치들도 볼 수 있어요');
+  toast(DONE_TOAST[BLOCKS[bi].kind] || '기록이 남았어요');
   nextBlock();
 });
 
