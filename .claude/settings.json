@@ -1,0 +1,26 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "exit 0"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if echo \"$CLAUDE_TOOL_INPUT\" | grep -qE '(rm[[:space:]]+(-[a-zA-Z]*[rR][a-zA-Z]*f|-[a-zA-Z]*f[a-zA-Z]*[rR]|-[rR][[:space:]]+-f|-f[[:space:]]+-[rR]|--recursive|--force))|(find[[:space:]].*-delete)|(truncate[[:space:]]+-s[[:space:]]*0)|(git[[:space:]]+push[[:space:]]+(-f|--force)([[:space:]]|$))|(git[[:space:]]+reset[[:space:]]+--hard)|(DROP[[:space:]]+TABLE)'; then echo 'BLOCKED: 위험할 수 있는 명령(best-effort 가드 — 보안 경계가 아님). 의도한 것이면 직접 실행하세요.' >&2; exit 1; fi"
+          }
+        ]
+      }
+    ]
+  }
+}

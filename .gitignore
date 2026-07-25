@@ -7,3 +7,17 @@ game/
 assets/char-retro.png
 assets/char-line.png
 assets/char-story.png
+.superpowers/
+
+# 생각구독 76호 유료 원고를 담고 있어 공개 배포에서 제외한다
+reader-prototype.html
+phases/reader-*/
+
+# 하네스 실행 산출물
+.harness.lock
+phases/*/harness.log
+__pycache__/
+.claude/settings.local.json
+
+# 포스터·정적 아트용 선택 스킬 — 폰트 5.5MB, 이 레포에선 안 씀 (로컬에는 있음)
+.claude/skills/canvas-design/
