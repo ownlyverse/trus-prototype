@@ -97,6 +97,25 @@ a{color:inherit;text-decoration:none}
 .mode .go{display:inline-block; margin-top:14px; font-size:.8rem; font-weight:800; color:var(--accent-d)}
 .mode.study .go{color:#1E62C4}
 
+/* 초안 목업 — 모드 진입 크게 */
+.mode-stage{min-height:calc(100vh - 62px); display:flex; flex-direction:column; justify-content:center;
+  align-items:center; padding:56px 0 44px}
+.ms-h{text-align:center; margin-bottom:40px}
+.ms-sign{display:inline-flex; align-items:center; gap:9px; padding:9px 18px; border-radius:12px; margin-bottom:22px;
+  background:rgba(23,19,31,.82); border:2px solid #3E3155; color:#FFE6F0; font-size:.85rem;
+  box-shadow:0 3px 0 rgba(0,0,0,.45), 0 0 22px rgba(242,109,156,.28)}
+.ms-h h1{font-size:clamp(1.8rem,4.4vw,2.8rem); color:#FFE6F0; line-height:1.3;
+  text-shadow:0 0 22px rgba(242,109,156,.4)}
+.ms-sub{margin-top:12px; font-size:.92rem; color:#B7AACB}
+.mode-grid.big{width:100%; max-width:860px; gap:24px}
+.mode-grid.big .mode{padding:38px 34px 32px}
+.mode-grid.big .tag{font-size:.78rem; padding:7px 14px; margin-bottom:18px}
+.mode-grid.big h3{font-size:1.5rem; margin-bottom:10px}
+.mode-grid.big p{font-size:.98rem}
+.mode-grid.big .go{font-size:.95rem; margin-top:22px}
+.ms-cross{margin-top:38px; font-size:.9rem; font-weight:700; color:#D8CFE8}
+.ms-cross:hover{color:#fff; text-decoration:underline}
+
 /* 크로스링크 — 생각구독 (화이트 에디토리얼 미니) */
 .cross{margin:56px 0; border-radius:18px; padding:44px 36px; background:var(--paper-ed); color:var(--ink-ed);
   border:3px solid #17171C; box-shadow:5px 5px 0 rgba(0,0,0,.4);
@@ -173,6 +192,35 @@ a{color:inherit;text-decoration:none}
 
 <main class="stage wrap">
 
+  <!-- ── 초안 목업: 모드 진입만 크게 ── -->
+  <section class="mode-stage">
+    <div class="ms-h">
+      <p class="ms-sign pxfont">⛲ 트루스월드 · 프로토타입</p>
+      <h1 class="pxfont">모드로 들어가 보기</h1>
+      <p class="ms-sub">두 시점을 오가며 확인해요</p>
+    </div>
+    <div class="mode-grid big">
+      <a class="mode" href="lecture-upload-prototype.html">
+        <span class="tag pxfont">관리자 모드</span>
+        <h3>강의 스튜디오</h3>
+        <p>에피소드를 만들고 큐시트를 짜서 강의를 발행하는 제작실이에요.</p>
+        <span class="go">스튜디오 열기 →</span>
+      </a>
+      <a class="mode study" href="lecture-prototype.html">
+        <span class="tag pxfont">수강자 모드</span>
+        <h3>강의 화면</h3>
+        <p>코치 3명과 같이 듣는 라이브 강의실 — 수강자의 시점이에요.</p>
+        <span class="go">강의실 입장 →</span>
+      </a>
+    </div>
+    <a class="ms-cross" href="subscribe-prototype.html">생각구독 보러가기 →</a>
+  </section>
+
+</main>
+
+<!-- ── 이전 풀 원페이지 (초안 단계라 숨김 — 다시 살릴 때 주석 해제) ──
+<main-old class="stage wrap">
+
   <section class="hero">
     <p class="sign pxfont">⛲ 바운더리 타운</p>
     <h1 class="pxfont">강의를 완주하면<br><b>타운이 열려요</b></h1>
@@ -235,7 +283,8 @@ a{color:inherit;text-decoration:none}
     <button class="foot-join" onclick="openAuth('signup')">통합회원 가입</button>
   </footer>
 
-</main>
+</main-old>
+-->
 
 <!-- 통합 auth 모달 (공용 블록 — index/subscribe와 동일) -->
 <div class="auth-ovl" id="authOvl" onclick="if(event.target===this)closeAuth()">

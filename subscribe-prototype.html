@@ -117,6 +117,23 @@ a{color:inherit;text-decoration:none}
 .mode p{font-size:.88rem; color:var(--sub)}
 .mode .go{display:inline-block; margin-top:16px; font-size:.86rem; font-weight:800; color:var(--blue-d)}
 
+/* 초안 목업 — 모드 진입 크게 */
+.mode-stage{min-height:calc(100vh - 66px); display:flex; flex-direction:column; justify-content:center;
+  align-items:center; padding:56px 0 44px}
+.ms-h{text-align:center; margin-bottom:40px}
+.kicker-l{display:inline-block; font-size:.82rem; font-weight:800; color:var(--blue-d); background:var(--blue-soft);
+  padding:6px 12px; border-radius:8px; margin-bottom:18px}
+.ms-h h1{font-size:clamp(1.9rem,4.4vw,2.9rem); font-weight:900; letter-spacing:-0.03em; margin-bottom:12px}
+.ms-sub{font-size:.98rem; color:var(--sub)}
+.mode-grid.big{width:100%; max-width:860px; gap:22px}
+.mode-grid.big .mode{padding:38px 34px}
+.mode-grid.big .tag{font-size:.8rem; padding:6px 13px; margin-bottom:18px}
+.mode-grid.big h3{font-size:1.5rem; margin-bottom:10px}
+.mode-grid.big p{font-size:.98rem}
+.mode-grid.big .go{font-size:.95rem; margin-top:22px}
+.ms-cross{margin-top:38px; font-size:.9rem; font-weight:700; color:var(--sub)}
+.ms-cross:hover{color:var(--ink); text-decoration:underline}
+
 /* 크로스링크 — 트루스월드 (밤 톤 미니) */
 .cross{position:relative; overflow:hidden; margin:60px 0; border-radius:18px; padding:44px 36px; color:#FFE6F0;
   background:linear-gradient(var(--night) 0%, var(--night-2) 100%)}
@@ -195,6 +212,35 @@ a{color:inherit;text-decoration:none}
 
 <main>
 
+  <!-- ── 초안 목업: 모드 진입만 크게 ── -->
+  <div class="wrap">
+    <section class="mode-stage">
+      <div class="ms-h">
+        <p class="kicker-l">윤소정의 생각구독 · 프로토타입</p>
+        <h1>모드로 들어가 보기</h1>
+        <p class="ms-sub">두 시점을 오가며 확인해요</p>
+      </div>
+      <div class="mode-grid big">
+        <a class="mode" href="ebook-editor-prototype.html">
+          <span class="tag">관리자 모드</span>
+          <h3>이북 편집기</h3>
+          <p>챕터를 쓰고 다듬어서 이번 달 책으로 발행하는 작업실이에요.</p>
+          <span class="go">편집기 열기 →</span>
+        </a>
+        <a class="mode" href="ebook-reader-prototype.html">
+          <span class="tag">구독자 모드</span>
+          <h3>이북 리더기</h3>
+          <p>도착한 책을 목차로 넘기며 읽는 구독자의 서재예요.</p>
+          <span class="go">리더기 열기 →</span>
+        </a>
+      </div>
+      <a class="ms-cross" href="world-prototype.html">트루스월드 보러가기 →</a>
+    </section>
+  </div>
+
+</main>
+
+<!-- ── 이전 풀 원페이지 (초안 단계라 숨김 — 다시 살릴 때 주석 해제) ──
   <div class="wrap">
     <section class="hero">
       <p class="kicker">매달 1권 발행</p>
@@ -336,8 +382,7 @@ a{color:inherit;text-decoration:none}
     </footer>
 
   </div>
-
-</main>
+-->
 
 <!-- 통합 auth 모달 (공용 블록 — index/world와 동일) -->
 <div class="auth-ovl" id="authOvl" onclick="if(event.target===this)closeAuth()">
