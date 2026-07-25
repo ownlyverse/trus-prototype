@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>이북 편집기 — 생각구독 관리자</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700;900&display=swap">
+<style>
+:root{
+  --paper:#FDFBF7; --ink:#1C1B18; --sub:#6E685D; --line:#E7E1D6;
+  --green:#2F5D50; --green-d:#24483E; --green-soft:#E7EFEA;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{font-family:"Pretendard Variable",Pretendard,-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+  background:var(--paper); color:var(--ink); letter-spacing:-0.01em; word-break:keep-all;
+  display:flex; flex-direction:column}
+button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
+a{color:inherit;text-decoration:none}
+.serif{font-family:'Noto Serif KR',Georgia,serif; letter-spacing:-0.02em}
+:focus-visible{outline:3px solid #3182F6; outline-offset:2px}
+
+/* 상단바 */
+.bar{display:flex; align-items:center; gap:12px; padding:11px 18px; background:#fff;
+  border-bottom:1px solid var(--line); flex-shrink:0}
+.back{font-size:.88rem; font-weight:700; color:var(--sub); padding:8px 10px; border-radius:9px}
+.back:hover{background:#F2EEE6; color:var(--ink)}
+.bar .book{display:flex; align-items:center; gap:10px; margin:0 auto; min-width:0}
+.bar .bt{font-size:.98rem; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.bar .tag{font-size:.7rem; font-weight:800; padding:4px 10px; border-radius:7px; background:var(--green-soft);
+  color:var(--green-d); flex-shrink:0}
+.bar .stat{font-size:.78rem; color:var(--sub); white-space:nowrap}
+.btn-save{font-size:.84rem; font-weight:800; padding:9px 15px; border-radius:10px; border:1.5px solid var(--line)}
+.btn-save:hover{border-color:var(--ink)}
+.btn-pub{font-size:.84rem; font-weight:800; color:#fff; background:var(--green); padding:9px 16px; border-radius:10px;
+  transition:background .12s}
+.btn-pub:hover{background:var(--green-d)}
+
+/* 본문 레이아웃 */
+.body{display:flex; flex:1; min-height:0}
+.side{width:250px; flex-shrink:0; border-right:1px solid var(--line); background:#FBF8F1;
+  display:flex; flex-direction:column; overflow-y:auto}
+.side .sh{font-size:.72rem; font-weight:800; color:var(--sub); letter-spacing:.08em; padding:18px 18px 10px}
+.chap{display:flex; align-items:baseline; gap:9px; width:100%; text-align:left; padding:12px 18px;
+  font-size:.88rem; border-left:3px solid transparent}
+.chap:hover{background:#F2EEE6}
+.chap.on{background:#fff; border-left-color:var(--green); font-weight:700}
+.chap .no{font-size:.7rem; color:var(--green); font-weight:700; flex-shrink:0}
+.chap .t{overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.add-chap{margin:10px 14px 20px; padding:11px; font-size:.84rem; font-weight:700; color:var(--sub);
+  border:1.5px dashed var(--line); border-radius:11px}
+.add-chap:hover{color:var(--green-d); border-color:var(--green)}
+
+/* 에디터 */
+.editor{flex:1; overflow-y:auto; padding:42px 28px 90px}
+.sheet{max-width:680px; margin:0 auto}
+.title-in{width:100%; font-family:'Noto Serif KR',Georgia,serif; font-size:1.7rem; font-weight:900; color:var(--ink);
+  border:none; background:none; letter-spacing:-0.02em; padding:6px 2px 14px; border-bottom:1px solid var(--line);
+  margin-bottom:24px}
+.title-in:focus{outline:none; border-bottom-color:var(--green)}
+.prose{min-height:52vh; font-family:'Noto Serif KR',Georgia,serif; font-size:1.02rem; line-height:1.95; color:#2A2822;
+  padding:2px}
+.prose:focus{outline:none}
+.prose p{margin-bottom:1.2em}
+.hint{margin-top:26px; font-size:.78rem; color:var(--sub)}
+
+/* 토스트 */
+.toast{position:fixed; left:50%; bottom:30px; transform:translateX(-50%) translateY(14px); z-index:120;
+  background:rgba(17,17,17,.94); color:#fff; font-size:.88rem; font-weight:600; line-height:1.5;
+  padding:13px 20px; border-radius:12px; max-width:min(420px,88vw); text-align:center;
+  opacity:0; visibility:hidden; transition:opacity .2s, transform .2s}
+.toast.on{opacity:1; visibility:visible; transform:translateX(-50%) translateY(0)}
+
+@media (prefers-reduced-motion:reduce){ *{transition:none!important} }
+/* 모바일 (기본 규칙 뒤!) */
+@media (max-width:760px){
+  .side{position:fixed; z-index:60; top:0; bottom:0; left:0; transform:translateX(-100%); transition:transform .2s;
+    box-shadow:12px 0 30px rgba(0,0,0,.08)}
+  .side.open{transform:none}
+  .bar .stat{display:none}
+  .m-toc{display:inline-flex!important}
+}
+.m-toc{display:none; font-size:.88rem; font-weight:700; padding:8px 10px; border-radius:9px; color:var(--sub)}
+</style>
+</head>
+<body>
+
+<header class="bar">
+  <a class="back" href="subscribe-prototype.html">← 생각구독</a>
+  <button class="m-toc" onclick="document.querySelector('.side').classList.toggle('open')">☰ 챕터</button>
+  <div class="book">
+    <span class="bt serif" id="bookTitle">경계 세우는 연습</span>
+    <span class="tag">관리자 모드</span>
+  </div>
+  <span class="stat" id="stat" role="status" aria-live="polite">임시저장됨 · 방금</span>
+  <button class="btn-save" onclick="saveMock()">저장</button>
+  <button class="btn-pub" onclick="publishMock()">발행하기</button>
+</header>
+
+<div class="body">
+  <nav class="side" aria-label="챕터 목록">
+    <p class="sh">챕터</p>
+    <div id="chapList"></div>
+    <button class="add-chap" onclick="addChapter()">+ 새 챕터</button>
+  </nav>
+
+  <main class="editor">
+    <div class="sheet">
+      <input class="title-in" id="chapTitle" aria-label="챕터 제목" placeholder="챕터 제목">
+      <div class="prose" id="prose" contenteditable="true" aria-label="본문 편집 영역"></div>
+      <p class="hint">프로토타입 — 내용은 이 화면에서만 유지되고 새로고침하면 처음으로 돌아가요.</p>
+    </div>
+  </main>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+// ── 목데이터 (리더기와 동일한 BOOK — 두 파일에 복붙 공유)
+const BOOK = {
+  title: '경계 세우는 연습',
+  subtitle: '일과 관계에서 나를 지키는 법',
+  chapters: [
+    { title: '1. 거절에도 예의가 있다',
+      body: [
+        '거절을 미루는 것은 배려가 아니라 유예다. 대답을 미루는 동안 상대는 계획을 세우지 못하고, 나는 마음의 빚을 키운다. 상대의 시간을 아끼는 가장 정중한 방법은, 빠르고 분명하게 말하는 것이다.',
+        '분명한 거절에는 세 가지가 담긴다. 요청을 이해했다는 확인, 들어줄 수 없다는 결론, 그리고 가능하다면 대안. 이 셋이 갖춰지면 거절은 관계를 상하게 하지 않는다. 오히려 다음 부탁을 쉽게 만든다.',
+        '거절이 어려운 이유는 대개 상대 때문이 아니라 나 때문이다. 좋은 사람으로 남고 싶은 마음이, 좋은 관계를 만드는 일을 방해한다.',
+      ] },
+    { title: '2. 경계는 벽이 아니라 문이다',
+      body: [
+        '경계를 세운다는 말은 관계를 끊는다는 뜻이 아니다. 담장 없는 집에는 손님이 오지 않는다. 어디까지가 마당이고 어디부터가 거실인지 모르기 때문이다. 문이 있는 집이 손님을 더 잘 맞이하듯, 경계가 있는 사람이 관계를 더 오래 지킨다.',
+        '경계는 선언이 아니라 반복으로 세워진다. 한 번의 큰 선언보다, 작은 요청에 일관되게 반응하는 편이 낫다. "퇴근 후에는 답장이 늦어요"를 열 번 지키는 것이, "연락하지 마세요"를 한 번 말하는 것보다 강하다.',
+      ] },
+    { title: '3. 관계를 남기는 말투',
+      body: [
+        '같은 거절도 말투에 따라 관계를 남기기도, 끝내기도 한다. 원칙은 하나다. 내용은 단호하게, 형식은 다정하게.',
+        '단호한 내용이 없으면 거절이 아니라 흥정이 되고, 다정한 형식이 없으면 거절이 아니라 단절이 된다. 이 둘은 반대말이 아니라 한 문장의 앞뒤다.',
+        '연습할 문장은 짧다. "마음 써줘서 고마워요. 이번에는 어려워요." 이 두 문장 사이에 변명을 넣지 않는 것이 연습의 전부다.',
+      ] },
+  ],
+};
+
+// ── 상태 (메모리 전용)
+let cur = 0;
+let dirtyTimer = null;
+const $ = id => document.getElementById(id);
+
+function renderList(){
+  $('chapList').innerHTML = BOOK.chapters.map((c, i) =>
+    `<button class="chap${i===cur?' on':''}" onclick="switchChap(${i})">
+       <span class="no">${String(i+1).padStart(2,'0')}</span><span class="t">${c.title}</span>
+     </button>`).join('');
+}
+function load(i){
+  cur = i;
+  $('chapTitle').value = BOOK.chapters[i].title;
+  $('prose').innerHTML = BOOK.chapters[i].body.map(p=>`<p>${p}</p>`).join('');
+  renderList();
+}
+function stash(){
+  BOOK.chapters[cur].title = $('chapTitle').value;
+  BOOK.chapters[cur].body = [...$('prose').querySelectorAll('p')].map(p=>p.textContent).filter(t=>t.trim());
+  if(!BOOK.chapters[cur].body.length) BOOK.chapters[cur].body = [$('prose').textContent.trim()];
+}
+function switchChap(i){
+  if(i===cur) return;
+  stash(); load(i);
+  document.querySelector('.side').classList.remove('open');
+}
+function addChapter(){
+  stash();
+  BOOK.chapters.push({ title: `${BOOK.chapters.length+1}. 새 챕터`, body: [''] });
+  load(BOOK.chapters.length-1);
+  $('chapTitle').select();
+  toast('새 챕터를 추가했어요');
+}
+function markDirty(){
+  $('stat').textContent = '수정 중…';
+  clearTimeout(dirtyTimer);
+  dirtyTimer = setTimeout(()=>{ stash(); renderList(); $('stat').textContent = '임시저장됨 · 방금'; }, 1200);
+}
+function saveMock(){ stash(); renderList(); $('stat').textContent='임시저장됨 · 방금'; toast('저장했어요 (목)'); }
+function publishMock(){ stash(); renderList(); toast('발행했어요! 구독자에게 이번 주 글로 나가요 (목)'); }
+function toast(msg){
+  const t = $('toast');
+  t.textContent = msg; t.classList.add('on');
+  clearTimeout(t._h); t._h = setTimeout(()=>t.classList.remove('on'), 2600);
+}
+
+$('chapTitle').addEventListener('input', markDirty);
+$('prose').addEventListener('input', markDirty);
+load(0);
+</script>
+</body>
+</html>
