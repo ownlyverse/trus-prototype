@@ -3253,16 +3253,19 @@ function renderSheets(){
       <div class="vidnote">${c.videoNote}</div>` : ``}
     ${c.sheets.map((s,i)=>sheetHTML(s,c,i===0)).join("")}
   `;
+  // 장 여는 말 카드를 고정 머리(#readHead)로 옮긴다.
+  // 반드시 #sheets 안에서 찾을 것 — 문서 전체로 찾으면 고정 자리에 있던 '이전 장' 카드가
+  // 먼저 잡혀 그걸 도로 넣고, 새 카드는 #sheets 에 남아 두 개가 된다.
+  const slot = $("#voiceSlot"), vc = $("#sheets").querySelector("#voiceCard");
+  if(slot) slot.replaceChildren(...(vc ? [vc] : []));
+
   wireVoice();
   renderHighlights();   // 저장된 하이라이트를 지면에 다시 입힌다(새로고침 복원)
 }
 
 function wireVoice(){
-  // 장 여는 말 카드는 고정 머리(#readHead)로 옮긴다 — 렌더될 때마다 다시 붙인다.
-  const slot = $("#voiceSlot"), vc = $("#voiceCard");
-  if(slot && vc) slot.replaceChildren(vc);
-
   const card = $("#voiceCard"), btn = $("#voicePlay"), au = $("#voiceAudio");
+  if(!card || !btn || !au) return;
   btn.onclick = ()=>{
     if(au.paused){ au.play().then(()=>{card.classList.add("playing"); btn.textContent="❚❚";})
       .catch(()=>toast("음성 파일을 찾지 못했습니다 (목업)")); }
