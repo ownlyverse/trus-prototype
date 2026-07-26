@@ -810,7 +810,12 @@ function endInteractive(){
   $('actOverlay').classList.remove('show');
   $('aoTimer').classList.remove('hot');
   if(actMet) toast(DONE_TOAST[b.kind] || '기록이 남았어요');
-  else { missed.push({kind:b.kind, t:b.t}); toast('시간 종료 — 이 활동은 강의가 끝난 뒤 마저 완료해야 해요'); }
+  else if(done) toast('시간 종료 — 이미 마친 강의라 보충 목록에 담지 않아요');
+  else {
+    // 목차로 되돌아와 같은 활동을 또 놓칠 수 있어요 — 보충은 한 번만 하면 돼요
+    if(!missed.some(m => m.kind === b.kind && m.t === b.t)) missed.push({kind:b.kind, t:b.t});
+    toast('시간 종료 — 이 활동은 강의가 끝난 뒤 마저 완료해야 해요');
+  }
   nextBlock();
 }
 
