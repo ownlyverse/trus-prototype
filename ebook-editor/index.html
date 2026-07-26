@@ -57,6 +57,11 @@ input,textarea{font:inherit;color:inherit}
 .tgl{font-size:.78rem; font-weight:700; padding:7px 10px; border-radius:8px; border:1.5px solid var(--line); background:#fff}
 .tgl:hover{border-color:var(--ink)}
 .tgl.on{background:var(--blue-soft); border-color:var(--blue-d); color:var(--blue-dd)}
+.segrow{display:flex; gap:5px; margin-top:6px}
+.segrow .tgl{flex:1; text-align:center; padding:7px 4px; justify-content:center; display:flex}
+.props-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:4px}
+.props-head .done{font-size:.74rem; font-weight:700; color:var(--sub); padding:5px 8px; border-radius:7px}
+.props-head .done:hover{background:#EFEDEA; color:var(--ink)}
 .cov-row{display:flex; align-items:center; gap:10px}
 .cov-thumb{width:52px; height:73px; border-radius:6px; border:1px solid var(--line); object-fit:cover; background:var(--canvas)}
 .cov-none{width:52px; height:73px; border-radius:6px; border:1.5px dashed var(--line); display:flex; align-items:center;
@@ -164,6 +169,14 @@ input,textarea{font:inherit;color:inherit}
   font-family:Georgia,"Times New Roman",serif; white-space:pre-line; min-height:1.2em}
 .bh-ko{font-size:.94rem; font-weight:700; color:var(--blue-dd); margin-top:8px; white-space:pre-line; min-height:1.4em}
 .bv{font-size:.96rem; line-height:2.05; text-align:center; white-space:pre-line; padding:14px 8px; color:#333; min-height:2em}
+/* 조판 모디파이어 — 발행 시 리더기에도 같은 클래스로 전달 (.bp/.bv 뒤에 둬서 우선) */
+.al-l{text-align:left}
+.al-c{text-align:center}
+.al-r{text-align:right}
+.lh-sm{line-height:1.6}
+.lh-lg{line-height:2.3}
+.ls-sm{letter-spacing:-.03em}
+.ls-lg{letter-spacing:.06em}
 .bd{text-align:center; color:#B9B4AB; font-size:.7rem; padding:12px 0; cursor:default}
 .blk.sel{outline:2px solid var(--blue-d); outline-offset:5px; border-radius:2px}
 .plabel{display:inline-block; font-size:.6rem; font-weight:800; letter-spacing:.12em; color:var(--blue-dd);
@@ -341,9 +354,9 @@ input,textarea{font:inherit;color:inherit}
   </main>
 
   <aside class="rside" aria-label="편집 패널">
-    <div class="ps">
+    <div class="ps" id="elPs">
       <p class="pt">요소</p>
-      <p class="hintp">누르면 선택한 블록 뒤에, 선택이 없으면 마지막 대지 끝에 들어갑니다.</p>
+      <p class="hintp">누르면 선택한 블록 뒤에, 선택이 없으면 마지막 대지 끝에 들어갑니다. 넣은 요소를 클릭하면 상세 설정으로 바뀝니다.</p>
       <div id="elements"></div>
     </div>
     <div class="ps" id="blkProps"></div>
@@ -627,6 +640,14 @@ function renderChapHead(){
   });
 }
 
+/* 블록 조판 클래스 (기본값이면 빈 문자열) — 편집 캔버스·발행 공용 */
+function fmtCls(b){
+  let c = '';
+  if(b.align === 'c') c += ' al-c'; else if(b.align === 'r') c += ' al-r';
+  if(b.lh === 's') c += ' lh-sm'; else if(b.lh === 'l') c += ' lh-lg';
+  if(b.ls === 's') c += ' ls-sm'; else if(b.ls === 'l') c += ' ls-lg';
+  return c;
+}
 function igapHTML(si, bi){
   return `<div class="igap"><button class="iplus" data-act="plus" data-si="${si}" data-bi="${bi}" aria-label="블록 추가">＋</button></div>`;
 }
@@ -642,14 +663,14 @@ function blkHTML(b, si, bi){
   </span>`;
   let body = '';
   if(b.t === 'p'){
-    body = `${(b.label || '').trim() ? `<span class="plabel">${escHtml(b.label)}</span>` : ''}<div class="bp" contenteditable="true" data-si="${si}" data-bi="${bi}" data-f="html" data-ph="내용 입력">${sanitizeHtml(b.html)}</div>`;
+    body = `${(b.label || '').trim() ? `<span class="plabel">${escHtml(b.label)}</span>` : ''}<div class="bp${fmtCls(b)}" contenteditable="true" data-si="${si}" data-bi="${bi}" data-f="html" data-ph="내용 입력">${sanitizeHtml(b.html)}</div>`;
   } else if(b.t === 'head'){
     body = `<div class="bh">
       <div class="bh-en" contenteditable="true" data-si="${si}" data-bi="${bi}" data-f="en" data-ph="ENGLISH COPY">${escHtml(b.en)}</div>
       <div class="bh-ko" contenteditable="true" data-si="${si}" data-bi="${bi}" data-f="ko" data-ph="한글 카피">${escHtml(b.ko)}</div>
     </div>`;
   } else if(b.t === 'verse'){
-    body = `<div class="bv" contenteditable="true" data-si="${si}" data-bi="${bi}" data-f="text" data-ph="인용·운문 입력">${escHtml(b.text)}</div>`;
+    body = `<div class="bv${fmtCls(b)}" contenteditable="true" data-si="${si}" data-bi="${bi}" data-f="text" data-ph="인용·운문 입력">${escHtml(b.text)}</div>`;
   } else if(b.t === 'divider'){
     body = `<div class="bd">◆</div>`;
   } else if(b.t === 'photo'){
@@ -817,15 +838,25 @@ function clearSel(){
 }
 const TYPE_NAME = { p:'문단', head:'헤드라인', verse:'인용·운문', photo:'사진', duo:'사진 두 장',
   video:'영상', divider:'구분선', split:'카피+사진', cover:'전면 사진', title:'표제지', toc:'목차' };
+function segRow(name, cur, opts){
+  return `<div class="segrow">${opts.map(([v, label]) =>
+    `<button class="tgl${cur === v ? ' on' : ''}" data-seg="${name}" data-v="${v}">${label}</button>`).join('')}</div>`;
+}
 function renderBlkProps(){
   const box = $('blkProps');
   const b = selBlock();
-  if(!b){
-    box.innerHTML = `<p class="pt">블록 속성</p><p class="hintp">지면에서 블록을 클릭하면 속성이 여기 표시됩니다.</p>`;
-    return;
-  }
+  /* 모드 전환: 선택 없음 → 요소 라이브러리 / 선택 → 상세 설정 */
+  $('elPs').style.display = b ? 'none' : '';
+  if(!b){ box.innerHTML = ''; box.style.display = 'none'; return; }
+  box.style.display = '';
   const { si, bi } = SEL;
-  let html = `<p class="pt">블록 속성 — ${TYPE_NAME[b.t] || b.t}</p>`;
+  let html = `<div class="props-head"><p class="pt">${TYPE_NAME[b.t] || b.t} 설정</p>
+    <button class="done" data-pact="done">완료 ✕</button></div>`;
+  if(b.t === 'p' || b.t === 'verse'){
+    html += `<p class="fl">정렬</p>` + segRow('align', b.align || 'l', [['l','왼쪽'], ['c','가운데'], ['r','오른쪽']]);
+    html += `<p class="fl">행간</p>` + segRow('lh', b.lh || 'm', [['s','좁게'], ['m','보통'], ['l','넓게']]);
+    html += `<p class="fl">자간</p>` + segRow('ls', b.ls || 'm', [['s','좁게'], ['m','보통'], ['l','넓게']]);
+  }
   if(b.t === 'p'){
     html += `<p class="fl">영문 레이블</p>
       <input type="text" id="ppLabel" value="${escHtml(b.label || '')}" placeholder="CAREER CHANGE">
@@ -860,11 +891,23 @@ function renderBlkProps(){
   if(lab) lab.addEventListener('input', e => { const blk = selBlock(); if(blk){ blk.label = e.target.value; markDirty(); } });
 }
 $('blkProps').addEventListener('click', e => {
+  const seg = e.target.closest('[data-seg]');
+  if(seg && SEL){
+    const b = selBlock();
+    if(b){
+      const key = seg.dataset.seg, v = seg.dataset.v;
+      b[key] = (key === 'align' && v === 'l') || (key !== 'align' && v === 'm') ? undefined : v;
+      if(b[key] === undefined) delete b[key];
+      markDirty(); renderSheets(); renderBlkProps();
+    }
+    return;
+  }
   const btn = e.target.closest('[data-pact]');
   if(!btn || !SEL) return;
   const b = selBlock(); if(!b) return;
   const { si, bi } = SEL;
   const act = btn.dataset.pact;
+  if(act === 'done'){ clearSel(); return; }
   if(act === 'img'){
     if(b.t === 'photo') pickImage({ kind:'photo', si, bi });
     else if(b.t === 'duo') pickImage({ kind:'duo', si, bi, slot:+btn.dataset.slot });
@@ -1193,8 +1236,10 @@ function toReaderBook(){
       const flushNormal = () => { if(blocks.length){ sheets.push({ no: pad2(++page), blocks }); blocks = []; } };
       s.blocks.forEach(b => {
         if(b.t === 'p'){
-          const html = sanitizeHtml(b.html);
+          let html = sanitizeHtml(b.html);
           if(!html.replace(/<br>/g, '').trim()) return;
+          const cls = fmtCls(b);
+          if(cls) html = `<span class="pfmt${cls}">${html}</span>`;
           const label = escHtml((b.label || '').trim());
           if(!run || label){ run = { t:'block', label, paras:[] }; blocks.push(run); }
           run.paras.push(html);
@@ -1205,7 +1250,12 @@ function toReaderBook(){
           if((b.en || '').trim() || (b.ko || '').trim())
             blocks.push({ t:'head', en:escHtml(b.en || ''), ko:escHtml(b.ko || '') });
         }
-        else if(b.t === 'verse'){ if((b.text || '').trim()) blocks.push({ t:'verse', text:escHtml(b.text) }); }
+        else if(b.t === 'verse'){
+          if((b.text || '').trim()){
+            const cls = fmtCls(b);
+            blocks.push({ t:'verse', text: cls ? `<span class="pfmt${cls}">${escHtml(b.text)}</span>` : escHtml(b.text) });
+          }
+        }
         else if(b.t === 'divider') blocks.push({ t:'verse', text:'◆' });
         else if(b.t === 'photo'){ if(b.src) blocks.push({ t:'photo', src:b.src, bleed:!!b.bleed, fill:!!b.fill }); }
         else if(b.t === 'duo'){ const ss = (b.srcs || []).filter(Boolean); if(ss.length) blocks.push({ t:'duo', srcs:ss }); }
