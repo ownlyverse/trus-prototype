@@ -69,7 +69,9 @@ python3 -m pytest scripts/ -q           # 하네스 스크립트 테스트
 이 파일은 생각구독 76호 **유료 원고 전문과 사진**을 담고 있어 공개되면 안 된다. 그런데 `.gitignore`에 넣으면 이력이 남지 않아 롤백이 불가능하다. 그래서 다음 방식으로 격리한다.
 
 - **`feat-reader-highlight` 브랜치에서만 추적한다.** 하네스가 step마다 커밋하므로 특정 step 상태로 되돌릴 수 있다.
-- **CRITICAL: `feat-reader-highlight`를 `main`에 머지하지 마라.** GitHub Pages가 `main`을 서빙하므로 머지하는 순간 유료 원고가 공개된다.
+- **CRITICAL: `feat-reader-highlight`를 원격에 푸시하지 마라.** 이 저장소는 공개다 — 브랜치를 올리는 순간 유료 원고가 GitHub에 그대로 노출된다. 이 브랜치는 로컬 전용이다.
+- **CRITICAL: `feat-reader-highlight`를 `main`에 머지하지 마라.** `main`은 GitHub Pages와 Railway로 배포되므로 머지하는 순간 유료 원고가 공개된다.
+- 공개할 것은 `ebook-reader/index.html` 하나다 — `scripts/build-demo-reader.mjs` 가 원고를 걷어내고 만들며, `scripts/check-demo-leak.mjs` 게이트를 통과해야 한다.
 - `main`에서 작업할 때 이 파일이 워킹트리에 있으면 **스테이징하지 마라.** `git add -A`를 쓰기 전에 `git status`로 확인한다.
 - 리더기 작업 결과를 `main`에 반영해야 할 일이 생기면, 파일을 옮기지 말고 사람에게 물어라.
 

@@ -166,14 +166,24 @@
      CSS 의사요소로만 그린다 — 외부 이미지·아이콘·SVG 없음. 메모 없는 조각엔 안 붙는다.
      ::after = 둥근 사각 본체, ::before = 아래쪽 꼬리. pointer-events:none 라 클릭은 span 이 받는다. */
   .hl.has-memo{position:relative}
-  .hl.has-memo::after{content:"";position:absolute;right:-4px;top:-0.9em;
-    width:13px;height:10px;box-sizing:border-box;
-    background:var(--paper);border:1.5px solid var(--ink);border-radius:3px;
+  /* 얇은 회색 윤곽 + 안쪽 짧은 두 줄. 본문을 방해하지 않게 연하게 둔다. */
+  .hl.has-memo::after{content:"";position:absolute;right:-3px;top:-1.05em;
+    width:14px;height:11px;box-sizing:border-box;border-radius:3px;
+    border:1px solid color-mix(in srgb, var(--ink-soft) 72%, transparent);
+    background:
+      linear-gradient(color-mix(in srgb, var(--ink-soft) 62%, transparent) 0 0) no-repeat 3px 3px / 8px 1px,
+      linear-gradient(color-mix(in srgb, var(--ink-soft) 62%, transparent) 0 0) no-repeat 3px 6px / 5px 1px,
+      var(--paper);
     pointer-events:none}
-  .hl.has-memo::before{content:"";position:absolute;right:2px;top:calc(-0.9em + 7px);
-    width:5px;height:5px;box-sizing:border-box;background:var(--paper);
-    border-right:1.5px solid var(--ink);border-bottom:1.5px solid var(--ink);
+  .hl.has-memo::before{content:"";position:absolute;right:3px;top:calc(-1.05em + 9px);
+    width:4px;height:4px;box-sizing:border-box;background:var(--paper);
+    border-right:1px solid color-mix(in srgb, var(--ink-soft) 72%, transparent);
+    border-bottom:1px solid color-mix(in srgb, var(--ink-soft) 72%, transparent);
     transform:rotate(45deg);pointer-events:none}
+  /* 말풍선은 13×10px 이라 그대로 두면 조준이 어렵다 — 눈에 안 보이는 큰 클릭 영역을 겹쳐 둔다.
+     .hl 안에 있으므로 클릭은 하이라이트가 받아 메모 모달이 열린다(텍스트가 없어 오프셋에 영향 없음). */
+  .hl.has-memo > .hl-hit{position:absolute;right:-11px;top:-1.6em;
+    width:31px;height:26px;cursor:pointer;background:transparent}
   /* 지면 본문은 드래그 선택 영역이라 I빔, 하이라이트 위에서는 pointer(rules.md) */
   .mbody p, .letter p, .verse{cursor:text}
   .hello{font-size:1.12rem;font-weight:800;margin:0 0 22px}
@@ -366,14 +376,14 @@
     box-sizing:border-box}
   .rtb-badge[hidden]{display:none}
 
-  /* 우측 공유 패널 — 딤 없음(지면 계속 읽기 가능). 상단바가 열려 있으면 그 아래로 내려 앉는다.
+  /* 좌측 공유 패널 — 딤 없음(지면 계속 읽기 가능). 구글 닥스처럼 왼쪽에서 밀려 나온다.
      컨테이너는 #rpanel 하나뿐 — kind(목차·검색·독서노트·보기설정)는 내용만 갈아 끼운다. */
-  .rpanel{position:fixed;right:0;top:0;bottom:0;z-index:90;width:min(380px,88vw);
-    display:flex;flex-direction:column;background:var(--panel);border-left:1px solid var(--panel-line);
-    transform:translateX(100%);transition:transform .28s cubic-bezier(.2,.7,.2,1),top .28s}
+  .rpanel{position:fixed;left:0;top:0;bottom:0;z-index:90;width:min(380px,88vw);
+    display:flex;flex-direction:column;background:var(--panel);border-right:1px solid var(--panel-line);
+    transform:translateX(-100%);transition:transform .28s cubic-bezier(.2,.7,.2,1),top .28s}
   body.rtop-open .rpanel{top:53px}
   body.rpanel-open .rpanel{transform:translateX(0);
-    box-shadow:-18px 0 46px -30px rgba(50,40,20,.4)}
+    box-shadow:18px 0 46px -30px rgba(50,40,20,.4)}
   .rpanel-head{display:flex;align-items:center;gap:10px;padding:14px 16px;flex:none;
     border-bottom:1px solid var(--panel-line)}
   .rpanel-title{flex:1;font-size:.9rem;font-weight:800;letter-spacing:.02em;color:var(--panel-ink)}
@@ -398,6 +408,84 @@
   /* 전체 화면 — 챕터 레일·발행 헤더를 숨겨 지면만 남긴다(상단바는 rtop-open 해제로 숨음). */
   body.reader-full .chaprail,
   body.reader-full .bookhead{display:none}
+
+  /* ═══════════ 집중 기본값 ═══════════
+     지면 위에 다섯 겹(서비스 탭바·내 서재·발행 헤더·챕터 레일·리더 상단바)이 쌓여
+     지면이 화면 아래로 밀려났다. 기본을 집중 상태로 두고, 그 다섯의 진입점은
+     좌상단 런처(#rlaunch) 한 곳으로 모은다. */
+  body.lean .topbar,
+  body.lean #pane-read > .chaprail{display:none}
+  /* 리더 상단바는 폐지 — 목차·본문검색·독서노트·보기설정이 전부 좌상단 런처로 들어갔다.
+     마크업과 바인딩은 남겨 두되(패널 API가 참조한다) 화면에서는 늘 뺀다. */
+  .rtop{display:none}
+  /* 내 서재는 팝업으로 뺐다 — 원래 자리(지면 위)에서는 항상 숨는다. */
+  #pane-read > .shelf{display:none}
+  /* 전체 화면·책갈피는 당분간 쓰지 않는다 — 코드는 두고 화면에서만 뺀다. */
+  #rtFull,#rtMark{display:none}
+
+  /* 지면 = 구글 닥스 대지(Letter 8.5×11in @96dpi = 816×1056). 배경 위에 종이 한 장.
+     집중 여부와 무관하게 늘 같은 크기다 — lean 에만 걸면 팝업·쓰기 화면에서 규칙이 사라진다. */
+  body.lean main{padding-top:clamp(18px,3.4vh,34px)}
+  .room .sheets-wrap{max-width:816px}
+  .room .sheet{min-height:1056px;
+    border:1px solid color-mix(in srgb, var(--panel-line) 70%, transparent);
+    box-shadow:0 1px 3px rgba(60,64,67,.16),0 4px 14px -8px rgba(60,64,67,.22)}
+  @media (max-width:900px){ .room .sheet{min-height:auto} }
+
+  /* 이번 호 머리 + 장 여는 말 — 상시 노출이고 스크롤해도 위에 붙어 있는다.
+     지면이 이 아래로 흘러가므로 배경을 깔아 글자가 비쳐 보이지 않게 한다. */
+  .readhead{position:sticky;top:0;z-index:40;background:var(--app)}
+  .readhead::after{content:"";position:absolute;left:0;right:0;bottom:-14px;height:14px;
+    background:linear-gradient(var(--app),transparent);pointer-events:none}
+  .readhead-in{max-width:816px;margin:0 auto;padding:12px 2px 10px}
+  .readhead .bookhead{display:flex;align-items:baseline;gap:11px;flex-wrap:wrap;margin:0 0 9px}
+  .readhead #voiceSlot:empty{display:none}
+  .readhead .voice{margin:0}
+
+  /* 내 서재 팝업 */
+  .shelfpop{position:fixed;inset:0;z-index:120;display:none;align-items:flex-start;justify-content:center;
+    padding:clamp(24px,7vh,84px) 16px}
+  body.shelfpop-open .shelfpop{display:flex}
+  .shelfpop-dim{position:absolute;inset:0;background:rgba(38,32,25,.38);backdrop-filter:blur(1.5px)}
+  .shelfpop-box{position:relative;width:min(816px,100%);max-height:100%;overflow:auto;
+    background:var(--panel);border:1px solid var(--panel-line);border-radius:14px;
+    box-shadow:0 30px 70px -24px rgba(50,40,20,.5);padding:6px 4px 10px}
+  .shelfpop-x{position:absolute;right:10px;top:10px;z-index:2;border:none;background:none;
+    font-size:.95rem;color:var(--panel-muted);cursor:pointer;padding:5px 9px;border-radius:7px}
+  .shelfpop-x:hover{color:var(--panel-ink);background:var(--app)}
+  .shelfpop .shelf{display:block;border:none;background:transparent}
+
+  /* ── 좌상단 런처 ── */
+  .rlaunch{position:fixed;left:clamp(10px,1.6vw,20px);top:clamp(10px,1.6vw,20px);z-index:95;
+    display:flex;align-items:center;gap:7px;height:38px;padding:0 13px 0 10px;
+    border:1px solid var(--panel-line);background:var(--panel);color:var(--panel-ink);
+    border-radius:999px;cursor:pointer;font-family:inherit;font-size:.78rem;font-weight:700;
+    box-shadow:0 2px 10px -4px rgba(50,40,20,.28);transition:box-shadow .16s,border-color .16s,opacity .2s}
+  .rlaunch:hover{border-color:var(--panel-muted);box-shadow:0 6px 18px -8px rgba(50,40,20,.36)}
+  .rlaunch:focus-visible{outline:2px solid var(--panel-ink);outline-offset:2px}
+  .rlaunch .ic{display:grid;place-items:center;width:22px;height:22px;border-radius:50%;
+    background:var(--app);font-size:.8rem;line-height:1}
+  .rlaunch .cnt{font-variant-numeric:tabular-nums;color:var(--panel-muted)}
+  .rlaunch .cnt:empty{display:none}
+  body.rpanel-open .rlaunch{opacity:0;pointer-events:none}
+
+  .rmenu{position:fixed;left:clamp(10px,1.6vw,20px);top:calc(clamp(10px,1.6vw,20px) + 44px);z-index:96;
+    min-width:212px;background:var(--panel);border:1px solid var(--panel-line);border-radius:13px;
+    padding:6px;box-shadow:0 14px 40px -14px rgba(50,40,20,.4);
+    opacity:0;transform:translateY(-6px) scale(.98);pointer-events:none;transition:.16s}
+  body.rmenu-open .rmenu{opacity:1;transform:none;pointer-events:auto}
+  .rmenu .grp{font-size:.6rem;letter-spacing:.14em;color:var(--panel-muted);padding:8px 11px 5px}
+  .rmenu button{display:flex;align-items:center;gap:9px;width:100%;text-align:left;border:none;
+    background:none;color:var(--panel-ink);font-family:inherit;font-size:.82rem;font-weight:600;
+    padding:9px 11px;border-radius:8px;cursor:pointer}
+  .rmenu button:hover{background:var(--app)}
+  .rmenu button .k{width:16px;text-align:center;color:var(--panel-muted);font-size:.86rem}
+  .rmenu button .b{margin-left:auto;background:var(--yellow);color:#fff;font-size:.6rem;font-weight:800;
+    border-radius:999px;padding:1px 6px;min-width:16px;text-align:center}
+  .rmenu button .b[hidden]{display:none}
+  .rmenu .sep{height:1px;background:var(--panel-line);margin:5px 4px}
+  .rmenu .now{padding:9px 11px 4px;font-size:.74rem;color:var(--panel-muted);line-height:1.5}
+  .rmenu .now b{display:block;color:var(--panel-ink);font-size:.84rem;font-weight:800;margin-bottom:2px}
 
   @media (prefers-reduced-motion:reduce){
     .rtop,.rpanel{transition:none}
@@ -909,10 +997,16 @@
       </div>
       <div class="shelf-row" id="shelfRow"></div>
     </section>
-    <div class="bookhead">
-      <span class="issue">SAMPLE</span>
+    <!-- 이번 호 머리 + 장 여는 말 — 스크롤해도 위에 붙어 있는다(sticky). -->
+    <div class="readhead" id="readHead">
+      <div class="readhead-in">
+        <div class="bookhead">
+          <span class="issue">SAMPLE</span>
       <h1>이 서재를 여는 법</h1>
       <span class="sub">리더기 미리보기 · 밑줄과 메모를 시험해 보세요</span>
+        </div>
+        <div id="voiceSlot"></div>
+      </div>
     </div>
     <div class="chaprail" id="chaprail"></div>
 
@@ -982,6 +1076,32 @@
   <button class="rtb icon" id="rtFull" aria-pressed="false" title="전체 화면">⛶</button>
   <button class="rtb icon" id="rtMark" aria-pressed="false" title="책갈피">🔖</button>
 </div>
+<!-- 내 서재 팝업 — 책 밖의 일이라 지면 위에 겹치지 않고 팝업으로 띄운다.
+     .shelf 요소는 초기화 때 여기로 옮겨온다(렌더 코드는 그대로 쓴다). -->
+<div class="shelfpop" id="shelfPop" role="dialog" aria-modal="true" aria-label="내 서재">
+  <div class="shelfpop-dim" id="shelfPopDim"></div>
+  <div class="shelfpop-box" id="shelfPopBox">
+    <button class="shelfpop-x" id="shelfPopX" title="닫기">✕</button>
+  </div>
+</div>
+
+<!-- 좌상단 런처 — 집중 기본값에서 숨긴 다섯 겹의 유일한 진입점.
+     구글 닥스의 문서 개요 버튼처럼 지면 왼쪽 위에 떠 있고, 고르면 좌측 패널이 열린다. -->
+<button class="rlaunch" id="rlaunch" aria-haspopup="menu" aria-expanded="false" title="메뉴">
+  <span class="ic" aria-hidden="true">☰</span><span class="cnt" id="rlaunchCnt"></span>
+</button>
+<div class="rmenu" id="rmenu" role="menu" aria-labelledby="rlaunch">
+  <div class="now"><b id="rmenuTitle"></b><span id="rmenuSub"></span></div>
+  <div class="sep"></div>
+  <button role="menuitem" data-go="toc"><span class="k">☰</span>목차</button>
+  <button role="menuitem" data-go="search"><span class="k">⌕</span>본문검색</button>
+  <button role="menuitem" data-go="note"><span class="k">❏</span>독서노트<span class="b" id="rmenuNoteBadge" hidden>0</span></button>
+  <button role="menuitem" data-go="view"><span class="k">T</span>보기설정</button>
+  <div class="sep"></div>
+  <button role="menuitem" data-act="shelf"><span class="k">▤</span>내 서재</button>
+  <button role="menuitem" data-act="write"><span class="k">✎</span>나의 생각으로 진화시키기</button>
+</div>
+
 <aside class="rpanel" id="rpanel" aria-label="리더 패널">
   <div class="rpanel-head">
     <span class="rpanel-title" id="rpanelTitle"></span>
@@ -1406,6 +1526,9 @@ function showPane(which){
   $("#tab-write").setAttribute("aria-selected", which==="write");
   $("#pane-read").hidden = which!=="read";
   $("#pane-write").hidden = which!=="write";
+  // 라이팅 탭은 서비스 헤더(탭바)가 있어야 되돌아올 수 있다 — 그 화면에서는 집중을 푼다.
+  document.body.classList.toggle("lean", which==="read");
+  if(typeof renderLauncherLeanItem === "function") renderLauncherLeanItem();
   window.scrollTo({top:0, behavior:"smooth"});
 }
 $("#tab-read").onclick = ()=>showPane("read");
@@ -1609,7 +1732,14 @@ function renderHighlights(){
     sheetsEl.querySelectorAll("span.hl").forEach(span => {
       (span.dataset.hid || "").split(" ").forEach(id => { if(memoIds.has(id)) lastById[id] = span; });
     });
-    Object.values(lastById).forEach(span => span.classList.add("has-memo"));
+    Object.values(lastById).forEach(span => {
+      span.classList.add("has-memo");
+      // 말풍선 조준용 히트 영역(빈 요소라 textContent 오프셋에 영향 없음)
+      const hit = document.createElement("i");
+      hit.className = "hl-hit";
+      hit.setAttribute("aria-hidden", "true");
+      span.appendChild(hit);
+    });
   }
 }
 
@@ -2183,13 +2313,96 @@ function updateProgress(){
   }
 }
 
-/* ── 독서노트 뱃지(메모 총 개수) ── 0 이면 숨긴다. */
+/* ── 독서노트 뱃지(메모 총 개수) ── 0 이면 숨긴다. 상단바·런처 메뉴 양쪽에 반영. */
 function updateNoteBadge(){
   const n = store.highlights.reduce((sum,h)=> sum + (h.memos ? h.memos.length : 0), 0);
-  const badge = $("#rtNoteBadge");
-  if(!badge) return;
-  badge.textContent = String(n);
-  badge.hidden = n === 0;
+  for(const sel of ["#rtNoteBadge", "#rmenuNoteBadge"]){
+    const badge = $(sel);
+    if(!badge) continue;
+    badge.textContent = String(n);
+    badge.hidden = n === 0;
+  }
+  const cnt = $("#rlaunchCnt");
+  if(cnt) cnt.textContent = n ? String(n) : "";
+}
+
+/* ── 좌상단 런처 ──
+   집중 기본값(body.lean)에서 숨긴 다섯 겹의 유일한 진입점이다.
+   런처를 누르면 메뉴가 열리고, 항목을 고르면 좌측 패널이 열리거나 화면이 바뀐다. */
+function initLauncher(){
+  const btn = $("#rlaunch"), menu = $("#rmenu");
+  if(!btn || !menu) return;
+
+  const setOpen = (on)=>{
+    document.body.classList.toggle("rmenu-open", on);
+    btn.setAttribute("aria-expanded", String(on));
+    if(on) syncLauncherTitle();
+  };
+  const isOpen = ()=> document.body.classList.contains("rmenu-open");
+
+  btn.addEventListener("click", (e)=>{ e.stopPropagation(); setOpen(!isOpen()); });
+
+  menu.addEventListener("click", (e)=>{
+    const b = e.target.closest("button[data-go],button[data-act]");
+    if(!b) return;
+    setOpen(false);
+    if(b.dataset.go){ openPanel(b.dataset.go); return; }
+    if(b.dataset.act === "shelf"){ openShelfPop(); return; }
+    if(b.dataset.act === "write"){ showPane("write"); return; }
+    if(b.dataset.act === "lean"){
+      document.body.classList.add("lean");
+      renderLauncherLeanItem();
+      return;
+    }
+  });
+
+  document.addEventListener("click", (e)=>{
+    if(isOpen() && !menu.contains(e.target) && e.target !== btn) setOpen(false);
+  });
+  document.addEventListener("keydown", (e)=>{ if(e.key === "Escape" && isOpen()) setOpen(false); });
+}
+
+/* 집중 화면을 푼 상태에서는 되돌리는 항목을 메뉴에 넣는다. */
+function renderLauncherLeanItem(){
+  const menu = $("#rmenu"); if(!menu) return;
+  const lean = document.body.classList.contains("lean");
+  let item = menu.querySelector('button[data-act="lean"]');
+  if(lean){ if(item) item.remove(); return; }
+  if(item) return;
+  item = document.createElement("button");
+  item.setAttribute("role","menuitem");
+  item.dataset.act = "lean";
+  item.innerHTML = '<span class="k">▢</span>지면만 보기';
+  menu.appendChild(item);
+}
+
+/* ── 내 서재 팝업 ──
+   .shelf 를 팝업 상자로 옮겨 붙인다. 렌더(renderShelf)는 같은 요소를 계속 쓴다. */
+function initShelfPop(){
+  const pop = $("#shelfPop"), box = $("#shelfPopBox"), sh = $("#shelf");
+  if(!pop || !box || !sh) return;
+  box.appendChild(sh);                 // 지면 위 → 팝업 안
+  sh.classList.remove("collapsed");    // 팝업에서는 늘 펼친 상태
+  const toggle = $("#shelfToggle");
+  if(toggle) toggle.hidden = true;     // 접기/펼치기는 팝업에서 의미가 없다
+  $("#shelfPopDim").addEventListener("click", closeShelfPop);
+  $("#shelfPopX").addEventListener("click", closeShelfPop);
+  document.addEventListener("keydown", (e)=>{
+    if(e.key === "Escape" && document.body.classList.contains("shelfpop-open")) closeShelfPop();
+  });
+}
+function openShelfPop(){ document.body.classList.add("shelfpop-open"); }
+function closeShelfPop(){ document.body.classList.remove("shelfpop-open"); }
+
+/* 런처 메뉴 머리에 현재 위치를 적는다. */
+function syncLauncherTitle(){
+  const c = CHAPTERS[curChap];
+  const t = $("#rmenuTitle"), s = $("#rmenuSub");
+  if(t) t.textContent = c ? `${c.no} ${c.title}` : "";
+  if(s){
+    const num = $("#rprogNum");
+    s.textContent = num ? num.textContent : "";
+  }
 }
 
 /* ── 초기화 · 바인딩 ── */
@@ -2226,11 +2439,9 @@ function initTopbarPanel(){
   const wrap = $("#sheets");
   if(wrap){
     wrap.addEventListener("click", e => {
-      if(e.target.closest(".hl")) return;                                        // 하이라이트 → 메모 모달
-      if(e.target.closest("button, a, input, textarea, audio, video, label")) return;
-      const sel = window.getSelection();
-      if(sel && !sel.isCollapsed && sel.toString().trim().length) return;         // 드래그 직후 → 선택 팝오버
-      toggleTopbar();
+      // 리더 상단바 폐지(런처로 통합) — 지면 클릭으로 여닫을 것이 없다.
+      // 하이라이트 클릭은 위쪽 메모 모달 핸들러가 받는다.
+      return;
     });
   }
 
@@ -3025,6 +3236,10 @@ function renderSheets(){
 }
 
 function wireVoice(){
+  // 장 여는 말 카드는 고정 머리(#readHead)로 옮긴다 — 렌더될 때마다 다시 붙인다.
+  const slot = $("#voiceSlot"), vc = $("#voiceCard");
+  if(slot && vc) slot.replaceChildren(vc);
+
   const card = $("#voiceCard"), btn = $("#voicePlay"), au = $("#voiceAudio");
   btn.onclick = ()=>{
     if(au.paused){ au.play().then(()=>{card.classList.add("playing"); btn.textContent="❚❚";})
@@ -3668,7 +3883,11 @@ applyView();                    // 저장된 보기 설정(배경·하이라이�
 renderSheets();
 initSelectPopover();            // 지면 드래그 → 선택 팝오버(하이라이트) — SOCIAL 무관하게 항상
 initMemoModal();                // 메모 모달 딤 클릭·Esc 닫기 바인딩(step 4)
-initTopbarPanel();              // 리더 상단바·우측 공유 패널·진행률·전체 화면·책갈피(step 5)
+initTopbarPanel();              // 리더 상단바·좌측 공유 패널·진행률·전체 화면·책갈피(step 5)
+document.body.classList.add("lean");   // 기본은 집중 — 지면 위 다섯 겹을 접고 좌상단 런처만 남긴다
+initLauncher();                 // 좌상단 런처 → 메뉴 → 좌측 패널
+initShelfPop();                 // 내 서재 → 팝업(딤 위에 뜬다)
+renderLauncherLeanItem();
 initNotePanel();                // 독서노트 패널 — 열려 있을 때 메모·하이라이트 변경 즉시 반영(step 7)
 initViewPanel();                // 보기설정 — 마우스 숨기기 idle 감시 + 보기 설정 재반영(step 8)
 if(SOCIAL) initSocial();        // 소셜 레일·모달·seltool 주입 + 채팅 렌더 (false 면 아예 안 만든다)
