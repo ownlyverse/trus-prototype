@@ -1839,8 +1839,8 @@ function pastIssues(){
   try{ lib = JSON.parse(localStorage.getItem(K_LIB)) || {}; }catch(e){}
   try{ dm = JSON.parse(localStorage.getItem(K_DRAFTS)) || {}; }catch(e){}
   const m = /NO\.(\d+)/.exec(issueLabel() || '');
-  const cur = m ? +m[1] : CAT_MAX + 1;
-  return CATALOG.filter(b => b.no < cur).sort((a, b) => b.no - a.no)
+  const cur = m ? +m[1] : 0;
+  return CATALOG.filter(b => b.no !== cur).sort((a, b) => b.no - a.no)
     .map(b => ({ no:String(b.no), t:b.t, img:b.img, pub:!!lib[b.no], wip:!!dm[b.no] }));
 }
 function hasDraft(){
