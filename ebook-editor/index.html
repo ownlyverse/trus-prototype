@@ -153,7 +153,8 @@ input,textarea{font:inherit;color:inherit}
   white-space:nowrap; z-index:5}
 .swrap.over .over-badge{display:block}
 .add-sheet{display:block; width:var(--sheet-w); margin:0 auto; padding:13px; font-size:.86rem; font-weight:700;
-  color:var(--sub); border:1.5px dashed #C9C5BD; border-radius:12px; background:rgba(255,255,255,.4)}
+  color:var(--sub); border:1.5px dashed #C9C5BD; border-radius:12px; background:rgba(255,255,255,.4);
+  position:relative; z-index:12}
 .add-sheet:hover{color:var(--blue-dd); border-color:var(--blue-d)}
 
 /* ── 블록 ── */
@@ -1205,10 +1206,13 @@ $('sheets').addEventListener('paste', e => {
 $('sheets').addEventListener('load', queueOverflow, true);
 
 $('addSheetBtn').addEventListener('click', () => {
-  chap().sheets.push({ blocks: [] });
-  markDirty(); renderSheets();
-  const last = document.querySelector('#sheets .swrap:last-of-type');
-  if(last) last.scrollIntoView({ behavior:'smooth', block:'center' });
+  try{
+    chap().sheets.push({ blocks: [] });
+    markDirty(); renderSheets();
+    toast(`대지 ${chap().sheets.length}장 — 추가되었습니다`);
+    const last = document.querySelector('#sheets .swrap:last-of-type');
+    if(last) last.scrollIntoView({ behavior:'smooth', block:'center' });
+  }catch(err){ toast('대지 추가 오류: ' + err.message); }
 });
 
 /* ── 챕터 조작 ── */
@@ -1538,6 +1542,11 @@ $('shelfGrid').addEventListener('click', e => {
       ask(card, '지금 작업 중인 책(임시저장)을 지우고 새 책을 시작한다. 발행본은 유지된다.', '새 책 시작', true, start);
     else start();
   }
+});
+
+/* 런타임 오류를 화면에 표면화한다 (rules.md: 콘솔을 안 보면 백지 원인을 모른다) */
+window.addEventListener('error', e => {
+  try{ toast('스크립트 오류: ' + (e.message || '알 수 없음')); }catch(_){}
 });
 
 /* ── 시작 — 서재부터 ── */
