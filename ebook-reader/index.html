@@ -3628,7 +3628,7 @@ const STEP_NAMES = [
    휠 칸 수는 STEP_NAMES.length 에서 나오므로 어디에도 7/8 을 하드코딩하지 않는다. */
 if(SOCIAL) STEP_NAMES.push(["나누기","비슷한 생각과 나눕니다"]);
 /* 목차 좌표 — 장별 항목이 어느 지면으로 가는지 */
-const KEYWORDS = [
+let KEYWORDS = [
   {
     "k": "읽은 것과 남은 것",
     "s": "읽는 일은 눈으로 하는 것 같지만 실은 손으로 하는 일에 가깝습니다.",
@@ -3660,6 +3660,15 @@ const KEYWORDS = [
     "from": "02 · SETTINGS"
   }
 ];
+/* 발행본 글쓰기 코스 반영 (이북 편집기 '생각 정리하기' 탭 — 단계명·키워드 오버라이드) */
+if(PUB_BOOK && PUB_BOOK.writing){
+  const _W = PUB_BOOK.writing;
+  if(Array.isArray(_W.steps) && _W.steps.length){
+    _W.steps.forEach((st, i) => { if(STEP_NAMES[i]) STEP_NAMES[i] = [st.name || STEP_NAMES[i][0], st.sub || STEP_NAMES[i][1]]; });
+  }
+  const _ks = Array.isArray(_W.keywords) ? _W.keywords.filter(x => x && x.k) : [];
+  if(_ks.length) KEYWORDS = _ks.map(x => ({ k: x.k, s: x.s || '', more: x.more || '', from: x.from || '' }));
+}
 /* 단어 정의 검색(윤소정 생각) */
 const WORD_SEARCH = {
   "읽기": "읽는 일은 눈으로 하는 것 같지만 실은 손으로 하는 일에 가깝습니다.",
@@ -3676,7 +3685,7 @@ function searchWord(w){
 }
 
 function buildBeats(){
-  return [
+  const beats = [
     {id:"p1",step:1,type:"ask",q:"이번 달, 나에게 가장 의미 있던 사람은?",ph:"이름이나 관계로 적어 주세요",min:2},
     {id:"pr1",step:1,type:"ask",q:a=>`‘${clip(a.p1)}’ — 그 사람이 왜 당신에게 의미 있었나요?`,ph:"떠오르는 이유를 한두 문장으로",min:6},
     {id:"p2",step:1,type:"ask",q:"이번 달, 나에게 가장 의미 있던 학습이나 문장은?",ph:"책·강의·대화에서 만난 한 문장도 좋습니다",min:2},
@@ -3699,6 +3708,10 @@ function buildBeats(){
     /* 마무리 비트 — SOCIAL 이면 8단계 '나누기'(친구+저장), 아니면 7단계 끝(서재 저장+77호). step 은 SOCIAL 에서 파생. */
     {id:"sh",step:SOCIAL?8:7,type:"connect"}
   ];
+  /* 발행본 질문 오버라이드 — 정적 질문만 (앞 답을 인용하는 함수형 질문은 유지) */
+  const _W = PUB_BOOK && PUB_BOOK.writing;
+  if(_W && _W.beatQ) beats.forEach(b => { if(typeof b.q === "string" && _W.beatQ[b.id]) b.q = _W.beatQ[b.id]; });
+  return beats;
 }
 
 let flow = {beats:[], cur:0, ans:{}, pick:null, title:null, hist:[], timer:null};

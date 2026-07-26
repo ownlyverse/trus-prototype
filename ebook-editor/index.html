@@ -36,6 +36,9 @@ input,textarea{font:inherit;color:inherit}
 .bar .tag{font-size:.7rem; font-weight:800; padding:4px 10px; border-radius:7px; background:var(--blue-soft);
   color:var(--blue-dd); flex-shrink:0}
 .bar .spacer{flex:1}
+.vtabs{display:flex; gap:4px; background:#F2F0EC; border-radius:10px; padding:3px; margin-left:6px}
+.vtabs button{font-size:.8rem; font-weight:800; padding:7px 12px; border-radius:8px; color:var(--sub)}
+.vtabs button.on{background:#fff; color:var(--ink); box-shadow:0 1px 3px rgba(0,0,0,.08)}
 .issue-badge{font-size:.64rem; font-weight:800; letter-spacing:.12em; padding:4px 9px; border-radius:6px;
   background:var(--blue-dd); color:#fff; flex-shrink:0}
 .bar .bt{max-width:32vw}
@@ -287,6 +290,59 @@ body.shelf .shelfview{display:block}
 .bkcard.newbk:hover .cov{color:var(--blue-dd)}
 .bkcard.past{opacity:.75}
 
+/* ── 생각 정리하기 탭 ── */
+.wbody{display:none; flex:1; min-height:0}
+body.wtab .body{display:none}
+body.wtab .wbody{display:flex}
+body.shelf .wbody{display:none}
+.wside{width:250px; flex-shrink:0; border-right:1px solid var(--line); background:#FAFAFA; overflow-y:auto;
+  display:flex; flex-direction:column}
+.wside .sh{font-size:.72rem; font-weight:800; color:var(--sub); letter-spacing:.08em; padding:18px 18px 10px}
+.wstep{display:flex; align-items:baseline; gap:9px; width:100%; text-align:left; padding:12px 18px;
+  font-size:.88rem; border-left:3px solid transparent; cursor:pointer}
+.wstep:hover{background:#F0F0F0}
+.wstep.on{background:#fff; border-left-color:var(--blue-d); font-weight:700}
+.wstep .no{font-size:.7rem; color:var(--blue-d); font-weight:700; flex-shrink:0}
+.wstep .sub2{display:block; font-size:.72rem; color:var(--sub); font-weight:400; margin-top:2px}
+.wmain{flex:1; overflow-y:auto; background:var(--canvas); padding:38px 20px 80px}
+.wprev{max-width:430px; margin:0 auto}
+.wprev-note{font-size:.72rem; font-weight:800; color:#A9A49B; letter-spacing:.08em; margin-bottom:10px; text-align:center}
+.wcard{background:#fff; border:1px solid var(--line); border-radius:18px; padding:24px 22px;
+  box-shadow:0 10px 28px rgba(0,0,0,.07)}
+.wp-badge{display:inline-block; font-size:.64rem; font-weight:800; letter-spacing:.12em; background:var(--blue-dd);
+  color:#fff; border-radius:6px; padding:3px 8px; margin-bottom:12px}
+.wp-eyebrow{font-size:.74rem; font-weight:800; color:var(--blue-dd); margin-bottom:8px}
+.wp-q{font-size:1.05rem; font-weight:800; line-height:1.55; word-break:keep-all}
+.wp-why{font-size:.84rem; color:var(--sub); line-height:1.7; margin-top:10px}
+.wp-quote{margin-top:14px; background:#FAF9F6; border-left:3px solid var(--blue-d); border-radius:0 9px 9px 0;
+  padding:12px 14px; font-size:.86rem; line-height:1.7}
+.wp-quote .qf{display:block; font-size:.7rem; color:var(--sub); margin-top:7px}
+.wp-input{margin-top:16px; border:1.5px dashed var(--line); border-radius:11px; padding:14px;
+  font-size:.84rem; color:#B6B2AA; min-height:64px}
+.wp-wheel{display:flex; gap:5px; margin-top:20px}
+.wp-wheel i{flex:1; height:4px; border-radius:2px; background:#EAE7E1}
+.wp-wheel i.on{background:var(--blue-d)}
+.kwrow{display:flex; gap:6px; align-items:center; margin-top:7px}
+.kwrow input{flex:1; min-width:0}
+.kwrow .pickbtn{flex-shrink:0}
+.pickbtn{font-size:.72rem; font-weight:700; padding:7px 9px; border-radius:8px; border:1.5px solid var(--line); background:#fff; white-space:nowrap}
+.pickbtn:hover{border-color:var(--blue-d); color:var(--blue-dd)}
+.rside textarea{width:100%; border:1.5px solid var(--line); border-radius:9px; padding:9px 11px; font-size:.86rem;
+  min-height:58px; resize:vertical; background:#fff; line-height:1.6}
+.rside textarea:focus{outline:none; border-color:var(--blue-d)}
+/* 문장 고르기 모달 */
+.pickdim{position:fixed; inset:0; z-index:115; background:rgba(20,18,16,.45); display:none;
+  align-items:center; justify-content:center; padding:20px}
+.pickdim.open{display:flex}
+.pickbox{width:min(520px, 94vw); max-height:80vh; overflow-y:auto; background:#fff; border-radius:18px;
+  box-shadow:0 30px 80px rgba(0,0,0,.3); padding:22px}
+.pickbox h3{font-size:1rem; font-weight:900; margin-bottom:4px}
+.pickbox .psub{font-size:.78rem; color:var(--sub); margin-bottom:12px}
+.picksent{display:block; width:100%; text-align:left; font-size:.86rem; line-height:1.65; padding:11px 12px;
+  border-radius:10px; border:1px solid transparent; word-break:keep-all}
+.picksent:hover{background:var(--blue-soft); border-color:var(--blue-d)}
+.picksent .pf{display:block; font-size:.68rem; color:var(--sub); margin-top:4px}
+
 /* ── 글자 포맷 툴바 ── */
 .fmt{position:fixed; z-index:95; background:rgba(17,17,17,.94); border-radius:11px; padding:5px;
   display:none; gap:2px; align-items:center; box-shadow:0 10px 30px rgba(0,0,0,.25)}
@@ -389,6 +445,10 @@ body.shelf .shelfview{display:block}
   <span class="issue-badge" id="issueBadge" hidden></span>
   <span class="bt serif" id="bookTitle"></span>
   <span class="tag">관리자 모드</span>
+  <nav class="vtabs" aria-label="편집 영역 전환">
+    <button id="tabBody" class="on">본문 편집</button>
+    <button id="tabWriting">생각 정리하기</button>
+  </nav>
   <span class="spacer"></span>
   <span class="stat" id="stat" role="status" aria-live="polite">임시저장됨</span>
   <button class="btn-ghost pv" id="bookInfoBtn">책 정보</button>
@@ -422,6 +482,30 @@ body.shelf .shelfview{display:block}
       <button class="mini danger" id="resetBtn">임시저장 초기화 — 기본 책으로</button>
     </div>
   </aside>
+</div>
+
+<div class="wbody" id="writingView">
+  <nav class="wside" aria-label="글쓰기 단계">
+    <p class="sh">글쓰기 코스</p>
+    <div id="wstepList"></div>
+  </nav>
+  <main class="wmain">
+    <div class="wprev">
+      <p class="wprev-note">구독자 화면 미리보기</p>
+      <div class="wcard" id="wprevCard"></div>
+    </div>
+  </main>
+  <aside class="rside" aria-label="글쓰기 설정">
+    <div class="ps" id="wProps"></div>
+  </aside>
+</div>
+
+<div class="pickdim" id="pickDim">
+  <div class="pickbox" role="dialog" aria-label="본문에서 고르기">
+    <h3>본문에서 문장 고르기</h3>
+    <p class="psub">이번 호 본문의 문장 중 하나를 고르면 해당 칸에 들어간다.</p>
+    <div id="pickList"></div>
+  </div>
 </div>
 
 <div class="palette" id="palette" role="menu" aria-label="블록 추가"></div>
@@ -1377,8 +1461,16 @@ function toReaderBook(){
     chapters.push(rc);
   });
   const issueRaw = (BOOK.issue || '').trim();
+  const W = ensureWriting();
+  const writing = {
+    q: escHtml(W.q || ''), why: escHtml(W.why || ''), quote: escHtml(W.quote || ''), from: escHtml(W.from || ''),
+    steps: W.steps.map(st => ({ name: escHtml(st.name || ''), sub: escHtml(st.sub || '') })),
+    beatQ: Object.fromEntries(Object.entries(W.beatQ || {}).filter(([k, v]) => (v || '').trim()).map(([k, v]) => [k, escHtml(v)])),
+    keywords: W.keywords.filter(x => (x.k || '').trim()).map(x => ({ k: escHtml(x.k), s: escHtml(x.s || ''), more: '', from: '' }))
+  };
   return {
     v: 2,
+    writing,
     issue: escHtml(/^\d+$/.test(issueRaw) ? 'NO.' + issueRaw : issueRaw),
     title: escHtml(BOOK.title || ''), subtitle: escHtml(BOOK.subtitle || ''), cover: BOOK.cover || null,
     chapters,
@@ -1408,6 +1500,188 @@ $('previewBtn').addEventListener('click', () => {
     window.open('../ebook-reader/?preview=1', '_blank');
   }
 });
+
+/* ═══════════ 생각 정리하기 (글쓰기 코스 저작) ═══════════
+   리더기 라이팅 코스와 1:1 — 7단계 구조는 리더기 인터뷰 비트에 묶여 있어 고정,
+   이름·안내문·정적 질문(beatQ)·이번 달 질문·추천 이유·인용문·키워드 5개를 저작한다. */
+function defaultWriting(){
+  return {
+    q: '이번 달, 나에게 가장 오래 남은 문장은 무엇인가요?',
+    why: '', quote: '', from: '',
+    steps: [
+      { name:'돌아보기', sub:'이번 달을 돌아봅니다' },
+      { name:'곱씹기',   sub:'조금 더 곱씹어 봅니다' },
+      { name:'고르기',   sub:'마음에 걸리는 말을 고릅니다' },
+      { name:'만나기',   sub:'작가의 생각을 만납니다' },
+      { name:'바꾸기',   sub:'내 단어로 바꿔 봅니다' },
+      { name:'내 방식',  sub:'내 방식으로 바꿔 봅니다' },
+      { name:'쓰기',     sub:'한 편으로 써 봅니다' }
+    ],
+    beatQ: {},
+    keywords: [ {k:'',s:''}, {k:'',s:''}, {k:'',s:''}, {k:'',s:''}, {k:'',s:''} ]
+  };
+}
+function ensureWriting(){ if(!BOOK.writing) BOOK.writing = defaultWriting(); return BOOK.writing; }
+/* 리더기 buildBeats의 정적 질문 카탈로그 — id는 리더기와 반드시 일치 */
+const BEAT_CATALOG = [
+  { id:'p1', step:1, q:'이번 달, 나에게 가장 의미 있던 사람은?' },
+  { id:'p2', step:1, q:'이번 달, 나에게 가장 의미 있던 학습이나 문장은?' },
+  { id:'p3', step:1, q:'이번 달, 나에게 가장 의미 있던 일은?' },
+  { id:'r4', step:2, q:'이렇게 과정을 돌아보니, 새롭게 생각하게 된 건 무엇인가요?' },
+  { id:'k',  step:3, q:'작가의 이번 달 생각에서, 마음에 걸리는 키워드를 골라 보세요.' },
+  { id:'c2', step:4, q:'왜 그 키워드에 공감했나요? (혹은 왜 다르게 느꼈나요?)' },
+  { id:'w',  step:5, q:'이번 달, 새로 정의해 보고 싶은 단어 하나는?' },
+  { id:'w2', step:5, q:'작가의 문장을, 당신의 생활 문장으로 바꿔 써 보세요.' },
+  { id:'x',  step:6, q:'그 정의를 당신 방식으로 바꾸면 어떻게 될까요?' },
+  { id:'wr', step:7, q:'앞의 조각들을 모아, 당신의 생각을 한 편으로 써 보세요.' }
+];
+function beatQOf(id){
+  const W = ensureWriting();
+  const base = BEAT_CATALOG.find(b => b.id === id);
+  return (W.beatQ && W.beatQ[id]) || (base ? base.q : '');
+}
+
+let wsel = null; /* null = 코스 공통, 0..6 = 단계 */
+function renderWStepList(){
+  const W = ensureWriting();
+  $('wstepList').innerHTML = `
+    <div class="wstep${wsel === null ? ' on' : ''}" data-ws="all" role="button" tabindex="0">
+      <span class="no">★</span><span>코스 공통<span class="sub2">이번 달 질문·인용·키워드</span></span>
+    </div>` +
+    W.steps.map((st, i) => `
+    <div class="wstep${wsel === i ? ' on' : ''}" data-ws="${i}" role="button" tabindex="0">
+      <span class="no">${i + 1}</span><span>${escHtml(st.name)}<span class="sub2">${escHtml(st.sub)}</span></span>
+    </div>`).join('');
+}
+function renderWPrev(){
+  const W = ensureWriting();
+  let inner = `<span class="wp-badge">${issueLabel() || 'ISSUE'} · 이번 달의 글쓰기</span>`;
+  if(wsel === null){
+    inner += `<div class="wp-q">${escHtml(W.q)}</div>
+      ${W.why ? `<div class="wp-why">${escHtml(W.why)}</div>` : ''}
+      ${W.quote ? `<div class="wp-quote">${escHtml(W.quote)}${W.from ? `<span class="qf">${escHtml(W.from)}</span>` : ''}</div>` : ''}
+      <div class="wp-input">여기에 구독자가 자기 생각을 적어요…</div>`;
+  } else {
+    const st = W.steps[wsel];
+    const beats = BEAT_CATALOG.filter(b => b.step === wsel + 1);
+    inner += `<div class="wp-eyebrow">${wsel + 1}. ${escHtml(st.name)} — ${escHtml(st.sub)}</div>
+      <div class="wp-q">${escHtml(beats.length ? beatQOf(beats[0].id) : W.q)}</div>
+      ${wsel === 3 && W.quote ? `<div class="wp-quote">${escHtml(W.quote)}${W.from ? `<span class="qf">${escHtml(W.from)}</span>` : ''}</div>` : ''}
+      ${wsel === 2 ? `<div class="wp-why">${W.keywords.filter(x => x.k).map(x => `「${escHtml(x.k)}」`).join(' ') || '키워드를 채우면 여기 표시된다'}</div>` : ''}
+      <div class="wp-input">여기에 구독자가 답을 적어요…</div>`;
+  }
+  inner += `<div class="wp-wheel">${ensureWriting().steps.map((_, i) =>
+    `<i class="${wsel !== null && i <= wsel ? 'on' : (wsel === null && i === 0 ? 'on' : '')}"></i>`).join('')}</div>`;
+  $('wprevCard').innerHTML = inner;
+}
+function renderWProps(){
+  const W = ensureWriting();
+  let html = '';
+  if(wsel === null){
+    html = `<p class="pt">코스 공통 설정</p>
+      <p class="fl">이번 달 글쓰기 질문</p>
+      <textarea id="wq">${escHtml(W.q)}</textarea>
+      <p class="fl">추천 이유 (구독자에게 보이는 문장)</p>
+      <textarea id="wwhy" placeholder="이 질문을 던지는 이유">${escHtml(W.why)}</textarea>
+      <p class="fl">연결 인용문</p>
+      <textarea id="wquote" placeholder="본문에서 고르거나 직접 입력">${escHtml(W.quote)}</textarea>
+      <div class="row"><button class="pickbtn" data-wpick="quote">본문에서 고르기</button></div>
+      <p class="fl">고르기 단계 키워드 (5개)</p>
+      ${W.keywords.map((x, i) => `
+        <div class="kwrow">
+          <input type="text" data-kw="${i}" value="${escHtml(x.k)}" placeholder="키워드 ${i + 1}">
+          <button class="pickbtn" data-wpick="kw-${i}" title="설명 문장 본문에서 고르기">${x.s ? '문장 ✓' : '문장 고르기'}</button>
+        </div>`).join('')}
+      <p class="hintp">키워드는 3단계 「고르기」 카드로, 인용문은 4단계 「만나기」에 표시된다.</p>`;
+  } else {
+    const st = W.steps[wsel];
+    const beats = BEAT_CATALOG.filter(b => b.step === wsel + 1);
+    html = `<p class="pt">${wsel + 1}단계 설정</p>
+      <p class="fl">단계 이름</p>
+      <input type="text" id="wsName" value="${escHtml(st.name)}">
+      <p class="fl">안내 문구</p>
+      <input type="text" id="wsSub" value="${escHtml(st.sub)}">
+      ${beats.length ? beats.map((b, i) => `
+        <p class="fl">질문 ${beats.length > 1 ? i + 1 : ''}</p>
+        <textarea data-bq="${b.id}">${escHtml(beatQOf(b.id))}</textarea>`).join('')
+        : '<p class="hintp">이 단계는 앞 단계 답을 인용하는 자동 질문으로 진행된다.</p>'}
+      <p class="hintp">구독자는 이 단계를 인터뷰처럼 순서대로 지난다.</p>`;
+  }
+  $('wProps').innerHTML = html;
+  const bindIn = (id, fn) => { const el = $(id); if(el) el.addEventListener('input', e => { fn(e.target.value); markDirty(); renderWPrev(); }); };
+  bindIn('wq', v => { W.q = v; });
+  bindIn('wwhy', v => { W.why = v; });
+  bindIn('wquote', v => { W.quote = v; });
+  bindIn('wsName', v => { W.steps[wsel].name = v; renderWStepList(); });
+  bindIn('wsSub', v => { W.steps[wsel].sub = v; renderWStepList(); });
+  document.querySelectorAll('#wProps [data-bq]').forEach(el =>
+    el.addEventListener('input', e => { W.beatQ[el.dataset.bq] = e.target.value; markDirty(); renderWPrev(); }));
+  document.querySelectorAll('#wProps [data-kw]').forEach(el =>
+    el.addEventListener('input', e => { W.keywords[+el.dataset.kw].k = e.target.value; markDirty(); renderWPrev(); }));
+}
+function renderWriting(){ renderWStepList(); renderWPrev(); renderWProps(); }
+
+$('wstepList').addEventListener('click', e => {
+  const row = e.target.closest('[data-ws]');
+  if(!row) return;
+  wsel = row.dataset.ws === 'all' ? null : +row.dataset.ws;
+  renderWriting();
+});
+
+/* 탭 전환 */
+function setTab(w){
+  document.body.classList.toggle('wtab', w);
+  $('tabBody').classList.toggle('on', !w);
+  $('tabWriting').classList.toggle('on', w);
+  if(w) renderWriting();
+}
+$('tabBody').addEventListener('click', () => setTab(false));
+$('tabWriting').addEventListener('click', () => setTab(true));
+
+/* 본문에서 문장 고르기 */
+let pickTarget = null;
+function bodySentences(){
+  const out = [];
+  BOOK.chapters.forEach(c => {
+    c.sheets.forEach((sh, si) => {
+      sh.blocks.forEach(b => {
+        let txt = '';
+        if(b.t === 'p'){ const t = document.createElement('div'); t.innerHTML = sanitizeHtml(b.html); txt = t.textContent; }
+        else if(b.t === 'verse') txt = b.text || '';
+        if(!txt.trim()) return;
+        txt.split(/(?<=[.!?다요])\s+/).forEach(sent => {
+          const cl = sent.trim();
+          if(cl.length >= 10) out.push({ s: cl, from: `${escHtml(c.title)} · 대지 ${pad2(si + 1)}` });
+        });
+      });
+    });
+  });
+  return out.slice(0, 80);
+}
+function openPick(target){
+  pickTarget = target;
+  const list = bodySentences();
+  $('pickList').innerHTML = list.length
+    ? list.map((x, i) => `<button class="picksent" data-pi="${i}">${escHtml(x.s)}<span class="pf">${x.from}</span></button>`).join('')
+    : '<p class="hintp">본문에 문장이 없다. 본문 편집 탭에서 글을 먼저 작성할 것.</p>';
+  $('pickDim').classList.add('open');
+  $('pickDim')._list = list;
+}
+$('wProps').addEventListener('click', e => {
+  const b = e.target.closest('[data-wpick]');
+  if(b) openPick(b.dataset.wpick);
+});
+$('pickList').addEventListener('click', e => {
+  const b = e.target.closest('[data-pi]');
+  if(!b || !pickTarget) return;
+  const x = $('pickDim')._list[+b.dataset.pi];
+  const W = ensureWriting();
+  if(pickTarget === 'quote'){ W.quote = x.s; W.from = `${issueLabel() || '이번 호'} · ${x.from.split(' · ')[0]}`; }
+  else if(pickTarget.startsWith('kw-')){ const i = +pickTarget.slice(3); W.keywords[i].s = x.s; }
+  $('pickDim').classList.remove('open'); pickTarget = null;
+  markDirty(); renderWriting();
+});
+$('pickDim').addEventListener('click', e => { if(e.target === $('pickDim')) $('pickDim').classList.remove('open'); });
 
 /* ── 글자 포맷 툴바 (문단 드래그 선택) ── */
 function fmtTargetEl(){
@@ -1477,6 +1751,7 @@ document.addEventListener('keydown', e => {
     closePalette(); closeAsk(); clearSel(); closeBookModal();
     document.querySelector('.side').classList.remove('open');
     $('fmt').classList.remove('open');
+    $('pickDim').classList.remove('open');
   }
 });
 
@@ -1516,6 +1791,7 @@ function renderShelf(){
 }
 function goShelf(){
   document.body.classList.add('shelf');
+  setTab(false);
   clearSel(); closePalette(); closeAsk(); closeBookModal();
   renderShelf();
 }
