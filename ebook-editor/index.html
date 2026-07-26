@@ -151,6 +151,12 @@ input,textarea{font:inherit;color:inherit}
 
 .bp{font-size:.98rem; line-height:1.92; color:#212121; padding:2px 0; min-height:1.9em}
 .bp b{font-weight:800}
+/* 글자 서식 (발행 시 리더기에도 동일 클래스로 렌더) */
+.tc-b{color:var(--blue-dd)}
+.tc-p{color:#ED2390}
+.hl-y{background:linear-gradient(180deg, transparent 55%, rgba(242,197,61,.55) 55%)}
+.fs-sm{font-size:.85em}
+.fs-lg{font-size:1.22em}
 .bh{padding:6px 0 10px}
 .bh-en{font-size:1.5rem; font-weight:800; line-height:1.18; letter-spacing:-0.02em; color:var(--ink);
   font-family:Georgia,"Times New Roman",serif; white-space:pre-line; min-height:1.2em}
@@ -220,6 +226,42 @@ input,textarea{font:inherit;color:inherit}
   border-radius:11px; padding:13px 22px; cursor:pointer}
 .empty-sheet button:hover{color:var(--blue-dd); border-color:var(--blue-d)}
 
+/* ── 글자 포맷 툴바 ── */
+.fmt{position:fixed; z-index:95; background:rgba(17,17,17,.94); border-radius:11px; padding:5px;
+  display:none; gap:2px; align-items:center; box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.fmt.open{display:flex}
+.fmt button{min-width:28px; height:28px; border-radius:7px; color:#EEE; font-size:.78rem; font-weight:800;
+  display:flex; align-items:center; justify-content:center; padding:0 7px}
+.fmt button:hover{background:rgba(255,255,255,.16)}
+.fmt .sw{width:14px; height:14px; border-radius:4px; display:inline-block}
+.fmt .sep{width:1px; height:16px; background:rgba(255,255,255,.22); margin:0 3px}
+
+/* ── 요소 라이브러리 ── */
+.elg{font-size:.68rem; font-weight:800; color:#A9A49B; letter-spacing:.08em; margin:12px 0 6px}
+.elgrid{display:grid; grid-template-columns:1fr 1fr; gap:6px}
+.elbtn{display:flex; align-items:center; gap:8px; padding:9px 10px; border-radius:9px; border:1.5px solid var(--line);
+  background:#fff; font-size:.8rem; font-weight:700; text-align:left}
+.elbtn:hover{border-color:var(--blue-d); color:var(--blue-dd)}
+.elbtn .pi{width:22px; height:22px; border-radius:6px; background:#F2F0EC; display:flex; align-items:center;
+  justify-content:center; font-size:.62rem; font-weight:800; color:var(--sub); flex-shrink:0}
+
+/* ── 책 만들기 모달 ── */
+.bdim{position:fixed; inset:0; z-index:110; background:rgba(20,18,16,.45); display:none;
+  align-items:center; justify-content:center; padding:20px}
+.bdim.open{display:flex}
+.bmodal{width:min(400px, 94vw); background:#fff; border-radius:18px; box-shadow:0 30px 80px rgba(0,0,0,.3);
+  padding:26px 24px; max-height:90vh; overflow-y:auto}
+.bmodal h2{font-size:1.15rem; font-weight:900; margin-bottom:4px}
+.bmodal .msub{font-size:.8rem; color:var(--sub); margin-bottom:14px}
+.bmodal .fl{font-size:.72rem; font-weight:800; color:var(--sub); letter-spacing:.05em; margin:12px 0 5px}
+.bmodal input[type=text]{width:100%; border:1.5px solid var(--line); border-radius:9px; padding:10px 12px; font-size:.92rem}
+.bmodal input[type=text]:focus{outline:none; border-color:var(--blue-d)}
+.bmodal .mrow{display:flex; gap:8px; margin-top:18px}
+.bmodal .go{flex:1; font-size:.9rem; font-weight:800; color:#fff; background:var(--blue-d); border-radius:11px; padding:12px}
+.bmodal .go:hover{background:var(--blue-dd)}
+.bmodal .alt{width:100%; margin-top:9px; font-size:.78rem; font-weight:700; color:var(--sub); padding:7px}
+.bmodal .alt:hover{color:var(--ink)}
+
 /* ── 팔레트 ── */
 .palette{position:fixed; z-index:90; background:#fff; border:1px solid var(--line); border-radius:13px;
   box-shadow:0 16px 44px rgba(0,0,0,.16); padding:7px; display:none; width:200px}
@@ -275,6 +317,7 @@ input,textarea{font:inherit;color:inherit}
     <span class="tag">관리자 모드</span>
   </div>
   <span class="stat" id="stat" role="status" aria-live="polite">임시저장됨</span>
+  <button class="btn-ghost pv" id="bookInfoBtn">책 정보</button>
   <button class="btn-ghost pv" id="previewBtn">미리보기</button>
   <button class="btn-pub" id="pubBtn">발행하기</button>
 </header>
@@ -297,15 +340,9 @@ input,textarea{font:inherit;color:inherit}
 
   <aside class="rside" aria-label="편집 패널">
     <div class="ps">
-      <p class="pt">이번 호</p>
-      <p class="fl">호수</p>
-      <input type="text" id="inIssue" placeholder="76" aria-label="호수">
-      <p class="fl">이번 호 제목</p>
-      <input type="text" id="inTitle" aria-label="이번 호 제목">
-      <p class="fl">부제</p>
-      <input type="text" id="inSubtitle" aria-label="부제">
-      <p class="fl">표지 이미지</p>
-      <div class="cov-row" id="covRow"></div>
+      <p class="pt">요소</p>
+      <p class="hintp">누르면 선택한 블록 뒤에, 선택이 없으면 마지막 대지 끝에 들어갑니다.</p>
+      <div id="elements"></div>
     </div>
     <div class="ps" id="blkProps"></div>
     <div class="ps">
@@ -315,6 +352,36 @@ input,textarea{font:inherit;color:inherit}
 </div>
 
 <div class="palette" id="palette" role="menu" aria-label="블록 추가"></div>
+<div class="fmt" id="fmt" role="toolbar" aria-label="글자 서식">
+  <button data-f="b" title="굵게" aria-label="굵게">B</button>
+  <span class="sep"></span>
+  <button data-f="c-blue" title="파랑" aria-label="파랑 글자"><span class="sw" style="background:#067CAF"></span></button>
+  <button data-f="c-pink" title="핑크" aria-label="핑크 글자"><span class="sw" style="background:#ED2390"></span></button>
+  <button data-f="hl" title="형광" aria-label="형광 하이라이트"><span class="sw" style="background:#F2C53D"></span></button>
+  <span class="sep"></span>
+  <button data-f="sm" title="작게" aria-label="글자 작게">가⁻</button>
+  <button data-f="lg" title="크게" aria-label="글자 크게">가⁺</button>
+  <span class="sep"></span>
+  <button data-f="clear" title="서식 지우기" aria-label="서식 지우기">지우기</button>
+</div>
+<div class="bdim" id="bdim">
+  <div class="bmodal" role="dialog" aria-label="책 만들기">
+    <h2 id="bmTitle">새 책 만들기</h2>
+    <p class="msub" id="bmSub">이번 호의 기본 정보를 먼저 정합니다. 나중에 상단 '책 정보'에서 바꿀 수 있습니다.</p>
+    <p class="fl">호수</p>
+    <input type="text" id="inIssue" placeholder="76" aria-label="호수">
+    <p class="fl">이번 호 제목</p>
+    <input type="text" id="inTitle" placeholder="경계 세우는 연습" aria-label="이번 호 제목">
+    <p class="fl">부제</p>
+    <input type="text" id="inSubtitle" placeholder="일과 관계에서 나를 지키는 법" aria-label="부제">
+    <p class="fl">표지 이미지</p>
+    <div class="cov-row" id="covRow"></div>
+    <div class="mrow">
+      <button class="go" id="bmGo">책 만들기</button>
+    </div>
+    <button class="alt" id="bmAlt">빈 책으로 시작</button>
+  </div>
+</div>
 <div class="ask" id="ask" role="alertdialog"><p class="at" id="askText"></p>
   <div class="ar"><button class="no" id="askNo">취소</button><button class="yes" id="askYes">확인</button></div>
 </div>
@@ -342,7 +409,7 @@ function mockBook(){
         sheets:[
           { blocks:[
             { t:'head', en:'Saying no,\nkindly.', ko:'거절에도 예의가 있다' },
-            { t:'p', html:'거절을 미루는 것은 배려가 아니라 유예다. 대답을 미루는 동안 상대는 계획을 세우지 못하고, 나는 마음의 빚을 키운다. 상대의 시간을 아끼는 가장 정중한 방법은, 빠르고 분명하게 말하는 것이다.' },
+            { t:'p', html:'거절을 미루는 것은 배려가 아니라 유예다. 대답을 미루는 동안 상대는 계획을 세우지 못하고, 나는 마음의 빚을 키운다. 상대의 시간을 아끼는 가장 정중한 방법은, <span class="hl-y">빠르고 분명하게 말하는 것이다.</span>' },
             { t:'p', html:'분명한 거절에는 세 가지가 담긴다. 요청을 이해했다는 확인, 들어줄 수 없다는 결론, 그리고 가능하다면 대안. 이 셋이 갖춰지면 거절은 관계를 상하게 하지 않는다. 오히려 다음 부탁을 쉽게 만든다.' }
           ]},
           { blocks:[
@@ -406,7 +473,26 @@ function escHtml(s){
   return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
     .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
-/* 허용 태그 b/i/br만 남긴다. div·p 등 블록 경계는 <br>로 변환. */
+/* 허용 태그: b/i/br + 서식 span(클래스 화이트리스트). div·p 등 블록 경계는 <br>로 변환.
+   execCommand 가 만드는 font[color/size]·style 색은 아는 값이면 클래스로 변환, 모르면 벗긴다. */
+const FMT_CLASSES = ['tc-b', 'tc-p', 'hl-y', 'fs-sm', 'fs-lg'];
+const COLOR_MAP = {
+  '#067caf':'tc-b', 'rgb(6, 124, 175)':'tc-b',
+  '#ed2390':'tc-p', 'rgb(237, 35, 144)':'tc-p',
+  '#f2c53d':'hl-y', 'rgb(242, 197, 61)':'hl-y'
+};
+function fmtClassesOf(n){
+  const out = [];
+  (n.getAttribute('class') || '').split(/\s+/).forEach(c => { if(FMT_CLASSES.includes(c)) out.push(c); });
+  const st = n.getAttribute('style') || '';
+  const fc = n.getAttribute('color') || ((st.match(/(?:^|;)\s*color:\s*([^;]+)/i) || [])[1] || '').trim();
+  if(fc && COLOR_MAP[fc.toLowerCase()] && COLOR_MAP[fc.toLowerCase()][0] === 't') out.push(COLOR_MAP[fc.toLowerCase()]);
+  const bc = ((st.match(/background(?:-color)?:\s*([^;]+)/i) || [])[1] || '').trim();
+  if(bc && COLOR_MAP[bc.toLowerCase()] === 'hl-y') out.push('hl-y');
+  const sz = n.getAttribute('size');
+  if(sz){ if(+sz <= 2) out.push('fs-sm'); else if(+sz >= 5) out.push('fs-lg'); }
+  return [...new Set(out)];
+}
 function sanitizeHtml(html){
   const t = document.createElement('div');
   t.innerHTML = String(html ?? '');
@@ -419,6 +505,11 @@ function sanitizeHtml(html){
       if(tag === 'br'){ out += '<br>'; }
       else if(tag === 'b' || tag === 'strong'){ out += '<b>'; walk(n); out += '</b>'; }
       else if(tag === 'i' || tag === 'em'){ out += '<i>'; walk(n); out += '</i>'; }
+      else if(tag === 'span' || tag === 'font'){
+        const cls = fmtClassesOf(n);
+        if(cls.length){ out += `<span class="${cls.join(' ')}">`; walk(n); out += '</span>'; }
+        else walk(n);
+      }
       else { walk(n); if(/^(div|p|li|h[1-6]|tr|blockquote)$/.test(tag)) out += '<br>'; }
     });
   })(t);
@@ -640,10 +731,7 @@ function renderBookBar(){
   $('bookTitle').textContent = BOOK.title || '(제목 없음)';
   document.title = '이북 편집기 — ' + (BOOK.title || '생각구독 관리자');
 }
-function renderBookPanel(){
-  $('inIssue').value = BOOK.issue || '';
-  $('inTitle').value = BOOK.title;
-  $('inSubtitle').value = BOOK.subtitle;
+function renderCovRow(){
   $('covRow').innerHTML = (BOOK.cover
     ? `<img class="cov-thumb" src="${BOOK.cover}" alt="표지 이미지">
        <button class="mini" data-act="cov-change">표지 변경</button>
@@ -651,6 +739,60 @@ function renderBookPanel(){
     : `<span class="cov-none">표지<br>없음</span>
        <button class="mini" data-act="cov-change">표지 업로드</button>`);
 }
+
+/* ─ 책 만들기 / 책 정보 모달 ─ */
+let bmMode = 'new';
+function openBookModal(mode){
+  bmMode = mode;
+  $('bmTitle').textContent = mode === 'new' ? '새 책 만들기' : '책 정보';
+  $('bmSub').textContent = mode === 'new'
+    ? '이번 호의 기본 정보를 먼저 정합니다. 나중에 상단 「책 정보」에서 바꿀 수 있습니다.'
+    : '이번 호의 기본 정보를 수정합니다.';
+  $('bmGo').textContent = mode === 'new' ? '책 만들기' : '저장';
+  $('bmAlt').style.display = mode === 'new' ? '' : 'none';
+  $('inIssue').value = BOOK.issue || '';
+  $('inTitle').value = BOOK.title || '';
+  $('inSubtitle').value = BOOK.subtitle || '';
+  renderCovRow();
+  $('bdim').classList.add('open');
+  $('inIssue').focus();
+}
+function commitBookMeta(){
+  BOOK.issue = $('inIssue').value.trim();
+  BOOK.title = $('inTitle').value.trim() || '(제목 없음)';
+  BOOK.subtitle = $('inSubtitle').value.trim();
+  markDirty(); renderBookBar();
+}
+function closeBookModal(){ $('bdim').classList.remove('open'); }
+
+/* ─ 요소 라이브러리 ─ */
+const ELEMENTS = [
+  ['텍스트', [['p','문','문단'], ['head','H','헤드라인'], ['verse','❝','인용·운문'], ['title','T','표제지']]],
+  ['미디어', [['photo','▣','사진'], ['duo','▣▣','사진 두 장'], ['cover','■','전면 사진'], ['split','◧','카피+사진'], ['video','▶','영상']]],
+  ['구조', [['toc','☰','목차'], ['divider','◆','구분선']]]
+];
+function renderElements(){
+  $('elements').innerHTML = ELEMENTS.map(([g, items]) => `
+    <p class="elg">${g}</p>
+    <div class="elgrid">${items.map(([t, ic, label]) =>
+      `<button class="elbtn" data-el="${t}"><span class="pi">${ic}</span>${label}</button>`).join('')}</div>`).join('');
+}
+$('elements').addEventListener('click', e => {
+  const b = e.target.closest('[data-el]');
+  if(!b) return;
+  const nb = NEW_BLOCK[b.dataset.el]();
+  let si, bi;
+  if(SEL && chap().sheets[SEL.si]){
+    si = SEL.si; bi = SEL.bi + 1;
+  } else {
+    si = chap().sheets.length - 1; bi = chap().sheets[si].blocks.length;
+  }
+  chap().sheets[si].blocks.splice(bi, 0, nb);
+  markDirty(); renderSheets();
+  selectBlk(si, bi);
+  const el = document.querySelector(`.blk[data-si="${si}"][data-bi="${bi}"]`);
+  if(el) el.scrollIntoView({ behavior:'smooth', block:'center' });
+});
 
 /* ─ 블록 선택 + 속성 패널 ─ */
 let SEL = null; /* {si, bi} */
@@ -741,7 +883,7 @@ $('blkProps').addEventListener('click', e => {
   }
 });
 function renderAll(){
-  renderBookBar(); renderChapList(); renderChapHead(); renderSheets(); renderBookPanel(); renderBlkProps();
+  renderBookBar(); renderChapList(); renderChapHead(); renderSheets(); renderElements(); renderBlkProps();
 }
 
 /* ═══════════ 넘침 감지 ═══════════ */
@@ -844,7 +986,7 @@ $('fileIn').addEventListener('change', () => {
       const uri = cv.toDataURL('image/jpeg', 0.82);
       if(uri.length > 2 * 1024 * 1024) toast('사진 용량이 큽니다 — 발행 저장이 실패할 수 있습니다');
       const t = fileTarget; fileTarget = null;
-      if(t.kind === 'cover'){ BOOK.cover = uri; renderBookPanel(); }
+      if(t.kind === 'cover'){ BOOK.cover = uri; renderCovRow(); }
       else if(t.kind === 'duo'){ chap().sheets[t.si].blocks[t.bi].srcs[t.slot] = uri; renderSheets(); }
       else { chap().sheets[t.si].blocks[t.bi].src = uri; renderSheets(); } /* photo·split·coverblk */
       markDirty();
@@ -1003,16 +1145,25 @@ $('chapTitle').addEventListener('input', e => {
   chap().title = e.target.value; markDirty(); renderChapList();
 });
 
-/* ── 이번 호 설정 (우측 패널) ── */
+/* ── 책 만들기 / 책 정보 모달 ── */
 $('covRow').addEventListener('click', e => {
   const b = e.target.closest('[data-act]');
   if(!b) return;
   if(b.dataset.act === 'cov-change') pickImage({ kind:'cover' });
-  else if(b.dataset.act === 'cov-del'){ BOOK.cover = null; markDirty(); renderBookPanel(); }
+  else if(b.dataset.act === 'cov-del'){ BOOK.cover = null; markDirty(); renderCovRow(); }
 });
-$('inIssue').addEventListener('input', e => { BOOK.issue = e.target.value; markDirty(); });
-$('inTitle').addEventListener('input', e => { BOOK.title = e.target.value; markDirty(); renderBookBar(); });
-$('inSubtitle').addEventListener('input', e => { BOOK.subtitle = e.target.value; markDirty(); });
+$('bookInfoBtn').addEventListener('click', () => openBookModal('edit'));
+$('bmGo').addEventListener('click', () => {
+  commitBookMeta(); closeBookModal();
+  if(bmMode === 'new') toast('책을 만들었습니다 — 본문을 채워 보십시오');
+});
+$('bmAlt').addEventListener('click', () => {
+  commitBookMeta();
+  BOOK.chapters = [{ id: uid(), tag:'', title:'1. 새 챕터', voice:null, sheets:[{ blocks:[{ t:'p', html:'' }] }] }];
+  cur = 0; SEL = null;
+  closeBookModal(); markDirty(); renderAll();
+  toast('빈 책으로 시작합니다');
+});
 $('resetBtn').addEventListener('click', e => {
   ask(e.target, '임시저장을 지우고 기본 책으로 되돌린다. 발행본은 유지된다.', '초기화', true, () => {
     try{ localStorage.removeItem(K_DRAFT); }catch(err){}
@@ -1118,21 +1269,81 @@ $('previewBtn').addEventListener('click', () => {
   }
 });
 
+/* ── 글자 포맷 툴바 (문단 드래그 선택) ── */
+function fmtTargetEl(){
+  const sel = window.getSelection();
+  if(!sel.rangeCount || sel.isCollapsed) return null;
+  const node = sel.anchorNode;
+  const el = (node.nodeType === 3 ? node.parentElement : node).closest('.bp[contenteditable]');
+  if(!el) return null;
+  const fnode = sel.focusNode;
+  if(!(el.contains(fnode))) return null;
+  return el;
+}
+function showFmt(){
+  const el = fmtTargetEl();
+  const f = $('fmt');
+  if(!el){ f.classList.remove('open'); return; }
+  const r = window.getSelection().getRangeAt(0).getBoundingClientRect();
+  f.classList.add('open');
+  const w = f.offsetWidth, h = f.offsetHeight;
+  const x = Math.min(Math.max(8, r.left + r.width/2 - w/2), window.innerWidth - w - 8);
+  let y = r.top - h - 8;
+  if(y < 8) y = r.bottom + 8;
+  f.style.left = x + 'px'; f.style.top = y + 'px';
+}
+document.addEventListener('mouseup', e => {
+  if(e.target.closest('#fmt')) return;
+  setTimeout(showFmt, 0);
+});
+document.addEventListener('keyup', e => {
+  if(e.key.startsWith('Arrow') || e.key === 'Shift') setTimeout(showFmt, 0);
+});
+$('fmt').addEventListener('mousedown', e => e.preventDefault()); /* 셀렉션 유지 */
+$('fmt').addEventListener('click', e => {
+  const b = e.target.closest('[data-f]');
+  if(!b) return;
+  const el = fmtTargetEl();
+  if(!el) return;
+  const kind = b.dataset.f;
+  if(kind === 'b') document.execCommand('bold');
+  else if(kind === 'c-blue') document.execCommand('foreColor', false, '#067CAF');
+  else if(kind === 'c-pink') document.execCommand('foreColor', false, '#ED2390');
+  else if(kind === 'hl'){
+    try{ document.execCommand('hiliteColor', false, '#F2C53D'); }
+    catch(err){ document.execCommand('backColor', false, '#F2C53D'); }
+  }
+  else if(kind === 'sm') document.execCommand('fontSize', false, '2');
+  else if(kind === 'lg') document.execCommand('fontSize', false, '5');
+  else if(kind === 'clear') document.execCommand('removeFormat');
+  /* 저장 + 표시 정규화(브라우저 font 태그 → 클래스 span) */
+  const { si, bi } = el.dataset;
+  const blk = chap().sheets[+si].blocks[+bi];
+  blk.html = sanitizeHtml(el.innerHTML);
+  el.innerHTML = blk.html;
+  markDirty(); queueOverflow();
+  window.getSelection().removeAllRanges();
+  $('fmt').classList.remove('open');
+});
+
 /* ── 전역 닫기 ── */
 document.addEventListener('click', e => {
   if(!e.target.closest('#palette') && !e.target.closest('[data-act="plus"]')) closePalette();
   if(!askGuard && !e.target.closest('#ask')) closeAsk();
 });
+$('bdim').addEventListener('click', e => { if(e.target === $('bdim')) closeBookModal(); });
 document.addEventListener('keydown', e => {
   if(e.key === 'Escape'){
-    closePalette(); closeAsk(); clearSel();
+    closePalette(); closeAsk(); clearSel(); closeBookModal();
     document.querySelector('.side').classList.remove('open');
+    $('fmt').classList.remove('open');
   }
 });
 
 /* ── 시작 ── */
 renderAll();
 if(_draft){ lastSaved = Date.now(); refreshStat(); toast('임시저장본을 불러왔습니다'); }
+else openBookModal('new'); /* 첫 방문 — 책 기본 정보부터 (샘플 값이 채워져 있음) */
 </script>
 </body>
 </html>
