@@ -3307,7 +3307,7 @@ function renderSheets(){
         <div class="vlabel">${c.voice.label}<small>${c.voice.dur}</small></div>
         <div class="wave">${"<i></i>".repeat(30)}</div>
       </div>
-      <audio id="voiceAudio" src="${encodeURI(VIDEO_SRC)}" preload="none"></audio>
+      <audio id="voiceAudio" src="${c.voiceSrc || encodeURI(VIDEO_SRC)}" preload="none"></audio>
     </div>` : ``}
     ${c.videoUrl ? `
       <div class="vidwrap">
