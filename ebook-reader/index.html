@@ -4037,7 +4037,7 @@ startFlow();
   .rs-bar a:hover{background:#F0EDE6}
   .rs-bar .t{font-size:.98rem; font-weight:800; margin:0 auto}
   .rs-bar .md{font-size:.7rem; font-weight:800; padding:4px 10px; border-radius:7px; background:#FBF3D8; color:#8a6d1c}
-  .rs-in{max-width:960px; margin:0 auto; padding:36px 22px 90px}
+  .rs-in{max-width:880px; margin:0 auto; padding:36px 22px 90px}
   .rs-h{font-size:1.5rem; font-weight:900; letter-spacing:-.02em}
   .rs-sub{font-size:.86rem; color:#8f897d; margin:6px 0 24px}
   .rs-now{display:flex; gap:18px; align-items:center; background:#fff; border:1px solid #E5E1D6; border-radius:18px;
@@ -4052,7 +4052,7 @@ startFlow();
   .rs-now .go{margin-left:auto; font-size:.86rem; font-weight:800; color:#8a6d1c; background:#FBF3D8;
     border-radius:999px; padding:10px 16px; white-space:nowrap; flex-shrink:0}
   .rs-gh{font-size:.78rem; font-weight:800; color:#8f897d; letter-spacing:.06em; margin:0 0 12px}
-  .rs-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(96px, 1fr)); gap:12px}
+  .rs-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(190px, 1fr)); gap:16px}
   .rs-bk{position:relative; aspect-ratio:210/297; border-radius:9px; border:1px solid #E5E1D6; background:#fff;
     display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; padding:8px;
     cursor:pointer; transition:transform .1s; overflow:hidden; text-align:center}
@@ -4080,25 +4080,26 @@ startFlow();
   .rs-now .cv{background:#F4F1EA; border-color:#E5E5E5}
   .rs-now .go{background:#E5F7FF; color:#045D84}
   .rs-gh{color:#8f897d}
-  .rs-bk{aspect-ratio:auto; border:none; background:transparent; padding:0; border-radius:0;
-    display:flex; flex-direction:column; gap:7px; text-align:left; justify-content:flex-start}
-  .rs-bk.own{background:transparent; border:none}
-  .rs-bk.now{outline:none}
-  .rs-bk .cvwrap{position:relative; width:100%; aspect-ratio:210/297; border-radius:8px; overflow:hidden;
-    background:#fff; border:1px solid #E5E5E5}
-  .rs-bk .cvwrap.empty{display:flex; align-items:center; justify-content:center; color:#B5B0A5; font-size:.64rem; font-weight:800}
+  /* 편집기 bkcard와 동일 규격 카드 */
+  .rs-bk{aspect-ratio:auto; background:#fff; border:1px solid #E5E5E5; border-radius:16px; padding:16px;
+    display:flex; flex-direction:column; gap:10px; text-align:left; justify-content:flex-start; min-height:230px}
+  .rs-bk:hover{transform:translateY(-2px); border-color:#067CAF}
+  .rs-bk.own{background:#fff; border-color:#E5E5E5}
+  .rs-bk.now{outline:none; border-color:#067CAF}
+  .rs-bk .cvwrap{position:relative; width:100%; aspect-ratio:210/297; border-radius:9px; overflow:hidden;
+    background:#F4F1EA; border:1px solid #E5E5E5}
+  .rs-bk .cvwrap.empty{display:flex; align-items:center; justify-content:center; color:#B5B0A5; font-size:.66rem; font-weight:800}
   .rs-bk .cvimg{position:absolute; inset:0; width:100%; height:100%; object-fit:cover}
-  .rs-bk .lbl{display:flex; flex-direction:column; gap:1px}
-  .rs-bk .lbl .no{font-size:.58rem; color:#8f897d}
-  .rs-bk .lbl .bt{font-size:.7rem; color:#121212; line-height:1.35; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden}
-  .rs-bk.own .cvwrap{border-color:#9CCFE8}
-  .rs-bk.now .cvwrap{outline:2px solid #067CAF}
+  .rs-bk .lbl .bt{display:block; font-size:.88rem; font-weight:800; color:#121212;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .rs-bk .chip{align-self:flex-start; font-size:.68rem; font-weight:800; padding:3px 8px; border-radius:6px}
+  .rs-bk .chip.now{background:#E5F7FF; color:#045D84}
+  .rs-bk .chip.pub{background:#E8F5E4; color:#2E6B3E}
+  .rs-bk .chip.gray{background:#F0EEEA; color:#8f897d}
   .rs-bk.lock .cvimg{filter:grayscale(.9); opacity:.45}
   .rs-bk.lock .lbl .bt{color:#B5B0A5}
   .rs-bk .lk{position:absolute; z-index:3; top:6px; right:7px; font-size:.85rem}
-  .rs-bk .edited{position:absolute; z-index:3; left:7px; top:7px; width:9px; height:9px; border-radius:50%;
-    background:#2E9E57; box-shadow:0 0 6px rgba(46,158,87,.6)}
-  @media (max-width:560px){ .rs-grid{grid-template-columns:repeat(auto-fill, minmax(78px, 1fr))} }
+  @media (max-width:560px){ .rs-grid{grid-template-columns:repeat(auto-fill, minmax(150px, 1fr))} }
 </style>
 <div class="rshelf" id="rshelf">
   <div class="rs-bar">
@@ -4225,10 +4226,13 @@ const CAT_MAX = CATALOG.reduce((m, b) => Math.max(m, b.no), 0);
     const b = CAT[n];
     const k = (n === curNo) ? 'now' : (LIB[n] ? 'own' : 'lock');
     const ttl = (n === curNo) ? curTitle : ((LIB[n] && LIB[n].title) ? LIB[n].title : (b ? b.t : ''));
-    const cov = b
-      ? `<span class="cvwrap"><img class="cvimg" src="${b.img}" alt="" loading="lazy">${LIB[n] ? '<i class="edited" title="발행 수정본"></i>' : ''}${k === 'lock' ? '<span class="lk">🔒</span>' : ''}</span>`
+    const cover = (LIB[n] && LIB[n].cover) ? LIB[n].cover : (b ? b.img : null);
+    const cov = cover
+      ? `<span class="cvwrap"><img class="cvimg" src="${cover}" alt="" loading="lazy">${k === 'lock' ? '<span class="lk">🔒</span>' : ''}</span>`
       : `<span class="cvwrap empty">NO.${n}</span>`;
-    cells += `<div class="rs-bk ${k === 'now' ? 'own now' : k}" data-k="${k}" data-n="${n}" title="${ttl}">${cov}<span class="lbl"><span class="no">NO.${n}</span><span class="bt">${ttl}</span></span></div>`;
+    const chip = k === 'now' ? '<span class="chip now">이번 호</span>'
+      : (k === 'own' ? '<span class="chip pub">발행됨</span>' : '<span class="chip gray">잠김</span>');
+    cells += `<div class="rs-bk ${k === 'now' ? 'own now' : k}" data-k="${k}" data-n="${n}" title="${ttl}">${cov}<span class="lbl"><span class="bt">NO.${n} · ${ttl}</span></span>${chip}</div>`;
   }
   document.getElementById('rsGrid').innerHTML = cells;
   function openNow(){ shelf.classList.remove('open'); window.scrollTo({ top: 0 }); }
