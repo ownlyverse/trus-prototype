@@ -74,10 +74,10 @@ input,select,textarea{font:inherit;color:inherit}
 /* ── ② 강의 구성 (구조만) ── */
 .meta{display:flex; align-items:center; gap:14px; font-size:.78rem; color:var(--muted); margin-bottom:12px; flex-wrap:wrap}
 .meta b{color:var(--text)}
-.sgwrap{overflow-x:auto}
+.sgwrap{overflow:auto; max-height:64vh}
 .sgtable{border:1px solid var(--line); border-radius:8px; min-width:1020px}
 .sghead,.sgrow,.arow{display:grid; grid-template-columns:28px 168px minmax(200px,1fr) 190px minmax(230px,330px) 90px; gap:12px; align-items:center}
-.sghead{padding:8px 12px; background:var(--soft); border-bottom:1px solid var(--line); font-size:.7rem; font-weight:700; color:var(--muted); border-radius:8px 8px 0 0}
+.sghead{padding:8px 12px; background:var(--soft); border-bottom:1px solid var(--line); font-size:.7rem; font-weight:700; color:var(--muted); border-radius:8px 8px 0 0; position:sticky; top:0; z-index:5}
 .sgrow{padding:11px 12px; border-bottom:1px solid var(--line); background:#fff}
 .sgrow .drag{color:var(--faint); font-size:.78rem; cursor:grab; text-align:center; user-select:none}
 .sg-no{font-size:.72rem; font-weight:800; color:var(--blue-d); background:var(--blue-bg); border-radius:5px; padding:5px 12px; text-align:center; white-space:nowrap; justify-self:start}
@@ -104,6 +104,8 @@ input,select,textarea{font:inherit;color:inherit}
 .cond input.wide{width:150px}
 .cond input:focus{outline:none; border-color:var(--blue)}
 .arm{width:24px; height:24px; border-radius:5px; color:var(--faint); font-size:.68rem; display:flex; align-items:center; justify-content:center; justify-self:end}
+.aops{display:flex; gap:2px; justify-self:end}
+.aops .arm{justify-self:auto}
 .arm:hover{background:#FDECEC; color:var(--red)}
 .fbtn{font-size:.74rem; font-weight:700; color:var(--blue-d); border:1px dashed var(--line-2); border-radius:5px; padding:5px 9px}
 .fbtn:hover{border-color:var(--blue); background:var(--blue-bg)}
@@ -206,7 +208,26 @@ input,select,textarea{font:inherit;color:inherit}
 .qm-x{color:var(--faint); font-size:1rem; padding:4px 9px; border-radius:6px}
 .qm-x:hover{background:var(--soft)}
 .qm-body{padding:16px 18px; overflow-y:auto; display:flex; flex-direction:column; gap:12px}
-.qm-foot{display:flex; justify-content:flex-end; gap:8px; padding:12px 18px; border-top:1px solid var(--line)}
+.qm-foot{display:flex; align-items:center; justify-content:flex-end; gap:8px; padding:12px 18px; border-top:1px solid var(--line)}
+/* 학생 화면 미리보기 */
+.pv-timer{display:inline-flex; align-items:center; gap:6px; font-size:.76rem; font-weight:700; color:#8A2D55; background:#FBE4EE; border:1px solid #F0C4D6; border-radius:6px; padding:4px 11px; margin-bottom:12px}
+.pv-box{border:1.5px solid var(--line-2); border-radius:10px; background:#fff; padding:16px}
+.pv-box p{font-size:.88rem; line-height:1.9; color:#3A3F49; margin-bottom:10px}
+.pv-hl{background:linear-gradient(transparent 55%, #FFE08A 55%); border-radius:2px}
+.pv-quote{font-size:.98rem; font-weight:700; text-align:center; line-height:1.7; margin:8px 0 14px}
+.pv-pill{display:block; margin:0 auto; font-size:.84rem; font-weight:700; color:#fff; background:var(--blue); border-radius:99px; padding:11px 22px; text-align:center; max-width:280px}
+.pv-canvas{height:130px; border:1.5px dashed var(--line-2); border-radius:8px; background:var(--soft); display:flex; align-items:center; justify-content:center; color:var(--faint); font-size:.8rem; margin-bottom:10px}
+.pv-colors{display:flex; gap:8px; justify-content:center}
+.pv-colors i{width:22px; height:22px; border-radius:50%; display:inline-block; border:2px solid #fff; box-shadow:0 0 0 1px var(--line-2)}
+.pv-ta{width:100%; border:1.5px solid var(--line-2); border-radius:8px; padding:11px 13px; font-size:.86rem; min-height:80px; background:var(--soft); color:var(--faint)}
+.pv-q{margin-bottom:14px}
+.pv-q .qt{font-size:.88rem; font-weight:800; margin-bottom:8px}
+.pv-q .qt small{color:var(--muted); font-weight:600}
+.pv-opt{display:block; width:100%; text-align:left; font-size:.84rem; font-weight:600; color:var(--sub); border:1.5px solid var(--line-2); border-radius:7px; padding:9px 12px; margin-bottom:6px; background:#fff}
+.pv-btns{display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-top:10px}
+.pv-btn{font-size:.84rem; font-weight:700; padding:10px 18px; border-radius:8px; border:1.5px solid var(--line-2); color:var(--sub); background:#fff}
+.pv-btn.pri{background:var(--blue); border-color:var(--blue); color:#fff}
+.pv-note{font-size:.76rem; color:var(--muted); text-align:center; margin-top:10px}
 
 .toast{position:fixed; left:50%; bottom:24px; transform:translateX(-50%) translateY(10px); z-index:90; background:var(--text); color:#fff;
   padding:11px 18px; border-radius:8px; font-size:.84rem; font-weight:600; box-shadow:0 8px 24px rgba(16,24,40,.25); opacity:0; transition:.2s; pointer-events:none}
@@ -310,6 +331,14 @@ input,select,textarea{font:inherit;color:inherit}
   </div>
 </div>
 
+<div class="mbg" id="pmbg">
+  <div class="qmodal">
+    <div class="qm-head"><b>미리보기</b><span class="qm-sub" id="pmSub"></span><button class="qm-x" onclick="pClose()">✕</button></div>
+    <div class="qm-body" id="pmBody"></div>
+    <div class="qm-foot"><span style="font-size:.74rem;color:var(--faint);margin-right:auto">학생 화면 미리보기 (목업)</span><button class="tbtn pri" onclick="pClose()">닫기</button></div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -387,8 +416,8 @@ function condBody(i,j,a){
   if(a.k==='speak') return `꾹 누르고 <input type="number" min="1" value="${a.done||3}" onchange="actDone(${i},${j},this.value)"> 초`;
   if(a.k==='write') return `<input type="number" min="1" value="${a.done||8}" onchange="actDone(${i},${j},this.value)"> 자 이상`;
   if(a.k==='play')  return (a.up
-    ? `<span class="fchip">📄 ${esc(a.file||'워크시트.png')}<button onclick="actUp(${i},${j},false)" title="파일 제거">✕</button></span> 작성본 올려야 통과`
-    : `<button class="fbtn miss" onclick="actUp(${i},${j},true)">⬆ 워크시트 파일 올리기 (필수)</button> 작성본 올려야 통과`);
+    ? `<span class="fchip">📄 ${esc(a.file||'워크시트.png')}<button onclick="actUp(${i},${j},false)" title="파일 제거">✕</button></span> <button class="fbtn" onclick="actUp(${i},${j},true)">⬆ 교체</button> 작성본 올려야 통과`
+    : `<button class="fbtn miss" onclick="actUp(${i},${j},true)">⬆ 파일 업로드 (필수)</button> 작성본 올려야 통과`);
   return '';
 }
 function renderStruct(){
@@ -409,11 +438,14 @@ function renderStruct(){
     s.acts.forEach((a,j)=>{
       h += `<div class="arow">
         <span class="lk">└</span>
-        <span class="a-tag">${AT[a.k].ic} 인터랙티브 · ${AT[a.k].n}</span>
+        <span class="a-tag">${AT[a.k].n}</span>
         <input class="a-t" value="${esc(a.t)}" onchange="actTitle(${i},${j},this.value)">
         <span class="tcell">${timeHtml(i,j,a)}</span>
         <span class="cond">${condBody(i,j,a)}</span>
-        <button class="arm" onclick="rmAct(${i},${j})" title="삭제">✕</button>
+        <span class="aops">
+          <button class="arm" onclick="pOpen(${i},${j})" title="학생 화면 미리보기">👁</button>
+          <button class="arm" onclick="rmAct(${i},${j})" title="삭제">✕</button>
+        </span>
       </div>`;
     });
     h += `<div class="addact">
@@ -460,7 +492,50 @@ let qCur = null;
 function qOpen(i,j){ qCur = {i,j}; renderQModal(); document.getElementById('qmbg').classList.add('on'); }
 function qClose(){ document.getElementById('qmbg').classList.remove('on'); qCur = null; renderStruct(); }
 document.getElementById('qmbg').addEventListener('click', e=>{ if(e.target === e.currentTarget) qClose(); });
-document.addEventListener('keydown', e=>{ if(e.key === 'Escape' && qCur) qClose(); });
+let pCur = null;
+function pOpen(i,j){ pCur = {i,j}; renderPreview(); document.getElementById('pmbg').classList.add('on'); }
+function pClose(){ document.getElementById('pmbg').classList.remove('on'); pCur = null; }
+document.getElementById('pmbg').addEventListener('click', e=>{ if(e.target === e.currentTarget) pClose(); });
+document.addEventListener('keydown', e=>{ if(e.key === 'Escape'){ if(pCur) pClose(); else if(qCur) qClose(); } });
+function renderPreview(){
+  const {i,j} = pCur, a = segs[i].acts[j];
+  const mm = Math.floor((a.dur||0)/60), ss = String((a.dur||0)%60).padStart(2,'0');
+  $('pmSub').textContent = `${AT[a.k].n} · ${a.t}`;
+  let body = `<div class="pv-timer">⏱ ${mm}:${ss} · 시간이 끝나면 다 같이 다음으로</div>`;
+  if(a.k==='read'){
+    body += `<div class="pv-box">
+      <p>일은 해야 할 것들의 목록이 아니라, 하지 않을 것들의 경계에서 시작됩니다.</p>
+      <p><span class="pv-hl">전략이란 결국 멈춤의 기술입니다.</span> 무엇을 하지 않을지 정하는 순간, 남은 것들이 또렷해집니다.</p>
+      <p style="margin-bottom:0">오늘 하루를 떠올려 보세요. 가장 오래 붙잡고 있던 일이, 정말 가장 중요한 일이었나요?</p>
+    </div>
+    <div class="pv-note">문장을 누르면 형광펜 — 끝까지 읽고 ${a.done||1}곳 이상 하이라이트하면 완료</div>`;
+  } else if(a.k==='draw'){
+    body += `<div class="pv-box"><div class="pv-canvas">🎨 손 가는 대로 그리는 캔버스</div>
+      <div class="pv-colors"><i style="background:#F26D9C"></i><i style="background:#3182F6"></i><i style="background:#46D5B2"></i><i style="background:#F2C14E"></i><i style="background:#2B2B33"></i></div></div>
+    <div class="pv-note">스트로크 ${a.done||12}회 이상 그리면 완료</div>`;
+  } else if(a.k==='quiz'){
+    body += `<div class="pv-box">` + (a.qs||[]).map((qz,qi)=>`
+      <div class="pv-q">
+        <div class="qt">✎ 문항 ${qi+1}. ${esc(qz.q||'(질문 미입력)')} ${qz.multi?'<small>(복수 선택)</small>':''}</div>
+        ${qz.opts.map((o,oi)=>`<button class="pv-opt">${oi+1}. ${esc(o||'(보기 미입력)')}</button>`).join('')}
+      </div>`).join('') + `<button class="pv-pill" style="width:100%; max-width:none">선택 완료 — 채점하기</button></div>
+    <div class="pv-note">모든 문항을 고르면 채점 — 정답/오답이 표시돼요</div>`;
+  } else if(a.k==='speak'){
+    body += `<div class="pv-box"><div class="pv-quote">“나는 하지 않을 것을 정하는 데서<br>전략을 시작한다.”</div>
+      <span class="pv-pill">🎤 꾹 누르고 소리 내어 말하기</span></div>
+    <div class="pv-note">${a.done||3}초 이상 꾹 누르고 말하면 완료</div>`;
+  } else if(a.k==='write'){
+    body += `<div class="pv-box"><textarea class="pv-ta" disabled placeholder="오늘 나는 …라는 걸 알았다."></textarea></div>
+    <div class="pv-note">${a.done||8}자 이상 쓰면 완료</div>`;
+  } else if(a.k==='play'){
+    body += `<div class="pv-box" style="text-align:center">
+      <div style="font-size:.9rem; font-weight:700; margin-bottom:4px">${esc(a.t)}</div>
+      <div style="font-size:.78rem; color:var(--muted); margin-bottom:12px">📄 ${esc(a.file||'워크시트.png')}</div>
+      <div class="pv-btns"><span class="pv-btn">⬇ 워크시트 내려받기</span><span class="pv-btn pri">⬆ 작성한 워크시트 올리기</span></div></div>
+    <div class="pv-note">내려받아 작성하고, 작성본을 올려야 완료</div>`;
+  }
+  $('pmBody').innerHTML = body;
+}
 function renderQModal(){
   if(!qCur) return;
   const {i,j} = qCur, a = segs[i].acts[j];

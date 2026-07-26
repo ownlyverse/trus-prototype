@@ -923,7 +923,7 @@ function renderCurriculum(){
     + (c.state==='now' ? ' aria-current="step"' : '')
     + `><span class="md-ic">${c.state==='done' ? '✓' : '▶'}</span>`
     + `<span class="md-name">${c.n}. ${c.name}<small>${c.prod}</small></span>`
-    + (c.state==='done' ? '<span class="cur-badge">산출물 완료</span>' : '')
+    + (c.state==='done' ? '<span class="cur-badge">제출 완료</span>' : '')
     + `</div>`).join('');
 }
 renderCurriculum();
