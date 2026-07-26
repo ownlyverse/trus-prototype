@@ -45,7 +45,9 @@ h1{font-size:1.45rem; font-weight:900; margin:36px 0 20px}
 .me .joined{font-size:.78rem; color:var(--sub); margin-top:3px}
 .badge.uni{background:#F2F4F6; color:var(--ink)}
 
-/* 생각구독 카드 */
+/* 생각구독 카드 — 미색 */
+.card.subx{background:#FBF8EF; border-color:#EDE6D4}
+.card.subx .krow{border-bottom-color:#F0EADB}
 .badge.sub-on{background:var(--blue-soft); color:var(--blue-d)}
 .krow{display:flex; justify-content:space-between; gap:12px; padding:9px 0; border-bottom:1px solid #F2F4F6; font-size:.9rem}
 .krow:last-of-type{border-bottom:none}
@@ -137,11 +139,11 @@ h1{font-size:1.45rem; font-weight:900; margin:36px 0 20px}
       </div>
     </section>
 
-    <section class="card" aria-label="생각구독">
-      <div class="ch"><h2>생각구독</h2><span class="badge sub-on">구독 중 · 연간</span></div>
+    <section class="card subx" aria-label="생각구독">
+      <div class="ch"><h2>생각구독</h2><span class="badge sub-on">구독 중 · 1년권</span></div>
+      <div class="krow"><span class="k">구독권</span><span class="v">1년권 <small>3개월·6개월·1년 중</small></span></div>
       <div class="krow"><span class="k">구독 기간</span><span class="v">2026.01.15 ~ 2027.01.14 <small>D-173</small></span></div>
       <div class="krow"><span class="k">다음 갱신일</span><span class="v">2027.01.15</span></div>
-      <div class="krow"><span class="k">이번 달 책</span><span class="v">나는 '언러닝' 합니다</span></div>
       <a class="card-cta" href="../subscribe/">구독 상세 · 구매내역 보기 <span aria-hidden="true">→</span></a>
     </section>
 
