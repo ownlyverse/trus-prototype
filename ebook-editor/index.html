@@ -108,6 +108,16 @@ input,textarea{font:inherit;color:inherit}
   background:rgba(255,255,255,.6); width:180px}
 .tag-in:hover{border-color:#CFCCC5}
 .tag-in:focus{outline:none; border-color:var(--blue-d); background:#fff}
+.vrow{display:flex; align-items:center; gap:10px; font-size:.82rem; font-weight:700; color:var(--sub)}
+.tswitch{position:relative; width:40px; height:23px; border-radius:999px; background:#CFCCC5; transition:background .15s; flex-shrink:0}
+.tswitch i{position:absolute; top:2.5px; left:3px; width:18px; height:18px; border-radius:50%; background:#fff;
+  box-shadow:0 1px 3px rgba(0,0,0,.25); transition:left .15s}
+.tswitch.on{background:var(--blue-d)}
+.tswitch.on i{left:19px}
+.vrow .vprev{display:inline-flex; align-items:center; gap:7px; background:#fff; border:1px solid var(--line);
+  border-radius:999px; padding:4px 12px 4px 4px; font-size:.78rem; color:var(--ink)}
+.vrow .vprev .vp{width:22px; height:22px; border-radius:50%; background:var(--blue-d); color:#fff;
+  display:flex; align-items:center; justify-content:center; font-size:.56rem}
 .voice-add{font-size:.8rem; font-weight:700; color:var(--sub); padding:7px 10px; border-radius:8px;
   border:1.5px dashed #CFCCC5}
 .voice-add:hover{color:var(--blue-dd); border-color:var(--blue-d)}
@@ -613,48 +623,18 @@ function renderChapList(){
 }
 
 function renderChapHead(){
-  const v = chap().voice;
-  let vHtml;
-  if(chap()._voiceEdit){
-    vHtml = `<div class="voice-form">
-      <input class="vlab" id="vLab" value="${escHtml(v ? v.label : '작가가 이 장을 여는 말')}" aria-label="여는 말 라벨">
-      <input class="vdur" id="vDur" value="${escHtml(v ? v.dur : '')}" placeholder="1:12" aria-label="재생시간">
-      <button class="mini" id="vSave">저장</button>
-      <button class="mini" id="vCancel">취소</button>
-      <span class="verr" id="vErr"></span>
-    </div>`;
-  } else if(v){
-    vHtml = `<div class="voice-bar"><span class="vp">▶</span>${escHtml(v.label)}
-      <span class="vd">${escHtml(v.dur)}</span>
-      <button class="vx" id="vEdit" aria-label="여는 말 수정">수정</button>
-      <button class="vx" id="vDel" aria-label="여는 말 삭제">삭제</button></div>`;
-  } else {
-    vHtml = `<button class="voice-add" id="vAdd">+ 여는 말 추가</button>`;
-  }
-  $('crow').innerHTML = vHtml;
-  const bind = (id, fn) => { const el = $(id); if(el) el.addEventListener('click', fn); };
-  bind('vAdd', () => { chap()._voiceEdit = true; renderChapHead(); });
-  bind('vEdit', () => { chap()._voiceEdit = true; renderChapHead(); });
-  bind('vDel', () => { chap().voice = null; markDirty(); renderChapHead(); });
-  bind('vCancel', () => { delete chap()._voiceEdit; renderChapHead(); });
-  bind('vSave', () => {
-    const lab = $('vLab').value.trim() || '작가가 이 장을 여는 말';
-    const dur = $('vDur').value.trim();
-    if(!/^\d{1,2}:\d{2}$/.test(dur)){ $('vErr').textContent = '시간 형식: 분:초 (예 1:12)'; return; }
-    chap().voice = { label: lab, dur };
-    delete chap()._voiceEdit;
+  const on = !!chap().voice;
+  $('crow').innerHTML = `<div class="vrow">
+    <span>이 장을 여는 말 (음성 파일)</span>
+    <button class="tswitch${on ? ' on' : ''}" id="vToggle" role="switch" aria-checked="${on}" aria-label="여는 말 켜기/끄기"><i></i></button>
+    ${on ? `<span class="vprev"><span class="vp">▶</span>${escHtml(chap().voice.label)} · ${escHtml(chap().voice.dur)}</span>` : ''}
+  </div>`;
+  $('vToggle').addEventListener('click', () => {
+    chap().voice = chap().voice ? null : { label: '작가가 이 장을 여는 말', dur: '1:04' };
     markDirty(); renderChapHead();
   });
 }
 
-/* 블록 조판 클래스 (기본값이면 빈 문자열) — 편집 캔버스·발행 공용 */
-function fmtCls(b){
-  let c = '';
-  if(b.align === 'c') c += ' al-c'; else if(b.align === 'r') c += ' al-r';
-  if(b.lh === 's') c += ' lh-sm'; else if(b.lh === 'l') c += ' lh-lg';
-  if(b.ls === 's') c += ' ls-sm'; else if(b.ls === 'l') c += ' ls-lg';
-  return c;
-}
 function igapHTML(si, bi){
   return `<div class="igap"><button class="iplus" data-act="plus" data-si="${si}" data-bi="${bi}" aria-label="블록 추가">＋</button></div>`;
 }
