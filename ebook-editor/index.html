@@ -35,6 +35,10 @@ input,textarea{font:inherit;color:inherit}
 .bt-btn .car{font-size:.6rem; color:var(--sub)}
 .bar .tag{font-size:.7rem; font-weight:800; padding:4px 10px; border-radius:7px; background:var(--blue-soft);
   color:var(--blue-dd); flex-shrink:0}
+.bar .spacer{flex:1}
+.issue-badge{font-size:.64rem; font-weight:800; letter-spacing:.12em; padding:4px 9px; border-radius:6px;
+  background:var(--blue-dd); color:#fff; flex-shrink:0}
+.bar .bt{max-width:32vw}
 .bar .stat{font-size:.78rem; color:var(--sub); white-space:nowrap}
 .btn-ghost{font-size:.84rem; font-weight:800; padding:9px 14px; border-radius:10px; border:1.5px solid var(--line); background:#fff}
 .btn-ghost:hover{border-color:var(--ink)}
@@ -178,6 +182,7 @@ input,textarea{font:inherit;color:inherit}
 .ls-sm{letter-spacing:-.03em}
 .ls-lg{letter-spacing:.06em}
 .bd{text-align:center; color:#B9B4AB; font-size:.7rem; padding:12px 0; cursor:default}
+.bct{font-size:1.5rem; font-weight:900; letter-spacing:-.02em; line-height:1.35; padding:4px 0 10px; min-height:1.4em}
 .blk.sel{outline:2px solid var(--blue-d); outline-offset:5px; border-radius:2px}
 .plabel{display:inline-block; font-size:.6rem; font-weight:800; letter-spacing:.12em; color:var(--blue-dd);
   background:var(--blue-soft); border-radius:5px; padding:2px 7px; margin-bottom:4px}
@@ -325,12 +330,12 @@ input,textarea{font:inherit;color:inherit}
 <body>
 
 <header class="bar">
-  <a class="back" href="../subscribe/">← 윤소정의 생각구독</a>
+  <a class="back" href="../ebook-reader/" title="생각구독 서재로" aria-label="생각구독 서재로">←</a>
   <button class="m-toc" onclick="document.querySelector('.side').classList.toggle('open')">☰ 챕터</button>
-  <div class="book">
-    <span class="bt serif" id="bookTitle"></span>
-    <span class="tag">관리자 모드</span>
-  </div>
+  <span class="issue-badge" id="issueBadge" hidden></span>
+  <span class="bt serif" id="bookTitle"></span>
+  <span class="tag">관리자 모드</span>
+  <span class="spacer"></span>
   <span class="stat" id="stat" role="status" aria-live="polite">임시저장됨</span>
   <button class="btn-ghost pv" id="bookInfoBtn">책 정보</button>
   <button class="btn-ghost pv" id="previewBtn">미리보기</button>
@@ -346,7 +351,6 @@ input,textarea{font:inherit;color:inherit}
 
   <main class="editor" id="editorScroll">
     <div class="chead">
-      <input class="title-in" id="chapTitle" aria-label="챕터 제목" placeholder="챕터 제목">
       <div class="crow" id="crow"></div>
     </div>
     <div id="sheets"></div>
@@ -420,10 +424,11 @@ function mockBook(){
     subtitle: '일과 관계에서 나를 지키는 법',
     cover: null,
     chapters: [
-      { id:'ch1', tag:'거절의 기술', title:'1. 거절에도 예의가 있다',
+      { id:'ch1', tag:'', title:'1. 거절에도 예의가 있다',
         voice:{ label:'작가가 이 장을 여는 말', dur:'1:12' },
         sheets:[
           { blocks:[
+            { t:'ctitle', text:'1. 거절에도 예의가 있다' },
             { t:'head', en:'Saying no,\nkindly.', ko:'거절에도 예의가 있다' },
             { t:'p', html:'거절을 미루는 것은 배려가 아니라 유예다. 대답을 미루는 동안 상대는 계획을 세우지 못하고, 나는 마음의 빚을 키운다. 상대의 시간을 아끼는 가장 정중한 방법은, <span class="hl-y">빠르고 분명하게 말하는 것이다.</span>' },
             { t:'p', html:'분명한 거절에는 세 가지가 담긴다. 요청을 이해했다는 확인, 들어줄 수 없다는 결론, 그리고 가능하다면 대안. 이 셋이 갖춰지면 거절은 관계를 상하게 하지 않는다. 오히려 다음 부탁을 쉽게 만든다.' }
@@ -436,6 +441,7 @@ function mockBook(){
       { id:'ch2', tag:'', title:'2. 경계는 벽이 아니라 문이다', voice:null,
         sheets:[
           { blocks:[
+            { t:'ctitle', text:'2. 경계는 벽이 아니라 문이다' },
             { t:'photo', src:svgPh('사진 예시', '#D8D4CC'), bleed:false },
             { t:'p', html:'경계를 세운다는 말은 관계를 끊는다는 뜻이 아니다. 담장 없는 집에는 손님이 오지 않는다. 어디까지가 마당이고 어디부터가 거실인지 모르기 때문이다. 문이 있는 집이 손님을 더 잘 맞이하듯, 경계가 있는 사람이 관계를 더 오래 지킨다.' },
             { t:'p', html:'경계는 선언이 아니라 반복으로 세워진다. 한 번의 큰 선언보다, 작은 요청에 일관되게 반응하는 편이 낫다. "퇴근 후에는 답장이 늦어요"를 열 번 지키는 것이, "연락하지 마세요"를 한 번 말하는 것보다 강하다.' }
@@ -444,6 +450,7 @@ function mockBook(){
       { id:'ch3', tag:'', title:'3. 관계를 남기는 말투', voice:null,
         sheets:[
           { blocks:[
+            { t:'ctitle', text:'3. 관계를 남기는 말투' },
             { t:'p', html:'같은 거절도 말투에 따라 관계를 남기기도, 끝내기도 한다. 원칙은 하나다. <b>내용은 단호하게, 형식은 다정하게.</b>' },
             { t:'divider' },
             { t:'p', html:'단호한 내용이 없으면 거절이 아니라 흥정이 되고, 다정한 형식이 없으면 거절이 아니라 단절이 된다. 이 둘은 반대말이 아니라 한 문장의 앞뒤다.' }
@@ -603,7 +610,6 @@ function renderChapList(){
 }
 
 function renderChapHead(){
-  $('chapTitle').value = chap().title;
   const v = chap().voice;
   let vHtml;
   if(chap()._voiceEdit){
@@ -622,10 +628,7 @@ function renderChapHead(){
   } else {
     vHtml = `<button class="voice-add" id="vAdd">+ 여는 말 추가</button>`;
   }
-  $('crow').innerHTML = `
-    <input class="tag-in" id="tagIn" value="${escHtml(chap().tag || '')}" placeholder="장 태그 (선택)" aria-label="장 태그">
-    ${vHtml}`;
-  $('tagIn').addEventListener('input', e => { chap().tag = e.target.value; markDirty(); });
+  $('crow').innerHTML = vHtml;
   const bind = (id, fn) => { const el = $(id); if(el) el.addEventListener('click', fn); };
   bind('vAdd', () => { chap()._voiceEdit = true; renderChapHead(); });
   bind('vEdit', () => { chap()._voiceEdit = true; renderChapHead(); });
@@ -663,7 +666,9 @@ function blkHTML(b, si, bi){
     <button class="del" data-act="del" data-si="${si}" data-bi="${bi}" title="삭제" aria-label="블록 삭제">✕</button>
   </span>`;
   let body = '';
-  if(b.t === 'p'){
+  if(b.t === 'ctitle'){
+    body = `<div class="bct" contenteditable="true" data-si="${si}" data-bi="${bi}" data-f="text" data-ph="챕터 제목">${escHtml(b.text)}</div>`;
+  } else if(b.t === 'p'){
     body = `${(b.label || '').trim() ? `<span class="plabel">${escHtml(b.label)}</span>` : ''}<div class="bp${fmtCls(b)}" contenteditable="true" data-si="${si}" data-bi="${bi}" data-f="html" data-ph="내용 입력">${sanitizeHtml(b.html)}</div>`;
   } else if(b.t === 'head'){
     body = `<div class="bh">
@@ -751,8 +756,15 @@ function renderSheets(){
   }
 }
 
+function issueLabel(){
+  const v = (BOOK.issue || '').trim();
+  return v ? (/^\d+$/.test(v) ? 'NO.' + v : v) : '';
+}
 function renderBookBar(){
   $('bookTitle').textContent = BOOK.title || '(제목 없음)';
+  const ib = $('issueBadge');
+  ib.textContent = issueLabel();
+  ib.hidden = !issueLabel();
   document.title = '이북 편집기 — ' + (BOOK.title || '생각구독 관리자');
 }
 function renderCovRow(){
@@ -792,7 +804,7 @@ function closeBookModal(){ $('bdim').classList.remove('open'); }
 
 /* ─ 요소 라이브러리 ─ */
 const ELEMENTS = [
-  ['텍스트', [['p','문','문단'], ['head','H','헤드라인'], ['verse','❝','인용·운문'], ['title','T','표제지']]],
+  ['텍스트', [['ctitle','#','챕터 제목'], ['p','문','문단'], ['head','H','헤드라인'], ['verse','❝','인용·운문'], ['title','T','표제지']]],
   ['미디어', [['photo','▣','사진'], ['duo','▣▣','사진 두 장'], ['cover','■','전면 사진'], ['split','◧','카피+사진'], ['video','▶','영상']]],
   ['구조', [['toc','☰','목차'], ['divider','◆','구분선']]]
 ];
@@ -838,7 +850,7 @@ function clearSel(){
   document.querySelectorAll('.blk.sel').forEach(el => el.classList.remove('sel'));
   renderBlkProps();
 }
-const TYPE_NAME = { p:'문단', head:'헤드라인', verse:'인용·운문', photo:'사진', duo:'사진 두 장',
+const TYPE_NAME = { ctitle:'챕터 제목', p:'문단', head:'헤드라인', verse:'인용·운문', photo:'사진', duo:'사진 두 장',
   video:'영상', divider:'구분선', split:'카피+사진', cover:'전면 사진', title:'표제지', toc:'목차' };
 function segRow(name, cur, opts){
   return `<div class="segrow">${opts.map(([v, label]) =>
@@ -882,6 +894,8 @@ function renderBlkProps(){
       <input type="text" id="ppVurl" value="${escHtml(b.url || '')}" placeholder="https://youtu.be/…">
       <div class="row"><button class="mini" data-pact="vapply">적용</button></div>
       <p class="hintp">발행 시 이 장의 머리에 영상으로 붙습니다 (장당 1개).</p>`;
+  } else if(b.t === 'ctitle'){
+    html += `<p class="hintp">이 제목이 왼쪽 챕터 목록(문서 탭)에 자동으로 반영됩니다. 리더기에서도 장 제목으로 표시됩니다.</p>`;
   } else if(b.t === 'toc'){
     html += `<p class="hintp">챕터 구성(사이드바)에서 자동 생성됩니다. 리더기에서는 목차 지면으로 렌더되고, 항목을 누르면 그 장으로 이동합니다.</p>`;
   } else {
@@ -946,6 +960,7 @@ window.addEventListener('resize', queueOverflow);
 
 /* ═══════════ 블록·대지 조작 ═══════════ */
 const NEW_BLOCK = {
+  ctitle:  () => ({ t:'ctitle', text:'' }),
   p:       () => ({ t:'p', html:'' }),
   head:    () => ({ t:'head', en:'', ko:'' }),
   verse:   () => ({ t:'verse', text:'' }),
@@ -1000,6 +1015,7 @@ function moveBlock(si, bi, dir){
   markDirty(); renderSheets();
 }
 function isEmptyBlock(b){
+  if(b.t === 'ctitle') return !(b.text || '').trim();
   if(b.t === 'p') return !sanitizeHtml(b.html).replace(/<br>/g, '').trim();
   if(b.t === 'head') return !(b.en || '').trim() && !(b.ko || '').trim();
   if(b.t === 'verse') return !(b.text || '').trim();
@@ -1118,6 +1134,7 @@ $('sheets').addEventListener('input', e => {
   else if(f === 'text') blk.text = el.innerText.replace(/\n+$/, '');
   else if(f === 'note') blk.note = el.innerText.trim();
   else blk[f] = el.innerText.replace(/\n+$/, '');
+  if(blk.t === 'ctitle'){ chap().title = (blk.text || '').trim() || '(제목 없음)'; renderChapList(); }
   markDirty(); queueOverflow();
 });
 /* 붙여넣기는 평문만 */
@@ -1181,16 +1198,13 @@ function switchChap(i){
 function addChapter(){
   BOOK.chapters.push({
     id: uid(), tag: '', title: `${BOOK.chapters.length + 1}. 새 챕터`,
-    voice: null, sheets: [{ blocks: [{ t:'p', html:'' }] }]
+    voice: null, sheets: [{ blocks: [{ t:'ctitle', text: `${BOOK.chapters.length + 1}. 새 챕터` }, { t:'p', html:'' }] }]
   });
   cur = BOOK.chapters.length - 1;
   markDirty(); renderAll();
-  $('chapTitle').select();
-  toast('새 챕터를 추가했습니다');
+  toast('새 챕터를 추가했습니다 — 챕터 제목 블록을 눌러 제목을 정하십시오');
 }
-$('chapTitle').addEventListener('input', e => {
-  chap().title = e.target.value; markDirty(); renderChapList();
-});
+
 
 /* ── 책 만들기 / 책 정보 모달 ── */
 $('covRow').addEventListener('click', e => {
@@ -1207,7 +1221,7 @@ $('bmGo').addEventListener('click', () => {
 $('bmNew').addEventListener('click', e => {
   ask(e.target, '지금 책(임시저장)을 지우고 새 책을 시작한다. 발행본은 유지된다.', '새 책 시작', true, () => {
     BOOK = { v:2, issue:'', title:'', subtitle:'', cover:null,
-      chapters:[{ id: uid(), tag:'', title:'1. 새 챕터', voice:null, sheets:[{ blocks:[{ t:'p', html:'' }] }] }] };
+      chapters:[{ id: uid(), tag:'', title:'1. 새 챕터', voice:null, sheets:[{ blocks:[{ t:'ctitle', text:'1. 새 챕터' }, { t:'p', html:'' }] }] }] };
     cur = 0; SEL = null;
     renderAll();
     openBookModal('new');
@@ -1216,7 +1230,7 @@ $('bmNew').addEventListener('click', e => {
 });
 $('bmAlt').addEventListener('click', () => {
   commitBookMeta();
-  BOOK.chapters = [{ id: uid(), tag:'', title:'1. 새 챕터', voice:null, sheets:[{ blocks:[{ t:'p', html:'' }] }] }];
+  BOOK.chapters = [{ id: uid(), tag:'', title:'1. 새 챕터', voice:null, sheets:[{ blocks:[{ t:'ctitle', text:'1. 새 챕터' }, { t:'p', html:'' }] }] }];
   cur = 0; SEL = null;
   closeBookModal(); markDirty(); renderAll();
   toast('빈 책으로 시작합니다');
@@ -1258,7 +1272,8 @@ function toReaderBook(){
           return;
         }
         run = null;
-        if(b.t === 'head'){
+        if(b.t === 'ctitle'){ if((b.text || '').trim()) blocks.push({ t:'ctitle', text:escHtml(b.text) }); }
+        else if(b.t === 'head'){
           if((b.en || '').trim() || (b.ko || '').trim())
             blocks.push({ t:'head', en:escHtml(b.en || ''), ko:escHtml(b.ko || '') });
         }

@@ -10,6 +10,7 @@
 <style>
   /* 편집기 글자 서식·조판 클래스 (발행 본문 span — 편집기와 짝 유지) */
   .pfmt{display:block}
+  .ctitle{font-size:1.55rem; font-weight:800; letter-spacing:-.02em; line-height:1.4; margin:0 0 16px}
   .al-c{text-align:center}
   .al-r{text-align:right}
   .lh-sm{line-height:1.6}
@@ -3255,6 +3256,7 @@ document.addEventListener("click", e => {
 /* ─────────────── 지면(A4 낱장) ─────────────── */
 function blockHTML(b){
   switch(b.t){
+    case "ctitle": return `<h2 class="ctitle">${b.text}</h2>`;
     case "cover": return `<img class="cover-img" src="${imgURL(b.src)}" alt="">`;
     case "photo": return `<figure class="photo ${b.bleed?"bleed":""} ${b.fill?"fill":""}"><img src="${imgURL(b.src)}" alt=""></figure>`;
     case "duo":   return `<div class="duo">${b.srcs.map(s=>`<img src="${imgURL(s)}" alt="">`).join("")}</div>`;
