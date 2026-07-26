@@ -46,7 +46,7 @@ a{color:inherit;text-decoration:none}
 
 /* ── 2분할 ─────────────────────────── */
 .split{display:flex; height:100vh; min-height:620px}
-.half{position:relative; flex:1; display:flex; flex-direction:column; justify-content:center;
+.half{position:relative; flex:1 1 0; min-width:0; display:flex; flex-direction:column; justify-content:center;
   padding:96px clamp(28px,5vw,72px) 108px; cursor:pointer; overflow:hidden;
   transition:flex .45s cubic-bezier(.22,.7,.3,1)}
 .split:has(.half:hover) .half:hover{flex:1.28}
