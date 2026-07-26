@@ -64,6 +64,66 @@ input,select,textarea{font:inherit;color:inherit}
 .field label{display:block; font-size:.78rem; font-weight:700; color:var(--sub); margin-bottom:6px}
 .inp,.sel{width:100%; border:1px solid var(--line-2); border-radius:7px; padding:10px 12px; background:#fff; font-size:.9rem; transition:.13s}
 .inp:focus,.sel:focus{outline:none; border-color:var(--blue); box-shadow:0 0 0 3px rgba(49,130,246,.14)}
+/* ── 첫 화면: 강의 상품 고르기 ── */
+.gate{position:fixed; inset:0; z-index:80; background:var(--bg); overflow-y:auto}
+.gate.hide{display:none}
+.gate-top{height:56px; background:#fff; border-bottom:1px solid var(--line); display:flex; align-items:center; padding:0 16px}
+.gate-in{max-width:1060px; margin:0 auto; padding:44px 28px 80px}
+.gate-h{font-size:1.55rem; font-weight:800; letter-spacing:-0.035em}
+.gate-p{font-size:.9rem; color:var(--muted); margin:7px 0 28px}
+.cgrid{display:grid; grid-template-columns:repeat(auto-fill,minmax(248px,1fr)); gap:18px}
+.ccard{display:flex; flex-direction:column; gap:12px; width:100%; text-align:left;
+  background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px;
+  transition:border-color .14s, box-shadow .14s, transform .14s}
+.ccard:hover{border-color:var(--blue); box-shadow:0 6px 18px rgba(49,130,246,.13); transform:translateY(-2px)}
+
+/* 썸네일 */
+.cthumb{position:relative; aspect-ratio:16/11; border-radius:9px; overflow:hidden; background:var(--soft)}
+.cthumb img, .cthumb svg{width:100%; height:100%; object-fit:cover; object-position:center 20%; display:block; transition:transform .35s ease}
+.ccard:hover .cthumb img, .ccard:hover .cthumb svg{transform:scale(1.045)}
+.cthumb .ecount{position:absolute; left:8px; top:8px; font-size:.66rem; font-weight:800;
+  color:#fff; background:rgba(20,24,31,.6); backdrop-filter:blur(6px);
+  padding:3px 9px; border-radius:99px; font-variant-numeric:tabular-nums}
+.cthumb .go{position:absolute; left:0; right:0; bottom:0; padding:24px 11px 10px;
+  font-size:.76rem; font-weight:700; color:#fff;
+  background:linear-gradient(transparent, rgba(15,20,28,.8)); opacity:0; transition:opacity .16s}
+.ccard:hover .cthumb .go{opacity:1}
+.cthumb.blank{display:flex; align-items:center; justify-content:center;
+  background:linear-gradient(140deg,#E9EDF3,#D2D9E3); color:#8A94A3; font-size:2rem; font-weight:800}
+.cthumb.dash{display:flex; align-items:center; justify-content:center; background:transparent;
+  border:2px dashed var(--line-2); color:var(--faint); font-size:28px; transition:.14s}
+.ccard.add:hover .cthumb.dash{border-color:var(--blue); background:var(--blue-bg); color:var(--blue)}
+.cmeta{display:flex; flex-direction:column; gap:4px; padding:0 3px 3px}
+.cmeta b{font-size:1rem; font-weight:800; letter-spacing:-.02em}
+.cmeta small{display:flex; align-items:center; gap:6px; font-size:.76rem; color:var(--muted)}
+.cmeta .dot{width:6px; height:6px; border-radius:50%; background:var(--line-2); flex-shrink:0}
+.cmeta .dot.on{background:var(--green)}
+@media(prefers-reduced-motion:reduce){.ccard{transition:none} .ccard:hover{transform:none} .cthumb img,.cthumb svg{transition:none}}
+
+/* 에피소드 목록 */
+[hidden]{display:none !important}
+.gate-p .dot{display:inline-block; width:6px; height:6px; border-radius:50%; background:var(--line-2); margin-right:6px; vertical-align:middle}
+.gate-p .dot.on{background:var(--green)}
+.eplist{display:flex; flex-direction:column; gap:8px; max-width:660px}
+.eprow{display:flex; align-items:center; gap:14px; width:100%; text-align:left;
+  background:var(--card); border:1px solid var(--line); border-radius:10px; padding:15px 16px;
+  transition:border-color .13s, box-shadow .13s}
+.eprow:hover{border-color:var(--blue); box-shadow:0 2px 10px rgba(49,130,246,.1)}
+.epno{font-size:.66rem; font-weight:800; letter-spacing:.03em; color:var(--muted); background:var(--soft);
+  border:1px solid var(--line); border-radius:5px; padding:3px 8px; flex-shrink:0; font-variant-numeric:tabular-nums}
+.eptitle{flex:1; min-width:0; font-size:.92rem; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.epgo{font-size:.8rem; font-weight:700; color:var(--faint); flex-shrink:0}
+.eprow:hover .epgo{color:var(--blue)}
+.eprow.add{border-style:dashed; background:transparent}
+.eprow.add:hover{background:var(--blue-bg)}
+.eprow.add .epno{background:#fff; border-style:dashed; font-size:.8rem; padding:1px 8px}
+.eprow.add .eptitle{color:var(--sub)}
+.eprow.add:hover .epno{background:var(--blue); border-color:var(--blue); border-style:solid; color:#fff}
+.eprow.add:hover .eptitle{color:var(--blue-d); font-weight:700}
+.epempty{font-size:.86rem; color:var(--muted); padding:2px 2px 12px}
+.crumb-b{font-weight:700; color:var(--text); padding:2px 5px; border-radius:5px; transition:.12s}
+.crumb-b:hover{background:var(--soft); color:var(--blue-d)}
+
 .eps{background:var(--soft); border-radius:8px; padding:11px 14px; margin-bottom:14px}
 .eps .el{font-size:.74rem; font-weight:700; color:var(--muted); margin-bottom:7px}
 .eps .ei{display:flex; align-items:center; gap:9px; font-size:.84rem; color:var(--sub); padding:3px 0}
@@ -221,10 +281,29 @@ input,select,textarea{font:inherit;color:inherit}
 </head>
 <body>
 
+<!-- 편집 앞 화면: ① 강의 상품 고르기 → ② 에피소드 목록 -->
+<div class="gate" id="courseGate">
+  <header class="gate-top">
+    <a class="back" id="backAdmin" href="admin-prototype.html">‹ 강의 관리</a>
+    <button class="back" id="backCourses" onclick="showCourses()" hidden>‹ 강의 목록</button>
+  </header>
+  <div class="gate-in">
+    <section id="viewCourses">
+      <h1 class="gate-h">강의 상품</h1>
+      <p class="gate-p">만들 강의를 고르면 에피소드 목록으로 들어가요.</p>
+      <div class="cgrid" id="courseGrid"></div>
+    </section>
+    <section id="viewEps" hidden>
+      <div id="epHead"></div>
+      <div class="eplist" id="epList"></div>
+    </section>
+  </div>
+</div>
+
 <!-- 상단바 -->
 <header class="topbar">
   <a class="back" href="admin-prototype.html">‹ 강의 관리</a>
-  <span class="crumb"><b id="crumbCourse">일의 교과서</b> › 새 에피소드</span>
+  <span class="crumb"><button class="crumb-b" id="crumbCourse" onclick="backToCourses()" title="에피소드 목록으로">일의 교과서</button> › <span id="crumbEp">새 에피소드</span></span>
   <span class="chip">초안</span>
   <span class="save" id="saveState">자동 저장됨</span>
   <span class="sp"></span>
@@ -331,10 +410,110 @@ const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
 
 /* ── 강의 상품 ── */
+/* 커버 아트 — 교과서 시리즈 체계: 같은 격자·같은 선 굵기, 권마다 도형만 달라요.
+   ① 경계 = 겹친 사각형 + 내가 그은 한 변  ② 관계 = 두 원이 겹치는 자리 */
+const ART = {
+  boundary: `<svg viewBox="0 0 320 220" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <rect width="320" height="220" fill="#14243D"/>
+    <g fill="none" stroke="#fff" stroke-width="1.5">
+      <rect x="40" y="30" width="240" height="160" rx="6" opacity=".16"/>
+      <rect x="62" y="48" width="196" height="124" rx="5" opacity=".28"/>
+      <rect x="84" y="66" width="152" height="88" rx="4" opacity=".46"/>
+    </g>
+    <path d="M84 66 H236" stroke="#3182F6" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="236" cy="66" r="5" fill="#3182F6"/>
+  </svg>`,
+  overlap: `<svg viewBox="0 0 320 220" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <rect width="320" height="220" fill="#123A31"/>
+    <path d="M160 56.9 A62 62 0 0 1 160 163.1 A62 62 0 0 1 160 56.9 Z" fill="#12B76A" opacity=".5"/>
+    <g fill="none" stroke="#fff" stroke-width="1.5" opacity=".45">
+      <circle cx="128" cy="110" r="62"/><circle cx="192" cy="110" r="62"/>
+    </g>
+  </svg>`,
+};
+
 const COURSES = [
-  {name:'일의 교과서', eps:['오리엔테이션 — 왜 멈춰야 하나','나의 바운더리 세우기','숫자언어 — 나만의 지표','고객언어 — 듣는 법','문제를 한 문장으로']},
+  {name:'일의 교과서', state:'운영 중', live:true, art:'boundary',
+   eps:['오리엔테이션 — 왜 멈춰야 하나','나의 바운더리 세우기','숫자언어 — 나만의 지표','고객언어 — 듣는 법','문제를 한 문장으로']},
+  {name:'관계의 교과서', state:'준비 중', live:false, art:'overlap', eps:[]},
 ];
 let curCourse = 0;
+
+/* ── 첫 화면: 강의 상품 목록 ── */
+function thumbHTML(c){
+  const art = c.art && ART[c.art];
+  const inner = art ? art
+    : c.cover ? `<img src="${esc(c.cover)}" alt="">`
+    : esc(c.name.slice(0,1));                       // 커버가 없으면 이름 첫 글자로
+  return `<span class="cthumb${(art || c.cover) ? '' : ' blank'}">${inner}`
+    + `<span class="ecount">${c.eps.length}편</span>`
+    + `<span class="go">＋ EP${c.eps.length + 1} 만들기</span></span>`;
+}
+function renderCourseGrid(){
+  $('courseGrid').innerHTML = COURSES.map((c,i)=>`
+    <button class="ccard" onclick="enterCourse(${i})">
+      ${thumbHTML(c)}
+      <span class="cmeta"><b>${esc(c.name)}</b>
+        <small><span class="dot${c.live ? ' on' : ''}"></span>에피소드 ${c.eps.length}편 · ${esc(c.state)}</small></span>
+    </button>`).join('')
+  + `<button class="ccard add" onclick="newCourse()">
+      <span class="cthumb dash">＋</span>
+      <span class="cmeta"><b>새 강의 상품</b><small>이름부터 정해요</small></span>
+    </button>`;
+}
+
+/* ── 두 번째 화면: 에피소드 목록 ── */
+function renderEpList(){
+  const c = COURSES[curCourse];
+  $('epHead').innerHTML = `<h1 class="gate-h">${esc(c.name)}</h1>`
+    + `<p class="gate-p"><span class="dot${c.live ? ' on' : ''}"></span>에피소드 ${c.eps.length}편 · ${esc(c.state)}</p>`;
+  $('epList').innerHTML =
+    (c.eps.length ? '' : `<p class="epempty">아직 에피소드가 없어요. 첫 편부터 만들어요.</p>`)
+    + c.eps.map((e,i)=>`
+      <button class="eprow" onclick="openEditor(${i})">
+        <span class="epno">EP${i+1}</span>
+        <span class="eptitle">${esc(e)}</span>
+        <span class="epgo">편집 ›</span>
+      </button>`).join('')
+    + `<button class="eprow add" onclick="openEditor(null)">
+        <span class="epno">＋</span>
+        <span class="eptitle">EP${c.eps.length + 1} 새 에피소드 만들기</span>
+      </button>`;
+}
+
+/* ── 화면 전환 ── */
+function showCourses(){
+  renderCourseGrid();
+  $('viewCourses').hidden = false; $('viewEps').hidden = true;
+  $('backAdmin').hidden = false;   $('backCourses').hidden = true;
+  $('courseGate').classList.remove('hide');
+  window.scrollTo(0,0);
+}
+function enterCourse(i){          // 강의 카드 → 에피소드 목록
+  curCourse = i;
+  renderEpList();
+  $('viewCourses').hidden = true;  $('viewEps').hidden = false;
+  $('backAdmin').hidden = true;    $('backCourses').hidden = false;
+  $('courseGate').classList.remove('hide');
+  window.scrollTo(0,0);
+}
+function openEditor(ep){          // 에피소드 행 → 편집 화면 (ep=null 이면 새 에피소드)
+  const c = COURSES[curCourse];
+  const isNew = ep === null;
+  renderCourseSelect(); renderCourse();
+  $('crumbEp').textContent = isNew ? '새 에피소드' : `EP${ep + 1}`;
+  if(!isNew){ $('fTitle').value = c.eps[ep]; refresh(); }
+  $('courseGate').classList.add('hide');
+  window.scrollTo(0,0);
+}
+function backToCourses(){ enterCourse(curCourse); }   // 상단바 강의 이름 → 에피소드 목록으로
+function newCourse(){
+  const nm = (prompt('새 강의 상품 이름') || '').trim();
+  if(!nm) return;
+  COURSES.push({name:nm, state:'초안', live:false, eps:[]});
+  enterCourse(COURSES.length - 1);
+  toast('새 강의 상품이 만들어졌어요');
+}
 function renderCourseSelect(){
   $('fCourse').innerHTML = COURSES.map((c,i)=>`<option value="${i}">${esc(c.name)}</option>`).join('')
     + `<option value="new">＋ 새 강의 상품 만들기</option>`;
@@ -344,7 +523,7 @@ function onCourse(){
   const v = $('fCourse').value;
   if(v === 'new'){
     const nm = (prompt('새 강의 상품 이름') || '').trim();
-    if(nm){ COURSES.push({name:nm, eps:[]}); curCourse = COURSES.length - 1; toast('새 강의 상품이 만들어졌어요'); }
+    if(nm){ COURSES.push({name:nm, state:'초안', live:false, eps:[]}); curCourse = COURSES.length - 1; toast('새 강의 상품이 만들어졌어요'); }
     renderCourseSelect();
   } else curCourse = +v;
   renderCourse(); saved();
@@ -640,8 +819,9 @@ function toast(m){ const t = $('toast'); t.textContent = m; t.classList.add('on'
 $('fTitle').addEventListener('input', refresh);
 ['fTitle','fDesc'].forEach(id=>$(id).addEventListener('change', saved));
 
-/* 초기 렌더 */
+/* 초기 렌더 — 강의 목록 → 에피소드 목록 → 편집 순서로 들어가요 */
 renderCourseSelect(); renderCourse(); renderPeople(); renderStruct();
+showCourses();
 </script>
 </body>
 </html>
