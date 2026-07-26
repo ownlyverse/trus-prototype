@@ -139,8 +139,10 @@ input,textarea{font:inherit;color:inherit}
 
 /* ── 블록 ── */
 .blk{position:relative; cursor:text}
+/* 왼쪽 여백까지 hover 영역 확장 — 핸들로 가는 길에 틈이 없게 */
+.blk::before{content:""; position:absolute; left:calc(-1*var(--pad-x)); top:0; bottom:0; width:var(--pad-x)}
 .blk-h{position:absolute; left:calc(-1*var(--pad-x) + 7px); top:0; display:none; flex-direction:column; gap:1px; z-index:6}
-.blk:hover > .blk-h, .blk:focus-within > .blk-h{display:flex}
+.blk:hover > .blk-h, .blk:focus-within > .blk-h, .blk.sel > .blk-h{display:flex}
 .blk-h button{width:24px; height:24px; border-radius:6px; font-size:.68rem; color:#98938A; background:#fff;
   border:1px solid var(--line); display:flex; align-items:center; justify-content:center}
 .blk-h button:hover{color:var(--ink); border-color:var(--ink)}
