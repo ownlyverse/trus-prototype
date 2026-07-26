@@ -46,11 +46,10 @@ a{color:inherit;text-decoration:none}
 
 /* ── 2분할 ─────────────────────────── */
 .split{display:flex; height:100vh; min-height:620px}
-.half{position:relative; flex:1 1 0; min-width:0; display:flex; flex-direction:column; justify-content:center;
+.half{position:relative; flex:0 0 50%; width:50%; min-width:0; display:flex; flex-direction:column; justify-content:center;
   padding:96px clamp(28px,5vw,72px) 108px; cursor:pointer; overflow:hidden;
-  transition:flex .45s cubic-bezier(.22,.7,.3,1)}
-.split:has(.half:hover) .half:hover{flex:1.28}
-.split .half.grow{flex:1.28}
+  transition:transform .35s ease, filter .35s ease}
+.half:hover{transform:scale(1.015); z-index:5; filter:brightness(1.07)}
 
 /* 좌 — 생각구독 (실사이트 히어로 구성: 흑백 사진 + 핑크 캘리) */
 .half.sub{color:#EDEDED; border-right:1px solid rgba(0,0,0,.55); align-items:center; text-align:center;
@@ -136,12 +135,11 @@ a{color:inherit;text-decoration:none}
 /* 모바일 — 상하 분할 (기본 규칙 뒤!) */
 @media (max-width:768px){
   .split{flex-direction:column; height:auto; min-height:0}
-  .half{min-height:88vh; padding:92px 24px 70px}
+  .half{min-height:88vh; width:100%; flex:0 0 auto; padding:92px 24px 70px}
   .half.sub{border-right:none; border-bottom:1px solid rgba(0,0,0,.35)}
   .half.world{padding:0}
   .world .inner{padding:92px 24px 80px}
-  .split:has(.half:hover) .half:hover{flex:1}
-  .split .half.grow{flex:1}
+  .half:hover{transform:none}
   .band{position:static}
 }
 </style>
@@ -233,12 +231,6 @@ function go(ev, url){
   if(ev.target.closest('a,button')) return;
   location.href = url;
 }
-
-// ── 반쪽 호버 확대 — 캔버스 위에서도 확실히 동작하도록 JS 토글
-document.querySelectorAll('.split .half').forEach(h => {
-  h.addEventListener('mouseenter', () => h.classList.add('grow'));
-  h.addEventListener('mouseleave', () => h.classList.remove('grow'));
-});
 
 // ── 통합 auth 모달 (공용 블록 — subscribe/world 상세와 동일)
 function openAuth(mode){
