@@ -4064,36 +4064,40 @@ startFlow();
   .rs-bk.lock{background:#EFEDE8; color:#B5B0A5; cursor:pointer}
   .rs-bk.lock .no{color:#B5B0A5}
   .rs-bk.lock .lk{font-size:1rem}
-  /* ── etimeline 톤: 검은 서재 ── */
-  .rshelf{background:#0D0D0D}
-  .rs-bar{background:#101010; border-bottom-color:#242424}
-  .rs-bar a{color:#B9B9B9}
-  .rs-bar a:hover{background:#1C1C1C}
-  .rs-bar .t{color:#fff}
-  .rs-bar .md{background:#2A2413; color:#D9BE62}
-  .rs-h{color:#fff}
-  .rs-sub{color:#9A9A9A}
-  .rs-now{background:#161616; border-color:#262626}
-  .rs-now .bt{color:#F2F2F2}
-  .rs-now .bs{color:#9A9A9A}
-  .rs-now .cv{background:#1E1E1E; border-color:#262626}
-  .rs-gh{color:#8A8A8A}
+  /* ── 편집기 화면과 통일: 화이트+블루 톤 (표지 그리드 유지) ── */
+  .rshelf{background:#E9E6E0}
+  .rs-bar{background:#fff; border-bottom-color:#E5E5E5}
+  .rs-bar a{color:#666}
+  .rs-bar a:hover{background:#F0F0F0; color:#121212}
+  .rs-bar .t{color:#121212}
+  .rs-bar .md{background:#E5F7FF; color:#045D84}
+  .rs-h{color:#121212}
+  .rs-sub{color:#666}
+  .rs-now{background:#fff; border-color:#E5E5E5}
+  .rs-now:hover{border-color:#067CAF}
+  .rs-now .bt{color:#121212}
+  .rs-now .bs{color:#666}
+  .rs-now .cv{background:#F4F1EA; border-color:#E5E5E5}
+  .rs-now .go{background:#E5F7FF; color:#045D84}
+  .rs-gh{color:#8f897d}
   .rs-bk{aspect-ratio:auto; border:none; background:transparent; padding:0; border-radius:0;
     display:flex; flex-direction:column; gap:7px; text-align:left; justify-content:flex-start}
+  .rs-bk.own{background:transparent; border:none}
   .rs-bk.now{outline:none}
-  .rs-bk .cvwrap{position:relative; width:100%; aspect-ratio:210/297; border-radius:6px; overflow:hidden; background:#1A1A1A}
-  .rs-bk .cvwrap.empty{display:flex; align-items:center; justify-content:center; color:#5A5A5A; font-size:.64rem; font-weight:800}
+  .rs-bk .cvwrap{position:relative; width:100%; aspect-ratio:210/297; border-radius:8px; overflow:hidden;
+    background:#fff; border:1px solid #E5E5E5}
+  .rs-bk .cvwrap.empty{display:flex; align-items:center; justify-content:center; color:#B5B0A5; font-size:.64rem; font-weight:800}
   .rs-bk .cvimg{position:absolute; inset:0; width:100%; height:100%; object-fit:cover}
   .rs-bk .lbl{display:flex; flex-direction:column; gap:1px}
-  .rs-bk .lbl .no{font-size:.58rem; color:#8A8A8A}
-  .rs-bk .lbl .bt{font-size:.7rem; color:#EDEDED; line-height:1.35; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden}
-  .rs-bk.own .cvwrap{outline:1px solid #4A3F1E}
-  .rs-bk.now .cvwrap{outline:2px solid #c9a53a}
-  .rs-bk.lock .cvimg{filter:grayscale(.85); opacity:.4}
-  .rs-bk.lock .lbl .bt{color:#6E6E6E}
+  .rs-bk .lbl .no{font-size:.58rem; color:#8f897d}
+  .rs-bk .lbl .bt{font-size:.7rem; color:#121212; line-height:1.35; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden}
+  .rs-bk.own .cvwrap{border-color:#9CCFE8}
+  .rs-bk.now .cvwrap{outline:2px solid #067CAF}
+  .rs-bk.lock .cvimg{filter:grayscale(.9); opacity:.45}
+  .rs-bk.lock .lbl .bt{color:#B5B0A5}
   .rs-bk .lk{position:absolute; z-index:3; top:6px; right:7px; font-size:.85rem}
   .rs-bk .edited{position:absolute; z-index:3; left:7px; top:7px; width:9px; height:9px; border-radius:50%;
-    background:#41C46A; box-shadow:0 0 8px rgba(65,196,106,.8)}
+    background:#2E9E57; box-shadow:0 0 6px rgba(46,158,87,.6)}
   @media (max-width:560px){ .rs-grid{grid-template-columns:repeat(auto-fill, minmax(78px, 1fr))} }
 </style>
 <div class="rshelf" id="rshelf">

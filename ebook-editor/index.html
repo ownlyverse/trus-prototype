@@ -289,21 +289,6 @@ body.shelf .shelfview{display:block}
 .bkcard.newbk .cov{border-style:dashed; background:transparent; color:var(--sub); font-size:.88rem; font-weight:700}
 .bkcard.newbk:hover .cov{color:var(--blue-dd)}
 .bkcard.past{opacity:1}
-/* ── etimeline 톤: 검은 서재 ── */
-body.shelf{background:#0D0D0D}
-.shelfview{background:#0D0D0D; color:#EDEDED}
-.shelfview .sv-bar{background:#101010; border-bottom:1px solid #242424}
-.shelfview .sv-bar .svt{color:#fff}
-.shelfview .sv-h{color:#fff}
-.shelfview .sv-sub{color:#9A9A9A}
-.bkcard{background:#161616; border-color:#262626}
-.bkcard:hover{border-color:#4A4A4A}
-.bkcard .cov{background:#1E1E1E; border-color:#262626}
-.bkcard .cov .cno{color:#8A8A8A}
-.bkcard .cov .ct{color:#CFCFCF}
-.bkcard .bkt{color:#F2F2F2}
-.bkcard .st.gray{background:#242424; color:#9A9A9A}
-.bkcard.newbk .cov{color:#8A8A8A; border-color:#333}
 
 /* ── 생각 정리하기 탭 ── */
 .wbody{display:none; flex:1; min-height:0}
@@ -1859,17 +1844,17 @@ function renderShelf(){
       <span class="bt2r"><span class="bkt">${escHtml(BOOK.title || '(제목 없음)')}</span></span>
       <span class="bt2r">${statusChips}</span>
     </button>
+    <button class="bkcard newbk" data-open="new">
+      <span class="cov">＋ 새 책 만들기</span>
+      <span class="bt2r"><span class="bkt">다음 호 시작</span></span>
+      <span class="bt2r"><span class="st gray">호수·제목부터</span></span>
+    </button>
     ${pastIssues().map(b => `
     <button class="bkcard past" data-open="past" data-no="${b.no}">
       <span class="cov">${b.img ? `<img src="${b.img}" alt="" loading="lazy">` : `<span class="cno">NO.${b.no}</span><span class="ct">${b.t}</span>`}</span>
       <span class="bt2r"><span class="bkt">NO.${b.no} · ${b.t}</span></span>
       <span class="bt2r">${b.pub ? '<span class="st pub">수정 발행됨</span>' : (b.wip ? '<span class="st">작업 중</span>' : '<span class="st gray">원본</span>')}</span>
-    </button>`).join('')}
-    <button class="bkcard newbk" data-open="new">
-      <span class="cov">＋ 새 책 만들기</span>
-      <span class="bt2r"><span class="bkt">다음 호 시작</span></span>
-      <span class="bt2r"><span class="st gray">호수·제목부터</span></span>
-    </button>`;
+    </button>`).join('')}`;
 }
 function goShelf(){
   document.body.classList.add('shelf');
