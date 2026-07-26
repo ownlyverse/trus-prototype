@@ -434,7 +434,8 @@ body.shelf .wbody{display:none}
   </div>
   <div class="sv-in">
     <h1 class="sv-h serif">나의 서재</h1>
-    <p class="sv-sub">발행한 호와 작업 중인 책이 모이는 곳. 책을 열어 편집하거나 새 책을 시작한다.</p>
+    <p class="sv-sub">발행한 호와 작업 중인 책이 모이는 곳. 책을 열어 편집하거나 새 책을 시작한다.
+      <button class="mini" id="importBtn" style="margin-left:10px">책 가져오기 (JSON)</button></p>
     <div class="sv-grid" id="shelfGrid"></div>
   </div>
 </div>
@@ -546,6 +547,7 @@ body.shelf .wbody{display:none}
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <input type="file" id="fileIn" accept="image/*" hidden>
 <input type="file" id="audioIn" accept="audio/*" hidden>
+<input type="file" id="jsonIn" accept=".json,application/json" hidden>
 
 <script>
 /* ═══════════ 목데이터 (리더기와 동일한 BOOK — 두 파일에 복붙 공유) ═══════════ */
@@ -1823,6 +1825,27 @@ $('shelfGrid').addEventListener('click', e => {
 /* 런타임 오류를 화면에 표면화한다 (rules.md: 콘솔을 안 보면 백지 원인을 모른다) */
 window.addEventListener('error', e => {
   try{ toast('스크립트 오류: ' + (e.message || '알 수 없음')); }catch(_){}
+});
+
+/* ── 책 가져오기 (JSON — 편집기 내부 스키마 v2) ── */
+$('importBtn').addEventListener('click', () => { $('jsonIn').value = ''; $('jsonIn').click(); });
+$('jsonIn').addEventListener('change', () => {
+  const f = $('jsonIn').files[0];
+  if(!f) return;
+  const rd = new FileReader();
+  rd.onload = () => {
+    try{
+      const d = JSON.parse(rd.result);
+      if(!(d && d.v === 2 && Array.isArray(d.chapters) && d.chapters.length)) throw new Error('스키마 불일치');
+      BOOK = d; cur = 0; SEL = null;
+      ensureWriting();
+      clearTimeout(dirtyTimer);
+      if(saveKey(K_DRAFT)){ lastSaved = Date.now(); refreshStat(); }
+      openBook();
+      toast(`「${BOOK.title || '(제목 없음)'}」 — 가져오기 완료 (이 브라우저에만 저장됨)`);
+    }catch(err){ toast('가져오기 실패 — 편집기 JSON 형식이 아니다 (' + err.message + ')'); }
+  };
+  rd.readAsText(f);
 });
 
 /* ── 시작 — 서재부터 ── */
