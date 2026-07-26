@@ -121,6 +121,8 @@ a{color:inherit;text-decoration:none}
   margin-bottom:10px; background:#fff; color:var(--ink)}
 .auth-card input:focus{outline:none; border-color:#111}
 .auth-form-gap{margin-top:6px}
+.demo-flag{display:inline-block; font-size:.72rem; font-weight:800; color:#F04452; background:#FDEBEC;
+  padding:4px 10px; border-radius:7px; margin-bottom:12px}
 
 /* 토스트 */
 .toast{position:fixed; left:50%; bottom:30px; transform:translateX(-50%) translateY(14px); z-index:120;
@@ -214,11 +216,12 @@ a{color:inherit;text-decoration:none}
     </div>
 
     <div id="authLogin" hidden>
+      <p class="demo-flag">데모 버전 — 계정이 미리 입력돼 있어요</p>
       <h3>로그인</h3>
       <p class="auth-sub">TRUS 통합 계정으로 로그인해요</p>
       <div class="auth-form-gap">
-        <input type="email" placeholder="이메일" aria-label="이메일">
-        <input type="password" placeholder="비밀번호" aria-label="비밀번호">
+        <input type="email" value="demo@trus.co" aria-label="이메일">
+        <input type="password" value="trus1234" aria-label="비밀번호">
       </div>
       <button class="auth-cta" onclick="mockLogin()">로그인</button>
     </div>
