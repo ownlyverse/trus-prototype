@@ -77,36 +77,67 @@ a{color:inherit;text-decoration:none}
   text-shadow:0 0 22px rgba(242,109,156,.35)}
 .world h2 b{color:var(--accent)}
 .world .lead{font-size:1rem; color:#D8CFE8; line-height:1.7; margin-bottom:32px; max-width:34ch}
-/* 광장 게임 신 — 밤의 잔디 광장 + 걷는 픽셀 캐릭터 (plaza 캐넌 에셋) */
+/* 게임 레벨 신 — 반쪽 전체가 게임 세계, 카피는 세계 위에 (GDevelop풍) */
 .half.world{padding:0; justify-content:flex-start}
-.world .inner{position:relative; z-index:2; flex:1; width:100%; display:flex; flex-direction:column;
-  justify-content:center; align-items:flex-start; padding:92px clamp(28px,5vw,64px) 22px}
-.plaza-scene{position:relative; z-index:1; height:42%; min-height:230px; flex-shrink:0; overflow:hidden;
+.world .inner{position:relative; z-index:3; flex:1; width:100%; display:flex; flex-direction:column;
+  justify-content:center; align-items:center; text-align:center;
+  padding:88px clamp(24px,4vw,56px) max(24vh,190px)}
+.world .inner .lead{margin-left:auto; margin-right:auto}
+/* 달 */
+.moon{position:absolute; z-index:1; top:8%; left:9%; width:88px; height:88px; border-radius:50%;
+  background:#DFF7EC; opacity:.92; box-shadow:0 0 46px rgba(223,247,236,.4);
+  animation:floaty 7s ease-in-out infinite}
+/* 원경 실루엣 언덕 */
+.hills{position:absolute; z-index:1; left:0; right:0; bottom:calc(27% - 6px); height:110px; pointer-events:none; opacity:.75;
+  background:
+    radial-gradient(46% 120% at 12% 100%, #3A2C55 0 58%, transparent 59%),
+    radial-gradient(52% 100% at 55% 100%, #322447 0 55%, transparent 56%),
+    radial-gradient(40% 130% at 92% 100%, #3A2C55 0 60%, transparent 61%)}
+/* 떠 있는 섬 */
+.isle{position:absolute; z-index:2; top:15%; right:9%; animation:floaty 5.5s ease-in-out .8s infinite}
+.isle .plate{width:118px; height:30px; background:url('assets/stone.png') 0 0/110px 110px repeat;
+  image-rendering:pixelated; border:3px solid #17171C; border-radius:9px 9px 16px 16px;
+  box-shadow:0 10px 0 -4px #2A1F33, 0 14px 0 -6px #201829, 4px 4px 0 rgba(0,0,0,.35)}
+.isle .tree{position:absolute; bottom:24px; left:50%; transform:translateX(-50%); width:64px; image-rendering:pixelated}
+/* 코인·보석 */
+.coin{position:absolute; z-index:2; width:15px; height:15px; border-radius:50%; background:#FFD34D;
+  border:2px solid #C9930A; box-shadow:0 0 12px rgba(255,211,77,.75); animation:twinkle 1.6s ease-in-out infinite alternate}
+.coin.c1{top:30%; left:16%}
+.coin.c2{top:52%; right:14%; animation-delay:.5s}
+.coin.c3{top:22%; left:44%; animation-delay:.9s}
+.gem{position:absolute; z-index:2; top:44%; left:8%; width:15px; height:15px; background:#FFE24D;
+  border:2px solid #C9930A; transform:rotate(45deg); box-shadow:0 0 14px rgba(255,226,77,.8);
+  animation:twinkle 2s ease-in-out .3s infinite alternate}
+@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+@keyframes twinkle{from{opacity:.45; box-shadow:0 0 4px rgba(255,211,77,.3)}to{opacity:1; box-shadow:0 0 14px rgba(255,211,77,.9)}}
+/* 광장 그라운드 */
+.plaza-scene{position:absolute; left:0; right:0; bottom:0; height:27%; min-height:175px; z-index:2; overflow:visible;
   background:url('assets/stone.png') 0 0/200px 200px repeat; image-rendering:pixelated;
   border-top:3px solid #17171C; box-shadow:0 -8px 26px rgba(0,0,0,.5)}
 .plaza-scene::before{content:""; position:absolute; inset:0; z-index:1; pointer-events:none;
   background:linear-gradient(rgba(23,17,31,.55), rgba(23,17,31,.15))}
 .prop{position:absolute; z-index:2; image-rendering:pixelated}
-.prop.tree{width:82px}
-.prop.t1{left:4%; bottom:54%}
-.prop.t2{right:5%; bottom:6%}
-.prop.bench{width:72px}
-.prop.b1{left:15%; bottom:14%}
-.prop.b2{right:17%; bottom:58%}
-.prop.fountain{width:150px; left:50%; bottom:24%; transform:translateX(-50%)}
-.walker{position:absolute; z-index:3; bottom:9%; left:7%; display:flex; flex-direction:column;
+.prop.tree{width:78px}
+.prop.t1{left:4%; bottom:34%}
+.prop.t2{right:5%; bottom:4%}
+.prop.bench{width:68px}
+.prop.b1{left:16%; bottom:10%}
+.prop.b2{right:18%; bottom:48%}
+.prop.fountain{width:132px; left:50%; bottom:18%; transform:translateX(-50%);
+  filter:drop-shadow(0 0 14px rgba(242,109,156,.45))}
+.walker{position:absolute; z-index:3; bottom:7%; left:7%; display:flex; flex-direction:column;
   align-items:center; gap:3px; animation:strollX 16s ease-in-out infinite}
 .walker .wtag{font-family:'NeoDunggeunmo','Pretendard Variable',sans-serif; letter-spacing:0; font-size:.6rem;
   color:#FFE6F0; background:rgba(23,19,31,.85); border:2px solid #3E3155; border-radius:4px; padding:2px 7px; white-space:nowrap}
 .walker .wbody{animation:flipX 16s ease-in-out infinite}
 .walker .wimg{display:block; width:46px; image-rendering:pixelated; animation:bob .5s steps(2) infinite}
-.walker.w2{left:auto; right:9%; bottom:44%; animation-delay:-9s}
+.walker.w2{left:auto; right:9%; bottom:38%; animation-delay:-9s}
 .walker.w2 .wbody{animation-delay:-9s}
 .walker.w2 .wimg{filter:hue-rotate(150deg)}
 @keyframes strollX{0%,100%{transform:translateX(0)}50%{transform:translateX(min(240px,22vw))}}
 @keyframes flipX{0%,49.9%{transform:scaleX(1)}50%,100%{transform:scaleX(-1)}}
 @keyframes bob{0%{transform:translateY(0)}100%{transform:translateY(-3px)}}
-.pl-bubble{position:absolute; z-index:3; left:50%; bottom:64%; transform:translateX(-50%);
+.pl-bubble{position:absolute; z-index:3; left:50%; bottom:88%; transform:translateX(-50%);
   background:#FFF9F1; color:#191F28; border:3px solid #17171C; border-radius:8px; padding:6px 11px;
   font-size:.64rem; box-shadow:3px 3px 0 rgba(0,0,0,.35); white-space:nowrap}
 .pl-bubble::after{content:""; position:absolute; top:100%; left:50%; transform:translateX(-50%);
@@ -169,7 +200,7 @@ a{color:inherit;text-decoration:none}
   .half{min-height:88vh; padding:92px 24px 70px}
   .half.sub{border-right:none; border-bottom:1px solid rgba(0,0,0,.35)}
   .half.world{padding:0}
-  .world .inner{padding:92px 24px 20px}
+  .world .inner{padding:92px 24px max(22vh,180px)}
   .split:has(.half:hover) .half:hover{flex:1}
   .band{position:static}
 }
@@ -199,6 +230,16 @@ a{color:inherit;text-decoration:none}
   <!-- 우 — 트루스월드 -->
   <section class="half world" onclick="go(event,'world/')" aria-label="트루스월드">
     <div class="stars" aria-hidden="true"></div>
+    <div class="moon" aria-hidden="true"></div>
+    <div class="hills" aria-hidden="true"></div>
+    <div class="isle" aria-hidden="true">
+      <img class="tree" src="assets/tree.png" alt="">
+      <div class="plate"></div>
+    </div>
+    <span class="coin c1" aria-hidden="true"></span>
+    <span class="coin c2" aria-hidden="true"></span>
+    <span class="coin c3" aria-hidden="true"></span>
+    <span class="gem" aria-hidden="true"></span>
     <div class="inner">
       <p class="kicker pxfont">TRUS WORLD</p>
       <h2 class="pxfont">완주하는 사람들의<br><b>트루스월드</b></h2>
