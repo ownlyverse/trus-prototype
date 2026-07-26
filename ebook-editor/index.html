@@ -801,6 +801,16 @@ function igapHTML(si, bi){
 function phFigure(src, tools){
   return `<figure class="ph"><img src="${src}" alt="본문 사진">${tools}</figure>`;
 }
+/* 블록 조판 클래스 — 정렬·행간·자간 (속성 패널의 align/lh/ls) → ' al-c lh-lg' 꼴.
+   보통(m)은 클래스를 붙이지 않아 .bp/.bv 기본값을 그대로 써요.
+   정렬은 값이 있으면 l도 붙여요 — 인용(.bv)은 기본이 가운데라 왼쪽 선택을 눌러줘야 해요. */
+function fmtCls(b){
+  const out = [];
+  if(b.align) out.push('al-' + b.align);
+  if(b.lh && b.lh !== 'm') out.push('lh-' + (b.lh === 's' ? 'sm' : 'lg'));
+  if(b.ls && b.ls !== 'm') out.push('ls-' + (b.ls === 's' ? 'sm' : 'lg'));
+  return out.length ? ' ' + out.join(' ') : '';
+}
 function blkHTML(b, si, bi){
   const h = `<span class="blk-h">
     <button data-act="up" data-si="${si}" data-bi="${bi}" title="위로" aria-label="블록 위로">↑</button>
