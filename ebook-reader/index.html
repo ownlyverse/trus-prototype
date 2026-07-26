@@ -1163,8 +1163,25 @@ const SOCIAL = false;
 const IMG = "생각구독-76호-assets/";
 const VIDEO_SRC = "";   // 챕터 여는 음성·영상 (목업)
 
+/* ─────────────── 발행본 로드 (이북 편집기 연동) ───────────────
+   ebook-editor 가 리더기 네이티브 스키마(v:2, chapters/toc/tocNav)로
+   trus_ebook_published(발행) · trus_ebook_preview(?preview=1)에 저장한다.
+   없거나 v≠2·파싱 실패면 아래 내장 샘플로 폴백한다.
+   ⚠ build-demo-reader.mjs 로 이 파일을 재생성할 때 이 구획과
+   imgURL()·let 선언·PUB_BOOK 분기(TOC_NAV 아래)를 보존/재주입할 것. */
+const IS_PREVIEW = new URLSearchParams(location.search).get("preview") === "1";
+let PUB_BOOK = null;
+try{
+  const _d = JSON.parse(localStorage.getItem(IS_PREVIEW ? "trus_ebook_preview" : "trus_ebook_published"));
+  if(_d && _d.v === 2 && Array.isArray(_d.chapters) && _d.chapters.length) PUB_BOOK = _d;
+}catch(e){}
+/* 편집기 발행 사진은 data URI, 내장 샘플은 파일명(__IMGMAP 치환) — 둘 다 통과시킨다 */
+function imgURL(s){ return /^data:/.test(String(s || "")) ? s : IMG + s; }
+const RUN_L = PUB_BOOK ? PUB_BOOK.title : "샘플 · 리더기 미리보기";
+const RUN_R = PUB_BOOK ? (PUB_BOOK.subtitle || "") : "HOW TO READ";
+
 /* 목차 좌표 — 장별 항목이 어느 지면으로 가는지 */
-const CHAPTERS = [
+let CHAPTERS = [
   {
     "id": "intro",
     "no": "00",
@@ -1358,7 +1375,7 @@ const CHAPTERS = [
 ];
 
 /* 목차 좌표 — 장별 항목이 어느 지면으로 가는지 */
-const TOC = [
+let TOC = [
   {
     "no": "00",
     "t": "Intro",
@@ -1407,7 +1424,7 @@ const HL_COLORS = ["#fbeda0", "#fbc9d4", "#c4e7c6", "#c2dbf6", "#dccdf0"];
    낮춘 짝. 저장값은 늘 HL_COLORS(밝은 세트) 기준 논리색이고, 어두운 테마일 때 표시만 이 값으로
    바꾼다(보기설정 step8 의 applyView 가 --hl0..4 변수를 이 배열로 재정의). 저장색은 안 건드린다. */
 const HL_COLORS_DARK = ["#6e5c1f", "#7d3b4a", "#2f6238", "#2f4d70", "#4a3a6b"];
-const STORE_KEY = "trus_reader_demo";
+const STORE_KEY = PUB_BOOK ? "trus_reader_pub" : "trus_reader_demo";
 const SEED = true;   // 개발용 시드 — 끄면 스토어가 비어 시작한다
 
 /* ═══════════ 소셜 데이터 (SOCIAL) ═══════════
@@ -2495,7 +2512,7 @@ function initTopbarPanel(){
 /* ═══════════════════ 상단바·패널 셸 동작 끝 ═══════════════════ */
 
 /* 목차 좌표 — 장별 항목이 어느 지면으로 가는지 */
-const TOC_NAV = [
+let TOC_NAV = [
   [
     {
       "chapter": 0,
@@ -2531,6 +2548,13 @@ const TOC_NAV = [
     }
   ]
 ];
+
+/* 발행본이 있으면 내장 샘플 대신 발행 데이터로 교체한다 (이북 편집기 연동) */
+if(PUB_BOOK){
+  CHAPTERS = PUB_BOOK.chapters;
+  TOC = PUB_BOOK.toc || [];
+  TOC_NAV = PUB_BOOK.tocNav || CHAPTERS.map((c, i) => [ c.sheets.length ? { chapter: i, sheet: c.sheets[0].no } : null ]);
+}
 
 /* 장(그룹) 헤더가 이동할 좌표: 그 장 첫 유효 항목 좌표(없으면 null = 비활성). */
 function tocGroupNav(g){
@@ -3194,13 +3218,13 @@ function renderRail(){
 /* ─────────────── 지면(A4 낱장) ─────────────── */
 function blockHTML(b){
   switch(b.t){
-    case "cover": return `<img class="cover-img" src="${IMG+b.src}" alt="">`;
-    case "photo": return `<figure class="photo ${b.bleed?"bleed":""} ${b.fill?"fill":""}"><img src="${IMG+b.src}" alt=""></figure>`;
-    case "duo":   return `<div class="duo">${b.srcs.map(s=>`<img src="${IMG+s}" alt="">`).join("")}</div>`;
+    case "cover": return `<img class="cover-img" src="${imgURL(b.src)}" alt="">`;
+    case "photo": return `<figure class="photo ${b.bleed?"bleed":""} ${b.fill?"fill":""}"><img src="${imgURL(b.src)}" alt=""></figure>`;
+    case "duo":   return `<div class="duo">${b.srcs.map(s=>`<img src="${imgURL(s)}" alt="">`).join("")}</div>`;
     case "head":  return `<div class="mhead"><div class="h en">${b.en}</div><div class="rule"></div><div class="ko">${b.ko}</div></div>`;
     case "split": return `<div class="split">
         <div><div class="mhead"><div class="h en">${b.en}</div><div class="rule"></div><div class="ko">${b.ko}</div></div></div>
-        <div class="simg"><img src="${IMG+b.src}" alt=""></div>
+        <div class="simg"><img src="${imgURL(b.src)}" alt=""></div>
       </div>`;
     case "verse": return `<div class="verse">${b.text}</div>`;
     case "title": return `<div class="title-sheet"><div class="t1 en">${b.t1}</div><div class="t2 en">${b.t2}</div></div>`;
@@ -3228,7 +3252,7 @@ function sheetHTML(s, c, first){
   return `
     <section class="sheet" data-sheet="${s.no}">
       <span class="sheetno en">${s.no}</span>
-      <div class="runhead"><span>샘플 · 리더기 미리보기</span><span class="r en">HOW TO READ</span></div>
+      <div class="runhead"><span>${RUN_L}</span><span class="r en">${RUN_R}</span></div>
       <div class="sbody">${s.blocks.map(blockHTML).join("")}</div>
       <div class="runfoot"><span>YOON SOJUNG'S THOUGHT BOOK</span><span class="pno en">${s.no}</span></div>
     </section>`;
@@ -3237,6 +3261,7 @@ function sheetHTML(s, c, first){
 function renderSheets(){
   const c = CHAPTERS[curChap];
   $("#sheets").innerHTML = `
+    ${c.voice ? `
     <div class="voice" id="voiceCard" style="background:var(--paper);border:1px solid var(--panel-line)">
       <button class="play" id="voicePlay">▶</button>
       <div class="vmeta">
@@ -3244,8 +3269,16 @@ function renderSheets(){
         <div class="wave">${"<i></i>".repeat(30)}</div>
       </div>
       <audio id="voiceAudio" src="${encodeURI(VIDEO_SRC)}" preload="none"></audio>
-    </div>
-    ${c.video ? `
+    </div>` : ``}
+    ${c.videoUrl ? `
+      <div class="vidwrap">
+        <span class="vidtag en">VIDEO + PAGE</span>
+        <div style="position:relative;aspect-ratio:16/9;background:#111">
+          <iframe src="${c.videoUrl}" title="본문 영상" style="position:absolute;inset:0;width:100%;height:100%;border:0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        </div>
+      </div>
+      ${c.videoNote ? `<div class="vidnote">${c.videoNote}</div>` : ``}` : c.video ? `
       <div class="vidwrap">
         <span class="vidtag en">VIDEO + PAGE</span>
         <video src="${encodeURI(VIDEO_SRC)}" controls playsinline preload="metadata"></video>
