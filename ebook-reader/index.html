@@ -4019,5 +4019,101 @@ startFlow();
 #demo-note button:hover{color:#fff}
 @media print{#demo-note{display:none}}
 </style>
+
+<!-- ═══════════ 내 서재 (진입 첫 화면 — 80권 중 소지본만 열림) ═══════════ -->
+<style>
+  .rshelf{position:fixed; inset:0; z-index:300; background:#F4F2ED; overflow-y:auto; display:none}
+  .rshelf.open{display:block}
+  .rs-bar{display:flex; align-items:center; gap:10px; padding:13px 18px; background:#fff;
+    border-bottom:1px solid #E5E1D6; position:sticky; top:0; z-index:5}
+  .rs-bar a{font-size:.88rem; font-weight:700; color:#8f897d; padding:8px 10px; border-radius:9px; text-decoration:none; color:inherit}
+  .rs-bar a:hover{background:#F0EDE6}
+  .rs-bar .t{font-size:.98rem; font-weight:800; margin:0 auto}
+  .rs-bar .md{font-size:.7rem; font-weight:800; padding:4px 10px; border-radius:7px; background:#FBF3D8; color:#8a6d1c}
+  .rs-in{max-width:960px; margin:0 auto; padding:36px 22px 90px}
+  .rs-h{font-size:1.5rem; font-weight:900; letter-spacing:-.02em}
+  .rs-sub{font-size:.86rem; color:#8f897d; margin:6px 0 24px}
+  .rs-now{display:flex; gap:18px; align-items:center; background:#fff; border:1px solid #E5E1D6; border-radius:18px;
+    padding:18px; margin-bottom:30px; cursor:pointer; transition:transform .12s, border-color .12s; text-align:left; width:100%}
+  .rs-now:hover{transform:translateY(-2px); border-color:#c9a53a}
+  .rs-now .cv{width:92px; aspect-ratio:210/297; border-radius:8px; background:#efe7d6; border:1px solid #E5E1D6;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; overflow:hidden; flex-shrink:0}
+  .rs-now .cv img{width:100%; height:100%; object-fit:cover}
+  .rs-now .cv .no{font-size:.62rem; font-weight:800; letter-spacing:.14em; color:#8f897d}
+  .rs-now .bt{font-size:1.08rem; font-weight:900}
+  .rs-now .bs{font-size:.8rem; color:#8f897d; margin-top:4px}
+  .rs-now .go{margin-left:auto; font-size:.86rem; font-weight:800; color:#8a6d1c; background:#FBF3D8;
+    border-radius:999px; padding:10px 16px; white-space:nowrap; flex-shrink:0}
+  .rs-gh{font-size:.78rem; font-weight:800; color:#8f897d; letter-spacing:.06em; margin:0 0 12px}
+  .rs-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(96px, 1fr)); gap:12px}
+  .rs-bk{position:relative; aspect-ratio:210/297; border-radius:9px; border:1px solid #E5E1D6; background:#fff;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; padding:8px;
+    cursor:pointer; transition:transform .1s; overflow:hidden; text-align:center}
+  .rs-bk:hover{transform:translateY(-2px)}
+  .rs-bk .no{font-size:.6rem; font-weight:800; letter-spacing:.12em; color:#8f897d}
+  .rs-bk .bt{font-size:.72rem; font-weight:800; line-height:1.35; word-break:keep-all}
+  .rs-bk.own{border-color:#d9c98f; background:#FFFDF6}
+  .rs-bk.now{outline:2px solid #c9a53a}
+  .rs-bk.lock{background:#EFEDE8; color:#B5B0A5; cursor:pointer}
+  .rs-bk.lock .no{color:#B5B0A5}
+  .rs-bk.lock .lk{font-size:1rem}
+  @media (max-width:560px){ .rs-grid{grid-template-columns:repeat(auto-fill, minmax(78px, 1fr))} }
+</style>
+<div class="rshelf" id="rshelf">
+  <div class="rs-bar">
+    <a href="../subscribe/">← 윤소정의 생각구독</a>
+    <span class="t">내 서재</span>
+    <span class="md">구독자 모드</span>
+  </div>
+  <div class="rs-in">
+    <h1 class="rs-h">내 서재</h1>
+    <p class="rs-sub" id="rsSub"></p>
+    <button class="rs-now" id="rsNow"></button>
+    <p class="rs-gh">전체 80권</p>
+    <div class="rs-grid" id="rsGrid"></div>
+  </div>
+</div>
+<script>
+/* 내 서재 — ?preview=1(편집기 미리보기)이면 건너뛰고 바로 지면으로 */
+(function(){
+  if(IS_PREVIEW) return;
+  const shelf = document.getElementById('rshelf');
+  const curNo = (PUB_BOOK && /^NO\.(\d+)$/.test(PUB_BOOK.issue || '')) ? +PUB_BOOK.issue.slice(3) : 76;
+  const curTitle = PUB_BOOK ? PUB_BOOK.title : '이 서재를 여는 법';
+  const curSub = PUB_BOOK ? (PUB_BOOK.subtitle || '') : '리더기 미리보기 · 밑줄과 메모를 시험해 보세요';
+  const OWNED_PAST = { };
+  [[curNo-1, '멀리 가는 마음'], [curNo-2, '질문의 온도'], [curNo-3, '기록이 남는 자리'], [curNo-4, '여름을 견디는 법']]
+    .forEach(([n, t]) => { if(n >= 1) OWNED_PAST[n] = t; });
+  const ownedCount = 1 + Object.keys(OWNED_PAST).length;
+  document.getElementById('rsSub').textContent = `80권 중 ${ownedCount}권을 만났어요. 이번 호부터 이어서 읽어요.`;
+  document.getElementById('rsNow').innerHTML = `
+    <span class="cv">${PUB_BOOK && PUB_BOOK.cover
+      ? `<img src="${PUB_BOOK.cover}" alt="표지">`
+      : `<span class="no">${PUB_BOOK ? (PUB_BOOK.issue || 'ISSUE') : 'SAMPLE'}</span><span class="bt" style="font-size:.78rem;padding:0 8px">${curTitle}</span>`}</span>
+    <span><span class="bt">${curTitle}</span><span class="bs" style="display:block">${curSub}</span></span>
+    <span class="go">이어서 읽기 →</span>`;
+  let cells = '';
+  for(let n = 80; n >= 1; n--){
+    if(n === curNo){
+      cells += `<div class="rs-bk own now" data-k="now"><span class="no">NO.${n}</span><span class="bt">${curTitle}</span></div>`;
+    } else if(OWNED_PAST[n]){
+      cells += `<div class="rs-bk own" data-k="own"><span class="no">NO.${n}</span><span class="bt">${OWNED_PAST[n]}</span></div>`;
+    } else {
+      cells += `<div class="rs-bk lock" data-k="lock"><span class="lk">🔒</span><span class="no">NO.${n}</span></div>`;
+    }
+  }
+  document.getElementById('rsGrid').innerHTML = cells;
+  function openNow(){ shelf.classList.remove('open'); window.scrollTo({ top: 0 }); }
+  document.getElementById('rsNow').addEventListener('click', openNow);
+  document.getElementById('rsGrid').addEventListener('click', e => {
+    const c = e.target.closest('[data-k]');
+    if(!c) return;
+    if(c.dataset.k === 'now') openNow();
+    else if(c.dataset.k === 'own') toast('이 목업에서는 이번 호만 열 수 있어요');
+    else toast('아직 만나지 못한 호예요 — 구독을 이어가면 하나씩 열려요');
+  });
+  shelf.classList.add('open');
+})();
+</script>
 </body>
 </html>
