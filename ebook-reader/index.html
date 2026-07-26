@@ -4209,9 +4209,6 @@ const CAT_MAX = CATALOG.reduce((m, b) => Math.max(m, b.no), 0);
   const curSub = PUB_BOOK ? (PUB_BOOK.subtitle || '') : '리더기 미리보기 · 밑줄과 메모를 시험해 보세요';
   /* 열람 규칙: 이번 호(공개 76호) + 편집기에서 발행한 호만 열린다 */
   let LIB = {};
-  try{ LIB = JSON.parse(localStorage.getItem('trus_library_v1')) || {}; }catch(e){}
-  const ownedCount = new Set([curNo, ...Object.keys(LIB).map(Number)]).size;
-  document.getElementById('rsSub').textContent = `${CAT_MAX}권 중 ${ownedCount}권을 만났어요. 이번 호부터 이어서 읽어요.`;
   document.getElementById('rsNow').innerHTML = `
     <span class="cv">${(PUB_BOOK && PUB_BOOK.cover)
       ? `<img src="${PUB_BOOK.cover}" alt="표지">`
@@ -4221,6 +4218,11 @@ const CAT_MAX = CATALOG.reduce((m, b) => Math.max(m, b.no), 0);
     <span><span class="bt">${curTitle}</span><span class="bs" style="display:block">${curSub}</span></span>
     <span class="go">이어서 읽기 →</span>`;
   document.getElementById('rsTotal').textContent = `전체 ${CAT_MAX}권`;
+  /* 발행 라이브러리를 다시 읽어 그린다 — 편집기 탭에서 발행하면 storage 이벤트로 즉시 갱신 */
+  function renderGrid(){
+  try{ LIB = JSON.parse(localStorage.getItem('trus_library_v1')) || {}; }catch(e){ LIB = {}; }
+  const ownedCount = new Set([curNo, ...Object.keys(LIB).map(Number)]).size;
+  document.getElementById('rsSub').textContent = `${CAT_MAX}권 중 ${ownedCount}권을 만났어요. 이번 호부터 이어서 읽어요.`;
   let cells = '';
   for(let n = CAT_MAX; n >= 1; n--){
     const b = CAT[n];
@@ -4235,6 +4237,9 @@ const CAT_MAX = CATALOG.reduce((m, b) => Math.max(m, b.no), 0);
     cells += `<div class="rs-bk ${k === 'now' ? 'own now' : k}" data-k="${k}" data-n="${n}" title="${ttl}">${cov}<span class="lbl"><span class="bt">NO.${n} · ${ttl}</span></span>${chip}</div>`;
   }
   document.getElementById('rsGrid').innerHTML = cells;
+  }
+  renderGrid();
+  window.addEventListener('storage', ev => { if(ev.key === 'trus_library_v1') renderGrid(); });
   function openNow(){ shelf.classList.remove('open'); window.scrollTo({ top: 0 }); }
   document.getElementById('rsNow').addEventListener('click', openNow);
   document.getElementById('rsGrid').addEventListener('click', e => {
