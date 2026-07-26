@@ -912,6 +912,12 @@
   .piece{background:var(--paper-2);border-radius:3px;padding:8px 10px}
   .piece .pd{font-size:.6rem;color:var(--panel-muted);font-weight:800;margin-bottom:3px;letter-spacing:.06em}
   .piece .pt{font-size:.76rem;line-height:1.55;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  /* 코스·조각이 뭔지 처음 보는 사람에게 한 번 설명해 주는 자리 */
+  .course-help{margin:10px 0 2px;font-size:.8rem;line-height:1.75;color:var(--panel-muted);word-break:keep-all}
+  .course-help b{color:var(--panel-ink);font-weight:700}
+  .piece-help{margin:12px 0 0;font-size:.76rem;line-height:1.75;color:var(--panel-muted);word-break:keep-all}
+  .piece-help b{color:var(--panel-ink);font-weight:700}
+  .piece-help.sub{margin:8px 0 0;font-size:.72rem}
   .theme-guess{background:var(--yellow-soft);border-left:2px solid var(--yellow);padding:10px 12px;margin:11px 0;
     font-size:.78rem;line-height:1.65;word-break:keep-all}
   .theme-guess b{color:var(--yellow)}
@@ -1025,6 +1031,12 @@
           <span class="badge">이번 달의 글쓰기</span>
           <span class="d">2025.12 · 76호와 함께</span>
         </div>
+        <p class="course-help">
+          읽은 글을 <b>내 생각으로 옮겨 보는 일곱 걸음</b>입니다.
+          내 이번 달을 먼저 돌아본 뒤(1~2), 윤소정의 생각과 만나고(3~4),
+          그 말을 내 단어로 바꿔(5~6), 마지막에 한 편으로 씁니다(7).
+          중간에 멈춰도 괜찮아요 — 다음에 오면 이어서 시작합니다.
+        </p>
         <div class="wheel" id="wheel"></div>
         <div class="flow-history" id="flowHistory"></div>
         <div class="flow-active" id="flowActive"></div>
@@ -1043,8 +1055,18 @@
             <div class="small">이번 달에 쌓은 생각 조각</div>
           </div>
         </div>
+        <div class="piece-help">
+          <b>조각이 뭔가요?</b>
+          왼쪽 코스를 <b>돌아보기 → 곱씹기 → 고르기 → 만나기 → 바꾸기 → 내 방식 → 쓰기</b>
+          일곱 걸음으로 한 바퀴 돌면, 그날 쓴 글이 <b>조각 하나</b>로 여기 쌓입니다.
+          한 번에 오래 쓰지 않아도 됩니다 — 5~10분이면 한 바퀴예요.
+        </div>
         <div class="theme-guess">이번 달 조각에서 <b id="monthTheme">"때를 기다리는 일"</b>이 가장 자주 나왔습니다. 30개가 모이면 이 주제로 글 한 편을 엮어 드립니다.</div>
         <button class="btn wide ghost" id="weaveBtn">이 조각들로 글 엮어 보기</button>
+        <div class="piece-help sub">
+          조각이 30개가 되기 전에도 눌러 볼 수 있어요.
+          지금까지 쌓인 것만으로 <b>어떤 주제가 나오고 있는지, 목차를 어떻게 잡으면 좋을지</b> 먼저 보여 드립니다.
+        </div>
         <div class="rhead" style="margin-top:16px">이번 달 쌓인 조각</div>
         <div class="pieces" id="pieces"></div>
       </aside>
