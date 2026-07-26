@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>마이페이지 — TRUS 통합회원</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+:root{
+  --ink:#191F28; --sub:#6B7684; --line:#E5E8EB; --bg:#F7F8FA;
+  --blue:#00B8FF; --blue-d:#067CAF; --blue-soft:#E5F7FF;
+  --night:#231B2E; --night-2:#2E2340; --accent:#F26D9C; --accent-d:#C24C78;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:"Pretendard Variable",Pretendard,-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+  background:var(--bg); color:var(--ink); letter-spacing:-0.01em; word-break:keep-all; line-height:1.6; min-height:100vh}
+button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
+a{color:inherit;text-decoration:none}
+:focus-visible{outline:3px solid #3182F6; outline-offset:2px}
+.wrap{max-width:640px; margin:0 auto; padding:0 20px 80px}
+
+/* 헤더 */
+.top{position:sticky; top:0; z-index:50; background:rgba(255,255,255,.94); backdrop-filter:blur(8px);
+  border-bottom:1px solid var(--line)}
+.top .in{max-width:640px; margin:0 auto; padding:14px 20px; display:flex; align-items:center; gap:14px}
+.logo{font-weight:800; letter-spacing:.14em; font-size:1rem}
+.wordmark{font-size:1rem; font-weight:800; border-left:1px solid var(--line); padding-left:14px}
+.top .spacer{flex:1}
+.top-out{font-weight:700; font-size:.86rem; color:var(--sub); padding:9px 12px; border-radius:9px}
+.top-out:hover{background:#F2F4F6; color:var(--ink)}
+
+/* 카드 공통 */
+h1{font-size:1.45rem; font-weight:900; margin:36px 0 20px}
+.card{background:#fff; border:1px solid var(--line); border-radius:18px; padding:24px 22px; margin-bottom:16px}
+.card .ch{display:flex; align-items:center; gap:10px; margin-bottom:16px}
+.card .ch h2{font-size:1.02rem; font-weight:800; flex:1}
+.badge{font-size:.7rem; font-weight:800; padding:4px 10px; border-radius:7px}
+
+/* 기본정보 */
+.me{display:flex; align-items:center; gap:16px}
+.avatar{width:54px; height:54px; border-radius:50%; background:var(--ink); color:#fff; font-weight:800;
+  font-size:1.2rem; display:flex; align-items:center; justify-content:center; flex-shrink:0}
+.me .nm{font-size:1.08rem; font-weight:800}
+.me .em{font-size:.86rem; color:var(--sub)}
+.me .joined{font-size:.78rem; color:var(--sub); margin-top:3px}
+.badge.uni{background:#F2F4F6; color:var(--ink)}
+
+/* 생각구독 카드 */
+.badge.sub-on{background:var(--blue-soft); color:var(--blue-d)}
+.krow{display:flex; justify-content:space-between; gap:12px; padding:9px 0; border-bottom:1px solid #F2F4F6; font-size:.9rem}
+.krow:last-of-type{border-bottom:none}
+.krow .k{color:var(--sub)}
+.krow .v{font-weight:700; text-align:right}
+.krow .v small{color:var(--blue-d); font-weight:800; margin-left:6px}
+.card-cta{display:flex; width:100%; align-items:center; justify-content:center; gap:8px; margin-top:14px;
+  font-size:.9rem; font-weight:800; padding:13px; border-radius:12px; border:1.5px solid var(--line);
+  transition:border-color .12s, background .12s}
+.card-cta:hover{border-color:var(--ink)}
+
+/* 트루스월드 카드 — 밤 톤 */
+.card.world{background:linear-gradient(var(--night) 0%, var(--night-2) 100%); border-color:#17131F; color:#EFE4EC;
+  position:relative; overflow:hidden}
+.card.world::before{content:""; position:absolute; left:8%; top:14%; width:3px; height:3px; background:#fff; opacity:.6;
+  border-radius:50%; box-shadow:14vw 8px #FFF6C9, 28vw 30px #FBE4EE, 38vw 4px #fff, 20vw 60px #fff}
+.card.world .ch h2{color:#fff}
+.badge.tk-on{background:var(--accent); color:#fff}
+.badge.tk-off{background:rgba(255,255,255,.12); color:#B7AACB}
+.ticket{position:relative; z-index:1; display:flex; align-items:center; gap:14px; background:rgba(255,255,255,.06);
+  border:1.5px dashed rgba(255,255,255,.25); border-radius:12px; padding:14px 16px; margin-bottom:6px}
+.ticket .ic{font-size:1.5rem}
+.ticket .tt{font-size:.92rem; font-weight:800; color:#fff}
+.ticket .td{font-size:.78rem; color:#B7AACB; margin-top:2px}
+.no-ticket{position:relative; z-index:1; text-align:center; padding:18px 10px 8px; color:#B7AACB; font-size:.9rem}
+.enter-btn{display:flex; width:100%; align-items:center; justify-content:center; gap:8px; margin-top:14px;
+  position:relative; z-index:1; font-size:.92rem; font-weight:800; padding:14px; border-radius:12px;
+  background:var(--accent); color:#fff; border:2px solid var(--accent-d); box-shadow:0 3px 0 var(--accent-d);
+  transition:transform .08s, box-shadow .08s}
+.enter-btn:active{transform:translateY(2px); box-shadow:0 1px 0 var(--accent-d)}
+.enter-btn:disabled{background:rgba(255,255,255,.1); border-color:rgba(255,255,255,.16); box-shadow:none;
+  color:#8B7F99; cursor:not-allowed}
+.gate-note{position:relative; z-index:1; margin-top:10px; text-align:center; font-size:.78rem; color:#B7AACB}
+
+/* 로그인 게이트 */
+.login-gate{text-align:center; padding:90px 20px}
+.login-gate .big{font-size:2rem; margin-bottom:14px}
+.login-gate h2{font-size:1.2rem; font-weight:800; margin-bottom:8px}
+.login-gate p{font-size:.9rem; color:var(--sub); margin-bottom:24px}
+.login-gate button{background:var(--ink); color:#fff; font-weight:800; font-size:.95rem; padding:14px 28px; border-radius:12px}
+
+/* 데모 토글 */
+.demo{display:flex; align-items:center; justify-content:center; gap:10px; margin-top:26px; font-size:.78rem; color:var(--sub)}
+.demo button{font-size:.76rem; font-weight:800; padding:6px 13px; border-radius:999px; border:1.5px solid var(--line)}
+.demo button.on{background:var(--ink); color:#fff; border-color:var(--ink)}
+
+.toast{position:fixed; left:50%; bottom:30px; transform:translateX(-50%) translateY(14px); z-index:120;
+  background:rgba(17,17,17,.94); color:#fff; font-size:.88rem; font-weight:600; line-height:1.5;
+  padding:13px 20px; border-radius:12px; max-width:min(420px,88vw); text-align:center;
+  opacity:0; visibility:hidden; transition:opacity .2s, transform .2s}
+.toast.on{opacity:1; visibility:visible; transform:translateX(-50%) translateY(0)}
+@media (prefers-reduced-motion:reduce){ *{transition:none!important} }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="in">
+    <a class="logo" href="../">TRUS</a>
+    <span class="wordmark">마이페이지</span>
+    <div class="spacer"></div>
+    <button class="top-out" onclick="doLogout()">로그아웃</button>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- 비로그인 게이트 -->
+  <section class="login-gate" id="gate" hidden>
+    <p class="big" aria-hidden="true">🔒</p>
+    <h2>로그인이 필요해요</h2>
+    <p>TRUS 통합 계정으로 로그인하면 구독과 티켓을 한눈에 볼 수 있어요</p>
+    <button onclick="doLogin()">로그인하기 (목)</button>
+  </section>
+
+  <!-- 마이페이지 본문 -->
+  <div id="my" hidden>
+    <h1>마이페이지</h1>
+
+    <section class="card" aria-label="기본정보">
+      <div class="ch"><h2>기본정보</h2><span class="badge uni">TRUS 통합회원</span></div>
+      <div class="me">
+        <div class="avatar">김</div>
+        <div>
+          <p class="nm">김트러스</p>
+          <p class="em">trus@example.com</p>
+          <p class="joined">2026.07.01 통합회원 가입 · 하나의 계정으로 두 세계를 이용 중</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="card" aria-label="생각구독">
+      <div class="ch"><h2>생각구독</h2><span class="badge sub-on">구독 중 · 연간</span></div>
+      <div class="krow"><span class="k">구독 기간</span><span class="v">2026.01.15 ~ 2027.01.14 <small>D-173</small></span></div>
+      <div class="krow"><span class="k">다음 갱신일</span><span class="v">2027.01.15</span></div>
+      <div class="krow"><span class="k">이번 달 책</span><span class="v">나는 '언러닝' 합니다</span></div>
+      <a class="card-cta" href="../subscribe/">구독 상세 · 구매내역 보기 <span aria-hidden="true">→</span></a>
+    </section>
+
+    <section class="card world" aria-label="트루스월드">
+      <div class="ch"><h2>트루스월드</h2><span class="badge" id="tkBadge"></span></div>
+
+      <div id="tkYes" hidden>
+        <div class="ticket">
+          <span class="ic" aria-hidden="true">🎫</span>
+          <div>
+            <p class="tt">입장 티켓 · TICKET #0042</p>
+            <p class="td">일의 교과서 — 2026.07.10 구매</p>
+          </div>
+        </div>
+        <button class="enter-btn" onclick="location.href='../world/'">월드 입장 <span aria-hidden="true">→</span></button>
+      </div>
+
+      <div id="tkNo" hidden>
+        <p class="no-ticket">보유한 입장 티켓이 없어요</p>
+        <button class="enter-btn" disabled>월드 입장</button>
+        <p class="gate-note">입장 티켓을 구매한 분만 입장할 수 있어요 · <a href="../world/" style="text-decoration:underline">티켓 알아보기</a></p>
+      </div>
+    </section>
+
+    <div class="demo">
+      <span>프로토타입 데모</span>
+      <button id="dOn" onclick="setTicket(true)">티켓 있음</button>
+      <button id="dOff" onclick="setTicket(false)">티켓 없음</button>
+    </div>
+  </div>
+
+</main>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+const $ = id => document.getElementById(id);
+function toast(msg){
+  const t = $('toast');
+  t.textContent = msg; t.classList.add('on');
+  clearTimeout(t._h); t._h = setTimeout(()=>t.classList.remove('on'), 2600);
+}
+function render(){
+  const logged = !!localStorage.getItem('trus_user');
+  $('gate').hidden = logged;
+  $('my').hidden = !logged;
+  if(!logged) return;
+  const tk = localStorage.getItem('trus_ticket') !== '0';   // 기본값: 있음
+  $('tkYes').hidden = !tk;
+  $('tkNo').hidden = tk;
+  const b = $('tkBadge');
+  b.textContent = tk ? '입장 가능' : '티켓 없음';
+  b.className = 'badge ' + (tk ? 'tk-on' : 'tk-off');
+  $('dOn').classList.toggle('on', tk);
+  $('dOff').classList.toggle('on', !tk);
+}
+function setTicket(v){
+  localStorage.setItem('trus_ticket', v ? '1' : '0');
+  render();
+  toast(v ? '데모: 입장 티켓이 생겼어요' : '데모: 티켓 없는 상태로 전환했어요');
+}
+function doLogin(){ localStorage.setItem('trus_user','1'); render(); toast('로그인 완료! (목)'); }
+function doLogout(){ localStorage.removeItem('trus_user'); toast('로그아웃했어요'); setTimeout(()=>location.href='../', 600); }
+render();
+</script>
+</body>
+</html>

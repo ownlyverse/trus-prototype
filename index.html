@@ -149,8 +149,10 @@ a{color:inherit;text-decoration:none}
 <header class="top">
   <a class="logo" href="index.html">TRUS</a>
   <div class="spacer"></div>
-  <button class="top-login" onclick="openAuth('login')">로그인</button>
-  <button class="top-join" onclick="openAuth('signup')">회원가입</button>
+  <button class="top-login when-out" onclick="openAuth('login')">로그인</button>
+  <button class="top-join when-out" onclick="openAuth('signup')">회원가입</button>
+  <a class="top-join when-in" hidden href="mypage/">마이페이지</a>
+  <button class="top-login when-in" hidden onclick="mockLogout()">로그아웃</button>
 </header>
 
 <main class="split">
@@ -218,7 +220,7 @@ a{color:inherit;text-decoration:none}
         <input type="email" placeholder="이메일" aria-label="이메일">
         <input type="password" placeholder="비밀번호" aria-label="비밀번호">
       </div>
-      <button class="auth-cta" onclick="toast('로그인 완료! (목)');closeAuth()">로그인</button>
+      <button class="auth-cta" onclick="mockLogin()">로그인</button>
     </div>
 
   </div>
@@ -247,6 +249,8 @@ function authStep(n){
   }
 }
 function authDone(){
+  localStorage.setItem('trus_user','1');
+  renderAuthUI();
   closeAuth();
   toast('가입 완료! 하나의 계정으로 생각구독·트루스월드 어디서나 만나요');
 }
@@ -267,6 +271,19 @@ function toast(msg){
   all.addEventListener('change', ()=>{ [...req,...opt].forEach(c=>c.checked=all.checked); sync(); });
   [...req,...opt].forEach(c=>c.addEventListener('change', sync));
 })();
+function mockLogin(){
+  localStorage.setItem('trus_user','1');
+  renderAuthUI();
+  closeAuth();
+  toast('로그인 완료! 통합 계정으로 두 세계가 열렸어요 (목)');
+}
+function mockLogout(){ localStorage.removeItem('trus_user'); renderAuthUI(); toast('로그아웃했어요'); }
+function renderAuthUI(){
+  const on = !!localStorage.getItem('trus_user');
+  document.querySelectorAll('.when-out').forEach(el => el.hidden = on);
+  document.querySelectorAll('.when-in').forEach(el => el.hidden = !on);
+}
+renderAuthUI();
 document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeAuth(); });
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
