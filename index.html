@@ -77,16 +77,40 @@ a{color:inherit;text-decoration:none}
   text-shadow:0 0 22px rgba(242,109,156,.35)}
 .world h2 b{color:var(--accent)}
 .world .lead{font-size:1rem; color:#D8CFE8; line-height:1.7; margin-bottom:32px; max-width:34ch}
-/* 구현된 타운 라이브 미니 프리뷰 (월드맵 축소 임베드) */
-.world .preview{position:relative; width:min(460px,100%); aspect-ratio:16/10; margin-bottom:38px;
-  border:3px solid #17171C; border-radius:12px; overflow:hidden; background:#171130;
-  box-shadow:5px 5px 0 rgba(0,0,0,.4), 0 0 26px rgba(242,109,156,.18)}
-.world .preview iframe{width:250%; height:250%; transform:scale(.4); transform-origin:0 0;
-  border:0; pointer-events:none}
-.world .pv-label{position:absolute; top:-13px; left:14px; background:var(--accent); color:#fff;
-  border:2px solid var(--accent-d); border-radius:5px; padding:4px 12px; font-size:.66rem;
-  font-family:'NeoDunggeunmo','Pretendard Variable',sans-serif; letter-spacing:0; box-shadow:0 3px 0 var(--accent-d); z-index:2}
-.world .pv-wrap{position:relative; padding-top:13px}
+/* 광장 게임 신 — 밤의 잔디 광장 + 걷는 픽셀 캐릭터 (plaza 캐넌 에셋) */
+.half.world{padding:0; justify-content:flex-start}
+.world .inner{position:relative; z-index:2; flex:1; width:100%; display:flex; flex-direction:column;
+  justify-content:center; align-items:flex-start; padding:92px clamp(28px,5vw,64px) 22px}
+.plaza-scene{position:relative; z-index:1; height:42%; min-height:230px; flex-shrink:0; overflow:hidden;
+  background:url('assets/stone.png') 0 0/200px 200px repeat; image-rendering:pixelated;
+  border-top:3px solid #17171C; box-shadow:0 -8px 26px rgba(0,0,0,.5)}
+.plaza-scene::before{content:""; position:absolute; inset:0; z-index:1; pointer-events:none;
+  background:linear-gradient(rgba(23,17,31,.55), rgba(23,17,31,.15))}
+.prop{position:absolute; z-index:2; image-rendering:pixelated}
+.prop.tree{width:82px}
+.prop.t1{left:4%; bottom:54%}
+.prop.t2{right:5%; bottom:6%}
+.prop.bench{width:72px}
+.prop.b1{left:15%; bottom:14%}
+.prop.b2{right:17%; bottom:58%}
+.prop.fountain{width:150px; left:50%; bottom:24%; transform:translateX(-50%)}
+.walker{position:absolute; z-index:3; bottom:9%; left:7%; display:flex; flex-direction:column;
+  align-items:center; gap:3px; animation:strollX 16s ease-in-out infinite}
+.walker .wtag{font-family:'NeoDunggeunmo','Pretendard Variable',sans-serif; letter-spacing:0; font-size:.6rem;
+  color:#FFE6F0; background:rgba(23,19,31,.85); border:2px solid #3E3155; border-radius:4px; padding:2px 7px; white-space:nowrap}
+.walker .wbody{animation:flipX 16s ease-in-out infinite}
+.walker .wimg{display:block; width:46px; image-rendering:pixelated; animation:bob .5s steps(2) infinite}
+.walker.w2{left:auto; right:9%; bottom:44%; animation-delay:-9s}
+.walker.w2 .wbody{animation-delay:-9s}
+.walker.w2 .wimg{filter:hue-rotate(150deg)}
+@keyframes strollX{0%,100%{transform:translateX(0)}50%{transform:translateX(min(240px,22vw))}}
+@keyframes flipX{0%,49.9%{transform:scaleX(1)}50%,100%{transform:scaleX(-1)}}
+@keyframes bob{0%{transform:translateY(0)}100%{transform:translateY(-3px)}}
+.pl-bubble{position:absolute; z-index:3; left:50%; bottom:64%; transform:translateX(-50%);
+  background:#FFF9F1; color:#191F28; border:3px solid #17171C; border-radius:8px; padding:6px 11px;
+  font-size:.64rem; box-shadow:3px 3px 0 rgba(0,0,0,.35); white-space:nowrap}
+.pl-bubble::after{content:""; position:absolute; top:100%; left:50%; transform:translateX(-50%);
+  border:7px solid transparent; border-top-color:#17171C}
 .px-cta{display:inline-flex; align-items:center; gap:8px; font-size:.92rem; padding:13px 22px; border-radius:6px;
   background:var(--accent); color:#fff; border:2px solid var(--accent-d); box-shadow:0 4px 0 var(--accent-d);
   transition:transform .08s, box-shadow .08s}
@@ -144,6 +168,8 @@ a{color:inherit;text-decoration:none}
   .split{flex-direction:column; height:auto; min-height:0}
   .half{min-height:88vh; padding:92px 24px 70px}
   .half.sub{border-right:none; border-bottom:1px solid rgba(0,0,0,.35)}
+  .half.world{padding:0}
+  .world .inner{padding:92px 24px 20px}
   .split:has(.half:hover) .half:hover{flex:1}
   .band{position:static}
 }
@@ -177,13 +203,17 @@ a{color:inherit;text-decoration:none}
       <p class="kicker pxfont">TRUS WORLD</p>
       <h2 class="pxfont">완주하는 사람들의<br><b>트루스월드</b></h2>
       <p class="lead">강의를 끝까지 듣고, 밤의 광장에서 만나는 타운이에요.</p>
-      <div class="pv-wrap">
-        <div class="preview" aria-label="구현된 타운 미리보기">
-          <span class="pv-label">지금 구현된 타운 — 라이브</span>
-          <iframe src="worldmap-prototype.html" loading="lazy" tabindex="-1" title="타운 월드맵 미리보기"></iframe>
-        </div>
-      </div>
       <a class="px-cta pxfont" href="world/">트루스월드 보러가기 <span aria-hidden="true">→</span></a>
+    </div>
+    <div class="plaza-scene" aria-hidden="true">
+      <img class="prop tree t1" src="assets/tree.png" alt="">
+      <img class="prop tree t2" src="assets/tree.png" alt="">
+      <img class="prop bench b1" src="assets/bench.png" alt="">
+      <img class="prop bench b2" src="assets/bench.png" alt="">
+      <img class="prop fountain" src="assets/fountain.png" alt="">
+      <div class="walker w1"><span class="wtag pxfont">완주자_준</span><span class="wbody"><img class="wimg" src="assets/me.png" alt=""></span></div>
+      <div class="walker w2"><span class="wtag pxfont">완주자_솔</span><span class="wbody"><img class="wimg" src="assets/me.png" alt=""></span></div>
+      <div class="pl-bubble pxfont">완강하고 광장에서 만나요!</div>
     </div>
   </section>
 
