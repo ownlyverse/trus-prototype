@@ -395,6 +395,7 @@ input,textarea{font:inherit;color:inherit}
       <button class="go" id="bmGo">책 만들기</button>
     </div>
     <button class="alt" id="bmAlt">빈 책으로 시작</button>
+    <button class="alt" id="bmNew">새 책 만들기 — 지금 책을 지우고 처음부터</button>
   </div>
 </div>
 <div class="ask" id="ask" role="alertdialog"><p class="at" id="askText"></p>
@@ -773,6 +774,7 @@ function openBookModal(mode){
     : '이번 호의 기본 정보를 수정합니다.';
   $('bmGo').textContent = mode === 'new' ? '책 만들기' : '저장';
   $('bmAlt').style.display = mode === 'new' ? '' : 'none';
+  $('bmNew').style.display = mode === 'edit' ? '' : 'none';
   $('inIssue').value = BOOK.issue || '';
   $('inTitle').value = BOOK.title || '';
   $('inSubtitle').value = BOOK.subtitle || '';
@@ -1201,6 +1203,16 @@ $('bookInfoBtn').addEventListener('click', () => openBookModal('edit'));
 $('bmGo').addEventListener('click', () => {
   commitBookMeta(); closeBookModal();
   if(bmMode === 'new') toast('책을 만들었습니다 — 본문을 채워 보십시오');
+});
+$('bmNew').addEventListener('click', e => {
+  ask(e.target, '지금 책(임시저장)을 지우고 새 책을 시작한다. 발행본은 유지된다.', '새 책 시작', true, () => {
+    BOOK = { v:2, issue:'', title:'', subtitle:'', cover:null,
+      chapters:[{ id: uid(), tag:'', title:'1. 새 챕터', voice:null, sheets:[{ blocks:[{ t:'p', html:'' }] }] }] };
+    cur = 0; SEL = null;
+    renderAll();
+    openBookModal('new');
+    $('inIssue').value = ''; $('inTitle').value = ''; $('inSubtitle').value = '';
+  });
 });
 $('bmAlt').addEventListener('click', () => {
   commitBookMeta();
