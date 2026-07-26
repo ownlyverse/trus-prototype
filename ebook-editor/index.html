@@ -43,24 +43,29 @@ input,textarea{font:inherit;color:inherit}
 .btn-pub:hover{background:var(--blue-dd)}
 .m-toc{display:none; font-size:.88rem; font-weight:700; padding:8px 10px; border-radius:9px; color:var(--sub)}
 
-/* ── 책 설정 패널 ── */
-.bpanel{position:absolute; top:calc(100% + 8px); left:50%; transform:translateX(-50%); width:min(360px, 92vw);
-  background:#fff; border:1px solid var(--line); border-radius:14px; box-shadow:0 16px 44px rgba(0,0,0,.14);
-  padding:18px; display:none; z-index:80; text-align:left}
-.bpanel.open{display:block}
-.bpanel .fl{font-size:.72rem; font-weight:800; color:var(--sub); letter-spacing:.05em; margin:12px 0 5px}
-.bpanel .fl:first-child{margin-top:0}
-.bpanel input[type=text]{width:100%; border:1.5px solid var(--line); border-radius:9px; padding:9px 11px; font-size:.9rem; background:#fff}
-.bpanel input[type=text]:focus{outline:none; border-color:var(--blue-d)}
+/* ── 우측 편집 패널 ── */
+.rside{width:264px; flex-shrink:0; border-left:1px solid var(--line); background:#FAFAFA;
+  overflow-y:auto; padding:16px 16px 46px}
+.rside .ps{border-bottom:1px solid var(--line); padding:15px 0}
+.rside .ps:first-child{padding-top:0}
+.rside .pt{font-size:.72rem; font-weight:800; color:var(--sub); letter-spacing:.08em; margin:0 0 4px}
+.rside .fl{font-size:.72rem; font-weight:800; color:var(--sub); letter-spacing:.05em; margin:12px 0 5px}
+.rside input[type=text]{width:100%; border:1.5px solid var(--line); border-radius:9px; padding:9px 11px; font-size:.9rem; background:#fff}
+.rside input[type=text]:focus{outline:none; border-color:var(--blue-d)}
+.rside .hintp{font-size:.76rem; color:var(--sub); line-height:1.6; margin-top:6px}
+.rside .row{display:flex; gap:7px; flex-wrap:wrap; margin-top:9px}
+.tgl{font-size:.78rem; font-weight:700; padding:7px 10px; border-radius:8px; border:1.5px solid var(--line); background:#fff}
+.tgl:hover{border-color:var(--ink)}
+.tgl.on{background:var(--blue-soft); border-color:var(--blue-d); color:var(--blue-dd)}
 .cov-row{display:flex; align-items:center; gap:10px}
 .cov-thumb{width:52px; height:73px; border-radius:6px; border:1px solid var(--line); object-fit:cover; background:var(--canvas)}
 .cov-none{width:52px; height:73px; border-radius:6px; border:1.5px dashed var(--line); display:flex; align-items:center;
   justify-content:center; font-size:.65rem; color:var(--sub); text-align:center}
+.cov-row{margin-top:2px}
 .mini{font-size:.78rem; font-weight:700; padding:7px 10px; border-radius:8px; border:1.5px solid var(--line); background:#fff}
 .mini:hover{border-color:var(--ink)}
 .mini.danger{color:var(--warn)}
 .mini.danger:hover{border-color:var(--warn); background:var(--warn-soft)}
-.bpanel .sep{border-top:1px solid var(--line); margin:16px -18px 12px}
 
 /* ── 본문 레이아웃 ── */
 .body{display:flex; flex:1; min-height:0}
@@ -152,6 +157,22 @@ input,textarea{font:inherit;color:inherit}
 .bh-ko{font-size:.94rem; font-weight:700; color:var(--blue-dd); margin-top:8px; white-space:pre-line; min-height:1.4em}
 .bv{font-size:.96rem; line-height:2.05; text-align:center; white-space:pre-line; padding:14px 8px; color:#333; min-height:2em}
 .bd{text-align:center; color:#B9B4AB; font-size:.7rem; padding:12px 0; cursor:default}
+.blk.sel{outline:2px solid var(--blue-d); outline-offset:5px; border-radius:2px}
+.plabel{display:inline-block; font-size:.6rem; font-weight:800; letter-spacing:.12em; color:var(--blue-dd);
+  background:var(--blue-soft); border-radius:5px; padding:2px 7px; margin-bottom:4px}
+.bsplit{display:grid; grid-template-columns:1fr 1fr; gap:16px; align-items:center; margin:6px 0}
+.bsplit .bh-en{font-size:1.22rem}
+.bsplit .ph{margin:0}
+.bsplit .ph img{height:220px; max-height:none}
+.bsplit .ph-empty{height:220px; margin:0}
+.bcover{margin:6px calc(-1*var(--pad-x))}
+.bcover .ph{margin:0}
+.bcover .ph img{max-height:430px; height:430px}
+.bcover-note{font-size:.68rem; color:#A9A49B; text-align:center; padding:4px 0 0}
+.btitle{padding:44px 0 34px; text-align:center}
+.btitle .bt1{font-size:.78rem; letter-spacing:.24em; font-weight:700; color:var(--sub); white-space:pre-line; min-height:1.2em}
+.btitle .bt2{font-size:1.65rem; letter-spacing:.08em; font-weight:800; margin-top:14px;
+  font-family:Georgia,"Times New Roman",serif; white-space:pre-line; min-height:1.3em}
 .ph{position:relative; margin:6px 0}
 .ph img{display:block; width:100%; max-height:340px; object-fit:cover}
 .blk.bleed .ph{margin-left:calc(-1*var(--pad-x)); margin-right:calc(-1*var(--pad-x))}
@@ -236,6 +257,7 @@ input,textarea{font:inherit;color:inherit}
   :root{--pad-y:34px; --pad-x:26px}
   .blk-h{left:auto; right:-6px; top:-12px; flex-direction:row}
   .sh-tools{display:flex}
+  .rside{display:none}
 }
 </style>
 </head>
@@ -245,20 +267,8 @@ input,textarea{font:inherit;color:inherit}
   <a class="back" href="../subscribe/">← 윤소정의 생각구독</a>
   <button class="m-toc" onclick="document.querySelector('.side').classList.toggle('open')">☰ 챕터</button>
   <div class="book">
-    <button class="bt-btn" id="bookBtn" aria-haspopup="true" aria-expanded="false">
-      <span class="bt serif" id="bookTitle"></span><span class="car">▼</span>
-    </button>
+    <span class="bt serif" id="bookTitle"></span>
     <span class="tag">관리자 모드</span>
-    <div class="bpanel" id="bpanel" role="dialog" aria-label="책 설정">
-      <p class="fl">책 제목</p>
-      <input type="text" id="inTitle" aria-label="책 제목">
-      <p class="fl">부제</p>
-      <input type="text" id="inSubtitle" aria-label="부제">
-      <p class="fl">표지 이미지</p>
-      <div class="cov-row" id="covRow"></div>
-      <div class="sep"></div>
-      <button class="mini danger" id="resetBtn">임시저장 초기화 — 기본 책으로 되돌리기</button>
-    </div>
   </div>
   <span class="stat" id="stat" role="status" aria-live="polite">임시저장됨</span>
   <button class="btn-ghost pv" id="previewBtn">미리보기</button>
@@ -280,6 +290,24 @@ input,textarea{font:inherit;color:inherit}
     <div id="sheets"></div>
     <button class="add-sheet" id="addSheetBtn">+ 대지 추가</button>
   </main>
+
+  <aside class="rside" aria-label="편집 패널">
+    <div class="ps">
+      <p class="pt">이번 호</p>
+      <p class="fl">호수</p>
+      <input type="text" id="inIssue" placeholder="76" aria-label="호수">
+      <p class="fl">이번 호 제목</p>
+      <input type="text" id="inTitle" aria-label="이번 호 제목">
+      <p class="fl">부제</p>
+      <input type="text" id="inSubtitle" aria-label="부제">
+      <p class="fl">표지 이미지</p>
+      <div class="cov-row" id="covRow"></div>
+    </div>
+    <div class="ps" id="blkProps"></div>
+    <div class="ps">
+      <button class="mini danger" id="resetBtn">임시저장 초기화 — 기본 책으로</button>
+    </div>
+  </aside>
 </div>
 
 <div class="palette" id="palette" role="menu" aria-label="블록 추가"></div>
@@ -300,6 +328,7 @@ function svgPh(label, bg){
 function mockBook(){
   return {
     v: 2,
+    issue: '01',
     title: '경계 세우는 연습',
     subtitle: '일과 관계에서 나를 지키는 법',
     cover: null,
@@ -516,7 +545,7 @@ function blkHTML(b, si, bi){
   </span>`;
   let body = '';
   if(b.t === 'p'){
-    body = `<div class="bp" contenteditable="true" data-si="${si}" data-bi="${bi}" data-f="html" data-ph="내용 입력">${sanitizeHtml(b.html)}</div>`;
+    body = `${(b.label || '').trim() ? `<span class="plabel">${escHtml(b.label)}</span>` : ''}<div class="bp" contenteditable="true" data-si="${si}" data-bi="${bi}" data-f="html" data-ph="내용 입력">${sanitizeHtml(b.html)}</div>`;
   } else if(b.t === 'head'){
     body = `<div class="bh">
       <div class="bh-en" contenteditable="true" data-si="${si}" data-bi="${bi}" data-f="en" data-ph="ENGLISH COPY">${escHtml(b.en)}</div>
@@ -550,7 +579,28 @@ function blkHTML(b, si, bi){
           ${b._err ? `<span class="verr">유튜브 주소 형식이 아닙니다</span>` : ''}
         </div>`;
   }
-  return `<div class="blk t-${b.t}${b.t === 'photo' && b.bleed ? ' bleed' : ''}">${h}${body}</div>`;
+  else if(b.t === 'split'){
+    body = `<div class="bsplit">
+      <div>
+        <div class="bh-en" contenteditable="true" data-si="${si}" data-bi="${bi}" data-f="en" data-ph="ENGLISH COPY">${escHtml(b.en)}</div>
+        <div class="bh-ko" contenteditable="true" data-si="${si}" data-bi="${bi}" data-f="ko" data-ph="한글 카피">${escHtml(b.ko)}</div>
+      </div>
+      ${b.src
+        ? phFigure(b.src, `<div class="ph-tools"><button data-act="split-change" data-si="${si}" data-bi="${bi}">사진 변경</button></div>`)
+        : `<button class="ph-empty" data-act="split-change" data-si="${si}" data-bi="${bi}">사진 선택</button>`}
+    </div>`;
+  } else if(b.t === 'cover'){
+    body = b.src
+      ? `<div class="bcover">${phFigure(b.src, `<div class="ph-tools"><button data-act="cover-change" data-si="${si}" data-bi="${bi}">사진 변경</button></div>`)}</div>
+         <div class="bcover-note">발행 시 이 사진은 여백 없는 전면 대지 한 장이 됩니다</div>`
+      : `<button class="ph-empty" data-act="cover-change" data-si="${si}" data-bi="${bi}">전면 사진 선택</button>`;
+  } else if(b.t === 'title'){
+    body = `<div class="btitle">
+      <div class="bt1" contenteditable="true" data-si="${si}" data-bi="${bi}" data-f="t1" data-ph="ISSUE NO.76 · DECEMBER 2025">${escHtml(b.t1)}</div>
+      <div class="bt2" contenteditable="true" data-si="${si}" data-bi="${bi}" data-f="t2" data-ph="CAREER PLANNING">${escHtml(b.t2)}</div>
+    </div>`;
+  }
+  return `<div class="blk t-${b.t}${b.t === 'photo' && b.bleed ? ' bleed' : ''}" data-si="${si}" data-bi="${bi}">${h}${body}</div>`;
 }
 
 function renderSheets(){
@@ -570,6 +620,11 @@ function renderSheets(){
       <div class="over-badge">A4 범위 초과 — 블록을 다음 대지로 이동</div>
     </section>`).join('');
   checkOverflows();
+  if(SEL){
+    const el = document.querySelector(`.blk[data-si="${SEL.si}"][data-bi="${SEL.bi}"]`);
+    if(el) el.classList.add('sel'); else { SEL = null; }
+    renderBlkProps();
+  }
 }
 
 function renderBookBar(){
@@ -577,6 +632,7 @@ function renderBookBar(){
   document.title = '이북 편집기 — ' + (BOOK.title || '생각구독 관리자');
 }
 function renderBookPanel(){
+  $('inIssue').value = BOOK.issue || '';
   $('inTitle').value = BOOK.title;
   $('inSubtitle').value = BOOK.subtitle;
   $('covRow').innerHTML = (BOOK.cover
@@ -586,8 +642,95 @@ function renderBookPanel(){
     : `<span class="cov-none">표지<br>없음</span>
        <button class="mini" data-act="cov-change">표지 업로드</button>`);
 }
+
+/* ─ 블록 선택 + 속성 패널 ─ */
+let SEL = null; /* {si, bi} */
+function selBlock(){
+  if(!SEL) return null;
+  const sh = chap().sheets[SEL.si];
+  return sh ? sh.blocks[SEL.bi] || null : null;
+}
+function selectBlk(si, bi){
+  SEL = { si, bi };
+  document.querySelectorAll('.blk.sel').forEach(el => el.classList.remove('sel'));
+  const el = document.querySelector(`.blk[data-si="${si}"][data-bi="${bi}"]`);
+  if(el) el.classList.add('sel');
+  renderBlkProps();
+}
+function clearSel(){
+  SEL = null;
+  document.querySelectorAll('.blk.sel').forEach(el => el.classList.remove('sel'));
+  renderBlkProps();
+}
+const TYPE_NAME = { p:'문단', head:'헤드라인', verse:'인용·운문', photo:'사진', duo:'사진 두 장',
+  video:'영상', divider:'구분선', split:'카피+사진', cover:'전면 사진', title:'표제지' };
+function renderBlkProps(){
+  const box = $('blkProps');
+  const b = selBlock();
+  if(!b){
+    box.innerHTML = `<p class="pt">블록 속성</p><p class="hintp">지면에서 블록을 클릭하면 속성이 여기 표시됩니다.</p>`;
+    return;
+  }
+  const { si, bi } = SEL;
+  let html = `<p class="pt">블록 속성 — ${TYPE_NAME[b.t] || b.t}</p>`;
+  if(b.t === 'p'){
+    html += `<p class="fl">영문 레이블</p>
+      <input type="text" id="ppLabel" value="${escHtml(b.label || '')}" placeholder="CAREER CHANGE">
+      <p class="hintp">레이블을 넣으면 이 문단부터 새 본문 묶음이 시작되고, 리더기 지면에 영문 레이블로 표시됩니다.</p>`;
+  } else if(b.t === 'photo'){
+    html += `<div class="row">
+      <button class="mini" data-pact="img">사진 변경</button>
+      <button class="tgl${b.bleed ? ' on' : ''}" data-pact="bleed">여백 채움 (bleed)</button>
+      <button class="tgl${b.fill ? ' on' : ''}" data-pact="fill">남은 높이 채움 (fill)</button>
+    </div>`;
+  } else if(b.t === 'duo'){
+    html += `<div class="row">
+      <button class="mini" data-pact="img" data-slot="0">왼쪽 사진 변경</button>
+      <button class="mini" data-pact="img" data-slot="1">오른쪽 사진 변경</button>
+    </div>`;
+  } else if(b.t === 'split' || b.t === 'cover'){
+    html += `<div class="row"><button class="mini" data-pact="img">사진 변경</button></div>
+      ${b.t === 'cover' ? '<p class="hintp">발행 시 여백 없는 전면 대지 한 장으로 분리됩니다.</p>' : ''}`;
+  } else if(b.t === 'video'){
+    html += `<p class="fl">유튜브 URL</p>
+      <input type="text" id="ppVurl" value="${escHtml(b.url || '')}" placeholder="https://youtu.be/…">
+      <div class="row"><button class="mini" data-pact="vapply">적용</button></div>
+      <p class="hintp">발행 시 이 장의 머리에 영상으로 붙습니다 (장당 1개).</p>`;
+  } else {
+    html += `<p class="hintp">이 블록은 지면에서 바로 편집합니다.</p>`;
+  }
+  html += `<div class="row"><button class="mini danger" data-pact="del">블록 삭제</button></div>`;
+  box.innerHTML = html;
+  const lab = $('ppLabel');
+  if(lab) lab.addEventListener('input', e => { const blk = selBlock(); if(blk){ blk.label = e.target.value; markDirty(); } });
+}
+$('blkProps').addEventListener('click', e => {
+  const btn = e.target.closest('[data-pact]');
+  if(!btn || !SEL) return;
+  const b = selBlock(); if(!b) return;
+  const { si, bi } = SEL;
+  const act = btn.dataset.pact;
+  if(act === 'img'){
+    if(b.t === 'photo') pickImage({ kind:'photo', si, bi });
+    else if(b.t === 'duo') pickImage({ kind:'duo', si, bi, slot:+btn.dataset.slot });
+    else if(b.t === 'split') pickImage({ kind:'split', si, bi });
+    else if(b.t === 'cover') pickImage({ kind:'coverblk', si, bi });
+  }
+  else if(act === 'bleed'){ b.bleed = !b.bleed; markDirty(); renderSheets(); }
+  else if(act === 'fill'){ b.fill = !b.fill; markDirty(); renderBlkProps(); }
+  else if(act === 'vapply'){
+    b.url = $('ppVurl').value.trim();
+    if(parseYouTube(b.url)) delete b._err; else b._err = true;
+    markDirty(); renderSheets();
+  }
+  else if(act === 'del'){
+    const doDel = () => { chap().sheets[si].blocks.splice(bi, 1); clearSel(); markDirty(); renderSheets(); };
+    if(isEmptyBlock(b)) doDel();
+    else ask(btn, '이 블록을 삭제한다. 되돌릴 수 없다.', '삭제', true, doDel);
+  }
+});
 function renderAll(){
-  renderBookBar(); renderChapList(); renderChapHead(); renderSheets();
+  renderBookBar(); renderChapList(); renderChapHead(); renderSheets(); renderBookPanel(); renderBlkProps();
 }
 
 /* ═══════════ 넘침 감지 ═══════════ */
@@ -609,11 +752,15 @@ const NEW_BLOCK = {
   photo:   () => ({ t:'photo', src:'', bleed:false }),
   duo:     () => ({ t:'duo', srcs:['',''] }),
   video:   () => ({ t:'video', url:'', note:'' }),
-  divider: () => ({ t:'divider' })
+  divider: () => ({ t:'divider' }),
+  split:   () => ({ t:'split', en:'', ko:'', src:'' }),
+  cover:   () => ({ t:'cover', src:'' }),
+  title:   () => ({ t:'title', t1:'', t2:'' })
 };
 const PALETTE = [
   ['p','문','문단'], ['head','H','헤드라인'], ['verse','❝','인용·운문'],
-  ['photo','▣','사진'], ['duo','▣▣','사진 두 장'], ['video','▶','영상'], ['divider','◆','구분선']
+  ['split','◧','카피+사진'], ['photo','▣','사진'], ['duo','▣▣','사진 두 장'],
+  ['cover','■','전면 사진'], ['title','T','표제지'], ['video','▶','영상'], ['divider','◆','구분선']
 ];
 
 let palTarget = null;
@@ -657,6 +804,9 @@ function isEmptyBlock(b){
   if(b.t === 'photo') return !b.src;
   if(b.t === 'duo') return !b.srcs[0] && !b.srcs[1];
   if(b.t === 'video') return !b.url;
+  if(b.t === 'split') return !(b.en || '').trim() && !(b.ko || '').trim() && !b.src;
+  if(b.t === 'cover') return !b.src;
+  if(b.t === 'title') return !(b.t1 || '').trim() && !(b.t2 || '').trim();
   return true; /* divider */
 }
 
@@ -682,8 +832,8 @@ $('fileIn').addEventListener('change', () => {
       if(uri.length > 2 * 1024 * 1024) toast('사진 용량이 큽니다 — 발행 저장이 실패할 수 있습니다');
       const t = fileTarget; fileTarget = null;
       if(t.kind === 'cover'){ BOOK.cover = uri; renderBookPanel(); }
-      else if(t.kind === 'photo'){ chap().sheets[t.si].blocks[t.bi].src = uri; renderSheets(); }
       else if(t.kind === 'duo'){ chap().sheets[t.si].blocks[t.bi].srcs[t.slot] = uri; renderSheets(); }
+      else { chap().sheets[t.si].blocks[t.bi].src = uri; renderSheets(); } /* photo·split·coverblk */
       markDirty();
     };
     img.src = rd.result;
@@ -704,7 +854,11 @@ $('palette').addEventListener('click', e => {
 
 $('sheets').addEventListener('click', e => {
   const b = e.target.closest('[data-act]');
-  if(!b) return;
+  if(!b){
+    const blkEl = e.target.closest('.blk');
+    if(blkEl) selectBlk(+blkEl.dataset.si, +blkEl.dataset.bi);
+    return;
+  }
   const si = +b.dataset.si, bi = +b.dataset.bi;
   const act = b.dataset.act;
   if(act === 'plus') openPalette(b, si, bi);
@@ -732,6 +886,8 @@ $('sheets').addEventListener('click', e => {
     else ask(b, `블록 ${s.blocks.length}개가 함께 삭제된다.`, '대지 삭제', true, doDel);
   }
   else if(act === 'ph-change') pickImage({ kind:'photo', si, bi });
+  else if(act === 'split-change') pickImage({ kind:'split', si, bi });
+  else if(act === 'cover-change') pickImage({ kind:'coverblk', si, bi });
   else if(act === 'duo-change') pickImage({ kind:'duo', si, bi, slot:+b.dataset.slot });
   else if(act === 'ph-bleed'){
     const blk = chap().sheets[si].blocks[bi];
@@ -815,7 +971,7 @@ $('chapList').addEventListener('keydown', e => {
 });
 function switchChap(i){
   if(i === cur) return;
-  cur = i;
+  cur = i; SEL = null;
   renderAll();
   document.querySelector('.side').classList.remove('open');
   $('editorScroll').scrollTop = 0;
@@ -834,29 +990,21 @@ $('chapTitle').addEventListener('input', e => {
   chap().title = e.target.value; markDirty(); renderChapList();
 });
 
-/* ── 책 설정 패널 ── */
-$('bookBtn').addEventListener('click', e => {
-  e.stopPropagation();
-  const open = !$('bpanel').classList.contains('open');
-  $('bpanel').classList.toggle('open', open);
-  $('bookBtn').setAttribute('aria-expanded', String(open));
-  if(open) renderBookPanel();
-});
-$('bpanel').addEventListener('click', e => {
-  e.stopPropagation();
+/* ── 이번 호 설정 (우측 패널) ── */
+$('covRow').addEventListener('click', e => {
   const b = e.target.closest('[data-act]');
   if(!b) return;
   if(b.dataset.act === 'cov-change') pickImage({ kind:'cover' });
   else if(b.dataset.act === 'cov-del'){ BOOK.cover = null; markDirty(); renderBookPanel(); }
 });
+$('inIssue').addEventListener('input', e => { BOOK.issue = e.target.value; markDirty(); });
 $('inTitle').addEventListener('input', e => { BOOK.title = e.target.value; markDirty(); renderBookBar(); });
 $('inSubtitle').addEventListener('input', e => { BOOK.subtitle = e.target.value; markDirty(); });
 $('resetBtn').addEventListener('click', e => {
   ask(e.target, '임시저장을 지우고 기본 책으로 되돌린다. 발행본은 유지된다.', '초기화', true, () => {
     try{ localStorage.removeItem(K_DRAFT); }catch(err){}
-    BOOK = mockBook(); cur = 0; lastSaved = null;
+    BOOK = mockBook(); cur = 0; lastSaved = null; SEL = null;
     $('stat').textContent = '임시저장됨';
-    $('bpanel').classList.remove('open');
     renderAll();
     toast('기본 책으로 되돌렸습니다');
   });
@@ -874,13 +1022,15 @@ function toReaderBook(){
     let video = null;
     const sheets = [];
     c.sheets.forEach(s => {
-      const blocks = [];
+      let blocks = [];
       let run = null;
+      const flushNormal = () => { if(blocks.length){ sheets.push({ no: pad2(++page), blocks }); blocks = []; } };
       s.blocks.forEach(b => {
         if(b.t === 'p'){
           const html = sanitizeHtml(b.html);
           if(!html.replace(/<br>/g, '').trim()) return;
-          if(!run){ run = { t:'block', label:'', paras:[] }; blocks.push(run); }
+          const label = escHtml((b.label || '').trim());
+          if(!run || label){ run = { t:'block', label, paras:[] }; blocks.push(run); }
           run.paras.push(html);
           return;
         }
@@ -891,14 +1041,27 @@ function toReaderBook(){
         }
         else if(b.t === 'verse'){ if((b.text || '').trim()) blocks.push({ t:'verse', text:escHtml(b.text) }); }
         else if(b.t === 'divider') blocks.push({ t:'verse', text:'◆' });
-        else if(b.t === 'photo'){ if(b.src) blocks.push({ t:'photo', src:b.src, bleed:!!b.bleed }); }
+        else if(b.t === 'photo'){ if(b.src) blocks.push({ t:'photo', src:b.src, bleed:!!b.bleed, fill:!!b.fill }); }
         else if(b.t === 'duo'){ const ss = (b.srcs || []).filter(Boolean); if(ss.length) blocks.push({ t:'duo', srcs:ss }); }
+        else if(b.t === 'split'){
+          if(b.src) blocks.push({ t:'split', en:escHtml(b.en || ''), ko:escHtml(b.ko || ''), src:b.src });
+          else if((b.en || '').trim() || (b.ko || '').trim())
+            blocks.push({ t:'head', en:escHtml(b.en || ''), ko:escHtml(b.ko || '') }); /* 사진 없으면 헤드라인으로 강등 */
+        }
+        else if(b.t === 'cover'){
+          /* 전면 사진은 여백 없는(flush) 대지 한 장으로 분리한다 — 리더기 지면 문법 */
+          if(b.src){ flushNormal(); sheets.push({ no: pad2(++page), flush:true, blocks:[{ t:'cover', src:b.src }] }); }
+        }
+        else if(b.t === 'title'){
+          if((b.t1 || '').trim() || (b.t2 || '').trim())
+            blocks.push({ t:'title', t1:escHtml(b.t1 || ''), t2:escHtml(b.t2 || '') });
+        }
         else if(b.t === 'video'){
           const emb = parseYouTube(b.url);
           if(emb && !video) video = { url: emb, note: escHtml(b.note || '') };
         }
       });
-      if(blocks.length) sheets.push({ no: pad2(++page), blocks });
+      flushNormal();
     });
     const rc = {
       id: c.id || ('ch' + ci), no: pad2(ci), tag: escHtml(c.tag || ''), title: escHtml(c.title || ''),
@@ -908,8 +1071,11 @@ function toReaderBook(){
     if(video){ rc.video = true; rc.videoUrl = video.url; rc.videoNote = video.note; }
     chapters.push(rc);
   });
+  const issueRaw = (BOOK.issue || '').trim();
   return {
-    v: 2, title: escHtml(BOOK.title || ''), subtitle: escHtml(BOOK.subtitle || ''), cover: BOOK.cover || null,
+    v: 2,
+    issue: escHtml(/^\d+$/.test(issueRaw) ? 'NO.' + issueRaw : issueRaw),
+    title: escHtml(BOOK.title || ''), subtitle: escHtml(BOOK.subtitle || ''), cover: BOOK.cover || null,
     chapters,
     toc: chapters.map(c => ({ no: c.no, t: c.title.replace(/^\d+[.)]\s*/, ''), items: [] })),
     tocNav: chapters.map((c, i) => [ c.sheets.length ? { chapter: i, sheet: c.sheets[0].no } : null ])
@@ -942,15 +1108,10 @@ $('previewBtn').addEventListener('click', () => {
 document.addEventListener('click', e => {
   if(!e.target.closest('#palette') && !e.target.closest('[data-act="plus"]')) closePalette();
   if(!askGuard && !e.target.closest('#ask')) closeAsk();
-  if(!e.target.closest('.book')){
-    $('bpanel').classList.remove('open');
-    $('bookBtn').setAttribute('aria-expanded', 'false');
-  }
 });
 document.addEventListener('keydown', e => {
   if(e.key === 'Escape'){
-    closePalette(); closeAsk();
-    $('bpanel').classList.remove('open');
+    closePalette(); closeAsk(); clearSel();
     document.querySelector('.side').classList.remove('open');
   }
 });
