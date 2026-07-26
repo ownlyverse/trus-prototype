@@ -1,187 +1,3694 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- PROVENANCE: scripts/build-demo-reader.mjs 가 reader-prototype.html 에서 생성했습니다.
+     직접 고치지 말고 feat-reader-highlight 브랜치에서 다시 빌드하세요.
+     76호 원고 유출 검사: node scripts/check-demo-leak.mjs -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>이북 리더기 — 생각구독</title>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <style>
-:root{
-  --paper:#FFFFFF; --ink:#121212; --sub:#666666; --line:#E5E5E5;
-  --blue:#00B8FF; --blue-d:#067CAF; --blue-dd:#045D84; --blue-soft:#E5F7FF; --cream:#FAFBED;
-}
-*{margin:0;padding:0;box-sizing:border-box}
-html,body{height:100%}
-body{font-family:"Pretendard Variable",Pretendard,-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
-  background:var(--paper); color:var(--ink); letter-spacing:-0.01em; word-break:keep-all;
-  display:flex; flex-direction:column}
-button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
-a{color:inherit;text-decoration:none}
-.serif{letter-spacing:-0.02em}
-:focus-visible{outline:3px solid #3182F6; outline-offset:2px}
+  :root{
+    /* 지면(리더기) — 흰 종이 */
+    --paper:#ffffff; --paper-2:#faf9f6; --ink:#1c1a17; --ink-soft:#8f897d; --rule:#e4e0d6;
+    /* 앱·채팅 영역 — 밝은 종이 톤(정제) */
+    --app:#eeece8; --panel:#ffffff; --panel-line:#e4e0d6; --panel-ink:#2a2721; --panel-muted:#8f897d;
+    /* 강조 — 색은 절제, 공감은 은은한 금색 */
+    --yellow:#c99a2e; --yellow-soft:rgba(201,154,46,.13); --pink:#262019; --live:#c0392b;
+    --mark:#efe6cf;
+    --shadow:0 26px 60px -34px rgba(50,40,20,.32);
+    color-scheme:light;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;background:var(--app);color:var(--panel-ink);
+    font-family:"Pretendard","Apple SD Gothic Neo",-apple-system,BlinkMacSystemFont,"Noto Sans KR",system-ui,sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased;
+  }
+  button{font-family:inherit}
+  .en{font-family:"Helvetica Neue",Helvetica,Arial,sans-serif}
 
-/* 진행 바 */
-.progress{position:fixed; top:0; left:0; right:0; height:3px; background:var(--line); z-index:70}
-.progress b{display:block; height:100%; background:var(--blue); width:0; transition:width .25s}
+  /* ── 상단 메뉴바 ───────────────────────────── */
+  .topbar{position:sticky;top:0;z-index:40;background:rgba(255,255,255,.82);backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--panel-line)}
+  .topbar-in{max-width:1440px;margin:0 auto;display:flex;align-items:center;gap:16px;padding:10px clamp(12px,3vw,26px)}
+  .brand{font-size:.66rem;font-weight:700;letter-spacing:.2em;color:var(--panel-muted);white-space:nowrap;line-height:1.5}
+  .brand b{display:block;color:var(--panel-ink);letter-spacing:.13em}
+  .menu{display:flex;gap:4px;background:var(--panel);border:1px solid var(--panel-line);border-radius:999px;padding:4px}
+  .menu button{border:none;background:transparent;color:var(--panel-muted);font-size:.88rem;font-weight:700;
+    padding:8px 17px;border-radius:999px;cursor:pointer;transition:.2s;white-space:nowrap}
+  .menu button:hover{color:var(--panel-ink)}
+  .menu button[aria-selected="true"]{background:var(--pink);color:#fff}
+  .spacer{flex:1}
+  .focusbtn{border:1px solid var(--panel-line);background:transparent;color:var(--panel-muted);border-radius:999px;
+    padding:7px 13px;font-size:.76rem;font-weight:700;cursor:pointer;white-space:nowrap}
+  .focusbtn:hover{color:var(--panel-ink);border-color:var(--panel-muted)}
+  .focusbtn[aria-pressed="true"]{background:var(--panel-ink);color:var(--app);border-color:var(--panel-ink)}
+  .me{display:flex;align-items:center;gap:7px;font-size:.78rem;color:var(--panel-muted)}
+  .ava{display:inline-grid;place-items:center;border-radius:50%;color:#fff;font-weight:800;font-size:.7rem;flex:none;
+    width:24px;height:24px}
+  .ava.xs{width:19px;height:19px;font-size:.56rem}
 
-/* 상단바 */
-.bar{display:flex; align-items:center; gap:10px; padding:13px 18px; background:#fff;
-  border-bottom:1px solid var(--line); flex-shrink:0; margin-top:3px}
-.back{font-size:.88rem; font-weight:700; color:var(--sub); padding:8px 10px; border-radius:9px; white-space:nowrap}
-.back:hover{background:#F0F0F0; color:var(--ink)}
-.bar .book{display:flex; align-items:center; gap:10px; margin:0 auto; min-width:0}
-.bar .bt{font-size:.98rem; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-.bar .tag{font-size:.7rem; font-weight:800; padding:4px 10px; border-radius:7px; background:var(--blue-soft);
-  color:var(--blue-dd); flex-shrink:0}
-.tool{font-size:.84rem; font-weight:700; color:var(--sub); padding:8px 11px; border-radius:9px; white-space:nowrap}
-.tool:hover{background:#F0F0F0; color:var(--ink)}
-.tool[aria-pressed="true"]{background:var(--blue-soft); color:var(--blue-dd)}
+  /* ── 내 서재(구독 현황) ────────────────────── */
+  .shelf{background:var(--panel);border:1px solid var(--panel-line);border-radius:10px;padding:14px 14px 8px;margin:2px 0 14px}
+  .shelf-head{display:flex;align-items:center;gap:14px;margin-bottom:12px;flex-wrap:wrap;cursor:pointer}
+  .shelf.collapsed{padding:9px 14px;background:transparent;border-color:transparent}
+  .shelf.collapsed:hover{background:var(--panel);border-color:var(--panel-line)}
+  .shelf.collapsed .shelf-head{margin-bottom:0}
+  .shelf.collapsed .shelf-prog .bar{display:none}
+  .shelf-title{font-size:.82rem;font-weight:800;letter-spacing:.02em;display:flex;align-items:center;gap:7px}
+  .shelf-title .ic{color:var(--yellow)}
+  .shelf-prog{display:flex;align-items:center;gap:10px;flex:1;min-width:180px}
+  .shelf-prog .bar{flex:1;max-width:220px;height:5px;background:#2a2a33;border-radius:3px;overflow:hidden}
+  .shelf-prog .bar i{display:block;height:100%;background:var(--yellow);width:0;transition:width .5s cubic-bezier(.2,.7,.2,1)}
+  .shelf-prog .stat{font-size:.72rem;color:var(--panel-muted);white-space:nowrap}
+  .shelf-prog .stat b{color:var(--panel-ink)}
+  .shelf-prog .stat em{color:var(--yellow);font-style:normal;font-weight:700}
+  .shelf-toggle{border:1px solid var(--panel-line);background:transparent;color:var(--panel-muted);border-radius:999px;
+    padding:5px 12px;font-size:.72rem;font-weight:700;cursor:pointer}
+  .shelf-toggle:hover{color:var(--panel-ink);border-color:var(--panel-muted)}
+  .shelf.collapsed .shelf-row{display:none}
+  .shelf-row{display:flex;gap:11px;overflow-x:auto;padding:2px 2px 8px;scrollbar-width:thin;
+    scrollbar-color:var(--panel-line) transparent}
+  .shelf-row::-webkit-scrollbar{height:6px}
+  .shelf-row::-webkit-scrollbar-thumb{background:var(--panel-line);border-radius:3px}
+  .tile{flex:none;width:92px;cursor:pointer}
+  .tile .cov{width:92px;height:126px;border-radius:6px;overflow:hidden;position:relative;
+    display:flex;flex-direction:column;justify-content:flex-end;padding:9px 9px 10px;
+    box-shadow:0 8px 20px -12px rgba(0,0,0,.75);transition:transform .18s,box-shadow .18s,filter .25s}
+  .tile:hover .cov{transform:translateY(-3px);box-shadow:0 14px 26px -12px rgba(0,0,0,.8)}
+  .tile .cov img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .tile .cov .no{position:relative;font-family:"Helvetica Neue",Arial,sans-serif;font-weight:800;font-size:.94rem;color:#fff;letter-spacing:.02em}
+  .tile .cov .ct{position:relative;font-size:.58rem;color:rgba(255,255,255,.86);line-height:1.35;margin-top:3px;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .tile .cov::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(0,0,0,.55))}
+  .tile.reading .cov{outline:2px solid var(--yellow);outline-offset:2px}
+  .tile.unread .cov{filter:grayscale(.85) brightness(.62)}
+  .tile.unread:hover .cov{filter:grayscale(.4) brightness(.8)}
+  .tile.unsub .cov{background:transparent!important;border:1.5px dashed var(--panel-line);box-shadow:none;
+    align-items:center;justify-content:center;padding:0}
+  .tile.unsub .cov::before{display:none}
+  .tile.unsub .cov .plus{font-size:1.4rem;color:var(--panel-muted);line-height:1;position:relative}
+  .tile.unsub:hover .cov{border-color:var(--yellow)}
+  .tile.unsub:hover .cov .plus{color:var(--yellow)}
+  .badge-st{position:absolute;top:6px;left:6px;z-index:2;font-size:.54rem;font-weight:800;letter-spacing:.04em;
+    padding:2px 6px;border-radius:3px}
+  .badge-st.reading{background:var(--yellow);color:var(--app)}
+  .badge-st.unread{background:rgba(0,0,0,.6);color:#fff;border:1px solid rgba(255,255,255,.25)}
+  .badge-st.read{background:rgba(255,255,255,.9);color:#111}
+  .tile .cap{font-size:.62rem;color:var(--panel-muted);margin-top:6px;text-align:center;letter-spacing:.02em}
+  .tile.reading .cap{color:var(--yellow);font-weight:700}
+  .tile.unsub .cap{color:#55545a}
 
-/* 목차 패널 */
-.toc{position:fixed; z-index:60; top:0; bottom:0; left:0; width:290px; background:#FAFAFA;
-  border-right:1px solid var(--line); transform:translateX(-100%); transition:transform .22s;
-  overflow-y:auto; padding-bottom:30px; box-shadow:12px 0 30px rgba(0,0,0,0)}
-.toc.open{transform:none; box-shadow:12px 0 30px rgba(0,0,0,.08)}
-.toc .th{display:flex; align-items:center; justify-content:space-between; padding:20px 20px 6px}
-.toc .th h2{font-size:1.05rem; font-weight:900}
-.toc .th button{color:var(--sub); font-size:.95rem; padding:6px 9px; border-radius:8px}
-.toc .th button:hover{background:#F0F0F0}
-.toc .sub{padding:0 20px 14px; font-size:.78rem; color:var(--sub)}
-.toc-i{display:flex; align-items:baseline; gap:9px; width:100%; text-align:left; padding:13px 20px;
-  font-size:.9rem; border-left:3px solid transparent}
-.toc-i:hover{background:#F0F0F0}
-.toc-i.on{background:#fff; border-left-color:var(--blue-d); font-weight:700}
-.toc-i .no{font-size:.7rem; color:var(--blue-d); font-weight:700; flex-shrink:0}
+  main{max-width:1440px;margin:0 auto;padding:clamp(10px,2vw,22px)}
+  .pane[hidden]{display:none}
+  .pane{animation:rise .4s cubic-bezier(.2,.7,.2,1) both}
+  @keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 
-/* 본문 */
-.read{flex:1; overflow-y:auto; padding:44px 24px 30px}
-.page{max-width:680px; margin:0 auto}
-.page .bk{font-size:.78rem; font-weight:700; color:var(--blue-d); margin-bottom:10px}
-.page h1{font-size:1.65rem; font-weight:900; margin-bottom:26px; line-height:1.4}
-.prose{line-height:1.95; color:#212121}
-.prose p{margin-bottom:1.25em}
-body[data-fs="0"] .prose{font-size:.92rem}
-body[data-fs="1"] .prose{font-size:1.02rem}
-body[data-fs="2"] .prose{font-size:1.14rem}
+  /* ── 발행 정보 + 챕터 레일 ─────────────────── */
+  .bookhead{display:flex;align-items:baseline;gap:11px;flex-wrap:wrap;margin:4px 2px 0}
+  .bookhead .issue{font-size:.64rem;font-weight:800;letter-spacing:.16em;color:var(--app);background:var(--yellow);
+    padding:3px 8px}
+  .bookhead h1{font-size:clamp(1rem,2.4vw,1.28rem);margin:0;font-weight:800;letter-spacing:-.01em}
+  .bookhead .sub{color:var(--panel-muted);font-size:.76rem}
+  .chaprail{display:flex;gap:6px;overflow-x:auto;padding:10px 2px}
+  .chip{border:1px solid var(--panel-line);background:var(--panel);color:var(--panel-muted);border-radius:999px;
+    padding:7px 13px;font-size:.79rem;font-weight:700;cursor:pointer;white-space:nowrap;transition:.18s;
+    display:flex;gap:7px;align-items:center}
+  .chip:hover{color:var(--panel-ink);border-color:var(--panel-muted)}
+  .chip[aria-current="true"]{background:var(--panel-ink);color:var(--app);border-color:var(--panel-ink)}
+  .chip .no{font-variant-numeric:tabular-nums;opacity:.6;font-size:.7rem}
+  .chip .sheets{font-size:.66rem;opacity:.6;letter-spacing:.04em}
 
-/* 하단 내비 */
-.nav{flex-shrink:0; border-top:1px solid var(--line); background:#fff; padding:13px 18px;
-  display:flex; align-items:center; justify-content:space-between; gap:12px}
-.nav button{font-size:.88rem; font-weight:700; padding:10px 15px; border-radius:10px; border:1.5px solid var(--line)}
-.nav button:hover:not(:disabled){border-color:var(--ink)}
-.nav button:disabled{opacity:.32; cursor:not-allowed}
-.nav .pos{font-size:.82rem; color:var(--sub); font-variant-numeric:tabular-nums}
+  /* ── 지면 레이아웃 ─────────────────────────────
+     기본(SOCIAL=false): 레일 없이 지면만, 가독성 위해 620px 가운데.
+     SOCIAL=true 면 initSocial()이 .room 에 .social 을 붙여 3열(채팅|지면|채팅) 복원. */
+  .room{display:block}
+  .room .sheets-wrap{max-width:620px;margin:0 auto}
+  .room.social{display:grid;grid-template-columns:minmax(190px,236px) minmax(0,1fr) minmax(190px,250px);
+    gap:16px;align-items:start;transition:grid-template-columns .3s}
+  .room.social .sheets-wrap{max-width:none;margin:0}
+  body.focus .room.social{grid-template-columns:0 minmax(0,1fr) 0;gap:0}
+  body.focus .rail{opacity:0;pointer-events:none;overflow:hidden}
+  @media (max-width:1180px){ .room.social{grid-template-columns:1fr} .room.social .sheets-wrap{order:-1} }
 
-@media (prefers-reduced-motion:reduce){ *{transition:none!important} }
-/* 모바일 (기본 규칙 뒤!) */
-@media (max-width:560px){
-  .bar .bt{display:none}
-  .read{padding:30px 18px 24px}
-}
+  /* ── 지면: A4 낱장 ─────────────────────────── */
+  .sheets-wrap{display:flex;flex-direction:column;gap:18px}
+  .sheet{position:relative;background:var(--paper);color:var(--ink);min-height:480px;
+    box-shadow:var(--shadow);padding:clamp(30px,4.2vw,60px);display:flex;flex-direction:column}
+  .sheet.flush{padding:0;min-height:0;aspect-ratio:1/1.414;overflow:hidden}
+  .sheet .runhead{display:flex;justify-content:space-between;align-items:baseline;font-size:.58rem;font-weight:800;
+    letter-spacing:.09em;color:var(--ink);margin-bottom:22px;flex:none}
+  .sheet .runhead .r{color:var(--ink-soft);letter-spacing:.14em}
+  .sheet .sbody{flex:1;min-height:0;display:flex;flex-direction:column}
+  .sheet .runfoot{display:flex;justify-content:space-between;align-items:baseline;font-size:.58rem;font-weight:800;
+    letter-spacing:.1em;color:var(--ink);margin-top:18px;flex:none}
+  .sheet .runfoot .pno{font-size:.66rem;letter-spacing:.06em}
+  .sheet.flush .runfoot{position:absolute;bottom:14px;right:16px;left:16px;color:#fff;mix-blend-mode:difference}
+  .sheetno{position:absolute;top:-9px;left:-9px;z-index:2;background:var(--app);color:var(--panel-muted);
+    border:1px solid var(--panel-line);border-radius:999px;font-size:.6rem;font-weight:800;letter-spacing:.08em;
+    padding:3px 9px}
+
+  /* 지면 요소 */
+  .block{margin:0 0 30px;max-width:44em}
+  .mlabel{font-size:.7rem;font-weight:800;letter-spacing:.16em;color:var(--ink);line-height:1.5;
+    white-space:pre-line;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--rule)}
+  .mlabel:empty{display:none}
+  .mbody p{margin:0 0 1.5em;font-size:1.04rem;line-height:2.15;word-break:keep-all;color:var(--ink)}
+  .mbody p:last-child{margin-bottom:0}
+  .mbody b{font-weight:800}
+  /* 하이라이트 — 글자 높이에 맞는 띠(설계서 §4.3). 색은 --c 변수로만 받는다.
+     box-decoration-break:clone 으로 줄바꿈돼도 조각마다 띠가 유지된다. */
+  .hl{background-image:linear-gradient(transparent 23%, var(--c) 23%, var(--c) 82%, transparent 82%);
+    -webkit-box-decoration-break:clone;box-decoration-break:clone;cursor:pointer}
+  /* 메모가 달린 하이라이트의 '마지막 조각' 오른쪽 위에만 말풍선 마크(설계 §4.3).
+     CSS 의사요소로만 그린다 — 외부 이미지·아이콘·SVG 없음. 메모 없는 조각엔 안 붙는다.
+     ::after = 둥근 사각 본체, ::before = 아래쪽 꼬리. pointer-events:none 라 클릭은 span 이 받는다. */
+  .hl.has-memo{position:relative}
+  .hl.has-memo::after{content:"";position:absolute;right:-4px;top:-0.9em;
+    width:13px;height:10px;box-sizing:border-box;
+    background:var(--paper);border:1.5px solid var(--ink);border-radius:3px;
+    pointer-events:none}
+  .hl.has-memo::before{content:"";position:absolute;right:2px;top:calc(-0.9em + 7px);
+    width:5px;height:5px;box-sizing:border-box;background:var(--paper);
+    border-right:1.5px solid var(--ink);border-bottom:1.5px solid var(--ink);
+    transform:rotate(45deg);pointer-events:none}
+  /* 지면 본문은 드래그 선택 영역이라 I빔, 하이라이트 위에서는 pointer(rules.md) */
+  .mbody p, .letter p, .verse{cursor:text}
+  .hello{font-size:1.12rem;font-weight:800;margin:0 0 22px}
+  .verse{font-size:1.02rem;line-height:2.25;white-space:pre-line;margin:0 0 30px;word-break:keep-all;max-width:44em}
+  .mhead{margin:0 0 22px}
+  .mhead .h{font-size:clamp(1.25rem,2.6vw,1.75rem);font-weight:400;line-height:1.38;letter-spacing:-.015em;
+    color:var(--ink);white-space:pre-line}
+  .mhead .rule{width:150px;height:1px;background:var(--ink);margin:14px 0 11px}
+  .mhead .ko{font-size:.72rem;line-height:1.75;color:var(--ink);white-space:pre-line}
+  .photo{margin:0 0 18px;background:var(--paper-2);flex:none}
+  .photo img{display:block;width:100%}
+  .photo.fill{margin:0 0 4px}
+  .photo.fill img{width:100%;height:auto;display:block}
+  .photo.bleed{margin-left:calc(-1 * clamp(24px,3.2vw,42px));margin-right:calc(-1 * clamp(24px,3.2vw,42px));width:auto}
+  .duo{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 18px;align-items:start;flex:none}
+  .duo img{display:block;width:100%}
+  .split{display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:center;min-height:52vh}
+  .split .simg img{width:100%;height:auto;object-fit:cover;display:block}
+  @media (max-width:640px){ .split{grid-template-columns:1fr;min-height:0} }
+  .cover-img{width:100%;height:100%;object-fit:cover;display:block}
+  .title-sheet{flex:1;display:flex;flex-direction:column;justify-content:center;gap:10px}
+  .title-sheet .t1{font-size:.72rem;font-weight:800;letter-spacing:.2em;color:var(--ink-soft)}
+  .title-sheet .t2{font-size:clamp(1.4rem,3vw,2rem);font-weight:400;letter-spacing:.02em}
+  .toc{display:grid;grid-template-columns:1fr 1fr;gap:26px 20px;align-content:start;flex:1}
+  .toc .g .gno{font-size:.7rem;font-weight:800;letter-spacing:.12em;color:var(--ink);margin-bottom:7px}
+  .toc .g .gt{font-size:.86rem;font-weight:800;margin-bottom:7px}
+  .toc .g .gi{font-size:.78rem;color:var(--ink);line-height:2}
+  .letter{max-width:44em}
+  @media (max-width:640px){ .toc{grid-template-columns:1fr} }
+  .letter p{margin:0 0 1.4em;font-size:1.02rem;line-height:2.2;word-break:keep-all}
+  .letter .sign{font-size:.8rem;font-weight:800;color:var(--ink-soft);margin-top:18px}
+
+  mark.ul{background:linear-gradient(180deg,transparent 60%,var(--mark) 60%);color:inherit;padding:0 1px;cursor:pointer}
+  mark.ul:hover{background:linear-gradient(180deg,transparent 46%,rgba(242,197,61,.72) 46%)}
+  /* 드래그 선택 색은 기본 하이라이트 노랑(HL_COLORS[0] 값)에 맞춘다(설계 §4.3). */
+  ::selection{background:#fbeda0;color:var(--ink)}
+
+  /* ── 선택 팝오버(step 3) — Esther 가 톤을 다듬는다. 구조·클래스명은 유지할 것. ──
+     .hlpop 컨테이너는 body 직속, position:absolute 로 좌표를 JS 가 준다.
+     내부는 drawPopover() 가 모드별로 다시 그린다: 색 팔레트 + 액션들. */
+  .hlpop{position:absolute;z-index:60;min-width:186px;max-width:244px;
+    background:var(--paper);border:1px solid var(--panel-line);border-radius:11px;
+    box-shadow:0 1px 2px rgba(50,40,20,.10),0 14px 30px -14px rgba(50,40,20,.34);
+    padding:8px;font-size:.82rem;color:var(--ink);
+    animation:hlpop-in .13s ease-out}
+  .hlpop.flip{animation-name:hlpop-in-up}
+  .hlpop[hidden]{display:none}
+  /* 선택 구간을 가리키는 작은 꼬리 — flip 이면 아래로 뒤집힌다 */
+  .hlpop::after{content:"";position:absolute;left:50%;width:10px;height:10px;
+    background:var(--paper);border:1px solid var(--panel-line);
+    transform:translateX(-50%) rotate(45deg)}
+  .hlpop:not(.flip)::after{top:-6px;border-right:0;border-bottom:0}
+  .hlpop.flip::after{bottom:-6px;border-left:0;border-top:0}
+  .hlpop-msg{font-size:.74rem;color:var(--ink-soft);padding:3px 4px 9px;line-height:1.5}
+  .hlpop-msg.warn{color:var(--live);font-weight:600;
+    background:color-mix(in srgb,var(--live) 8%,transparent);
+    border-radius:7px;padding:7px 9px;margin-bottom:2px}
+  .hlpop-colors{display:flex;gap:9px;justify-content:center;padding:3px 2px 9px;
+    border-bottom:1px solid var(--rule)}
+  .hlpop-c{width:24px;height:24px;border-radius:50%;border:1px solid rgba(0,0,0,.14);
+    background:var(--c);cursor:pointer;padding:0;
+    transition:transform .12s ease-out,box-shadow .12s ease-out}
+  .hlpop-c:hover{transform:scale(1.12);
+    box-shadow:0 0 0 3px color-mix(in srgb,var(--c) 55%,transparent)}
+  .hlpop-c:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+  .hlpop-actions{display:flex;flex-direction:column;gap:1px;padding-top:6px}
+  .hlpop-a{display:block;width:100%;text-align:left;border:none;background:none;
+    font-family:inherit;font-size:.82rem;color:var(--ink);padding:8px 9px;border-radius:7px;
+    cursor:pointer;transition:background .1s ease-out}
+  .hlpop-a:hover{background:var(--paper-2)}
+  .hlpop-a:focus-visible{outline:2px solid var(--ink);outline-offset:-1px}
+  .hlpop-a.ghost{color:var(--ink-soft)}
+  .hlpop-list{display:flex;flex-direction:column;gap:1px;padding-top:2px}
+  .hlpop-item{display:flex;justify-content:space-between;align-items:center;gap:8px;
+    width:100%;border:none;background:none;font-family:inherit;font-size:.8rem;color:var(--ink);
+    padding:8px 9px;border-radius:7px;cursor:pointer;text-align:left;
+    transition:background .1s ease-out}
+  .hlpop-item:hover{background:var(--paper-2)}
+  .hlpop-item:focus-visible{outline:2px solid var(--ink);outline-offset:-1px}
+  .hlpop-item-t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .hlpop-item-n{flex:none;font-size:.68rem;color:var(--ink-soft);
+    background:var(--paper-2);border-radius:999px;padding:2px 7px}
+  .hlpop-back{border:none;background:none;font-family:inherit;font-size:.76rem;
+    color:var(--ink-soft);cursor:pointer;padding:7px 9px 2px;border-radius:7px;
+    transition:color .1s ease-out}
+  .hlpop-back:hover{color:var(--ink)}
+  .hlpop-back:focus-visible{outline:2px solid var(--ink);outline-offset:-1px}
+  @keyframes hlpop-in{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes hlpop-in-up{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+  @media (prefers-reduced-motion:reduce){
+    .hlpop,.hlpop.flip{animation:none}
+    .hlpop-c{transition:none}
+    .hlpop-c:hover{transform:none}
+  }
+
+  /* ── 메모 모달(step 4) ──────────────────────────────────
+     같은 문장에 시간을 두고 남긴 메모를 오래된 순으로 쌓아 보여준다.
+     색(--c)은 JS 가 해당 하이라이트 색으로 넣는다(리터럴 하드코딩 금지). */
+  .memo-wrap{position:fixed;inset:0;z-index:95;display:grid;place-items:center;padding:20px;
+    background:rgba(40,34,26,.42);animation:memo-dim .16s ease-out}
+  .memo-wrap[hidden]{display:none}
+  .memo-box{width:min(440px,100%);max-height:calc(100dvh - 40px);overflow-y:auto;
+    background:var(--paper);color:var(--ink);border:1px solid var(--panel-line);border-radius:14px;
+    box-shadow:var(--shadow);animation:memo-rise .17s ease-out}
+  .memo-head{display:flex;align-items:center;gap:10px;padding:13px 16px;
+    border-bottom:1px solid var(--rule);position:sticky;top:0;background:var(--paper);z-index:1}
+  .memo-x{border:none;background:none;font-size:.95rem;color:var(--ink-soft);cursor:pointer;
+    padding:4px 7px;border-radius:7px;line-height:1;transition:color .12s ease-out,background .12s ease-out}
+  .memo-x:hover{color:var(--ink);background:var(--paper-2)}
+  .memo-x:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
+  .memo-title{flex:1;font-size:.86rem;font-weight:800;letter-spacing:.02em}
+  .memo-save{border:1px solid var(--ink);background:var(--ink);color:var(--paper);
+    font-family:inherit;font-size:.78rem;font-weight:700;padding:6px 15px;border-radius:999px;cursor:pointer;
+    transition:background .12s ease-out,transform .06s ease-out}
+  .memo-save:hover{background:var(--pink)}
+  .memo-save:active{transform:translateY(1px)}
+  .memo-save:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+  .memo-quote{position:relative;display:flex;flex-direction:column;gap:5px;margin:15px 16px 6px;
+    padding:12px 14px 12px 15px;background:var(--paper-2);
+    border-left:3px solid var(--c,var(--yellow));border-radius:0 9px 9px 0}
+  .memo-quote-t{font-size:.9rem;line-height:1.72;color:var(--ink)}
+  .memo-quote-m{font-size:.68rem;color:var(--ink-soft);letter-spacing:.02em}
+  .memo-log{display:flex;flex-direction:column;margin:8px 16px 4px 21px;
+    border-left:2px solid var(--rule);padding-left:0}
+  .memo-item{position:relative;padding:3px 0 16px 18px}
+  .memo-item:last-child{padding-bottom:4px}
+  .memo-dot{position:absolute;left:-5px;top:9px;width:8px;height:8px;border-radius:50%;
+    background:var(--rule);border:2px solid var(--paper);box-sizing:border-box;
+    transition:box-shadow .12s ease-out}
+  .memo-item.last .memo-dot{background:var(--c,var(--yellow));
+    box-shadow:0 0 0 3px color-mix(in srgb,var(--c,var(--yellow)) 22%,transparent)}
+  .memo-text{font-size:.9rem;line-height:1.72;white-space:pre-wrap;word-break:break-word;color:var(--ink)}
+  .memo-meta{display:flex;align-items:center;gap:6px;margin-top:6px}
+  .memo-time{font-size:.66rem;color:var(--ink-soft);flex:1;min-width:0}
+  .memo-edit,.memo-del{border:none;background:none;font-family:inherit;font-size:.7rem;flex:none;
+    color:var(--ink-soft);cursor:pointer;padding:3px 7px;border-radius:6px;
+    transition:color .12s ease-out,background .12s ease-out}
+  .memo-edit:hover{color:var(--ink);background:var(--paper-2)}
+  .memo-del:hover{color:var(--live);background:color-mix(in srgb,var(--live) 8%,transparent)}
+  .memo-edit:focus-visible,.memo-del:focus-visible{outline:2px solid var(--ink);outline-offset:-1px}
+  .memo-edit-ta,.memo-new textarea{width:100%;box-sizing:border-box;font-family:inherit;
+    font-size:.88rem;line-height:1.62;color:var(--ink);background:var(--paper);
+    border:1px solid var(--panel-line);border-radius:9px;padding:9px 11px;resize:vertical;
+    transition:border-color .12s ease-out,box-shadow .12s ease-out}
+  .memo-edit-ta{min-height:62px;display:block}
+  .memo-edit-ta:focus,.memo-new textarea:focus{outline:none;border-color:var(--ink);
+    box-shadow:0 0 0 3px var(--yellow-soft)}
+  .memo-edit-row{display:flex;justify-content:flex-end;gap:6px;margin-top:7px}
+  .memo-edit-cancel,.memo-edit-save{border:1px solid var(--panel-line);background:var(--paper);
+    font-family:inherit;font-size:.72rem;color:var(--ink);padding:5px 13px;border-radius:999px;cursor:pointer;
+    transition:background .12s ease-out,border-color .12s ease-out}
+  .memo-edit-cancel:hover{background:var(--paper-2)}
+  .memo-edit-save{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+  .memo-edit-save:hover{background:var(--pink);border-color:var(--pink)}
+  .memo-edit-cancel:focus-visible,.memo-edit-save:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+  .memo-new{margin:10px 16px 16px}
+  .memo-new textarea{min-height:76px;display:block}
+  .memo-count{text-align:right;font-size:.66rem;color:var(--ink-soft);margin-top:5px;letter-spacing:.02em}
+  @keyframes memo-dim{from{opacity:0}to{opacity:1}}
+  @keyframes memo-rise{from{opacity:0;transform:translateY(8px) scale(.99)}to{opacity:1;transform:translateY(0) scale(1)}}
+  @media (prefers-reduced-motion:reduce){
+    .memo-wrap,.memo-box{animation:none}
+    .memo-save,.memo-x,.memo-edit,.memo-del,.memo-dot,.memo-edit-ta,.memo-new textarea,
+    .memo-edit-cancel,.memo-edit-save{transition:none}
+  }
+
+  /* ═══ 상단바·패널 셸 (step 5) CSS ═══
+     지면 클릭으로 내려오는 리더 상단바 + 우측 슬라이드 패널(딤 없음, 컨테이너 하나 재사용) +
+     항상 보이는 독서 진행률. 색은 리더 토큰만 쓴다(하이라이트 hex 리터럴 금지).
+     z 층: 메모 모달(95) > 상단바(91) > 패널(90) > 진행률(80) > 선택 팝오버(60).
+     → 메모 모달이 언제나 최상위라 상단바·패널이 메모를 가리지 않는다. */
+  .rtop{position:fixed;left:0;right:0;top:0;z-index:91;display:flex;align-items:center;gap:5px;
+    padding:9px clamp(10px,3vw,20px);background:rgba(255,255,255,.92);backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--panel-line);
+    transform:translateY(-100%);transition:transform .28s cubic-bezier(.2,.7,.2,1)}
+  body.rtop-open .rtop{transform:translateY(0)}
+  .rtop-sp{flex:1}
+  .rtb{position:relative;border:1px solid transparent;background:transparent;
+    color:color-mix(in srgb, var(--panel-muted) 62%, var(--panel-ink)); /* 휴지색: 흰 배경에서 4.5:1↑ (AA) */
+    font-family:inherit;font-size:.82rem;font-weight:700;padding:7px 12px;border-radius:999px;cursor:pointer;
+    white-space:nowrap;transition:color .18s,background .18s,border-color .18s}
+  .rtb:hover{color:var(--panel-ink);background:var(--app)}
+  .rtb:active{transform:translateY(1px)}
+  .rtb:focus-visible{outline:2px solid var(--panel-ink);outline-offset:1px}
+  .rtb[aria-pressed="true"]{background:var(--panel-ink);color:var(--app);border-color:var(--panel-ink)}
+  .rtb[aria-pressed="true"]:hover{background:var(--panel-ink)}
+  .rtb.icon{font-size:.95rem;padding:7px 11px;line-height:1}
+  .rtb-badge{position:absolute;top:-2px;right:-2px;min-width:16px;height:16px;padding:0 4px;border-radius:999px;
+    background:var(--live);color:#fff;font-size:.6rem;font-weight:800;line-height:16px;text-align:center;
+    box-sizing:border-box}
+  .rtb-badge[hidden]{display:none}
+
+  /* 우측 공유 패널 — 딤 없음(지면 계속 읽기 가능). 상단바가 열려 있으면 그 아래로 내려 앉는다.
+     컨테이너는 #rpanel 하나뿐 — kind(목차·검색·독서노트·보기설정)는 내용만 갈아 끼운다. */
+  .rpanel{position:fixed;right:0;top:0;bottom:0;z-index:90;width:min(380px,88vw);
+    display:flex;flex-direction:column;background:var(--panel);border-left:1px solid var(--panel-line);
+    transform:translateX(100%);transition:transform .28s cubic-bezier(.2,.7,.2,1),top .28s}
+  body.rtop-open .rpanel{top:53px}
+  body.rpanel-open .rpanel{transform:translateX(0);
+    box-shadow:-18px 0 46px -30px rgba(50,40,20,.4)}
+  .rpanel-head{display:flex;align-items:center;gap:10px;padding:14px 16px;flex:none;
+    border-bottom:1px solid var(--panel-line)}
+  .rpanel-title{flex:1;font-size:.9rem;font-weight:800;letter-spacing:.02em;color:var(--panel-ink)}
+  .rpanel-x{border:none;background:none;font-size:.95rem;color:var(--panel-muted);cursor:pointer;
+    padding:4px 8px;border-radius:7px;line-height:1;transition:color .12s,background .12s}
+  .rpanel-x:hover{color:var(--panel-ink);background:var(--app)}
+  .rpanel-x:active{background:var(--panel-line)}
+  .rpanel-x:focus-visible{outline:2px solid var(--panel-ink);outline-offset:1px}
+  .rpanel-body{flex:1;min-height:0;overflow-y:auto;padding:16px}
+  .rpanel-todo{font-size:.82rem;color:var(--panel-muted);letter-spacing:.02em;line-height:1.7}
+
+  /* 독서 진행률 — 지면 하단, 항상 보임(전체 화면·마우스 숨기기 대상은 step 8 몫). */
+  .rprog{position:fixed;left:0;right:0;bottom:0;z-index:80;display:flex;align-items:center;gap:8px;
+    padding-right:clamp(8px,2.5vw,16px);pointer-events:none}
+  .rprog .track{flex:1;height:3px;background:var(--panel-line)}
+  .rprog .track i{display:block;height:100%;width:0;background:var(--yellow);border-radius:0 2px 2px 0;
+    transition:width .3s ease-out}
+  .rprog .num{flex:none;font-size:.64rem;font-weight:800;letter-spacing:.04em;
+    color:color-mix(in srgb, var(--panel-muted) 55%, var(--panel-ink)); /* 10px 소자라 4.5:1↑ 확보 (AA) */
+    font-variant-numeric:tabular-nums;background:rgba(255,255,255,.9);padding:3px 9px;border-radius:999px;margin:4px 0}
+
+  /* 전체 화면 — 챕터 레일·발행 헤더를 숨겨 지면만 남긴다(상단바는 rtop-open 해제로 숨음). */
+  body.reader-full .chaprail,
+  body.reader-full .bookhead{display:none}
+
+  @media (prefers-reduced-motion:reduce){
+    .rtop,.rpanel{transition:none}
+    .rprog .track i{transition:none}
+  }
+  /* ═══ 상단바·패널 셸 CSS 끝 ═══ */
+
+  /* ═══ 목차·검색 패널 (step 6) CSS ═══
+     step5 셸(.rpanel/.rpanel-body) 위에 얹는 패널 내용 스타일. 리더 패널 토큰만 쓴다
+     (하이라이트 hex 리터럴 0 — 강조는 --yellow 계열 토큰). */
+  /* 목차 */
+  .rtoc-cover{display:flex;gap:12px;align-items:center;padding-bottom:14px;margin-bottom:12px;
+    border-bottom:1px solid var(--panel-line)}
+  .rtoc-cover img{width:64px;height:auto;flex:none;border:1px solid var(--panel-line);border-radius:4px;
+    box-shadow:0 6px 16px -10px rgba(50,40,20,.5)}
+  .rtoc-cover-title{font-size:.92rem;font-weight:800;color:var(--panel-ink);line-height:1.4}
+  .rtoc-cover-author{font-size:.74rem;color:color-mix(in srgb,var(--panel-muted) 60%,var(--panel-ink));margin-top:3px}
+  .rtoc-list{display:flex;flex-direction:column;gap:2px}
+  .rtoc-group{display:flex;flex-direction:column;gap:2px;margin-bottom:6px}
+  .rtoc-g,.rtoc-i{display:flex;gap:10px;align-items:baseline;width:100%;text-align:left;
+    border:none;background:none;cursor:pointer;border-radius:7px;padding:8px 9px;font:inherit;
+    color:var(--panel-ink);transition:background .12s,color .12s}
+  .rtoc-g{font-weight:800;font-size:.86rem}
+  .rtoc-i{font-size:.8rem;color:color-mix(in srgb,var(--panel-muted) 40%,var(--panel-ink))}
+  .rtoc-g:hover,.rtoc-i:hover{background:var(--app)}
+  .rtoc-gno,.rtoc-ino{flex:none;width:34px;font-size:.66rem;font-weight:800;letter-spacing:.03em;
+    color:color-mix(in srgb,var(--panel-muted) 60%,var(--panel-ink));font-variant-numeric:tabular-nums;
+    white-space:nowrap}
+  .rtoc-gt,.rtoc-it{flex:1;line-height:1.5}
+  /* 하위(2단계) 항목: └ 는 장식용 의사요소로 옮겨 접근성 이름을 오염시키지 않고, 왼쪽 들여쓰기로 계층을 만든다 */
+  .rtoc-it{position:relative;padding-left:15px}
+  .rtoc-it::before{content:"└";position:absolute;left:0;top:-1px;font-weight:400;font-size:.82em;
+    color:color-mix(in srgb,var(--panel-muted) 45%,var(--panel-line))}
+  /* 현재 읽는 항목: 색 하나에 기대지 않고 배경 틴트+왼쪽 앰버 바+굵기로 표시(색맹 안전), 글자는 진한 잉크로 대비 확보 */
+  .rtoc-g.on,.rtoc-i.on{background:color-mix(in srgb,var(--yellow) 16%,var(--paper));
+    color:var(--panel-ink);font-weight:800;box-shadow:inset 3px 0 0 var(--yellow)}
+  .rtoc-g.on .rtoc-gno,.rtoc-i.on .rtoc-ino{color:color-mix(in srgb,var(--yellow) 50%,var(--panel-ink))}
+  .rtoc-i.on::before{color:color-mix(in srgb,var(--yellow) 55%,var(--panel-ink))}
+  .rtoc-g.dim,.rtoc-i.dim{opacity:.4;cursor:default}
+  .rtoc-g.dim:hover,.rtoc-i.dim:hover{background:none}
+  .rtoc-g:focus-visible,.rtoc-i:focus-visible{outline:2px solid var(--panel-ink);outline-offset:1px}
+  /* 본문 검색 */
+  .rsearch-bar{display:flex;gap:8px;margin-bottom:14px}
+  .rsearch-input{flex:1;min-width:0;border:1px solid var(--panel-line);border-radius:8px;
+    padding:9px 12px;font:inherit;font-size:.85rem;color:var(--panel-ink);background:var(--paper)}
+  .rsearch-input:focus{outline:none;border-color:var(--panel-ink);
+    box-shadow:0 0 0 3px color-mix(in srgb,var(--yellow) 22%,transparent)}
+  /* 돋보기: 기본은 종이톤 위 잉크 아이콘(입력칸과 한 쌍처럼 차분하게), hover/focus 때 잉크로 채워 명확한 실행 신호 */
+  .rsearch-btn{flex:none;display:flex;align-items:center;justify-content:center;width:38px;
+    border:1px solid var(--panel-line);border-radius:8px;background:var(--paper);
+    color:color-mix(in srgb,var(--panel-muted) 55%,var(--panel-ink));
+    cursor:pointer;transition:background .12s,color .12s,border-color .12s}
+  .rsearch-btn:hover{background:var(--panel-ink);border-color:var(--panel-ink);color:var(--app)}
+  .rsearch-btn:active{transform:translateY(1px)}
+  .rsearch-btn:focus-visible{outline:2px solid var(--panel-ink);outline-offset:1px}
+  .rsearch-hint,.rsearch-empty{font-size:.82rem;color:color-mix(in srgb,var(--panel-muted) 60%,var(--panel-ink));
+    line-height:1.7;text-align:center;padding:28px 8px}
+  /* 결과는 gap 없이 얇은 구분선으로 리듬을 만든다(gap+border 이중선 제거). 마지막 줄은 선 없음 */
+  .rsearch-list{display:flex;flex-direction:column}
+  .rsearch-item{display:flex;flex-direction:column;gap:5px;width:100%;text-align:left;font:inherit;
+    border:none;background:none;cursor:pointer;border-radius:8px;padding:11px 10px;
+    border-bottom:1px solid var(--panel-line);transition:background .12s}
+  .rsearch-item:last-child{border-bottom:none}
+  .rsearch-item:hover{background:var(--app)}
+  .rsearch-item:focus-visible{outline:2px solid var(--panel-ink);outline-offset:-2px}
+  .rsearch-item-loc{font-size:.66rem;font-weight:800;letter-spacing:.03em;
+    color:color-mix(in srgb,var(--panel-muted) 60%,var(--panel-ink))}
+  .rsearch-item-ctx{font-size:.82rem;line-height:1.6;color:var(--panel-ink);word-break:keep-all}
+  /* 검색어 강조: 리더 하이라이트처럼 앰버 마커 밴드 + 진한 잉크 글자(대비·가독성 확보) */
+  .rsearch-item-ctx b{background:color-mix(in srgb,var(--yellow) 30%,var(--paper));
+    color:var(--panel-ink);font-weight:800;padding:0 2px;border-radius:3px;
+    -webkit-box-decoration-break:clone;box-decoration-break:clone}
+  @media (prefers-reduced-motion:reduce){
+    .rtoc-g,.rtoc-i,.rsearch-item,.rsearch-btn{transition:none}
+  }
+  /* ═══ 목차·검색 패널 CSS 끝 ═══ */
+
+  /* ═══ 독서노트 패널 (step 7) CSS ═══
+     step5 셸(.rpanel/.rpanel-body) 위에 얹는 독서노트 내용 스타일. 리더 패널 토큰만 쓴다.
+     하이라이트 색은 --c 변수(JS 인라인)로만 받고 hex 리터럴을 넣지 않는다. */
+  .rnote-tabs{display:flex;gap:4px;margin-bottom:14px;border-bottom:1px solid var(--panel-line)}
+  .rnote-tab{flex:1;border:none;background:none;font:inherit;font-size:.84rem;font-weight:700;
+    color:color-mix(in srgb,var(--panel-muted) 55%,var(--panel-ink));cursor:pointer;
+    padding:9px 6px;border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .12s,border-color .12s}
+  .rnote-tab:hover{color:var(--panel-ink)}
+  .rnote-tab.on{color:var(--panel-ink);font-weight:800;border-bottom-color:var(--panel-ink)}
+  .rnote-tab:focus-visible{outline:2px solid var(--panel-ink);outline-offset:-2px;border-radius:6px}
+  /* 색 필터 */
+  .rnote-filter{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+  .rnote-chip{border:1px solid var(--panel-line);background:var(--paper);font:inherit;font-size:.74rem;
+    font-weight:700;color:color-mix(in srgb,var(--panel-muted) 55%,var(--panel-ink));
+    border-radius:999px;padding:5px 12px;cursor:pointer;transition:background .12s,color .12s,border-color .12s}
+  .rnote-chip:hover{color:var(--panel-ink);border-color:var(--panel-muted)}
+  .rnote-chip.on{background:var(--panel-ink);color:var(--app);border-color:var(--panel-ink)}
+  .rnote-dot{width:24px;height:24px;flex:none;border-radius:50%;cursor:pointer;padding:0;
+    background:var(--c);border:1px solid color-mix(in srgb,var(--c) 55%,var(--panel-ink));
+    transition:transform .12s,box-shadow .12s}
+  .rnote-dot:hover{transform:scale(1.12)}
+  .rnote-dot.on{box-shadow:0 0 0 2px var(--panel),0 0 0 4px var(--panel-ink)}
+  .rnote-dot:focus-visible{outline:2px solid var(--panel-ink);outline-offset:2px}
+  /* 개수·정렬 바 */
+  .rnote-bar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+  .rnote-count{font-size:.78rem;font-weight:800;color:var(--panel-ink)}
+  .rnote-sortwrap{font-size:.72rem;color:color-mix(in srgb,var(--panel-muted) 55%,var(--panel-ink));
+    display:flex;align-items:center;gap:6px}
+  .rnote-sort{font:inherit;font-size:.76rem;color:var(--panel-ink);background:var(--paper);
+    border:1px solid var(--panel-line);border-radius:7px;padding:5px 8px;cursor:pointer;
+    transition:border-color .12s}
+  .rnote-sort:hover{border-color:var(--panel-muted)}
+  .rnote-sort:focus-visible{outline:2px solid var(--panel-ink);outline-offset:1px}
+  /* 카드 */
+  .rnote-cards{display:flex;flex-direction:column;gap:12px}
+  .rnote-card{display:flex;gap:0;background:var(--paper);border:1px solid var(--panel-line);
+    border-radius:10px;overflow:hidden;transition:border-color .12s,box-shadow .12s}
+  .rnote-card:has(.rnote-card-body:hover){border-color:var(--panel-muted);
+    box-shadow:0 1px 3px color-mix(in srgb,var(--panel-ink) 8%,transparent)}
+  .rnote-card-bar{flex:none;width:5px;background:var(--c);align-self:stretch}
+  .rnote-card-in{flex:1;min-width:0;display:flex;flex-direction:column;padding:12px 13px}
+  .rnote-card-body{border:none;background:none;font:inherit;text-align:left;cursor:pointer;
+    padding:0;width:100%;display:flex;flex-direction:column;gap:9px}
+  .rnote-card-body:focus-visible{outline:2px solid var(--panel-ink);outline-offset:2px;border-radius:6px}
+  .rnote-quote{font-size:.86rem;line-height:1.65;color:var(--panel-ink);word-break:keep-all;
+    display:block;font-weight:600}
+  .rnote-memo{background:var(--app);border-radius:8px;padding:8px 10px}
+  .rnote-memo-t{font-size:.8rem;line-height:1.6;color:var(--panel-ink);white-space:pre-wrap;word-break:keep-all}
+  .rnote-memo-time{font-size:.66rem;margin-top:5px;
+    color:color-mix(in srgb,var(--panel-muted) 55%,var(--panel-ink))}
+  .rnote-nomemo{font-size:.76rem;color:color-mix(in srgb,var(--panel-muted) 55%,var(--panel-ink));
+    font-style:normal}
+  .rnote-card-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:11px}
+  .rnote-meta{font-size:.68rem;font-weight:700;letter-spacing:.02em;
+    color:color-mix(in srgb,var(--panel-muted) 55%,var(--panel-ink));font-variant-numeric:tabular-nums}
+  .rnote-acts{display:flex;gap:4px;flex:none}
+  .rnote-act{width:28px;height:28px;border:1px solid var(--panel-line);background:var(--paper);
+    border-radius:7px;cursor:pointer;font-size:.9rem;line-height:1;color:var(--panel-ink);
+    display:grid;place-items:center;transition:background .12s,border-color .12s}
+  .rnote-act:hover{background:var(--app);border-color:var(--panel-muted)}
+  .rnote-act:focus-visible{outline:2px solid var(--panel-ink);outline-offset:1px}
+  /* ⋮ 메뉴 · 삭제 확인(화면 안 UI) */
+  .rnote-menu,.rnote-confirm{display:flex;align-items:center;gap:8px;margin-top:10px;
+    padding-top:10px;border-top:1px solid var(--panel-line)}
+  .rnote-confirm{justify-content:space-between;flex-wrap:wrap;margin-top:11px;padding:9px 11px;
+    border:1px solid color-mix(in srgb,var(--live) 30%,var(--panel-line));border-radius:8px;
+    background:color-mix(in srgb,var(--live) 8%,var(--paper))}
+  .rnote-confirm-t{font-size:.74rem;color:var(--live);font-weight:700}
+  .rnote-confirm-acts,.rnote-menu{gap:8px}
+  .rnote-mbtn,.rnote-cbtn{border:1px solid var(--panel-line);background:var(--paper);font:inherit;
+    font-size:.74rem;font-weight:700;color:var(--panel-ink);border-radius:7px;padding:5px 12px;
+    cursor:pointer;transition:background .12s,border-color .12s,color .12s}
+  .rnote-mbtn:hover,.rnote-cbtn:hover{background:var(--app);border-color:var(--panel-muted)}
+  .rnote-mbtn.danger,.rnote-cbtn.danger{color:var(--live)}
+  .rnote-mbtn.danger:hover,.rnote-cbtn.danger:hover{
+    background:color-mix(in srgb,var(--live) 9%,var(--paper));border-color:var(--live)}
+  .rnote-mbtn:focus-visible,.rnote-cbtn:focus-visible{outline:2px solid var(--panel-ink);outline-offset:1px}
+  .rnote-empty{font-size:.82rem;text-align:center;line-height:1.7;padding:28px 8px;
+    color:color-mix(in srgb,var(--panel-muted) 60%,var(--panel-ink))}
+  /* 북마크 */
+  .rnote-bmlist{display:flex;flex-direction:column}
+  .rnote-bm{display:flex;align-items:stretch;gap:6px;border-bottom:1px solid var(--panel-line)}
+  .rnote-bm:last-child{border-bottom:none}
+  .rnote-bm-main{flex:1;min-width:0;display:grid;grid-template-columns:auto 1fr;gap:2px 10px;
+    align-items:baseline;border:none;background:none;font:inherit;text-align:left;cursor:pointer;
+    padding:11px 4px;border-radius:8px;transition:background .12s}
+  .rnote-bm-main:hover{background:var(--app)}
+  .rnote-bm-main:focus-visible{outline:2px solid var(--panel-ink);outline-offset:-2px}
+  .rnote-bm-page{grid-row:1 / span 2;font-size:.72rem;font-weight:800;letter-spacing:.02em;
+    color:var(--panel-ink);font-variant-numeric:tabular-nums;align-self:center;white-space:nowrap}
+  .rnote-bm-text{font-size:.82rem;line-height:1.5;color:var(--panel-ink);word-break:keep-all;
+    overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+  .rnote-bm-time{font-size:.66rem;color:color-mix(in srgb,var(--panel-muted) 55%,var(--panel-ink))}
+  .rnote-bm-del{flex:none;align-self:center;width:26px;height:26px;border:1px solid var(--panel-line);
+    background:var(--paper);border-radius:7px;cursor:pointer;font-size:.72rem;line-height:1;
+    color:color-mix(in srgb,var(--panel-muted) 55%,var(--panel-ink));display:grid;place-items:center;
+    transition:background .12s,color .12s,border-color .12s}
+  .rnote-bm-del:hover{background:color-mix(in srgb,var(--live) 9%,var(--paper));color:var(--live);border-color:var(--live)}
+  .rnote-bm-del:focus-visible{outline:2px solid var(--panel-ink);outline-offset:1px}
+  /* 본문 이동 강조(↗ 눌러 온 하이라이트 잠깐 반짝) */
+  .hl.hl-flash{animation:hlFlash 1.4s ease-out}
+  @keyframes hlFlash{0%,40%{box-shadow:0 0 0 3px color-mix(in srgb,var(--c) 60%,transparent)}
+    100%{box-shadow:0 0 0 0 transparent}}
+  @media (prefers-reduced-motion:reduce){
+    .rnote-tab,.rnote-chip,.rnote-dot,.rnote-act,.rnote-mbtn,.rnote-cbtn,.rnote-bm-main,.rnote-bm-del,
+    .rnote-card,.rnote-sort{transition:none}
+    .hl.hl-flash{animation:none}
+  }
+  /* ═══ 독서노트 패널 CSS 끝 ═══ */
+
+  /* ═══ 보기설정 패널 (step 8) CSS ═══
+     지면 표시(배경·투명도·글꼴·글자크기·줄간격·여백)를 CSS 변수로 제어한다. applyView()가
+     .room 에 --rop/--rsize/--rlead/--rmx/--rmy/--rff 를, 배경 테마는 body[data-rbg]로,
+     하이라이트 논리색은 body --hl0..4 로 준다. 요소마다 인라인 스타일을 뿌리지 않는다.
+     하이라이트 hex 리터럴은 넣지 않는다(색은 --hl0..4 = HL_COLORS/HL_COLORS_DARK 파생). */
+
+  /* 지면 타이포·여백·투명도 — .room 스코프 변수로 계산(원본 규칙 위에 얹는다) */
+  .room .sheets-wrap{opacity:var(--rop,1)}
+  .room .sheet{font-family:var(--rff,inherit);
+    padding-left:calc(clamp(30px,4.2vw,60px) + var(--rmx,0)*9px);
+    padding-right:calc(clamp(30px,4.2vw,60px) + var(--rmx,0)*9px);
+    padding-top:calc(clamp(30px,4.2vw,60px) + var(--rmy,0)*9px);
+    padding-bottom:calc(clamp(30px,4.2vw,60px) + var(--rmy,0)*9px)}
+  .room .sheet.flush{padding:0}
+  .room .mbody p{font-size:calc(1.04rem + var(--rsize,0)*1px);line-height:calc(2.15 + var(--rlead,0)*0.14)}
+  .room .letter p{font-size:calc(1.02rem + var(--rsize,0)*1px);line-height:calc(2.2 + var(--rlead,0)*0.14)}
+  .room .verse{font-size:calc(1.02rem + var(--rsize,0)*1px);line-height:calc(2.25 + var(--rlead,0)*0.14)}
+
+  /* 배경색 6종 — 지면이 쓰는 --paper/--ink 계열을 .room 스코프에서 재정의한다.
+     밝은 3종(흰·크림·연두)은 배경만, 어두운 3종(짙은초록·회색·검정)은 본문색까지 뒤집는다.
+     어두운 테마의 하이라이트 대응색은 applyView 가 body --hl0..4 를 HL_COLORS_DARK 로 바꿔 처리하고,
+     말풍선 마크(::after/::before)는 --paper/--ink 파생이라 배경 반전 시 윤곽선도 함께 뒤집힌다. */
+  body[data-rbg="cream"]  .room{--paper:#f7f1e3;--rule:#e6ddc9;--mark:#eadfc5}
+  body[data-rbg="mint"]   .room{--paper:#e5f0e6;--rule:#cfe1d0;--mark:#d3e6d4}
+  body[data-rbg="forest"] .room{--paper:#1e3327;--ink:#e9efe7;--ink-soft:#a7bfae;--rule:#37503f;--mark:#2c4636}
+  body[data-rbg="gray"]   .room{--paper:#2a2b2f;--ink:#e8e8ea;--ink-soft:#a9a9ad;--rule:#43444a;--mark:#3a3b40}
+  body[data-rbg="black"]  .room{--paper:#141414;--ink:#e9e9e9;--ink-soft:#9a9a9a;--rule:#333333;--mark:#2a2a2a}
+
+  /* 마우스 숨기기(idle) — 3초 무이동 시 body.reader-idle 로 커서·상단바·진행률을 숨긴다.
+     패널·모달이 열려 있으면 JS 가드가 idle 을 걸지 않는다(여기 CSS 는 표시만). */
+  .rprog{transition:opacity .3s}
+  body.reader-idle{cursor:none}
+  body.reader-idle .rtop{transform:translateY(-100%);pointer-events:none}
+  body.reader-idle .rprog{opacity:0;pointer-events:none}
+
+  /* 보기설정 패널 내용 — 리더 패널 토큰만 쓴다(하이라이트 hex 리터럴 0). */
+  .rview-sec{margin:0 0 18px}
+  .rview-sec:last-child{margin-bottom:0}
+  .rview-lab{display:flex;align-items:baseline;gap:8px;font-size:.8rem;font-weight:800;
+    color:var(--panel-ink);letter-spacing:.01em;margin:0 0 9px}
+  .rview-val{font-size:.72rem;font-weight:700;color:color-mix(in srgb, var(--panel-muted) 60%, var(--panel-ink));font-variant-numeric:tabular-nums}
+  .rview-bgs{display:flex;flex-wrap:wrap;gap:8px}
+  .rview-bg{width:34px;height:34px;border-radius:999px;border:1px solid var(--panel-muted);cursor:pointer;
+    padding:0;position:relative;transition:transform .12s,box-shadow .12s}
+  .rview-bg:hover{transform:scale(1.06)}
+  .rview-bg:focus-visible{outline:2px solid var(--panel-ink);outline-offset:2px}
+  .rview-bg[aria-pressed="true"]{box-shadow:0 0 0 2px var(--panel),0 0 0 4px var(--panel-ink)}
+  .rview-slider{display:flex;align-items:center;gap:10px}
+  .rview-step{flex:none;width:30px;height:30px;border:1px solid var(--panel-line);background:var(--panel);
+    color:var(--panel-ink);border-radius:8px;font-size:1rem;font-weight:800;line-height:1;cursor:pointer;
+    display:grid;place-items:center;transition:background .12s,border-color .12s}
+  .rview-step:hover{background:var(--app);border-color:var(--panel-muted)}
+  .rview-step:active{transform:translateY(1px)}
+  .rview-step:focus-visible{outline:2px solid var(--panel-ink);outline-offset:1px}
+  .rview-step:disabled{opacity:.4;cursor:default}
+  .rview-range{flex:1;-webkit-appearance:none;appearance:none;height:4px;border-radius:999px;
+    background:var(--panel-line);cursor:pointer}
+  .rview-range::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;
+    background:var(--panel-ink);border:2px solid var(--panel);box-shadow:0 1px 3px rgba(50,40,20,.3);cursor:pointer}
+  .rview-range::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:var(--panel-ink);
+    border:2px solid var(--panel);cursor:pointer}
+  .rview-range:focus-visible{outline:2px solid var(--panel-ink);outline-offset:3px}
+  .rview-select{width:100%;border:1px solid var(--panel-line);background:var(--panel);color:var(--panel-ink);
+    border-radius:8px;padding:9px 11px;font-family:inherit;font-size:.84rem;font-weight:700;cursor:pointer}
+  .rview-select:focus-visible{outline:2px solid var(--panel-ink);outline-offset:1px}
+  .rview-toggle{display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .rview-switch{flex:none;width:44px;height:26px;border-radius:999px;border:none;background:var(--panel-line);
+    cursor:pointer;position:relative;transition:background .16s;padding:0}
+  .rview-switch::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;
+    background:var(--panel);box-shadow:0 1px 3px rgba(50,40,20,.35);transition:transform .16s}
+  .rview-switch[aria-pressed="true"]{background:var(--panel-ink)}
+  .rview-switch[aria-pressed="true"]::after{transform:translateX(18px)}
+  .rview-switch:focus-visible{outline:2px solid var(--panel-ink);outline-offset:2px}
+  .rview-hint{font-size:.72rem;line-height:1.6;color:color-mix(in srgb, var(--panel-muted) 60%, var(--panel-ink));margin:8px 0 0}
+
+  @media (prefers-reduced-motion:reduce){
+    .rprog,.rview-bg,.rview-step,.rview-switch,.rview-switch::after{transition:none}
+  }
+  /* ═══ 보기설정 패널 CSS 끝 ═══ */
+
+  .vidwrap{margin:0 0 8px;overflow:hidden;background:#000;position:relative;flex:none}
+  .vidwrap video{width:100%;display:block;aspect-ratio:16/9;background:#000}
+  .vidtag{position:absolute;top:8px;left:8px;z-index:2;font-size:.58rem;font-weight:800;letter-spacing:.1em;
+    background:rgba(0,0,0,.6);color:#fff;padding:3px 8px}
+  .vidnote{font-size:.7rem;color:var(--ink-soft);margin:0 0 16px}
+  .voice{display:flex;align-items:center;gap:11px;border:1px solid var(--rule);padding:10px 12px;margin-bottom:20px;
+    background:var(--paper-2);flex:none}
+  .voice .play{width:34px;height:34px;border-radius:50%;border:none;background:var(--ink);color:#fff;font-size:.78rem;
+    cursor:pointer;display:grid;place-items:center;flex:none}
+  .voice .play:hover{background:var(--pink)}
+  .voice .vmeta{flex:1;min-width:0}
+  .voice .vlabel{font-size:.72rem;font-weight:800;margin-bottom:5px;color:var(--ink)}
+  .voice .vlabel small{color:var(--ink-soft);font-weight:600;margin-left:6px;letter-spacing:.04em}
+  .wave{display:flex;align-items:flex-end;gap:2px;height:15px}
+  .wave i{flex:1;background:var(--ink);opacity:.2;height:30%}
+  .voice.playing .wave i{animation:bar .9s ease-in-out infinite;opacity:.55}
+  .wave i:nth-child(3n){animation-delay:.15s}
+  .wave i:nth-child(3n+1){animation-delay:.3s}
+  .wave i:nth-child(4n){animation-delay:.45s}
+  @keyframes bar{0%,100%{height:20%}50%{height:100%}}
+
+  /* ── 채팅 레일 ─────────────────────────────── */
+  .rail{position:sticky;top:64px;opacity:.5;transition:opacity .25s;display:flex;flex-direction:column;
+    max-height:calc(100dvh - 84px)}
+  .rail:hover,.rail:focus-within{opacity:1}
+  @media (max-width:1180px){ .rail{position:static;opacity:1;max-height:none} }
+  .rhead{display:flex;align-items:center;gap:7px;font-size:.62rem;font-weight:800;letter-spacing:.12em;
+    color:var(--panel-muted);padding:0 2px 8px;flex:none}
+  .rhead .cnt{margin-left:auto;letter-spacing:0;font-weight:700}
+  .livedot{width:6px;height:6px;border-radius:50%;background:var(--live);animation:live 1.9s ease-out infinite;flex:none}
+  @keyframes live{0%{box-shadow:0 0 0 0 rgba(229,72,77,.45)}100%{box-shadow:0 0 0 7px rgba(229,72,77,0)}}
+  .stream{flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:1px;
+    scrollbar-width:thin;scrollbar-color:var(--panel-line) transparent;padding-right:2px}
+  .stream::-webkit-scrollbar{width:5px}
+  .stream::-webkit-scrollbar-thumb{background:var(--panel-line);border-radius:3px}
+  .msg{padding:6px 8px;border-radius:5px;transition:background .18s;animation:pop .35s ease both;cursor:default}
+  @keyframes pop{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .msg:hover{background:var(--panel)}
+  .msg.pin{background:var(--panel);border-left:2px solid var(--yellow);border-radius:0 5px 5px 0;margin-bottom:6px}
+  .msg .q{font-size:.66rem;color:#a1852f;line-height:1.5;margin-bottom:4px;padding-left:6px;
+    border-left:1px solid rgba(242,197,61,.5);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .msg.pin .q{color:var(--yellow)}
+  .msg .line{font-size:.76rem;line-height:1.65;color:var(--panel-muted);word-break:break-word}
+  .msg:hover .line,.msg.pin .line{color:var(--panel-ink)}
+  .msg .who{font-weight:800;margin-right:5px;font-size:.74rem}
+  .msg .mini{display:inline-block;width:13px;height:22px;vertical-align:-6px;margin-right:5px}
+  .msg .mini svg{width:100%;height:100%;display:block;transform-origin:50% 90%;animation:bob 2.6s ease-in-out infinite}
+  .msg:nth-child(3n) .mini svg{animation-delay:.5s}
+  .msg:nth-child(3n+1) .mini svg{animation-delay:1.1s}
+  @keyframes bob{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-2px) rotate(2deg)}}
+  .msg .foot{display:flex;align-items:center;gap:8px;margin-top:4px;opacity:0;transition:opacity .18s;height:0;overflow:hidden}
+  .msg:hover .foot,.msg.pin .foot,.msg.liked .foot{opacity:1;height:auto}
+  .like{border:none;background:transparent;color:var(--panel-muted);padding:0;font-size:.68rem;font-weight:700;
+    cursor:pointer;display:flex;align-items:center;gap:4px}
+  .like:hover{color:var(--yellow)}
+  .like[aria-pressed="true"]{color:var(--yellow)}
+  .msg .when{font-size:.62rem;color:#5a595f}
+  .pintag{font-size:.56rem;font-weight:800;letter-spacing:.1em;color:var(--yellow);margin-bottom:4px}
+  .chatin{display:flex;gap:6px;align-items:flex-end;margin-top:8px;border-top:1px solid var(--panel-line);
+    padding-top:8px;flex:none}
+  .chatin textarea{flex:1;border:none;background:var(--panel);border-radius:5px;color:var(--panel-ink);
+    font-family:inherit;font-size:.76rem;padding:8px 9px;resize:none;height:34px;outline:none;line-height:1.4}
+  .chatin textarea:focus{background:var(--paper-2)}
+  .chatin textarea::placeholder{color:#5a595f}
+  .send{border:none;background:var(--pink);color:#fff;border-radius:5px;width:34px;height:34px;cursor:pointer;
+    font-size:.8rem;flex:none}
+  .send:hover{filter:brightness(1.1)}
+  .railnote{font-size:.62rem;color:#55545a;line-height:1.5;margin-top:6px;flex:none}
+
+  /* ── 공통 버튼 ─────────────────────────────── */
+  .btn{border:none;border-radius:3px;padding:9px 15px;font-size:.82rem;font-weight:700;cursor:pointer;
+    background:var(--pink);color:#fff;transition:.18s}
+  .btn:hover{filter:brightness(1.08)}
+  .btn:disabled{background:#ece9e1;color:var(--panel-muted);cursor:not-allowed}
+  .btn.ghost{background:transparent;color:var(--panel-muted);border:1px solid var(--panel-line)}
+  .btn.ghost:hover{color:var(--panel-ink);border-color:var(--panel-muted)}
+  .btn.wide{width:100%;padding:12px;font-size:.88rem}
+  .btn.dark{background:var(--ink);color:#fff}
+  .btn.dark:disabled{background:#e4e2de;color:#aaa8a4}
+
+  /* ── 밑줄 도구 & 친구 추천 ──────────────────── */
+  #seltool{position:absolute;z-index:60;display:none;gap:4px;background:var(--ink);border-radius:4px;padding:4px;
+    box-shadow:0 12px 30px -12px rgba(0,0,0,.6)}
+  #seltool button{border:none;background:transparent;color:#fff;font-size:.76rem;font-weight:700;padding:6px 10px;
+    border-radius:3px;cursor:pointer}
+  #seltool button:hover{background:rgba(255,255,255,.18)}
+  .match{position:fixed;right:16px;bottom:16px;z-index:70;width:min(320px,calc(100vw - 32px));background:var(--panel);
+    border:1px solid var(--yellow);border-radius:5px;box-shadow:var(--shadow);padding:14px;
+    transform:translateY(14px);opacity:0;pointer-events:none;transition:.28s}
+  .match.show{transform:none;opacity:1;pointer-events:auto}
+  .match .mhead2{font-size:.62rem;font-weight:800;letter-spacing:.12em;color:var(--yellow);margin-bottom:8px}
+  .match .msent{font-size:.76rem;line-height:1.55;background:var(--yellow-soft);border-left:2px solid var(--yellow);
+    padding:6px 8px;margin-bottom:10px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .match .friend{display:flex;align-items:center;gap:9px;padding:7px 0;border-top:1px solid var(--panel-line)}
+  .match .friend .fmeta{flex:1;min-width:0}
+  .match .friend .fname{font-size:.8rem;font-weight:700}
+  .match .friend .fwhy{font-size:.68rem;color:var(--panel-muted)}
+  .match .mclose{position:absolute;top:9px;right:11px;border:none;background:transparent;color:var(--panel-muted);
+    cursor:pointer;font-size:.9rem}
+
+  .modal{position:fixed;inset:0;z-index:90;display:none;place-items:center;padding:20px;background:rgba(40,34,26,.42)}
+  .modal.show{display:grid}
+  .modal .box{width:min(460px,100%);background:var(--panel);border:1px solid var(--panel-line);border-radius:5px;
+    box-shadow:var(--shadow);padding:22px;animation:rise .3s cubic-bezier(.2,.7,.2,1) both}
+  .modal h3{margin:0 0 6px;font-size:1.02rem;font-weight:800}
+  .modal .msub{color:var(--panel-muted);font-size:.82rem;margin:0 0 14px;line-height:1.6}
+  .shared{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
+  .shared .s{background:var(--paper-2);border-left:2px solid var(--yellow);padding:9px 11px;font-size:.8rem;line-height:1.55}
+  .shared .s b{color:var(--yellow);font-size:.62rem;display:block;margin-bottom:4px;letter-spacing:.1em}
+  .mrow{display:flex;gap:8px;justify-content:flex-end}
+
+  /* ── 라이팅 ────────────────────────────────── */
+  .wgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(260px,320px);gap:16px;align-items:start}
+  @media (max-width:960px){ .wgrid{grid-template-columns:1fr} }
+  .paper-card{background:var(--paper);color:var(--ink);box-shadow:var(--shadow);padding:clamp(20px,3vw,36px)}
+  .side{background:var(--panel);border:1px solid var(--panel-line);border-radius:5px;padding:16px}
+  .today{display:flex;align-items:center;gap:9px;margin-bottom:15px}
+  .today .badge{font-size:.6rem;font-weight:800;letter-spacing:.12em;color:var(--app);background:var(--yellow);padding:3px 8px}
+  .today .d{font-size:.74rem;color:var(--ink-soft);font-weight:700;letter-spacing:.04em}
+  .step{border-top:1px solid var(--rule);padding:18px 0}
+  .step:first-of-type{border-top:none;padding-top:2px}
+  .step.locked{opacity:.32;pointer-events:none}
+  .step .shead{display:flex;align-items:center;gap:9px;margin-bottom:11px}
+  .step .snum{width:21px;height:21px;border-radius:50%;background:var(--ink);color:#fff;font-weight:800;
+    display:grid;place-items:center;font-size:.68rem;flex:none}
+  .step.locked .snum{background:#ccc}
+  .step .stitle{font-weight:800;font-size:.9rem;color:var(--ink)}
+  .step .slock{margin-left:auto;font-size:.66rem;color:var(--ink-soft);letter-spacing:.04em}
+  .field{width:100%;font-family:inherit;font-size:.88rem;color:var(--ink);background:var(--paper-2);
+    border:1px solid var(--rule);padding:11px 12px;resize:vertical;line-height:1.85;transition:border-color .2s}
+  .field:focus{outline:none;border-color:var(--ink)}
+  .field::placeholder{color:#b6b4b0}
+  .counter{font-size:.68rem;color:var(--ink-soft);text-align:right;margin-top:5px}
+  .counter b{color:var(--ink)}
+  .rec{display:flex;gap:11px;border:1px solid var(--rule);padding:12px;margin-top:11px;align-items:center;background:var(--paper-2)}
+  .rec .cover{width:42px;height:59px;flex:none;background:var(--ink);color:#fff;display:grid;place-items:center;
+    font-weight:800;font-size:.66rem}
+  .rec .cover img{width:100%;height:100%;object-fit:cover;display:block}
+  .rec .rmeta{flex:1;min-width:0}
+  .rec .rtitle{font-weight:800;font-size:.88rem;margin-bottom:3px;color:var(--ink)}
+  .rec .rwhy{font-size:.73rem;color:var(--ink-soft);line-height:1.6;word-break:keep-all}
+  .qbox{border-left:3px solid var(--yellow);background:rgba(242,197,61,.13);padding:12px 14px;margin-bottom:12px;
+    font-weight:700;line-height:1.7;font-size:.9rem;color:var(--ink);word-break:keep-all}
+  .qbox small{display:block;font-weight:800;color:var(--ink-soft);font-size:.6rem;letter-spacing:.14em;margin-bottom:5px}
+  .quote{border-left:1px solid var(--ink);padding:2px 0 2px 13px;margin:0 0 13px;line-height:1.95;font-size:.85rem;
+    text-align:justify;word-break:keep-all;color:var(--ink)}
+  .quote em{color:var(--ink-soft);font-style:normal;font-size:.68rem;display:block;margin-top:8px;letter-spacing:.04em;font-weight:700}
+  .srow{display:flex;gap:8px;align-items:center;margin-top:11px}
+  .hint{font-size:.74rem;color:var(--ink-soft);flex:1;line-height:1.5;word-break:keep-all}
+  .hint.ready{color:var(--ink);font-weight:700}
+  .runfoot-w{display:flex;justify-content:space-between;font-size:.58rem;font-weight:800;letter-spacing:.1em;
+    color:var(--ink);margin-top:24px;padding-top:14px;border-top:1px solid var(--rule)}
+  .ring{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+  .ring .rtxt .big{font-size:1.3rem;font-weight:800;line-height:1.1}
+  .ring .rtxt .small{font-size:.72rem;color:var(--panel-muted)}
+  .pieces{display:flex;flex-direction:column;gap:6px;max-height:270px;overflow-y:auto;padding-right:4px}
+  .piece{background:var(--paper-2);border-radius:3px;padding:8px 10px}
+  .piece .pd{font-size:.6rem;color:var(--panel-muted);font-weight:800;margin-bottom:3px;letter-spacing:.06em}
+  .piece .pt{font-size:.76rem;line-height:1.55;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .theme-guess{background:var(--yellow-soft);border-left:2px solid var(--yellow);padding:10px 12px;margin:11px 0;
+    font-size:.78rem;line-height:1.65;word-break:keep-all}
+  .theme-guess b{color:var(--yellow)}
+  /* ── 이번 달 글쓰기 흐름 ─────────────────────── */
+  .wheel{display:flex;gap:5px;margin-bottom:22px}
+  .spoke{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px;align-items:center;text-align:center}
+  .spoke .dot{width:100%;height:4px;border-radius:2px;background:var(--rule);transition:background .3s}
+  .spoke.done .dot{background:var(--ink)}
+  .spoke.active .dot{background:var(--yellow)}
+  .spoke .nm{font-size:.58rem;font-weight:800;color:#c2c0bc;letter-spacing:.01em;line-height:1.3}
+  .spoke.done .nm{color:var(--ink-soft)}
+  .spoke.active .nm{color:var(--ink)}
+  @media (max-width:520px){ .spoke .nm{display:none} .spoke.active .nm{display:block} }
+  .flow-history{display:flex;flex-direction:column;gap:13px;margin-bottom:16px}
+  .hbeat{border-left:2px solid var(--rule);padding:1px 0 1px 13px}
+  .hbeat .ht{font-size:.58rem;font-weight:800;letter-spacing:.1em;color:#a1852f;margin-bottom:4px}
+  .hbeat .hq{font-size:.74rem;color:var(--ink-soft);font-weight:700;margin-bottom:4px;word-break:keep-all;line-height:1.5}
+  .hbeat .ha{font-size:.92rem;line-height:1.8;color:var(--ink);word-break:keep-all;white-space:pre-wrap}
+  .flow-active{background:var(--paper-2);border:1px solid var(--rule);border-radius:6px;
+    padding:clamp(18px,2.8vw,28px);animation:rise .32s cubic-bezier(.2,.7,.2,1) both}
+  .beat-eyebrow{font-size:.62rem;font-weight:800;letter-spacing:.13em;color:#a1852f;margin-bottom:11px}
+  .beat-q{font-size:1.14rem;font-weight:800;line-height:1.62;color:var(--ink);margin-bottom:14px;word-break:keep-all}
+  .beat-help{font-size:.78rem;color:var(--ink-soft);line-height:1.65;margin:-6px 0 14px;word-break:keep-all}
+  .beat-actions{display:flex;gap:8px;align-items:center;margin-top:14px}
+  .beat-actions .sp{flex:1}
+  .picks{display:flex;flex-direction:column;gap:8px;margin-bottom:4px}
+  .pickopt{text-align:left;border:1px solid var(--rule);background:var(--paper);border-radius:6px;
+    padding:12px 14px;cursor:pointer;transition:.15s;font-family:inherit;width:100%}
+  .pickopt:hover{border-color:#a1852f}
+  .pickopt[aria-pressed="true"]{border-color:var(--yellow);background:rgba(242,197,61,.13)}
+  .pickopt .pk{font-weight:800;font-size:.94rem;color:var(--ink);margin-bottom:3px;line-height:1.45}
+  .pickopt .pf{font-size:.64rem;color:var(--ink-soft);letter-spacing:.03em}
+  .concept{border-left:3px solid var(--yellow);background:rgba(242,197,61,.11);
+    padding:14px 16px;margin-bottom:14px;border-radius:0 6px 6px 0}
+  .concept .cq{font-size:.6rem;font-weight:800;letter-spacing:.12em;color:#a1852f;margin-bottom:8px}
+  .concept .cs{font-size:.98rem;line-height:1.95;color:var(--ink);word-break:keep-all}
+  .concept .cf{font-size:.68rem;color:var(--ink-soft);margin-top:9px;font-weight:700}
+  .timerbar{display:flex;align-items:center;gap:10px;margin-bottom:12px;font-size:.74rem;color:var(--ink-soft)}
+  .timerbar .tt{font-variant-numeric:tabular-nums;font-weight:800;color:var(--ink)}
+  .timerbar .track{flex:1;height:4px;background:var(--rule);border-radius:2px;overflow:hidden}
+  .timerbar .track i{display:block;height:100%;background:var(--yellow);width:0}
+  .friend-l{display:flex;align-items:center;gap:10px;border:1px solid var(--rule);border-radius:6px;
+    padding:10px 12px;margin-bottom:8px;background:var(--paper)}
+  .friend-l .fmeta{flex:1;min-width:0}
+  .friend-l .fname{font-size:.88rem;font-weight:800;color:var(--ink)}
+  .friend-l .fwhy{font-size:.72rem;color:var(--ink-soft)}
+  .done-hero{text-align:center;padding:8px 0}
+  .done-hero .big{font-size:1.12rem;font-weight:800;color:var(--ink);margin-bottom:7px}
+  .done-hero .sub{font-size:.84rem;color:var(--ink-soft);line-height:1.65;word-break:keep-all}
+
+  .toast{position:fixed;left:50%;bottom:20px;transform:translate(-50%,16px);z-index:95;background:var(--panel-ink);
+    color:var(--app);padding:10px 17px;border-radius:999px;font-size:.8rem;font-weight:700;opacity:0;
+    transition:.28s;pointer-events:none}
+  .toast.show{opacity:1;transform:translate(-50%,0)}
 </style>
 </head>
-<body data-fs="1">
+<body>
 
-<div class="progress" aria-hidden="true"><b id="pbar"></b></div>
-
-<header class="bar">
-  <a class="back" href="../subscribe/">← 윤소정의 생각구독</a>
-  <div class="book">
-    <span class="bt serif">경계 세우는 연습</span>
-    <span class="tag">구독자 모드</span>
+<header class="topbar">
+  <div class="topbar-in">
+    <div class="brand">SUBSCRIBE TO<b>YOON SOJUNG'S THOUGHT BOOK</b></div>
+    <nav class="menu" role="tablist">
+      <button role="tab" id="tab-read" aria-selected="true">윤소정의 생각구독 보기</button>
+      <button role="tab" id="tab-write" aria-selected="false">나의 생각으로 진화시키기</button>
+    </nav>
+    <div class="spacer"></div>
+    <button class="focusbtn" id="focusBtn" aria-pressed="false">집중 모드</button>
+    <div class="me"><span class="ava" style="background:#4b5a6b">소</span> 소정님</div>
   </div>
-  <button class="tool" id="tocBtn" aria-pressed="false" onclick="toggleToc()">☰ 목차</button>
-  <button class="tool" onclick="fontSize(-1)" aria-label="글자 작게">Aa−</button>
-  <button class="tool" onclick="fontSize(1)" aria-label="글자 크게">Aa＋</button>
 </header>
 
-<nav class="toc" id="toc" aria-label="목차">
-  <div class="th"><h2 class="serif">경계 세우는 연습</h2><button onclick="toggleToc()" aria-label="목차 닫기">✕</button></div>
-  <p class="sub">일과 관계에서 나를 지키는 법</p>
-  <div id="tocList"></div>
-</nav>
+<main>
+  <!-- ══════════ 뷰어 ══════════ -->
+  <section class="pane" id="pane-read">
+    <section class="shelf collapsed" id="shelf">
+      <div class="shelf-head" id="shelfHead">
+        <div class="shelf-title"><span class="ic">▤</span> 내 서재</div>
+        <div class="shelf-prog">
+          <div class="bar"><i id="shelfBar"></i></div>
+          <span class="stat" id="shelfStat"></span>
+        </div>
+        <button class="shelf-toggle" id="shelfToggle" aria-expanded="false">펼치기 ▾</button>
+      </div>
+      <div class="shelf-row" id="shelfRow"></div>
+    </section>
+    <div class="bookhead">
+      <span class="issue">SAMPLE</span>
+      <h1>이 서재를 여는 법</h1>
+      <span class="sub">리더기 미리보기 · 밑줄과 메모를 시험해 보세요</span>
+    </div>
+    <div class="chaprail" id="chaprail"></div>
 
-<main class="read" id="read">
-  <article class="page">
-    <p class="bk" id="pageNo"></p>
-    <h1 class="serif" id="pageTitle"></h1>
-    <div class="prose" id="pageBody"></div>
-  </article>
+    <!-- 좌우 소셜 레일(공감 문장·LIVE 채팅)은 SOCIAL=true 일 때 initSocial()이 주입한다.
+         SOCIAL=false 면 아예 만들지 않아 DOM 에 흔적이 없다. -->
+    <div class="room">
+      <div class="sheets-wrap" id="sheets"></div>
+    </div>
+  </section>
+
+  <!-- ══════════ 라이팅 ══════════ -->
+  <section class="pane" id="pane-write" hidden>
+    <div class="wgrid">
+      <div class="paper-card">
+        <div class="today">
+          <span class="badge">이번 달의 글쓰기</span>
+          <span class="d">2025.12 · 76호와 함께</span>
+        </div>
+        <div class="wheel" id="wheel"></div>
+        <div class="flow-history" id="flowHistory"></div>
+        <div class="flow-active" id="flowActive"></div>
+        <div class="runfoot-w"><span>윤소정의 생각구독 · 나의 생각으로 진화시키기</span><span class="en">MONTHLY WRITING</span></div>
+      </div>
+
+      <aside class="side">
+        <div class="ring">
+          <svg width="68" height="68" viewBox="0 0 76 76">
+            <circle cx="38" cy="38" r="32" fill="none" stroke="#e4e0d6" stroke-width="8"/>
+            <circle id="ringArc" cx="38" cy="38" r="32" fill="none" stroke="#f2c53d" stroke-width="8"
+              stroke-linecap="round" stroke-dasharray="201" stroke-dashoffset="121" transform="rotate(-90 38 38)"/>
+          </svg>
+          <div class="rtxt">
+            <div class="big"><span id="pieceN">12</span> / 30</div>
+            <div class="small">이번 달에 쌓은 생각 조각</div>
+          </div>
+        </div>
+        <div class="theme-guess">이번 달 조각에서 <b id="monthTheme">"때를 기다리는 일"</b>이 가장 자주 나왔습니다. 30개가 모이면 이 주제로 글 한 편을 엮어 드립니다.</div>
+        <button class="btn wide ghost" id="weaveBtn">이 조각들로 글 엮어 보기</button>
+        <div class="rhead" style="margin-top:16px">이번 달 쌓인 조각</div>
+        <div class="pieces" id="pieces"></div>
+      </aside>
+    </div>
+  </section>
 </main>
 
-<footer class="nav">
-  <button id="prevBtn" onclick="move(-1)">← 이전 글</button>
-  <span class="pos" id="pos" role="status" aria-live="polite"></span>
-  <button id="nextBtn" onclick="move(1)">다음 글 →</button>
-</footer>
+<!-- #seltool(밑줄 도구)·#match(문장 매칭 모달)은 SOCIAL=true 일 때 initSocial()이 주입한다. -->
+
+<!-- 선택 팝오버(하이라이트) — SOCIAL 과 무관하게 항상 존재한다(step 3). 내용은 drawPopover()가 채운다. -->
+<div class="hlpop" id="hlpop" hidden></div>
+
+<!-- 메모 모달(step 4) — 딤 + 가운데 카드. 내용은 drawMemo()가 채운다. -->
+<div class="memo-wrap" id="memoWrap" hidden>
+  <div class="memo-box" role="dialog" aria-modal="true"></div>
+</div>
+
+<!-- ═══════════ 상단바·패널 셸 (step 5 · topbar-panel) ═══════════
+     지면 클릭으로 토글되는 리더 상단바 + 우측 공유 패널(컨테이너 #rpanel 하나) + 독서 진행률.
+     패널 4종(목차·본문검색·독서노트·보기설정)은 registerPanel 로 등록하며 내용은 step 6·7·8 이
+     채운다(지금은 '준비 중' 자리표시자). 음성 낭독·글자크기 스테퍼·1/2단 토글은 넣지 않는다. -->
+<div class="rtop" id="rtop">
+  <button class="rtb icon" id="rtBack" title="이전 장">←</button>
+  <button class="rtb" id="rtToc">목차</button>
+  <button class="rtb" id="rtSearch">본문검색</button>
+  <button class="rtb" id="rtNote">독서노트<span class="rtb-badge" id="rtNoteBadge" hidden>0</span></button>
+  <button class="rtb" id="rtView">보기설정</button>
+  <span class="rtop-sp"></span>
+  <button class="rtb icon" id="rtFull" aria-pressed="false" title="전체 화면">⛶</button>
+  <button class="rtb icon" id="rtMark" aria-pressed="false" title="책갈피">🔖</button>
+</div>
+<aside class="rpanel" id="rpanel" aria-label="리더 패널">
+  <div class="rpanel-head">
+    <span class="rpanel-title" id="rpanelTitle"></span>
+    <button class="rpanel-x" id="rpanelX" title="닫기">✕</button>
+  </div>
+  <div class="rpanel-body" id="rpanelBody"></div>
+</aside>
+<div class="rprog" id="rprog">
+  <div class="track"><i id="rprogBar"></i></div>
+  <span class="num" id="rprogNum">1 / 1</span>
+</div>
+<!-- ═══════════ /상단바·패널 셸 ═══════════ -->
+
+<div class="modal" id="modal">
+  <div class="box">
+    <!-- 공유 모달: 제목·본문·모달OK 는 여는 쪽(소셜 초대 / '글 엮어 보기')이 채운다. 기본값은 소셜 흔적 없게 비워 둔다. -->
+    <h3 id="modalTitle"></h3>
+    <p class="msub" id="modalSub"></p>
+    <div class="shared" id="sharedList"></div>
+    <div class="mrow">
+      <button class="btn ghost" id="modalClose">닫기</button>
+      <button class="btn" id="modalOk" hidden></button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
 
 <script>
-// ── 목데이터 (편집기와 동일한 BOOK — 두 파일에 복붙 공유)
-const BOOK = {
-  title: '경계 세우는 연습',
-  subtitle: '일과 관계에서 나를 지키는 법',
-  chapters: [
-    { title: '1. 거절에도 예의가 있다',
-      body: [
-        '거절을 미루는 것은 배려가 아니라 유예다. 대답을 미루는 동안 상대는 계획을 세우지 못하고, 나는 마음의 빚을 키운다. 상대의 시간을 아끼는 가장 정중한 방법은, 빠르고 분명하게 말하는 것이다.',
-        '분명한 거절에는 세 가지가 담긴다. 요청을 이해했다는 확인, 들어줄 수 없다는 결론, 그리고 가능하다면 대안. 이 셋이 갖춰지면 거절은 관계를 상하게 하지 않는다. 오히려 다음 부탁을 쉽게 만든다.',
-        '거절이 어려운 이유는 대개 상대 때문이 아니라 나 때문이다. 좋은 사람으로 남고 싶은 마음이, 좋은 관계를 만드는 일을 방해한다.',
-      ] },
-    { title: '2. 경계는 벽이 아니라 문이다',
-      body: [
-        '경계를 세운다는 말은 관계를 끊는다는 뜻이 아니다. 담장 없는 집에는 손님이 오지 않는다. 어디까지가 마당이고 어디부터가 거실인지 모르기 때문이다. 문이 있는 집이 손님을 더 잘 맞이하듯, 경계가 있는 사람이 관계를 더 오래 지킨다.',
-        '경계는 선언이 아니라 반복으로 세워진다. 한 번의 큰 선언보다, 작은 요청에 일관되게 반응하는 편이 낫다. "퇴근 후에는 답장이 늦어요"를 열 번 지키는 것이, "연락하지 마세요"를 한 번 말하는 것보다 강하다.',
-      ] },
-    { title: '3. 관계를 남기는 말투',
-      body: [
-        '같은 거절도 말투에 따라 관계를 남기기도, 끝내기도 한다. 원칙은 하나다. 내용은 단호하게, 형식은 다정하게.',
-        '단호한 내용이 없으면 거절이 아니라 흥정이 되고, 다정한 형식이 없으면 거절이 아니라 단절이 된다. 이 둘은 반대말이 아니라 한 문장의 앞뒤다.',
-        '연습할 문장은 짧다. "마음 써줘서 고마워요. 이번에는 어려워요." 이 두 문장 사이에 변명을 넣지 않는 것이 연습의 전부다.',
-      ] },
+/* ─────────────── 소셜 플래그 ───────────────
+   false = 남의 밑줄·실시간 채팅·문장 매칭·초대·라이팅 8단계 '나누기'를 전부 끈다.
+   지우는 게 아니라 끄는 것 — true 로 바꾸면 좌우 레일·매칭 모달·8단계가 함께 돌아온다.
+   소셜 데이터는 'FRIENDS/LIVE_POOL' 구역과 CHAPTERS[].chat, 동작은 '소셜 동작' 구역·initSocial(). */
+const SOCIAL = false;
+
+/* ─────────────── 자산 ─────────────── */
+const IMG = "생각구독-76호-assets/";
+const VIDEO_SRC = "";   // 챕터 여는 음성·영상 (목업)
+
+/* 목차 좌표 — 장별 항목이 어느 지면으로 가는지 */
+const CHAPTERS = [
+  {
+    "id": "intro",
+    "no": "00",
+    "tag": "Intro",
+    "title": "이 서재를 여는 법",
+    "voice": {
+      "label": "이 장을 여는 말",
+      "dur": "1:04"
+    },
+    "sheets": [
+      {
+        "no": "COVER",
+        "flush": true,
+        "blocks": [
+          {
+            "t": "cover",
+            "src": "plate1.svg"
+          }
+        ]
+      },
+      {
+        "no": "01",
+        "blocks": [
+          {
+            "t": "title",
+            "t1": "SAMPLE ISSUE · READER PREVIEW",
+            "t2": "HOW TO READ"
+          }
+        ]
+      },
+      {
+        "no": "02",
+        "blocks": [
+          {
+            "t": "toc"
+          }
+        ]
+      },
+      {
+        "no": "03",
+        "blocks": [
+          {
+            "t": "letter"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "underline",
+    "no": "01",
+    "tag": "밑줄",
+    "title": "문장에 밑줄을 그어보세요",
+    "voice": {
+      "label": "이 장을 여는 말",
+      "dur": "0:52"
+    },
+    "sheets": [
+      {
+        "no": "04",
+        "blocks": [
+          {
+            "t": "split",
+            "en": "A book you have\nwritten in is\na book you have\nactually read.",
+            "ko": "적어 넣은 책만이\n실제로 읽은 책이 됩니다.",
+            "src": "plate2.svg"
+          }
+        ]
+      },
+      {
+        "no": "05",
+        "flush": true,
+        "blocks": [
+          {
+            "t": "cover",
+            "src": "plate3.svg"
+          }
+        ]
+      },
+      {
+        "no": "06",
+        "blocks": [
+          {
+            "t": "head",
+            "en": "Drag any sentence\nto begin.",
+            "ko": "아무 문장이나\n드래그해 보세요."
+          },
+          {
+            "t": "photo",
+            "src": "plate4.svg",
+            "bleed": true,
+            "fill": true
+          }
+        ]
+      },
+      {
+        "no": "07",
+        "blocks": [
+          {
+            "t": "photo",
+            "src": "plate2.svg",
+            "bleed": true
+          },
+          {
+            "t": "block",
+            "label": "HOW TO",
+            "paras": [
+              "문장을 드래그하면 작은 창이 뜹니다. 다섯 가지 색 중 하나를 누르면 그 자리에 밑줄이 남고, <b>메모 남기기</b>를 누르면 그 문장에 붙는 메모장이 열립니다. 색은 나중에 독서노트에서 필터로 쓰이니, 나름의 규칙을 만들어 두면 좋습니다.",
+              "이미 밑줄 친 문장에 한 글자라도 걸치게 다시 드래그하면, 덮어쓸지 그 밑줄에 메모를 더할지 물어봅니다. 실수로 지워지는 일이 없도록 지워질 메모의 개수를 먼저 알려 드립니다."
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "memo",
+    "no": "02",
+    "tag": "메모",
+    "title": "같은 문장에 다시 적어보세요",
+    "voice": {
+      "label": "이 장을 여는 말",
+      "dur": "1:18"
+    },
+    "sheets": [
+      {
+        "no": "08",
+        "blocks": [
+          {
+            "t": "duo",
+            "srcs": [
+              "plate1.svg",
+              "plate3.svg"
+            ]
+          },
+          {
+            "t": "block",
+            "label": "AGAIN",
+            "paras": [
+              "메모는 덮어쓰지 않고 <b>쌓입니다</b>. 같은 문장에 오늘 한 줄, 두 달 뒤에 또 한 줄을 적으면 시각과 함께 세로로 이어 붙습니다.",
+              "그래서 어떤 문장은 읽을 때마다 다르게 읽혔다는 사실이 눈에 보입니다. 그 간격이 실은 내가 지나온 시간입니다."
+            ]
+          }
+        ]
+      },
+      {
+        "no": "09",
+        "blocks": [
+          {
+            "t": "photo",
+            "src": "plate4.svg"
+          },
+          {
+            "t": "block",
+            "label": "NOTEBOOK",
+            "paras": [
+              "위쪽 <b>독서노트</b>를 누르면 밑줄과 메모가 한자리에 모입니다. 색으로 걸러 보거나, 적은 순서와 목차 순서를 오갈 수 있습니다. 화살표를 누르면 그 문장이 있던 지면으로 곧장 돌아갑니다.",
+              "오른쪽 위 책갈피는 지금 보고 있는 쪽을 접어 두는 일입니다. 접어 둔 쪽은 독서노트의 북마크 칸에 모입니다."
+            ]
+          }
+        ]
+      },
+      {
+        "no": "10",
+        "blocks": [
+          {
+            "t": "verse",
+            "text": "읽는 일은 눈으로 하는 것 같지만\n실은 손으로 하는 일에 가깝습니다.\n밑줄 하나, 메모 한 줄이\n읽은 것을 남은 것으로 바꿉니다."
+          }
+        ]
+      },
+      {
+        "no": "11",
+        "blocks": [
+          {
+            "t": "photo",
+            "src": "plate1.svg"
+          },
+          {
+            "t": "block",
+            "label": "SETTINGS",
+            "paras": [
+              "<b>보기 설정</b>에서 배경색과 글자 크기, 줄 간격과 여백을 조절할 수 있습니다. 어두운 배경을 고르면 밑줄 색도 눈이 편한 쪽으로 함께 바뀝니다.",
+              "마우스를 잠시 두면 위아래 표시가 스스로 물러납니다. 지면만 남습니다. 여기까지가 이 서재의 전부입니다."
+            ]
+          }
+        ]
+      }
+    ]
+  }
+];
+
+/* 목차 좌표 — 장별 항목이 어느 지면으로 가는지 */
+const TOC = [
+  {
+    "no": "00",
+    "t": "Intro",
+    "items": [
+      "이 서재를 여는 법"
+    ]
+  },
+  {
+    "no": "01",
+    "t": "밑줄",
+    "items": [
+      "문장에 밑줄을 그어보세요",
+      "색으로 갈래를 나누기",
+      "겹칠 때 물어보는 것"
+    ]
+  },
+  {
+    "no": "02",
+    "t": "메모",
+    "items": [
+      "같은 문장에 다시 적어보세요",
+      "독서노트에 모아 보기",
+      "보기 설정"
+    ]
+  }
+];
+
+/* 편지(실제 4쪽) */
+const LETTER = {
+  "a": [
+    "안녕하세요,",
+    "이 지면은 <b>리더기를 시험해 보시라고 만든 샘플</b>입니다. 실제로 발행된 글은 구독자의 서재에서만 열립니다.",
+    "그래도 읽는 방식은 똑같습니다. 문장을 드래그해 밑줄을 긋고, 떠오른 생각을 그 자리에 적어 두세요. 적어 둔 것은 이 브라우저에 남아 다음에 와도 그대로 있습니다."
   ],
+  "b": [
+    "한 문장에 여러 번 적을 수 있습니다. 시간이 지나 다시 읽고 또 적으면, 그 문장 아래에 내 생각이 지나온 자리가 쌓입니다.",
+    "천천히 넘겨 보세요."
+  ]
 };
 
-let cur = 0;
-let fs = 1;
-const $ = id => document.getElementById(id);
+/* ═══════════ 하이라이트 색·저장 (설계서 §4.3·§5) ═══════════
+   색 리터럴은 여기 한 곳에만 둔다. CSS 는 --c 변수로만 받고, 코드는 HL_COLORS 를 참조한다.
+   순서: 노랑(기본) · 분홍 · 초록 · 파랑 · 보라. */
+const HL_COLORS = ["#fbeda0", "#fbc9d4", "#c4e7c6", "#c2dbf6", "#dccdf0"];
+/* 어두운 배경(짙은 초록·회색·검정)용 대응 색 — 같은 순서(노랑·분홍·초록·파랑·보라)의 밝기를
+   낮춘 짝. 저장값은 늘 HL_COLORS(밝은 세트) 기준 논리색이고, 어두운 테마일 때 표시만 이 값으로
+   바꾼다(보기설정 step8 의 applyView 가 --hl0..4 변수를 이 배열로 재정의). 저장색은 안 건드린다. */
+const HL_COLORS_DARK = ["#6e5c1f", "#7d3b4a", "#2f6238", "#2f4d70", "#4a3a6b"];
+const STORE_KEY = "trus_reader_demo";
+const SEED = true;   // 개발용 시드 — 끄면 스토어가 비어 시작한다
 
-function render(){
-  const n = BOOK.chapters.length, c = BOOK.chapters[cur];
-  $('pageNo').textContent = `${BOOK.title} — ${cur+1} / ${n}`;
-  $('pageTitle').textContent = c.title;
-  $('pageBody').innerHTML = c.body.map(p=>`<p>${p}</p>`).join('');
-  $('pos').textContent = `${cur+1} / ${n}`;
-  $('prevBtn').disabled = cur === 0;
-  $('nextBtn').disabled = cur === n-1;
-  $('pbar').style.width = `${((cur+1)/n)*100}%`;
-  $('tocList').innerHTML = BOOK.chapters.map((ch,i)=>
-    `<button class="toc-i${i===cur?' on':''}" onclick="goto(${i})">
-       <span class="no">${String(i+1).padStart(2,'0')}</span><span>${ch.title}</span>
-     </button>`).join('');
-  $('read').scrollTop = 0;
+/* ═══════════ 소셜 데이터 (SOCIAL) ═══════════
+   FRIENDS·LIVE_POOL 과 CHAPTERS[].chat 은 소셜 payload 다. SOCIAL=false 면 소비되지 않지만
+   지우지 않는다(§7 재도입 대비). 동작 코드는 아래 '소셜 동작' 구역·initSocial() 에 모여 있다. */
+const FRIENDS = [
+  {
+    "name": "읽는 사람 1",
+    "color": "#4b5a6b",
+    "why": "이 장에서 12문장이 겹칩니다",
+    "init": "1"
+  },
+  {
+    "name": "읽는 사람 2",
+    "color": "#7a5c46",
+    "why": "이 문장 포함 8문장이 겹칩니다",
+    "init": "2"
+  },
+  {
+    "name": "읽는 사람 3",
+    "color": "#3f6b5c",
+    "why": "이 책 전체에서 21문장이 겹칩니다",
+    "init": "3"
+  }
+];
+
+/* 실시간으로 흘러 들어오는 말 */
+const LIVE_POOL = [
+  {
+    "who": "읽는 사람 1",
+    "color": "#6b5a2f",
+    "text": "지금 09쪽 읽는 중인데 그림에서 한참 멈췄습니다"
+  },
+  {
+    "who": "읽는 사람 2",
+    "color": "#3f5d6b",
+    "text": "밑줄 세 개째입니다"
+  },
+  {
+    "who": "읽는 사람 3",
+    "color": "#8a4a5e",
+    "text": "이 부분 다시 읽으러 왔습니다"
+  },
+  {
+    "who": "읽는 사람 4",
+    "color": "#5d4b7a",
+    "text": "같이 읽는 사람 있으니까 끝까지 읽게 됩니다"
+  }
+];
+/* ═══════════ /소셜 데이터 ═══════════ */
+
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+
+/* 목차 좌표 — 장별 항목이 어느 지면으로 가는지 */
+let SHELF = [
+  {
+    "no": 3,
+    "m": "SAMPLE",
+    "t": "이 서재를 여는 법",
+    "cover": "plate1.svg",
+    "status": "reading",
+    "c": "#3a3f4a"
+  },
+  {
+    "no": 2,
+    "m": "SAMPLE",
+    "t": "두 번째 샘플",
+    "status": "read",
+    "c": "#5a4632"
+  },
+  {
+    "no": 1,
+    "m": "SAMPLE",
+    "t": "첫 번째 샘플",
+    "status": "read",
+    "c": "#3f5b52"
+  }
+];
+const PUBLISHED = 3;   // 지금까지 발행된 호
+
+function renderShelf(){
+  const owned = SHELF.filter(s=>s.status!=="unsub").length;
+  const read  = SHELF.filter(s=>s.status==="read"||s.status==="reading").length;
+  const gaps  = SHELF.filter(s=>s.status==="unsub").length;
+  $("#shelfBar").style.width = Math.round(read/owned*100) + "%";
+  $("#shelfStat").innerHTML = `${PUBLISHED}호까지 발행 · 내 서재 <b>${owned}권</b> · 읽음 <b>${read}</b>` +
+    (gaps ? ` · <em>빈 칸 ${gaps}권</em>` : ` · <em>모두 채웠어요</em>`);
+  $("#shelfRow").innerHTML = SHELF.map((s,i)=>{
+    const stName = {reading:"읽는 중", read:"읽음", unread:"안 읽음"}[s.status];
+    if(s.status==="unsub") return `
+      <div class="tile unsub" data-i="${i}">
+        <div class="cov"><span class="plus">＋</span></div>
+        <div class="cap">${s.no}호 · 구독하기</div>
+      </div>`;
+    const inner = s.cover
+      ? `<img src="${IMG+s.cover}" alt="">`
+      : ``;
+    return `
+      <div class="tile ${s.status}" data-i="${i}">
+        <div class="cov" style="background:${s.c}">
+          ${inner}
+          <span class="badge-st ${s.status}">${stName}</span>
+          <span class="no en">NO.${s.no}</span>
+          <span class="ct">${s.t}</span>
+        </div>
+        <div class="cap">${s.m}</div>
+      </div>`;
+  }).join("");
+  $$("#shelfRow .tile").forEach(tile => tile.onclick = ()=>{
+    const s = SHELF[+tile.dataset.i];
+    if(s.status==="unsub"){
+      s.status="unread"; s.t = s.t || "이번 달의 생각"; s.c = "#4a4a55";
+      renderShelf();
+      toast(`${s.no}호를 서재에 담았어요 · 빈 칸이 하나 줄었습니다`);
+    } else if(s.status==="reading"){
+      toast("지금 읽고 있는 호예요");
+    } else {
+      toast(`${s.no}호는 이 목업에는 담기지 않았어요 (76호만 실제)`);
+    }
+  });
 }
-function goto(i){ cur = i; render(); toggleToc(false); }
-function move(d){
-  const i = cur + d;
-  if(i < 0 || i >= BOOK.chapters.length) return;
-  cur = i; render();
+$("#shelfHead").onclick = ()=>{
+  const sh = $("#shelf"); const willOpen = sh.classList.contains("collapsed");
+  sh.classList.toggle("collapsed", !willOpen);
+  $("#shelfToggle").textContent = willOpen ? "접기 ▴" : "펼치기 ▾";
+  $("#shelfToggle").setAttribute("aria-expanded", willOpen);
+};
+
+/* ─────────────── 상태 ─────────────── */
+let curChap = 0;
+/* 소셜 채팅 상태 — SOCIAL=false 면 빈 배열(원본 CHAPTERS[].chat 데이터는 보존). */
+let state = CHAPTERS.map(c => ({ chat: SOCIAL ? c.chat.map((x,i)=>({...x, id:c.id+"-"+i, liked:false, seed:true, live:false})) : [] }));
+
+/* ─────────────── 메뉴바 ─────────────── */
+function showPane(which){
+  $("#tab-read").setAttribute("aria-selected", which==="read");
+  $("#tab-write").setAttribute("aria-selected", which==="write");
+  $("#pane-read").hidden = which!=="read";
+  $("#pane-write").hidden = which!=="write";
+  window.scrollTo({top:0, behavior:"smooth"});
 }
-function toggleToc(force){
-  const toc = $('toc');
-  const open = typeof force === 'boolean' ? force : !toc.classList.contains('open');
-  toc.classList.toggle('open', open);
-  $('tocBtn').setAttribute('aria-pressed', String(open));
+$("#tab-read").onclick = ()=>showPane("read");
+$("#tab-write").onclick = ()=>showPane("write");
+/* '집중 모드'(채팅 접기)는 소셜 레일 전용이라 initSocial() 에서 바인딩한다. */
+
+function toast(msg){
+  const t = $("#toast"); t.textContent = msg; t.classList.add("show");
+  clearTimeout(t._t); t._t = setTimeout(()=>t.classList.remove("show"), 2500);
 }
-function fontSize(d){
-  fs = Math.max(0, Math.min(2, fs + d));
-  document.body.dataset.fs = fs;
+
+/* ═══════════════════ 하이라이트 코어 (설계서 §4·§5) ═══════════════════
+   조작 UI 는 없다(step 3·4). 여기서는 데이터 모델·저장·복원·렌더 합성만 세운다.
+   하이라이트는 DOM span 이 아니라 [문단 인덱스 + 문자 오프셋]으로 저장하고,
+   지면을 그릴 때마다 다시 입힌다. 그래서 새로고침해도 살아남는다.
+
+   ── 앵커 규칙 ──
+   anchors[].block = 그 sheet 안에서 렌더된 '텍스트 문단'의 0-based 순번이다.
+     사진·표지·듀오 등 텍스트 없는 블록은 세지 않는다. 본문 문단(.mbody>p),
+     편지(.letter p), 시(.verse) 만 문서 순서대로 0,1,2… 를 매긴다(SEL_PARA).
+   anchors[].start/end = 그 문단의 textContent 기준 문자 오프셋. 반열림 [start,end).
+     innerHTML 이 아니라 textContent 기준이라 <b> 같은 인라인 태그가 섞여도 좌표가 안 흔들린다. */
+
+/* 하이라이트를 다시 입힐 '텍스트 문단' 선택자 — block 인덱스는 이 순서로 매긴다. */
+const HL_PARA_SEL = ".mbody > p, .letter p, .verse";
+
+function nowISO(){
+  const d = new Date(), z = n => String(n).padStart(2,"0");
+  return `${d.getFullYear()}-${z(d.getMonth()+1)}-${z(d.getDate())}T${z(d.getHours())}:${z(d.getMinutes())}:${z(d.getSeconds())}+09:00`;
 }
-document.addEventListener('keydown', e=>{
-  if(e.key === 'ArrowLeft') move(-1);
-  if(e.key === 'ArrowRight') move(1);
-  if(e.key === 'Escape') toggleToc(false);
-});
-render();
+function newId(prefix){
+  return prefix + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+}
+
+function defaultStore(){
+  return {
+    v: 1, issue: 76,
+    highlights: [],
+    bookmarks: [],
+    lastRead: null,
+    view: { bg:"white", opacity:100, font:"book", size:0, leading:0, marginX:0, marginY:0, hideMouse:true, fullscreen:false },
+    note: { tab:"highlight", colorFilter:[], sort:"added" }
+  };
+}
+
+/* loadStore() → 스토어 객체. 없거나 v≠1 이면 기본값(빈 상태)으로 시작한다. */
+function loadStore(){
+  try {
+    const raw = localStorage.getItem(STORE_KEY);
+    if(!raw) return defaultStore();
+    const obj = JSON.parse(raw);
+    if(!obj || obj.v !== 1) return defaultStore();          // 스키마 버전 불일치 → 무시
+    return Object.assign(defaultStore(), obj);              // 누락 키는 기본값으로 방어
+  } catch(_){ return defaultStore(); }
+}
+
+/* saveStore() → 현재 store 를 저장한다. 실패(용량 초과·프라이빗 모드)는 토스트로 알린다. */
+function saveStore(){
+  try {
+    localStorage.setItem(STORE_KEY, JSON.stringify(store));
+  } catch(_){
+    toast("저장 공간이 부족해 방금 변경이 저장되지 않았어요");
+  }
+}
+
+let store = loadStore();
+
+/* addHighlight({chapter, sheet, color, anchors, text}) → 생성된 id.
+   anchors 는 [{block,start,end}] 배열. 저장·재렌더까지 한 번에 한다. */
+function addHighlight({chapter, sheet, color, anchors, text}){
+  const h = {
+    id: newId("h"),
+    chapter, sheet,
+    color: color || HL_COLORS[0],
+    anchors: (anchors || []).map(a => ({ block:a.block, start:a.start, end:a.end })),
+    text: text || "",
+    createdAt: nowISO(),
+    memos: []
+  };
+  store.highlights.push(h);
+  saveStore();
+  renderHighlights();
+  return h.id;
+}
+
+/* removeHighlight(id) → 하이라이트 삭제 후 재렌더. */
+function removeHighlight(id){
+  const before = store.highlights.length;
+  store.highlights = store.highlights.filter(h => h.id !== id);
+  if(store.highlights.length !== before){ saveStore(); renderHighlights(); }
+}
+
+/* setHighlightColor(id, color) → 색만 바꾼다. */
+function setHighlightColor(id, color){
+  const h = store.highlights.find(h => h.id === id);
+  if(h && h.color !== color){ h.color = color; saveStore(); renderHighlights(); }
+}
+
+/* findHighlightsInRange(chapter, sheet, anchors) → 겹치는 하이라이트 id 배열.
+   같은 block 에서 반열림 구간이 '실제로' 교차할 때만 포함한다.
+   맞닿기만 한 경우(a.end === b.start)는 겹침이 아니다. */
+function findHighlightsInRange(chapter, sheet, anchors){
+  const ids = new Set();
+  for(const h of store.highlights){
+    if(h.chapter !== chapter || h.sheet !== sheet) continue;
+    for(const a of anchors){
+      for(const b of h.anchors){
+        if(a.block === b.block && a.start < b.end && b.start < a.end){ ids.add(h.id); break; }
+      }
+      if(ids.has(h.id)) break;
+    }
+  }
+  return [...ids];
+}
+
+/* 한 문단(textContent 기준)에 걸린 하이라이트들을 원본 마크업과 합성한다.
+   경계값으로 텍스트 노드를 쪼개므로 겹쳐도 span 이 중첩되지 않는다.
+   Range DOM 수술 API 나 문자열 replace 를 쓰지 않는다(§4.2 금지). */
+function compositeParagraph(html, blockIdx, hls){
+  // 이 문단(blockIdx)에 걸린 구간만 추린다
+  const segs = [];
+  for(const h of hls){
+    for(const a of h.anchors){
+      if(a.block === blockIdx && a.end > a.start){
+        segs.push({ start:a.start, end:a.end, id:h.id, color:h.color, createdAt:h.createdAt });
+      }
+    }
+  }
+  if(!segs.length) return html;
+
+  const tpl = document.createElement("template");
+  tpl.innerHTML = html;
+
+  // 모든 구간 경계값을 모은다 → 이 경계로만 텍스트 노드를 쪼갠다
+  const bset = new Set();
+  for(const s of segs){ bset.add(s.start); bset.add(s.end); }
+
+  const walker = document.createTreeWalker(tpl.content, NodeFilter.SHOW_TEXT);
+  const textNodes = [];
+  for(let n = walker.nextNode(); n; n = walker.nextNode()) textNodes.push(n);
+
+  let offset = 0;                         // 문단 전체 textContent 기준 누적 오프셋
+  for(const tn of textNodes){
+    const text = tn.nodeValue;
+    const nStart = offset, nEnd = offset + text.length;
+    offset = nEnd;
+    // 이 텍스트 노드 내부의 경계점
+    const cuts = [...bset].filter(b => b > nStart && b < nEnd).sort((x,y)=>x-y);
+    const points = [nStart, ...cuts, nEnd];
+    const frag = document.createDocumentFragment();
+    for(let i=0;i<points.length-1;i++){
+      const a = points[i], b = points[i+1];
+      if(b <= a) continue;
+      const piece = text.slice(a - nStart, b - nStart);
+      // [a,b) 를 덮는 구간들 (경계로 쪼갰으니 완전히 포함 아니면 완전히 배제)
+      const covering = segs.filter(s => s.start <= a && s.end >= b);
+      if(covering.length){
+        // 겹치면 가장 최근에 만든 것(createdAt 최대)의 색을 쓰고, data-hid 에 모든 id 를 담는다
+        const top = covering.reduce((p,c)=> c.createdAt > p.createdAt ? c : p);
+        const span = document.createElement("span");
+        span.className = "hl";
+        // 저장색(top.color)은 그대로 두고, 표시만 논리 변수로 공급한다(어두운 테마 대응 — step8).
+        span.style.setProperty("--c", hlVar(top.color));
+        span.dataset.hid = covering.map(s=>s.id).join(" ");
+        span.textContent = piece;
+        frag.appendChild(span);
+      } else {
+        frag.appendChild(document.createTextNode(piece));
+      }
+    }
+    tn.parentNode.replaceChild(frag, tn);
+  }
+  return tpl.innerHTML;
+}
+
+/* renderHighlights() → 현재 지면(#sheets)에 저장된 하이라이트를 다시 입힌다.
+   renderSheets() 뒤에, 그리고 add/remove/setColor 뒤에 호출된다. */
+function renderHighlights(){
+  const sheetsEl = $("#sheets");
+  if(!sheetsEl) return;
+  const chapId = CHAPTERS[curChap].id;
+  sheetsEl.querySelectorAll("section.sheet").forEach(sheetEl => {
+    const sheetNo = sheetEl.dataset.sheet;
+    if(sheetNo == null) return;
+    const hls = store.highlights.filter(h => h.chapter === chapId && h.sheet === sheetNo);
+    const paras = sheetEl.querySelectorAll(HL_PARA_SEL);
+    paras.forEach((el, blockIdx) => {
+      // 원본 마크업을 data-orig 로 보존 → 다시 그릴 때 항상 원본에서 합성한다
+      let orig = el.getAttribute("data-orig");
+      if(orig == null){ orig = el.innerHTML; el.setAttribute("data-orig", orig); }
+      el.innerHTML = hls.length ? compositeParagraph(orig, blockIdx, hls) : orig;
+    });
+  });
+  // 말풍선 마크: 메모가 하나 이상인 하이라이트의 '마지막 조각(문서순)'에만 has-memo 를 붙인다(§4.3).
+  // 여러 문단으로 쪼개져도 마지막 span 하나에만 걸리게 한다.
+  const memoIds = new Set(
+    store.highlights.filter(h => h.chapter === chapId && h.memos && h.memos.length).map(h => h.id)
+  );
+  if(memoIds.size){
+    const lastById = {};
+    sheetsEl.querySelectorAll("span.hl").forEach(span => {
+      (span.dataset.hid || "").split(" ").forEach(id => { if(memoIds.has(id)) lastById[id] = span; });
+    });
+    Object.values(lastById).forEach(span => span.classList.add("has-memo"));
+  }
+}
+
+/* 개발용 시드 — 스토어가 비어 있을 때 한 번만 넣는다(SEED=false 면 안 넣는다).
+   ① 02장(clean) 12쪽 첫 문단 + 메모 2개
+   ② 01장(season) 10쪽 SUMMER 블록 — <b> 태그에 걸치게 넣어 태그가 안 깨지는지 확인용 */
+function seedStore(){
+  if(!SEED || store.highlights.length) return;
+  store.highlights.push({
+    id: "seed-h1", chapter: "memo", sheet: "08", color: HL_COLORS[0],
+    anchors: [{ block:0, start:0, end:22 }],
+    text: "메모는 덮어쓰지 않고 쌓입니다",
+    createdAt: "2026-06-02T23:14:00+09:00",
+    memos: [
+      { id:"seed-m1", text:"밑줄만 긋고 지나가지 말자는 뜻으로 읽었다.", at:"2026-06-02T23:14:00+09:00", editedAt:null },
+      { id:"seed-m2", text:"두 달 만에 다시 읽음. 그 사이 적어 둔 게 하나도 없었다.", at:"2026-07-26T08:20:00+09:00", editedAt:null }
+    ]
+  });
+  store.highlights.push({
+    id: "seed-h2", chapter: "underline", sheet: "07", color: HL_COLORS[3],
+    anchors: [{ block:0, start:0, end:18 }],
+    text: "문장을 드래그하면 작은 창이 뜹니다",
+    createdAt: "2026-06-05T10:00:00+09:00",
+    memos: []
+  });
+  saveStore();
+}
+seedStore();
+
+/* ═══════════════════ 선택 팝오버 (step 3 · select-popover) ═══════════════════
+   지면에서 드래그가 끝나면 선택을 step 2 앵커로 바꿔 팝오버를 띄운다.
+   저장·렌더·겹침판정은 전부 step 2 공개 API(addHighlight·setHighlightColor·
+   removeHighlight·findHighlightsInRange)로만 한다 — 여기서 localStorage·DOM span 을 직접
+   만지지 않는다. confirm/alert/prompt 도 쓰지 않고 확인 UI 는 팝오버 안 요소로 만든다. */
+
+/* HTML 이스케이프(팝오버 목록에 본문 앞머리를 넣을 때). */
+function hlEsc(s){
+  return String(s).replace(/[&<>"]/g, m => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[m]));
+}
+
+/* para 안에서 (container, offset) 경계의 textContent 오프셋을 구한다.
+   렌더된 hl span 이 텍스트를 쪼개 놨어도 range.toString() 길이는 textContent 기준이라 정확하다. */
+function textOffsetInPara(para, container, offset){
+  try {
+    const r = document.createRange();
+    r.selectNodeContents(para);
+    r.setEnd(container, offset);
+    return r.toString().length;
+  } catch(_){ return null; }
+}
+
+/* 현재 Selection 의 range → {chapter, sheet, anchors:[{block,start,end}], text}.
+   문단을 넘어가는 선택은 anchor 여러 개가 된다. 실패·빈 선택이면 null. */
+function selectionToAnchors(range){
+  let startEl = range.startContainer;
+  startEl = startEl.nodeType === 1 ? startEl : startEl.parentElement;
+  const sheet = startEl ? startEl.closest("section.sheet[data-sheet]") : null;
+  if(!sheet) return null;
+  const paras = [...sheet.querySelectorAll(HL_PARA_SEL)];
+  const anchors = [];
+  paras.forEach((para, block) => {
+    if(!range.intersectsNode(para)) return;
+    const full = para.textContent.length;
+    let start = para.contains(range.startContainer)
+      ? textOffsetInPara(para, range.startContainer, range.startOffset) : 0;
+    let end = para.contains(range.endContainer)
+      ? textOffsetInPara(para, range.endContainer, range.endOffset) : full;
+    if(start == null || end == null) return;
+    start = Math.max(0, Math.min(start, full));
+    end   = Math.max(0, Math.min(end, full));
+    // 앞뒤 공백·개행은 하이라이트에서 제외한다
+    const t = para.textContent;
+    while(start < end && /\s/.test(t[start])) start++;
+    while(end > start && /\s/.test(t[end - 1])) end--;
+    if(end > start) anchors.push({ block, start, end });
+  });
+  if(!anchors.length) return null;
+  return {
+    chapter: CHAPTERS[curChap].id,
+    sheet: sheet.dataset.sheet,
+    anchors,
+    text: range.toString().trim()
+  };
+}
+
+/* 팝오버 상태 */
+let popPayload = null;   // 선택 구간(anchors)
+let popOverlap = [];     // 겹친 하이라이트 객체들
+let popMode = "main";    // main | pickTarget | confirmOverwrite
+let popRect = null;      // 기준 사각형(선택 구간)
+
+function overlapMemoCount(){
+  return popOverlap.reduce((n, h) => n + (h.memos ? h.memos.length : 0), 0);
+}
+
+function drawPopover(){
+  const pop = $("#hlpop");
+  const colors = HL_COLORS.map((c, i) =>
+    `<button class="hlpop-c" data-ci="${i}" style="--c:${c}" title="이 색으로 칠하기" aria-label="색 ${i + 1}"></button>`
+  ).join("");
+  let html = "";
+  if(popMode === "pickTarget"){
+    html = `<div class="hlpop-msg">어느 하이라이트에 메모를 남길까요?</div>
+      <div class="hlpop-list">` +
+      popOverlap.map((h, i) => {
+        const head = (h.text || "").trim().slice(0, 20);
+        const n = h.memos ? h.memos.length : 0;
+        return `<button class="hlpop-item" data-ti="${i}">
+          <span class="hlpop-item-t">${hlEsc(head)}…</span>
+          <span class="hlpop-item-n">메모 ${n}개</span>
+        </button>`;
+      }).join("") +
+      `</div>` +
+      // 지면 하이라이트 클릭으로 바로 들어온 경우(popPayload 없음)엔 돌아갈 '메인'이 없다.
+      (popPayload ? `<button class="hlpop-back" data-back="1">← 뒤로</button>` : ``);
+  } else if(popMode === "confirmOverwrite"){
+    const n = overlapMemoCount();
+    html = `<div class="hlpop-msg warn">메모 ${n}개가 함께 지워집니다</div>
+      <div class="hlpop-actions">
+        <button class="hlpop-a" data-act="overwrite-yes">↻ 덮어쓰고 메모 지우기</button>
+        <button class="hlpop-a ghost" data-back="1">취소</button>
+      </div>`;
+  } else if(popOverlap.length){
+    const n = overlapMemoCount();
+    html = `<div class="hlpop-msg">이미 하이라이트한 문장이에요${n ? ` · 메모 ${n}개` : ""}</div>
+      <div class="hlpop-colors">${colors}</div>
+      <div class="hlpop-actions">
+        <button class="hlpop-a" data-act="add-memo">✎ 이 하이라이트에 메모 추가</button>
+        <button class="hlpop-a" data-act="overwrite">↻ 새로 하이라이트 (덮어쓰기)</button>
+        <button class="hlpop-a" data-act="remove">✕ 하이라이트 지우기</button>
+      </div>`;
+  } else {
+    html = `<div class="hlpop-colors">${colors}</div>
+      <div class="hlpop-actions">
+        <button class="hlpop-a" data-act="new-memo">✎ 메모 남기기</button>
+      </div>`;
+  }
+  pop.innerHTML = html;
+  wirePopover();
+  if(popRect) positionPopover(popRect);
+}
+
+function wirePopover(){
+  const pop = $("#hlpop");
+  // 색 팔레트: 겹침 없으면 새 하이라이트, 있으면 겹친 것들의 색만 변경
+  pop.querySelectorAll(".hlpop-c").forEach(b => b.onclick = () => {
+    const c = HL_COLORS[+b.dataset.ci];
+    if(popOverlap.length) popOverlap.forEach(h => setHighlightColor(h.id, c));
+    else addHighlight({ ...popPayload, color: c });
+    closePopover();
+  });
+  pop.querySelectorAll("[data-act]").forEach(b => b.onclick = () => {
+    const act = b.dataset.act;
+    if(act === "new-memo"){
+      const id = addHighlight({ ...popPayload, color: HL_COLORS[0] });
+      closePopover();
+      openMemo(id);
+    } else if(act === "add-memo"){
+      if(popOverlap.length === 1){
+        const id = popOverlap[0].id;
+        closePopover();
+        openMemo(id);
+      } else {
+        popMode = "pickTarget";
+        drawPopover();
+      }
+    } else if(act === "overwrite"){
+      if(overlapMemoCount() > 0){ popMode = "confirmOverwrite"; drawPopover(); }
+      else doOverwrite();
+    } else if(act === "overwrite-yes"){
+      doOverwrite();
+    } else if(act === "remove"){
+      popOverlap.forEach(h => removeHighlight(h.id));
+      closePopover();
+    }
+  });
+  pop.querySelectorAll("[data-ti]").forEach(b => b.onclick = () => {
+    const id = popOverlap[+b.dataset.ti].id;
+    closePopover();
+    openMemo(id);
+  });
+  pop.querySelectorAll("[data-back]").forEach(b => b.onclick = () => {
+    popMode = "main";
+    drawPopover();
+  });
+}
+
+/* 덮어쓰기: 겹친 것들(과 그 메모)을 지우고 선택 구간으로 새 하이라이트를 만든다. */
+function doOverwrite(){
+  popOverlap.forEach(h => removeHighlight(h.id));
+  addHighlight({ ...popPayload, color: HL_COLORS[0] });
+  closePopover();
+}
+
+/* 팝오버를 선택 구간 아래에 놓는다. 화면 밖이면 위로 뒤집고 좌우로 클램프한다. */
+function positionPopover(rect){
+  const pop = $("#hlpop");
+  pop.hidden = false;
+  pop.style.visibility = "hidden";
+  const pw = pop.offsetWidth, ph = pop.offsetHeight;
+  const vw = document.documentElement.clientWidth;
+  const m = 8;
+  let left = rect.left + rect.width / 2 - pw / 2 + window.scrollX;
+  left = Math.max(window.scrollX + m, Math.min(left, window.scrollX + vw - pw - m));
+  let top = rect.bottom + window.scrollY + m;
+  if(window.innerHeight - rect.bottom < ph + m * 2){
+    top = rect.top + window.scrollY - ph - m;   // 아래 공간이 부족하면 위로 뒤집기
+    pop.classList.add("flip");
+  } else {
+    pop.classList.remove("flip");
+  }
+  pop.style.left = left + "px";
+  pop.style.top = top + "px";
+  pop.style.visibility = "";
+}
+
+function closePopover(){
+  const pop = $("#hlpop");
+  if(pop){ pop.hidden = true; pop.classList.remove("flip"); pop.innerHTML = ""; }
+  popPayload = null; popOverlap = []; popMode = "main"; popRect = null;
+}
+
+/* openMemo(highlightId) — 그 하이라이트의 메모 모달을 연다(step 4, 아래 '메모 모달' 구역에서 구현). */
+function openMemo(highlightId){
+  openMemoModal(highlightId);
+}
+
+/* 지면 드래그 종료 → 팝오버. 소셜 밑줄 도구(seltool)와 별개다. */
+function initSelectPopover(){
+  // 하이라이트 클릭 → 메모 모달. 겹친 조각(data-hid 다수)이면 step 3 pickTarget 목록을 재사용한다.
+  const sheetsWrap = $("#sheets");
+  if(sheetsWrap){
+    sheetsWrap.addEventListener("click", e => {
+      const span = e.target.closest(".hl");
+      if(!span || !sheetsWrap.contains(span)) return;
+      // 드래그로 문장을 선택한 직후의 클릭이면 선택 팝오버에 맡기고 무시한다
+      const sel = window.getSelection();
+      if(sel && !sel.isCollapsed && sel.toString().trim().length) return;
+      const ids = (span.dataset.hid || "").split(" ").filter(Boolean);
+      const hls = ids.map(id => store.highlights.find(h => h.id === id)).filter(Boolean);
+      if(!hls.length) return;
+      if(hls.length === 1){ openMemo(hls[0].id); return; }
+      // 겹친 하이라이트가 여럿 → 어느 것에 메모를 볼지 목록 먼저(pickTarget 재사용)
+      popPayload = null;
+      popOverlap = hls;
+      popMode = "pickTarget";
+      popRect = span.getBoundingClientRect();
+      drawPopover();
+    });
+  }
+  document.addEventListener("mouseup", () => {
+    const pop = $("#hlpop");
+    const sel = window.getSelection();
+    const wrap = $("#sheets");
+    if(!sel || sel.rangeCount === 0 || sel.isCollapsed || !wrap || !wrap.contains(sel.anchorNode)){
+      return;   // 클릭·빈 선택은 닫기(바깥 mousedown)에 맡긴다
+    }
+    if(sel.toString().trim().length < 1){ closePopover(); return; }
+    const range = sel.getRangeAt(0);
+    const payload = selectionToAnchors(range);
+    if(!payload){ closePopover(); return; }
+    popPayload = payload;
+    popOverlap = findHighlightsInRange(payload.chapter, payload.sheet, payload.anchors)
+      .map(id => store.highlights.find(h => h.id === id))
+      .filter(Boolean);
+    popMode = "main";
+    popRect = range.getBoundingClientRect();
+    drawPopover();
+  });
+  // 바깥 클릭으로 닫기 — 팝오버 내부 클릭은 유지
+  document.addEventListener("mousedown", e => {
+    const pop = $("#hlpop");
+    if(pop && !pop.hidden && !pop.contains(e.target)) closePopover();
+  });
+  // Esc 로 닫기
+  document.addEventListener("keydown", e => { if(e.key === "Escape") closePopover(); });
+}
+/* ═══════════════════ /선택 팝오버 ═══════════════════ */
+
+/* ═══════════════════ 메모 모달 (step 4 · memo-modal) ═══════════════════
+   같은 문장에 시간을 두고 남긴 메모를 오래된 순으로 쌓아 보여준다. 저장은 '덮어쓰기'가
+   아니라 배열에 '추가'다 — 이 리더기의 존재 이유. 저장·재렌더는 step 2 공개 API(saveStore·
+   renderHighlights)로만 하고 confirm/alert/prompt 는 쓰지 않는다. */
+
+let memoOpenId = null;   // 현재 열린 하이라이트 id
+let memoEditIdx = null;  // 인라인 수정 중인 메모 인덱스(없으면 null)
+
+/* ISO(+09:00) → 'YYYY.MM.DD HH:mm'. 타임존 흔들림 없이 문자열에서 바로 뽑는다. */
+function memoFmt(iso){
+  if(!iso) return "";
+  return String(iso).slice(0, 10).replace(/-/g, ".") + " " + String(iso).slice(11, 16);
+}
+
+function currentMemoHl(){
+  return store.highlights.find(h => h.id === memoOpenId) || null;
+}
+
+/* 타임라인 한 항목. editing 이면 인라인 textarea + 저장/취소로 바뀐다. */
+function memoItemHTML(m, i, isLast, editing){
+  const time = memoFmt(m.at) + (m.editedAt ? ` · 수정됨 ${memoFmt(m.editedAt)}` : "");
+  const body = editing
+    ? `<textarea class="memo-edit-ta" maxlength="500">${hlEsc(m.text)}</textarea>
+       <div class="memo-edit-row">
+         <button class="memo-edit-cancel" data-mcancel="1">취소</button>
+         <button class="memo-edit-save" data-mesave="${i}">저장</button>
+       </div>`
+    : `<div class="memo-text">${hlEsc(m.text)}</div>
+       <div class="memo-meta">
+         <span class="memo-time">${hlEsc(time)}</span>
+         <button class="memo-edit" data-medit="${i}">수정</button>
+         <button class="memo-del" data-mdel="${i}">삭제</button>
+       </div>`;
+  return `<div class="memo-item${isLast ? " last" : ""}${editing ? " editing" : ""}" data-mi="${i}">
+    <span class="memo-dot"></span>
+    <div class="memo-item-body">${body}</div>
+  </div>`;
+}
+
+/* 모달 내용을 현재 하이라이트 상태로 다시 그린다(추가·수정·삭제 후 매번 호출). */
+function drawMemo(){
+  const h = currentMemoHl();
+  if(!h) return;
+  const box = $("#memoWrap").querySelector(".memo-box");
+  const memos = h.memos || [];
+  const n = memos.length;
+  const title = n ? `메모 ${n}개` : "메모";
+  const meta = n
+    ? `${hlEsc(h.sheet)}p · ${memoFmt(memos[0].at)} 부터`
+    : `${hlEsc(h.sheet)}p · ${memoFmt(h.createdAt)}`;
+  const timeline = n
+    ? `<div class="memo-log">` +
+        memos.map((m, i) => memoItemHTML(m, i, i === n - 1, i === memoEditIdx)).join("") +
+      `</div>`
+    : "";
+  const ph = n ? "지금 다시 읽으니…" : "메모";
+  box.style.setProperty("--c", h.color);
+  box.innerHTML = `
+    <div class="memo-head">
+      <button class="memo-x" data-mx="1" aria-label="닫기">✕</button>
+      <div class="memo-title">${title}</div>
+      <button class="memo-save" data-msave="1">저장</button>
+    </div>
+    <div class="memo-quote">
+      <div class="memo-quote-t">“${hlEsc(h.text || "")}</div>
+      <div class="memo-quote-m">${meta}</div>
+    </div>
+    ${timeline}
+    <div class="memo-new">
+      <textarea maxlength="500" placeholder="${hlEsc(ph)}"></textarea>
+      <div class="memo-count"><span class="memo-count-n">0</span> / 500</div>
+    </div>`;
+  wireMemo();
+}
+
+function wireMemo(){
+  const box = $("#memoWrap").querySelector(".memo-box");
+  box.querySelector("[data-mx]").onclick = closeMemo;
+  const ta = box.querySelector(".memo-new textarea");
+  const cnt = box.querySelector(".memo-count-n");
+  if(ta && cnt) ta.oninput = () => { cnt.textContent = ta.value.length; };
+  box.querySelector("[data-msave]").onclick = () => {
+    const val = ta ? ta.value.trim() : "";
+    if(!val){ closeMemo(); return; }   // 빈 입력이면 아무것도 추가하지 않고 닫는다
+    addMemo(val);
+  };
+  box.querySelectorAll("[data-medit]").forEach(b => b.onclick = () => { memoEditIdx = +b.dataset.medit; drawMemo(); });
+  box.querySelectorAll("[data-mdel]").forEach(b => b.onclick = () => deleteMemo(+b.dataset.mdel));
+  box.querySelectorAll("[data-mcancel]").forEach(b => b.onclick = () => { memoEditIdx = null; drawMemo(); });
+  box.querySelectorAll("[data-mesave]").forEach(b => b.onclick = () => {
+    const editTa = box.querySelector(".memo-item.editing .memo-edit-ta");
+    saveEditMemo(+b.dataset.mesave, editTa ? editTa.value.trim() : "");
+  });
+}
+
+/* 새 메모 추가 — 덮어쓰지 않고 배열 끝에 쌓는다. */
+function addMemo(text){
+  const h = currentMemoHl();
+  if(!h) return;
+  h.memos.push({ id: newId("m"), text, at: nowISO(), editedAt: null });
+  saveStore();
+  renderHighlights();   // 말풍선 마크 즉시 반영
+  memoEditIdx = null;
+  drawMemo();
+  const ta = $("#memoWrap").querySelector(".memo-new textarea");
+  if(ta) ta.focus();
+}
+
+/* 메모 수정 — 본문을 갈아끼우고 editedAt 을 기록한다(빈 값이면 원문 유지). */
+function saveEditMemo(i, text){
+  const h = currentMemoHl();
+  if(h && h.memos && h.memos[i] && text){
+    h.memos[i].text = text;
+    h.memos[i].editedAt = nowISO();
+    saveStore();
+    renderHighlights();
+  }
+  memoEditIdx = null;
+  drawMemo();
+}
+
+/* 메모 삭제 — 그 메모만 지운다. 마지막 메모를 지우면 말풍선 마크가 사라진다. */
+function deleteMemo(i){
+  const h = currentMemoHl();
+  if(!h || !h.memos || !h.memos[i]) return;
+  h.memos.splice(i, 1);
+  saveStore();
+  renderHighlights();
+  memoEditIdx = null;
+  drawMemo();
+}
+
+function openMemoModal(highlightId){
+  const h = store.highlights.find(x => x.id === highlightId);
+  if(!h){ toast("하이라이트를 찾지 못했어요"); return; }
+  memoOpenId = highlightId;
+  memoEditIdx = null;
+  drawMemo();
+  $("#memoWrap").hidden = false;
+  const ta = $("#memoWrap").querySelector(".memo-new textarea");
+  if(ta) ta.focus();
+}
+
+function closeMemo(){
+  const wrap = $("#memoWrap");
+  if(wrap){
+    wrap.hidden = true;
+    const box = wrap.querySelector(".memo-box");
+    if(box) box.innerHTML = "";
+  }
+  memoOpenId = null;
+  memoEditIdx = null;
+}
+
+/* 딤 클릭·Esc 로 닫기. */
+function initMemoModal(){
+  const wrap = $("#memoWrap");
+  if(!wrap) return;
+  wrap.addEventListener("mousedown", e => { if(e.target === wrap) closeMemo(); });
+  document.addEventListener("keydown", e => { if(e.key === "Escape" && !wrap.hidden) closeMemo(); });
+}
+/* ═══════════════════ /메모 모달 ═══════════════════ */
+
+/* ═══════════════════ 상단바·패널 셸 · 동작 (step 5) ═══════════════════
+   지면 클릭으로 여닫는 리더 상단바 + 우측 공유 패널(4종이 컨테이너 #rpanel 하나를 갈아 끼움) +
+   독서 진행률 + 전체 화면(UI 숨김) + 책갈피 + lastRead 복원.
+   저장은 step 2 스토어의 예약 슬롯(store.view.fullscreen · store.bookmarks · store.lastRead)에만
+   기록한다 — 새 최상위 키를 만들지 않는다. 패널 내용은 step 6·7·8 이 registerPanel 로 채운다. */
+
+/* ── 우측 공유 패널 셸 ──
+   컨테이너는 #rpanel 하나뿐. kind 별 컨테이너를 새로 만들지 않는다(같은 자리를 갈아 끼운다).
+   registerPanel 로 각 패널이 자기 title · render(내용 HTML) · onOpen(연 뒤 후처리)을 등록한다. */
+const PANELS = {};          // kind -> { title, render, onOpen }
+let panelKind = null;       // 현재 열린 패널 kind (null = 닫힘)
+
+/* registerPanel(kind, { title, render, onOpen })
+   kind   : 'toc' | 'search' | 'note' | 'view'
+   title  : 패널 헤더 제목(문자열 또는 () => 문자열)
+   render : () => HTML 문자열 — 패널 본문을 통째로 그린다
+   onOpen : (bodyEl) => void — 렌더 뒤 이벤트 바인딩 등 후처리(선택) */
+function registerPanel(kind, def){ PANELS[kind] = def; }
+
+/* openPanel(kind) — 같은 kind 재클릭이면 닫는다. 다른 kind 면 컨테이너는 그대로 두고 내용만
+   갈아 끼운다(닫았다 여는 애니 없음). 딤 없음 — 지면은 계속 읽을 수 있다. */
+function openPanel(kind){
+  const def = PANELS[kind];
+  if(!def) return;
+  if(panelKind === kind){ closePanel(); return; }        // 같은 버튼 재클릭 = 닫힘
+  panelKind = kind;
+  const titleEl = $("#rpanelTitle"), bodyEl = $("#rpanelBody");
+  if(titleEl) titleEl.textContent = typeof def.title === "function" ? def.title() : def.title;
+  if(bodyEl){
+    bodyEl.innerHTML = def.render ? def.render() : "";   // 내용만 교체 → 다른 kind 로 바꿔도 안 깜빡인다
+    bodyEl.scrollTop = 0;
+    if(def.onOpen) def.onOpen(bodyEl);
+  }
+  document.body.classList.add("rpanel-open");
+  syncPanelBtns();
+}
+
+/* closePanel() — 패널을 닫는다(컨테이너는 DOM 에 남는다). */
+function closePanel(){
+  panelKind = null;
+  document.body.classList.remove("rpanel-open");
+  syncPanelBtns();
+}
+
+/* 네 패널을 등록한다. 목차·본문검색은 step6, 독서노트는 step7, 보기설정은 step8 이 채웠다. */
+registerPanel("toc",    { title:"목차",     render: tocPanelRender,    onOpen: tocPanelOnOpen });    // step6
+registerPanel("search", { title:"본문검색", render: searchPanelRender, onOpen: searchPanelOnOpen }); // step6
+registerPanel("note",   { title:"독서노트", render: notePanelRender, onOpen: notePanelOnOpen }); // step7
+registerPanel("view",   { title:"보기설정", render: viewPanelRender, onOpen: viewPanelOnOpen });    // step8
+
+/* 상단바 패널 버튼의 눌림 상태를 현재 열린 kind 에 맞춘다. */
+function syncPanelBtns(){
+  const map = { toc:"#rtToc", search:"#rtSearch", note:"#rtNote", view:"#rtView" };
+  for(const k in map){
+    const b = $(map[k]);
+    if(b) b.setAttribute("aria-pressed", String(panelKind === k));
+  }
+}
+
+/* ── 상단바 토글 ──
+   지면 클릭 시 상단바를 여닫는다. 단 ①드래그로 선택이 남아 있으면(선택 팝오버 차례)
+   ②하이라이트(.hl) 클릭이면(메모 모달 차례) ③버튼·입력 등 조작 요소 클릭이면 토글하지 않는다. */
+function toggleTopbar(){ document.body.classList.toggle("rtop-open"); }
+
+/* ── 전체 화면(UI 숨김) ──
+   상단바(rtop-open 해제)와 챕터 레일·발행 헤더를 숨겨 지면만 남긴다. Fullscreen API 는 쓰지
+   않는다(iframe 안에서 막힘). Esc·재클릭으로 해제. 상태는 store.view.fullscreen 에 저장한다. */
+function setFullscreen(on){
+  document.body.classList.toggle("reader-full", on);
+  if(on) document.body.classList.remove("rtop-open");    // 지면만 남긴다
+  const b = $("#rtFull");
+  if(b) b.setAttribute("aria-pressed", String(on));
+  if(store.view.fullscreen !== on){ store.view.fullscreen = on; saveStore(); }
+}
+function toggleFullscreen(){ setFullscreen(!store.view.fullscreen); }
+
+/* ── 책갈피 ──
+   현재 보고 있는 쪽(chapter+sheet)을 store.bookmarks 에 토글한다. 목록 화면은 만들지 않는다
+   (독서노트 패널의 북마크 탭 — step 7). */
+function curLoc(){ return { chapter: CHAPTERS[curChap].id, sheet: curSheetNo }; }
+function isBookmarked(){
+  const { chapter, sheet } = curLoc();
+  return store.bookmarks.some(b => b.chapter === chapter && b.sheet === sheet);
+}
+function toggleBookmark(){
+  const { chapter, sheet } = curLoc();
+  if(sheet == null) return;
+  if(isBookmarked()){
+    store.bookmarks = store.bookmarks.filter(b => !(b.chapter === chapter && b.sheet === sheet));
+  } else {
+    store.bookmarks.push({ chapter, sheet, at: nowISO() });
+  }
+  saveStore();
+  syncBookmarkBtn();
+}
+function syncBookmarkBtn(){
+  const b = $("#rtMark");
+  if(b) b.setAttribute("aria-pressed", String(isBookmarked()));
+}
+
+/* ── 독서 진행률 + 현재 쪽 추적 ──
+   지면은 세로로 쌓여 스크롤된다. 뷰포트 상단 근처에 걸린 sheet 를 '현재 쪽'으로 본다.
+   진행률 = (앞 챕터들 쪽 합 + 이 챕터 안 현재 쪽 순번 + 1) / 전체 쪽. lastRead 도 여기서 갱신. */
+let curSheetNo = null;      // 현재 뷰포트 상단에 걸린 sheet 의 no
+function totalSheets(){ return CHAPTERS.reduce((n,c)=> n + c.sheets.length, 0); }
+function sheetsBefore(chapIdx){ let n=0; for(let i=0;i<chapIdx;i++) n += CHAPTERS[i].sheets.length; return n; }
+function currentSheetEl(){
+  const els = $$("#sheets section.sheet");
+  if(!els.length) return null;
+  let cur = els[0];
+  for(const el of els){ if(el.getBoundingClientRect().top <= 120) cur = el; else break; }
+  return cur;
+}
+function updateProgress(){
+  const el = currentSheetEl();
+  if(!el) return;
+  const no = el.dataset.sheet;
+  const localIdx = CHAPTERS[curChap].sheets.findIndex(s => s.no === no);
+  const total = totalSheets();
+  const cur = sheetsBefore(curChap) + (localIdx < 0 ? 0 : localIdx) + 1;
+  const bar = $("#rprogBar"), num = $("#rprogNum");
+  if(bar) bar.style.width = (total ? cur / total * 100 : 0) + "%";
+  if(num) num.textContent = `${cur} / ${total}`;
+  if(no !== curSheetNo){
+    curSheetNo = no;
+    syncBookmarkBtn();
+    store.lastRead = { chapter: CHAPTERS[curChap].id, sheet: no };
+    saveStore();
+  }
+}
+
+/* ── 독서노트 뱃지(메모 총 개수) ── 0 이면 숨긴다. */
+function updateNoteBadge(){
+  const n = store.highlights.reduce((sum,h)=> sum + (h.memos ? h.memos.length : 0), 0);
+  const badge = $("#rtNoteBadge");
+  if(!badge) return;
+  badge.textContent = String(n);
+  badge.hidden = n === 0;
+}
+
+/* ── 초기화 · 바인딩 ── */
+function initTopbarPanel(){
+  // 재방문 복원 좌표를 먼저 잡아둔다(아래 updateProgress 가 lastRead 를 덮어쓰기 전에).
+  const restore = store.lastRead && store.lastRead.chapter
+    ? { chapter: store.lastRead.chapter, sheet: store.lastRead.sheet } : null;
+  if(restore){
+    const idx = CHAPTERS.findIndex(c => c.id === restore.chapter);
+    if(idx >= 0 && idx !== curChap){ curChap = idx; renderRail(); renderSheets(); }
+  }
+
+  // renderHighlights 뒤에 독서노트 뱃지도 갱신되도록 감싼다(step2·4 원본 코드는 안 건드린다).
+  const _renderHighlights = renderHighlights;
+  renderHighlights = function(){ const r = _renderHighlights.apply(this, arguments); updateNoteBadge(); return r; };
+
+  setFullscreen(!!store.view.fullscreen);   // 전체 화면 상태 복원
+
+  // 상단바 버튼
+  const back = $("#rtBack");
+  if(back) back.addEventListener("click", ()=>{
+    if(curChap > 0){ curChap--; renderRail(); renderSheets(); window.scrollTo({top:0,behavior:"smooth"}); updateProgress(); }
+  });
+  const bind = (sel, fn) => { const b = $(sel); if(b) b.addEventListener("click", fn); };
+  bind("#rtToc",    ()=> openPanel("toc"));
+  bind("#rtSearch", ()=> openPanel("search"));
+  bind("#rtNote",   ()=> openPanel("note"));
+  bind("#rtView",   ()=> openPanel("view"));
+  bind("#rtFull",   toggleFullscreen);
+  bind("#rtMark",   toggleBookmark);
+  bind("#rpanelX",  closePanel);
+
+  // 지면 클릭 → 상단바 토글(선택·하이라이트·조작요소 클릭은 제외)
+  const wrap = $("#sheets");
+  if(wrap){
+    wrap.addEventListener("click", e => {
+      if(e.target.closest(".hl")) return;                                        // 하이라이트 → 메모 모달
+      if(e.target.closest("button, a, input, textarea, audio, video, label")) return;
+      const sel = window.getSelection();
+      if(sel && !sel.isCollapsed && sel.toString().trim().length) return;         // 드래그 직후 → 선택 팝오버
+      toggleTopbar();
+    });
+  }
+
+  // Esc — 패널 먼저 닫고, 없으면 전체 화면 해제(메모 모달이 떠 있으면 그쪽에 양보한다)
+  document.addEventListener("keydown", e => {
+    if(e.key !== "Escape") return;
+    const memo = $("#memoWrap");
+    if(memo && !memo.hidden) return;
+    if(panelKind){ closePanel(); return; }
+    if(store.view.fullscreen) setFullscreen(false);
+  });
+
+  // 스크롤에 따라 진행률·현재 쪽 갱신(rAF 스로틀)
+  let ticking = false;
+  window.addEventListener("scroll", ()=>{
+    if(ticking) return; ticking = true;
+    requestAnimationFrame(()=>{ updateProgress(); ticking = false; });
+  }, { passive:true });
+
+  // 복원 쪽으로 스크롤(다음 방문 시 그 쪽에서 시작)
+  if(restore && restore.sheet){
+    const t = $(`#sheets section.sheet[data-sheet="${CSS.escape(restore.sheet)}"]`);
+    if(t) t.scrollIntoView({ block:"start" });
+  }
+  updateNoteBadge();
+  updateProgress();      // curSheetNo·lastRead·책갈피 버튼 초기 동기화
+  syncBookmarkBtn();
+}
+/* ═══════════════════ 상단바·패널 셸 동작 끝 ═══════════════════ */
+
+/* 목차 좌표 — 장별 항목이 어느 지면으로 가는지 */
+const TOC_NAV = [
+  [
+    {
+      "chapter": 0,
+      "sheet": "COVER"
+    }
+  ],
+  [
+    {
+      "chapter": 1,
+      "sheet": "04"
+    },
+    {
+      "chapter": 1,
+      "sheet": "06"
+    },
+    {
+      "chapter": 1,
+      "sheet": "07"
+    }
+  ],
+  [
+    {
+      "chapter": 2,
+      "sheet": "08"
+    },
+    {
+      "chapter": 2,
+      "sheet": "09"
+    },
+    {
+      "chapter": 2,
+      "sheet": "11"
+    }
+  ]
+];
+
+/* 장(그룹) 헤더가 이동할 좌표: 그 장 첫 유효 항목 좌표(없으면 null = 비활성). */
+function tocGroupNav(g){
+  const arr = TOC_NAV[g] || [];
+  for(const co of arr){ if(co) return co; }
+  return null;
+}
+
+/* CHAPTERS 상 전역 지면 순번(앞 장 지면 합 + 장 안 sheet 인덱스). 현재 위치·항목 위치 비교용. */
+function tocGlobalIndex(chapter, sheet){
+  const c = CHAPTERS[chapter];
+  const local = c ? c.sheets.findIndex(s => s.no === sheet) : -1;
+  return sheetsBefore(chapter) + (local < 0 ? 0 : local);
+}
+
+/* 지금 읽는 위치(curChap·curSheetNo)에서, 좌표가 있는 목차 항목 중
+   '현재 지점 이하'로 가장 뒤에 있는 항목 키("g:i")를 고른다. 없으면 null. */
+function currentTocKey(){
+  const here = tocGlobalIndex(curChap, curSheetNo);
+  let bestKey = null, bestIdx = -1;
+  TOC_NAV.forEach((arr, g) => {
+    arr.forEach((co, i) => {
+      if(!co) return;
+      const gi = tocGlobalIndex(co.chapter, co.sheet);
+      if(gi <= here && gi >= bestIdx){ bestIdx = gi; bestKey = g + ":" + i; }
+    });
+  });
+  return bestKey;
+}
+
+/* 좌표로 이동: 필요하면 장을 바꿔 다시 그리고 해당 sheet 로 스크롤한다. step5 renderSheets 경로 재사용. */
+function gotoLocation(chapter, sheet){
+  if(chapter == null) return;
+  if(chapter !== curChap){
+    curChap = chapter;
+    renderRail(); renderSheets(); if(SOCIAL) renderChat();
+    curSheetNo = null;
+  }
+  requestAnimationFrame(() => {
+    const t = $(`#sheets section.sheet[data-sheet="${CSS.escape(sheet)}"]`);
+    if(t) t.scrollIntoView({ block:"start", behavior:"smooth" });
+    updateProgress();   // 진행률·lastRead·책갈피 버튼 동기화
+  });
+}
+
+/* ── 목차 패널 ── */
+function tocPanelRender(){
+  const activeKey = currentTocKey();
+  const groups = TOC.map((g, gi) => {
+    const gnav = tocGroupNav(gi);
+    const gAttr = gnav ? `data-c="${gnav.chapter}" data-s="${hlEsc(gnav.sheet)}"` : `aria-disabled="true"`;
+    const items = g.items.map((it, ii) => {
+      const co = (TOC_NAV[gi] || [])[ii] || null;
+      const dim = co ? "" : " dim";
+      const on  = activeKey === (gi + ":" + ii) ? " on" : "";
+      // 쪽번호 칸 표시 라벨만: 표지 지면(sheet id "COVER")은 '표지'로 보여준다(이동 좌표 data-s 는 불변).
+      const no  = co ? hlEsc(co.sheet === "COVER" ? "표지" : co.sheet) : "·";
+      const attr = co ? `data-c="${co.chapter}" data-s="${hlEsc(co.sheet)}"` : `aria-disabled="true"`;
+      return `<button type="button" class="rtoc-i${dim}${on}" ${attr}>
+          <span class="rtoc-ino en">${no}</span>
+          <span class="rtoc-it">${hlEsc(it)}</span>
+        </button>`;
+    }).join("");
+    return `<div class="rtoc-group">
+        <button type="button" class="rtoc-g${gnav ? "" : " dim"}" ${gAttr}>
+          <span class="rtoc-gno en">${hlEsc(g.no)}</span>
+          <span class="rtoc-gt">${hlEsc(g.t)}</span>
+        </button>
+        ${items}
+      </div>`;
+  }).join("");
+  return `<div class="rtoc-cover">
+      <img src="${IMG}p01_0.jpg" alt="생각구독 76호 표지">
+      <div class="rtoc-cover-meta">
+        <div class="rtoc-cover-title">이 서재를 여는 법</div>
+        <div class="rtoc-cover-author">샘플</div>
+      </div>
+    </div>
+    <nav class="rtoc-list">${groups}</nav>`;
+}
+
+function tocPanelOnOpen(body){
+  body.querySelectorAll(".rtoc-g, .rtoc-i").forEach(btn => {
+    if(btn.getAttribute("aria-disabled") === "true") return;   // 지면 없는 항목 — 이동 안 함
+    btn.addEventListener("click", () => {
+      const c = Number(btn.dataset.c), s = btn.dataset.s;
+      closePanel();
+      gotoLocation(c, s);
+    });
+  });
+}
+
+/* ── 본문 검색 ──
+   검색 대상 = CHAPTERS 텍스트 블록(block.paras · verse.text · head/split 의 ko) + LETTER(a·b).
+   사진·표지·듀오·타이틀·toc 블록은 텍스트가 없으므로 건너뛴다.
+   본문엔 <b> 태그와 &lt; 엔티티가 섞여 있어, 먼저 태그 제거 + 엔티티 디코드한 플레인 텍스트에서
+   대소문자 무시로 매칭하고, 결과는 hlEsc 로 이스케이프한 뒤 검색어만 <b> 강조한다(입력의 < 안전). */
+
+/* HTML/엔티티가 섞인 원문을 검색용 플레인 텍스트로 정규화. */
+function searchPlain(raw){
+  return String(raw)
+    .replace(/<[^>]*>/g, "")                                   // <b> 등 태그 제거
+    .replace(/&lt;/g, "<").replace(/&gt;/g, ">")
+    .replace(/&amp;/g, "&").replace(/&quot;/g, '"').replace(/&nbsp;/g, " ");
+}
+
+/* 검색 대상 텍스트 조각을 { chapter, sheet, chapTitle, text } 목록으로 수집. */
+function searchCorpus(){
+  const out = [];
+  CHAPTERS.forEach((c, ci) => {
+    const chapTitle = `${c.tag} ${c.title}`.trim();
+    c.sheets.forEach(sh => {
+      sh.blocks.forEach(b => {
+        const push = t => { if(t) out.push({ chapter:ci, sheet:sh.no, chapTitle, text:searchPlain(t) }); };
+        if(b.t === "block" && b.paras) b.paras.forEach(push);
+        else if(b.t === "verse") push(b.text);
+        else if(b.t === "head" || b.t === "split") push(b.ko);
+        // cover·photo·duo·title·toc·letter(아래서 별도 수집)는 건너뛴다
+      });
+    });
+  });
+  // 편지(LETTER)는 intro 3쪽(sheet "03")에 실린다.
+  const c0 = CHAPTERS[0];
+  const letterLoc = { chapter:0, sheet:"03", chapTitle:`${c0.tag} ${c0.title}`.trim() };
+  [...LETTER.a, ...LETTER.b].forEach(p => out.push({ ...letterLoc, text:searchPlain(p) }));
+  return out;
+}
+
+/* 문맥 조각을 이스케이프하고 검색어만 <b> 강조. 매치 앞뒤 약 20자. */
+function searchSnippet(text, at, qlen){
+  const CTX = 20;
+  const from = Math.max(0, at - CTX);
+  const to = Math.min(text.length, at + qlen + CTX);
+  const pre = (from > 0 ? "…" : "") + text.slice(from, at);
+  const hit = text.slice(at, at + qlen);
+  const post = text.slice(at + qlen, to) + (to < text.length ? "…" : "");
+  return `${hlEsc(pre)}<b>${hlEsc(hit)}</b>${hlEsc(post)}`;
+}
+
+/* 검색 실행 → 결과 HTML. 대소문자 무시 단순 포함. 조각당 첫 매치 1건. */
+function runSearch(q){
+  const query = q.trim();
+  if(!query) return `<div class="rsearch-hint">단어나 문장을 검색해보세요</div>`;
+  const needle = query.toLowerCase();
+  const hits = [];
+  searchCorpus().forEach(row => {
+    const at = row.text.toLowerCase().indexOf(needle);
+    if(at < 0) return;
+    hits.push(`<button type="button" class="rsearch-item" data-c="${row.chapter}" data-s="${hlEsc(row.sheet)}">
+        <span class="rsearch-item-loc">${hlEsc(row.sheet)} · ${hlEsc(row.chapTitle)}</span>
+        <span class="rsearch-item-ctx">${searchSnippet(row.text, at, query.length)}</span>
+      </button>`);
+  });
+  if(!hits.length) return `<div class="rsearch-empty">검색 결과가 없어요</div>`;
+  return `<div class="rsearch-list">${hits.join("")}</div>`;
+}
+
+function searchPanelRender(){
+  return `<form class="rsearch-bar" id="rsearchForm" role="search">
+      <input type="search" class="rsearch-input" id="rsearchInput" placeholder="단어나 문장"
+        autocomplete="off" enterkeyhint="search" aria-label="본문 검색어">
+      <button type="submit" class="rsearch-btn" aria-label="검색">
+        <svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true">
+          <circle cx="8.5" cy="8.5" r="5.5" fill="none" stroke="currentColor" stroke-width="1.8"/>
+          <line x1="12.6" y1="12.6" x2="17" y2="17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </form>
+    <div class="rsearch-out" id="rsearchOut"><div class="rsearch-hint">단어나 문장을 검색해보세요</div></div>`;
+}
+
+function searchPanelOnOpen(body){
+  const form = body.querySelector("#rsearchForm");
+  const input = body.querySelector("#rsearchInput");
+  const out = body.querySelector("#rsearchOut");
+  if(!form || !input || !out) return;
+  const doSearch = () => { out.innerHTML = runSearch(input.value); wireSearchResults(out); };
+  form.addEventListener("submit", e => { e.preventDefault(); doSearch(); });   // Enter·돋보기 버튼
+  input.focus();
+}
+
+function wireSearchResults(out){
+  out.querySelectorAll(".rsearch-item").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const c = Number(btn.dataset.c), s = btn.dataset.s;
+      closePanel();
+      gotoLocation(c, s);
+    });
+  });
+}
+/* ═══════════════════ /목차·검색 패널 ═══════════════════ */
+
+/* ═══════════════════ 독서노트 패널 (step 7 · panel-note) ═══════════════════
+   하이라이트·메모와 책갈피를 모아 보는 패널. step5 셸의 note 자리표시자를 실제 내용으로
+   채운다(등록은 셸 구역에서 함). 셸(openPanel/closePanel·#rpanel 컨테이너·z층)은 안 건드린다.
+   메모 편집은 새로 만들지 않고 step4 의 openMemo 를 그대로 쓴다. 삭제 확인·⋮ 메뉴는
+   confirm/alert/prompt 없이 패널 안 요소로만 만든다. 탭·색필터·정렬 상태는 store.note 슬롯에만
+   저장한다(새 최상위 키 없음, saveStore 경유). */
+
+let noteMenuId = null;     // ⋮ 메뉴가 펼쳐진 카드 하이라이트 id
+let noteConfirmDel = null; // 삭제 확인 중인 카드 하이라이트 id
+
+/* 하이라이트 하나의 정렬 키 [장 순서, sheet 순서, 문단 오프셋, 시작 오프셋] — '목차순' 비교용. */
+function hlSortKey(h){
+  const ci = CHAPTERS.findIndex(c => c.id === h.chapter);
+  const c = CHAPTERS[ci];
+  const si = c ? c.sheets.findIndex(s => s.no === h.sheet) : -1;
+  const a = (h.anchors && h.anchors[0]) || { block:0, start:0 };
+  return [ci < 0 ? 999 : ci, si < 0 ? 999 : si, a.block || 0, a.start || 0];
+}
+
+/* CHAPTERS 상 전역 지면 순번(장/쪽 id 기준). 책갈피 목차순 정렬용(tocGlobalIndex 는 장 인덱스). */
+function locGlobalIndex(chapterId, sheetNo){
+  const ci = CHAPTERS.findIndex(c => c.id === chapterId);
+  if(ci < 0) return 1e9;
+  return tocGlobalIndex(ci, sheetNo);
+}
+
+/* 색 필터·정렬을 적용한 하이라이트 목록. 필터 비면 전체, 정렬 기본은 '추가순'(createdAt 내림차순). */
+function noteFilteredSortedHls(){
+  const filter = (store.note && store.note.colorFilter) || [];
+  let list = store.highlights.slice();
+  if(filter.length) list = list.filter(h => filter.includes(HL_COLORS.indexOf(h.color)));
+  const sort = (store.note && store.note.sort) || "added";
+  if(sort === "toc"){
+    list.sort((a, b) => {
+      const ka = hlSortKey(a), kb = hlSortKey(b);
+      return (ka[0]-kb[0]) || (ka[1]-kb[1]) || (ka[2]-kb[2]) || (ka[3]-kb[3]);
+    });
+  } else {
+    list.sort((a, b) => a.createdAt < b.createdAt ? 1 : a.createdAt > b.createdAt ? -1 : 0);
+  }
+  return list;
+}
+
+/* 그 쪽(장/쪽)의 첫 문장 약 40자 — 책갈피 미리보기용. 텍스트 없는 지면(표지·사진)은 빈 문자열. */
+function sheetFirstText(chapterId, sheetNo){
+  const c = CHAPTERS.find(x => x.id === chapterId);
+  const sh = c ? c.sheets.find(s => s.no === sheetNo) : null;
+  if(!sh) return "";
+  for(const b of sh.blocks){
+    let t = "";
+    if(b.t === "block" && b.paras && b.paras.length) t = b.paras[0];
+    else if(b.t === "verse") t = b.text;
+    else if(b.t === "head" || b.t === "split") t = b.ko;
+    else if(b.t === "letter") t = LETTER.a[0];
+    if(t){ return searchPlain(t).replace(/\s+/g, " ").trim().slice(0, 40); }
+  }
+  return "";
+}
+
+/* 카드 하나(하이라이트 1개). 메모는 인용문 아래 회색 박스로 시간순으로 쌓인다. */
+function noteCardHTML(h){
+  const memos = h.memos || [];
+  const boxes = memos.length
+    ? memos.map(m => `<div class="rnote-memo">
+        <div class="rnote-memo-t">${hlEsc(m.text)}</div>
+        <div class="rnote-memo-time">${hlEsc(memoFmt(m.editedAt || m.at))}${m.editedAt ? " · 수정됨" : ""}</div>
+      </div>`).join("")
+    : `<div class="rnote-nomemo">메모 없음 — 눌러서 남기기</div>`;
+  const meta = `${hlEsc(h.sheet === "COVER" ? "표지" : h.sheet + "p")} · ${hlEsc(memoFmt(h.createdAt))}`;
+  let extra = "";
+  if(noteConfirmDel === h.id){
+    const n = memos.length;
+    extra = `<div class="rnote-confirm">
+      <span class="rnote-confirm-t">메모 ${n}개가 함께 지워집니다</span>
+      <span class="rnote-confirm-acts">
+        <button type="button" class="rnote-cbtn danger" data-delyes="${hlEsc(h.id)}">지우기</button>
+        <button type="button" class="rnote-cbtn" data-delno="${hlEsc(h.id)}">취소</button>
+      </span>
+    </div>`;
+  } else if(noteMenuId === h.id){
+    extra = `<div class="rnote-menu">
+      <button type="button" class="rnote-mbtn" data-edit="${hlEsc(h.id)}">수정</button>
+      <button type="button" class="rnote-mbtn danger" data-del="${hlEsc(h.id)}">삭제</button>
+    </div>`;
+  }
+  return `<div class="rnote-card">
+    <span class="rnote-card-bar" style="--c:${hlVar(h.color)}"></span>
+    <div class="rnote-card-in">
+      <button type="button" class="rnote-card-body" data-open="${hlEsc(h.id)}">
+        <span class="rnote-quote">“${hlEsc(h.text || "")}</span>
+        ${boxes}
+      </button>
+      <div class="rnote-card-foot">
+        <span class="rnote-meta">${meta}</span>
+        <span class="rnote-acts">
+          <button type="button" class="rnote-act" data-goto="${hlEsc(h.id)}" aria-label="본문으로 이동" title="본문으로 이동">↗</button>
+          <button type="button" class="rnote-act" data-more="${hlEsc(h.id)}" aria-label="수정·삭제" title="수정·삭제" aria-expanded="${noteMenuId === h.id}">⋮</button>
+        </span>
+      </div>
+      ${extra}
+    </div>
+  </div>`;
+}
+
+/* 목차 좌표 — 장별 항목이 어느 지면으로 가는지 */
+function noteHighlightHTML(){
+  const filter = (store.note && store.note.colorFilter) || [];
+  const sort = (store.note && store.note.sort) || "added";
+  const chips = `<button type="button" class="rnote-chip${filter.length === 0 ? " on" : ""}" data-cf="all">전체</button>` +
+    HL_COLORS.map((c, i) =>
+      `<button type="button" class="rnote-dot${filter.includes(i) ? " on" : ""}" data-cf="${i}" style="--c:var(--hl${i})" aria-label="색 ${i + 1} 필터" aria-pressed="${filter.includes(i)}"></button>`
+    ).join("");
+  const list = noteFilteredSortedHls();
+  const total = store.highlights.length;
+  const cards = list.length
+    ? list.map(noteCardHTML).join("")
+    : `<div class="rnote-empty">${total ? "이 색의 하이라이트가 없어요" : "아직 하이라이트가 없어요"}</div>`;
+  return `<div class="rnote-filter">${chips}</div>
+    <div class="rnote-bar">
+      <span class="rnote-count">전체 ${total}</span>
+      <label class="rnote-sortwrap">정렬
+        <select class="rnote-sort" id="rnoteSort" aria-label="정렬 순서">
+          <option value="added"${sort === "added" ? " selected" : ""}>추가순</option>
+          <option value="toc"${sort === "toc" ? " selected" : ""}>목차순</option>
+        </select>
+      </label>
+    </div>
+    <div class="rnote-cards">${cards}</div>`;
+}
+
+/* 북마크 탭 본문 — 책갈피를 목차순으로. 쪽번호 + 첫 문장 + 저장 시각 + 삭제. */
+function noteBookmarkHTML(){
+  const list = store.bookmarks.slice()
+    .sort((a, b) => locGlobalIndex(a.chapter, a.sheet) - locGlobalIndex(b.chapter, b.sheet));
+  if(!list.length) return `<div class="rnote-empty">아직 책갈피가 없어요</div>`;
+  return `<div class="rnote-bmlist">` + list.map(bm => {
+    const ci = CHAPTERS.findIndex(c => c.id === bm.chapter);
+    const first = sheetFirstText(bm.chapter, bm.sheet);
+    const pageLabel = bm.sheet === "COVER" ? "표지" : bm.sheet + "p";
+    return `<div class="rnote-bm">
+      <button type="button" class="rnote-bm-main" data-bm="${ci}|${hlEsc(bm.sheet)}">
+        <span class="rnote-bm-page en">${hlEsc(pageLabel)}</span>
+        <span class="rnote-bm-text">${hlEsc(first || "이 쪽으로 이동")}</span>
+        <span class="rnote-bm-time">${hlEsc(memoFmt(bm.at))}</span>
+      </button>
+      <button type="button" class="rnote-bm-del" data-bmdel="${hlEsc(bm.chapter)}|${hlEsc(bm.sheet)}" aria-label="책갈피 삭제">✕</button>
+    </div>`;
+  }).join("") + `</div>`;
+}
+
+/* 패널 전체(탭 + 본문). 마지막 본 탭으로 연다(store.note.tab). */
+function notePanelRender(){
+  const tab = (store.note && store.note.tab) || "highlight";
+  const body = tab === "bookmark" ? noteBookmarkHTML() : noteHighlightHTML();
+  return `<div class="rnote-tabs" role="tablist">
+      <button type="button" class="rnote-tab${tab === "highlight" ? " on" : ""}" data-tab="highlight" role="tab" aria-selected="${tab === "highlight"}">하이라이트</button>
+      <button type="button" class="rnote-tab${tab === "bookmark" ? " on" : ""}" data-tab="bookmark" role="tab" aria-selected="${tab === "bookmark"}">북마크</button>
+    </div>
+    <div class="rnote-body" id="rnoteBody">${body}</div>`;
+}
+
+/* 본문(#rnoteBody)만 현재 탭 상태로 다시 그린다(탭 헤더는 유지). */
+function drawNotePanel(){
+  const body = document.getElementById("rnoteBody");
+  if(!body) return;
+  const tab = (store.note && store.note.tab) || "highlight";
+  body.innerHTML = tab === "bookmark" ? noteBookmarkHTML() : noteHighlightHTML();
+  wireNoteBody(body);
+}
+
+/* ↗ — 모달 없이 그 하이라이트가 있는 쪽으로 이동하고 그 하이라이트로 스크롤. 패널은 닫는다. */
+function gotoHighlight(id){
+  const h = store.highlights.find(x => x.id === id);
+  if(!h) return;
+  const ci = CHAPTERS.findIndex(c => c.id === h.chapter);
+  if(ci < 0) return;
+  closePanel();
+  gotoLocation(ci, h.sheet);
+  // 지면·하이라이트가 다시 그려진 뒤 그 span 으로 스크롤 + 잠깐 반짝
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    const span = document.querySelector(`#sheets span.hl[data-hid~="${CSS.escape(id)}"]`);
+    if(span){
+      span.scrollIntoView({ block:"center", behavior:"smooth" });
+      span.classList.add("hl-flash");
+      setTimeout(() => span.classList.remove("hl-flash"), 1500);
+    }
+  }));
+}
+
+/* 패널 본문의 이벤트를 바인딩한다(색 필터·정렬·카드·⋮·삭제확인·책갈피). */
+function wireNoteBody(body){
+  if(!body) return;
+  // 색 필터: '전체'면 비우고, 색 원은 복수 선택 토글
+  body.querySelectorAll("[data-cf]").forEach(b => b.addEventListener("click", () => {
+    if(!store.note.colorFilter) store.note.colorFilter = [];
+    const v = b.dataset.cf;
+    if(v === "all"){ store.note.colorFilter = []; }
+    else {
+      const i = Number(v), arr = store.note.colorFilter, at = arr.indexOf(i);
+      if(at < 0) arr.push(i); else arr.splice(at, 1);
+    }
+    saveStore(); noteMenuId = null; noteConfirmDel = null; drawNotePanel();
+  }));
+  // 정렬
+  const sel = body.querySelector("#rnoteSort");
+  if(sel) sel.addEventListener("change", () => { store.note.sort = sel.value; saveStore(); drawNotePanel(); });
+  // 카드 본문 → 메모 모달(step4 openMemo 재사용)
+  body.querySelectorAll("[data-open]").forEach(b => b.addEventListener("click", () => openMemo(b.dataset.open)));
+  // ↗ 본문 이동
+  body.querySelectorAll("[data-goto]").forEach(b => b.addEventListener("click", e => { e.stopPropagation(); gotoHighlight(b.dataset.goto); }));
+  // ⋮ 메뉴 토글
+  body.querySelectorAll("[data-more]").forEach(b => b.addEventListener("click", e => {
+    e.stopPropagation();
+    const id = b.dataset.more;
+    noteMenuId = noteMenuId === id ? null : id;
+    noteConfirmDel = null;
+    drawNotePanel();
+  }));
+  // 수정 = 메모 모달
+  body.querySelectorAll("[data-edit]").forEach(b => b.addEventListener("click", e => {
+    e.stopPropagation(); noteMenuId = null; openMemo(b.dataset.edit);
+  }));
+  // 삭제 요청 — 지워질 메모가 있으면 화면 안 확인, 없으면 바로 삭제
+  body.querySelectorAll("[data-del]").forEach(b => b.addEventListener("click", e => {
+    e.stopPropagation();
+    const id = b.dataset.del;
+    const h = store.highlights.find(x => x.id === id);
+    if(h && h.memos && h.memos.length){ noteConfirmDel = id; noteMenuId = null; drawNotePanel(); }
+    else { removeHighlight(id); noteMenuId = null; }
+  }));
+  // 삭제 확인
+  body.querySelectorAll("[data-delyes]").forEach(b => b.addEventListener("click", e => {
+    e.stopPropagation(); noteConfirmDel = null; removeHighlight(b.dataset.delyes);
+  }));
+  body.querySelectorAll("[data-delno]").forEach(b => b.addEventListener("click", e => {
+    e.stopPropagation(); noteConfirmDel = null; drawNotePanel();
+  }));
+  // 책갈피 이동 / 삭제
+  body.querySelectorAll("[data-bm]").forEach(b => b.addEventListener("click", () => {
+    const [c, s] = b.dataset.bm.split("|");
+    closePanel(); gotoLocation(Number(c), s);
+  }));
+  body.querySelectorAll("[data-bmdel]").forEach(b => b.addEventListener("click", e => {
+    e.stopPropagation();
+    const [c, s] = b.dataset.bmdel.split("|");
+    store.bookmarks = store.bookmarks.filter(x => !(x.chapter === c && x.sheet === s));
+    saveStore(); drawNotePanel();
+  }));
+}
+
+/* 패널이 열린 뒤 후처리 — 탭 전환 바인딩 + 첫 본문 바인딩. */
+function notePanelOnOpen(root){
+  root.querySelectorAll(".rnote-tab").forEach(b => b.addEventListener("click", () => {
+    const t = b.dataset.tab;
+    store.note.tab = t; saveStore();
+    root.querySelectorAll(".rnote-tab").forEach(x => {
+      const on = x.dataset.tab === t;
+      x.classList.toggle("on", on);
+      x.setAttribute("aria-selected", String(on));
+    });
+    noteMenuId = null; noteConfirmDel = null;
+    drawNotePanel();
+  }));
+  wireNoteBody(root.querySelector("#rnoteBody"));
+}
+
+/* renderHighlights 뒤에 독서노트 패널도 갱신되도록 감싼다(step2·4·5 원본은 안 건드린다).
+   메모/하이라이트가 add/remove/edit 될 때 열려 있는 노트 목록이 즉시 최신으로 다시 그려진다. */
+function initNotePanel(){
+  const _renderHighlights = renderHighlights;
+  renderHighlights = function(){
+    const r = _renderHighlights.apply(this, arguments);
+    if(panelKind === "note") drawNotePanel();
+    return r;
+  };
+}
+/* ═══════════════════ /독서노트 패널 ═══════════════════ */
+
+/* ═══════════════════ 보기설정 패널 (step 8 · panel-view) ═══════════════════
+   지면 표시(배경·투명도·글꼴·글자크기·줄간격·좌우/상하 여백·마우스 숨기기)를 조절한다. 값은
+   즉시 반영되고 store.view 슬롯에 저장된다(saveStore 경유·새 최상위 키 없음). step5 셸
+   (openPanel/closePanel/registerPanel·#rpanel)은 안 건드리고 view 등록 한 줄만 채웠다.
+
+   색 체계: 저장된 하이라이트 color 는 늘 HL_COLORS(밝은 세트) 기준 논리색이다. 표시할 때만
+   hlVar(color)=var(--hlN) 로 공급하고, 어두운 배경이면 applyView 가 body --hl0..4 를
+   HL_COLORS_DARK 로 재정의한다. 저장값은 절대 덮어쓰지 않으므로 밝은 배경으로 되돌리면 원색으로
+   복구된다. 독서노트 색 원·카드 색 바도 같은 hlVar 경로를 쓴다. */
+
+/* 하이라이트 색 → 논리 CSS 변수. 저장색은 안 건드리고 표시만 var(--hlN)로 공급한다. */
+function hlVar(color){
+  const i = HL_COLORS.indexOf(color);
+  return i >= 0 ? `var(--hl${i})` : color;
+}
+
+/* 글꼴 3종 — 새 웹폰트를 싣지 않는다(폰트 규칙·폰트 CDN 없음).
+   책 원본 = 지면 기존 서체(inherit), 명조/고딕 = 시스템 스택. */
+const VIEW_FONTS = {
+  book: "inherit",
+  serif: '"Nanum Myeongjo","Apple Myungjo",Batang,"Times New Roman",serif',
+  sans: '"Pretendard","Apple SD Gothic Neo",-apple-system,"Noto Sans KR",system-ui,sans-serif'
+};
+/* 배경 알약 6종 — 스와치 색은 지면 --paper 재정의(CSS body[data-rbg])와 짝을 맞춘 미리보기 색. */
+const VIEW_BGS = [
+  { id:"white",  label:"흰",        sw:"#ffffff" },
+  { id:"cream",  label:"크림",      sw:"#f7f1e3" },
+  { id:"mint",   label:"연두",      sw:"#e5f0e6" },
+  { id:"forest", label:"짙은 초록", sw:"#1e3327" },
+  { id:"gray",   label:"회색",      sw:"#2a2b2f" },
+  { id:"black",  label:"검정",      sw:"#141414" }
+];
+/* 슬라이더 5종 — [store 키, 라벨, 최소, 최대]. 전부 − 버튼·트랙·+ 버튼 + 라벨 옆 숫자. */
+const VIEW_SLIDERS = [
+  { key:"opacity", label:"투명도",   min:0,  max:100 },
+  { key:"size",    label:"글자 크기", min:-4, max:8 },
+  { key:"leading", label:"줄 간격",   min:-3, max:3 },
+  { key:"marginX", label:"좌우 여백", min:-3, max:3 },
+  { key:"marginY", label:"상하 여백", min:-3, max:3 }
+];
+
+function isDarkBg(bg){ return bg === "forest" || bg === "gray" || bg === "black"; }
+
+/* applyView() — store.view 를 지면에 즉시 반영한다. 배경 테마·하이라이트 논리색·타이포·여백·투명도.
+   요소마다 인라인 스타일을 뿌리지 않고 body 속성 / body·.room 의 CSS 변수만 바꾼다. */
+function applyView(){
+  document.body.setAttribute("data-rbg", store.view.bg);
+  const set = isDarkBg(store.view.bg) ? HL_COLORS_DARK : HL_COLORS;
+  for(let i = 0; i < set.length; i++) document.body.style.setProperty(`--hl${i}`, set[i]);
+  const room = $(".room");
+  if(room){
+    room.style.setProperty("--rop",   String(store.view.opacity / 100));
+    room.style.setProperty("--rsize", String(store.view.size));
+    room.style.setProperty("--rlead", String(store.view.leading));
+    room.style.setProperty("--rmx",   String(store.view.marginX));
+    room.style.setProperty("--rmy",   String(store.view.marginY));
+    room.style.setProperty("--rff",   VIEW_FONTS[store.view.font] || VIEW_FONTS.book);
+  }
+}
+
+/* 슬라이더 라벨 옆 숫자 표기: 투명도는 그대로, ±범위는 부호를 붙인다. */
+function viewShownVal(key, val){
+  return key === "opacity" ? String(val) : (val > 0 ? "+" + val : String(val));
+}
+function viewSliderHTML(s){
+  const val = store.view[s.key];
+  return `<div class="rview-sec">
+    <div class="rview-lab">${s.label}<span class="rview-val" data-vval="${s.key}">${viewShownVal(s.key, val)}</span></div>
+    <div class="rview-slider">
+      <button type="button" class="rview-step" data-vdec="${s.key}" aria-label="${s.label} 줄이기">−</button>
+      <input type="range" class="rview-range" data-vrange="${s.key}" min="${s.min}" max="${s.max}" step="1" value="${val}" aria-label="${s.label}">
+      <button type="button" class="rview-step" data-vinc="${s.key}" aria-label="${s.label} 늘리기">+</button>
+    </div>
+  </div>`;
+}
+
+function viewPanelRender(){
+  const v = store.view;
+  const bgs = VIEW_BGS.map(b =>
+    `<button type="button" class="rview-bg" data-bg="${b.id}" style="background:${b.sw}" aria-pressed="${v.bg === b.id}" aria-label="${b.label} 배경" title="${b.label}"></button>`
+  ).join("");
+  const fonts = [["book","책 원본"],["serif","명조"],["sans","고딕"]]
+    .map(([id,lab]) => `<option value="${id}"${v.font === id ? " selected" : ""}>${lab}</option>`).join("");
+  const slider = key => viewSliderHTML(VIEW_SLIDERS.find(s => s.key === key));
+  return `
+    <div class="rview-sec">
+      <div class="rview-lab">배경색</div>
+      <div class="rview-bgs">${bgs}</div>
+    </div>
+    ${slider("opacity")}
+    <div class="rview-sec">
+      <div class="rview-lab">글꼴</div>
+      <select class="rview-select" data-vfont aria-label="글꼴">${fonts}</select>
+    </div>
+    ${slider("size")}
+    ${slider("leading")}
+    ${slider("marginX")}
+    ${slider("marginY")}
+    <div class="rview-sec">
+      <div class="rview-toggle">
+        <span class="rview-lab" style="margin:0">마우스 숨기기</span>
+        <button type="button" class="rview-switch" data-vhide aria-pressed="${v.hideMouse}" aria-label="마우스 숨기기"></button>
+      </div>
+      <p class="rview-hint">일정시간 마우스를 움직이지 않을때 상단 타이틀(전체화면), 커서, 독서 진행률을 자동으로 숨깁니다.</p>
+    </div>`;
+}
+
+function viewPanelOnOpen(bodyEl){
+  // 배경 알약 — 즉시 반영 + 저장. 저장 하이라이트 색은 안 건드리고 applyView 가 표시만 바꾼다.
+  bodyEl.querySelectorAll("[data-bg]").forEach(btn => {
+    btn.addEventListener("click", ()=>{
+      store.view.bg = btn.dataset.bg;
+      saveStore(); applyView();
+      bodyEl.querySelectorAll("[data-bg]").forEach(b =>
+        b.setAttribute("aria-pressed", String(b.dataset.bg === store.view.bg)));
+    });
+  });
+  // 슬라이더 — 트랙·− ·+ 모두 clampSet 으로 모인다.
+  const clampSet = (key, next) => {
+    const s = VIEW_SLIDERS.find(x => x.key === key);
+    next = Math.max(s.min, Math.min(s.max, next));
+    store.view[key] = next;
+    saveStore(); applyView();
+    const range = bodyEl.querySelector(`[data-vrange="${key}"]`);
+    if(range) range.value = next;
+    const lab = bodyEl.querySelector(`[data-vval="${key}"]`);
+    if(lab) lab.textContent = viewShownVal(key, next);
+  };
+  bodyEl.querySelectorAll("[data-vrange]").forEach(range =>
+    range.addEventListener("input", ()=> clampSet(range.dataset.vrange, +range.value)));
+  bodyEl.querySelectorAll("[data-vdec]").forEach(btn =>
+    btn.addEventListener("click", ()=> clampSet(btn.dataset.vdec, store.view[btn.dataset.vdec] - 1)));
+  bodyEl.querySelectorAll("[data-vinc]").forEach(btn =>
+    btn.addEventListener("click", ()=> clampSet(btn.dataset.vinc, store.view[btn.dataset.vinc] + 1)));
+  // 글꼴 드롭다운
+  const sel = bodyEl.querySelector("[data-vfont]");
+  if(sel) sel.addEventListener("change", ()=>{ store.view.font = sel.value; saveStore(); applyView(); });
+  // 마우스 숨기기 토글
+  const tog = bodyEl.querySelector("[data-vhide]");
+  if(tog) tog.addEventListener("click", ()=>{
+    store.view.hideMouse = !store.view.hideMouse;
+    tog.setAttribute("aria-pressed", String(store.view.hideMouse));
+    saveStore();
+    if(store.view.hideMouse) scheduleIdle(); else clearIdle(true);
+  });
+}
+
+/* ── 마우스 숨기기(idle) ──
+   토글이 켜져 있고 3초 동안 마우스가 안 움직이면 body.reader-idle 로 커서·상단바·진행률을 숨긴다.
+   패널이나 모달(메모·팝오버)이 열려 있으면 숨기지 않는다. 마우스가 움직이면 즉시 복귀. */
+let idleTimer = null;
+function idleBlocked(){
+  if(panelKind) return true;                                  // 우측 패널 열림
+  const memo = $("#memoWrap"), pop = $("#hlpop");
+  if(memo && !memo.hidden) return true;                       // 메모 모달 열림
+  if(pop && !pop.hidden) return true;                         // 선택 팝오버 열림
+  return false;
+}
+function clearIdle(stopTimer){
+  document.body.classList.remove("reader-idle");
+  if(stopTimer && idleTimer){ clearTimeout(idleTimer); idleTimer = null; }
+}
+function scheduleIdle(){
+  if(idleTimer){ clearTimeout(idleTimer); idleTimer = null; }
+  if(!store.view.hideMouse) return;
+  idleTimer = setTimeout(()=>{ if(!idleBlocked()) document.body.classList.add("reader-idle"); }, 3000);
+}
+function initViewPanel(){
+  applyView();                                                // 저장된 보기 설정 즉시 반영(재방문 복원)
+  const wake = ()=>{ clearIdle(false); scheduleIdle(); };
+  document.addEventListener("mousemove", wake, { passive:true });
+  document.addEventListener("mousedown", wake, { passive:true });
+  document.addEventListener("keydown",   wake, { passive:true });
+  scheduleIdle();
+}
+/* ═══════════════════ /보기설정 패널 ═══════════════════ */
+
+/* ─────────────── 챕터 레일 ─────────────── */
+function renderRail(){
+  $("#chaprail").innerHTML = CHAPTERS.map((c,i)=>`
+    <button class="chip" data-i="${i}" aria-current="${i===curChap}">
+      <span class="no en">${c.no}</span>${c.tag} ${c.title}
+    </button>`).join("");
+  $$("#chaprail .chip").forEach(b => b.onclick = ()=>{
+    curChap = +b.dataset.i; renderRail(); renderSheets(); if(SOCIAL) renderChat();
+    window.scrollTo({top:0, behavior:"smooth"});
+    curSheetNo = null; updateProgress();   // 새 챕터 기준으로 진행률·lastRead 갱신(step5)
+  });
+}
+
+/* ─────────────── 지면(A4 낱장) ─────────────── */
+function blockHTML(b){
+  switch(b.t){
+    case "cover": return `<img class="cover-img" src="${IMG+b.src}" alt="">`;
+    case "photo": return `<figure class="photo ${b.bleed?"bleed":""} ${b.fill?"fill":""}"><img src="${IMG+b.src}" alt=""></figure>`;
+    case "duo":   return `<div class="duo">${b.srcs.map(s=>`<img src="${IMG+s}" alt="">`).join("")}</div>`;
+    case "head":  return `<div class="mhead"><div class="h en">${b.en}</div><div class="rule"></div><div class="ko">${b.ko}</div></div>`;
+    case "split": return `<div class="split">
+        <div><div class="mhead"><div class="h en">${b.en}</div><div class="rule"></div><div class="ko">${b.ko}</div></div></div>
+        <div class="simg"><img src="${IMG+b.src}" alt=""></div>
+      </div>`;
+    case "verse": return `<div class="verse">${b.text}</div>`;
+    case "title": return `<div class="title-sheet"><div class="t1 en">${b.t1}</div><div class="t2 en">${b.t2}</div></div>`;
+    case "toc":   return `<div class="toc">${TOC.map(g=>`
+        <div class="g"><div class="gno en">${g.no}</div><div class="gt">${g.t}</div>
+        ${g.items.map(i=>`<div class="gi">${i}</div>`).join("")}</div>`).join("")}</div>`;
+    case "letter":return `<div class="letter">
+        <div>${LETTER.a.map((p,i)=> i===0 ? `<p class="hello">${p}</p>` : `<p>${p}</p>`).join("")}</div>
+        <div>${LETTER.b.map(p=>`<p>${p}</p>`).join("")}<div class="sign">생각구독 12월 호</div></div>
+      </div>`;
+    case "block": return `<div class="block">
+        <div class="mlabel en">${b.label}</div>
+        <div class="mbody">${b.paras.map(p=>`<p>${p}</p>`).join("")}</div>
+      </div>`;
+    default: return "";
+  }
+}
+
+function sheetHTML(s, c, first){
+  if(s.flush) return `
+    <section class="sheet flush" data-sheet="${s.no}">
+      <span class="sheetno en">${s.no}</span>
+      ${s.blocks.map(blockHTML).join("")}
+    </section>`;
+  return `
+    <section class="sheet" data-sheet="${s.no}">
+      <span class="sheetno en">${s.no}</span>
+      <div class="runhead"><span>샘플 · 리더기 미리보기</span><span class="r en">HOW TO READ</span></div>
+      <div class="sbody">${s.blocks.map(blockHTML).join("")}</div>
+      <div class="runfoot"><span>YOON SOJUNG'S THOUGHT BOOK</span><span class="pno en">${s.no}</span></div>
+    </section>`;
+}
+
+function renderSheets(){
+  const c = CHAPTERS[curChap];
+  $("#sheets").innerHTML = `
+    <div class="voice" id="voiceCard" style="background:var(--paper);border:1px solid var(--panel-line)">
+      <button class="play" id="voicePlay">▶</button>
+      <div class="vmeta">
+        <div class="vlabel">${c.voice.label}<small>${c.voice.dur}</small></div>
+        <div class="wave">${"<i></i>".repeat(30)}</div>
+      </div>
+      <audio id="voiceAudio" src="${encodeURI(VIDEO_SRC)}" preload="none"></audio>
+    </div>
+    ${c.video ? `
+      <div class="vidwrap">
+        <span class="vidtag en">VIDEO + PAGE</span>
+        <video src="${encodeURI(VIDEO_SRC)}" controls playsinline preload="metadata"></video>
+      </div>
+      <div class="vidnote">${c.videoNote}</div>` : ``}
+    ${c.sheets.map((s,i)=>sheetHTML(s,c,i===0)).join("")}
+  `;
+  wireVoice();
+  renderHighlights();   // 저장된 하이라이트를 지면에 다시 입힌다(새로고침 복원)
+}
+
+function wireVoice(){
+  const card = $("#voiceCard"), btn = $("#voicePlay"), au = $("#voiceAudio");
+  btn.onclick = ()=>{
+    if(au.paused){ au.play().then(()=>{card.classList.add("playing"); btn.textContent="❚❚";})
+      .catch(()=>toast("음성 파일을 찾지 못했습니다 (목업)")); }
+    else { au.pause(); card.classList.remove("playing"); btn.textContent="▶"; }
+  };
+  au.onended = ()=>{ card.classList.remove("playing"); btn.textContent="▶"; };
+}
+
+/* ═══════════════════ 소셜 동작 (SOCIAL) ═══════════════════
+   좌측 '가장 많이 공감한 문장' 레일 · 우측 LIVE 실시간 채팅(입력·전송·좋아요) ·
+   밑줄 도구(seltool) · 문장 매칭 모달 · 대화 초대 모달.
+   아래 함수들은 정의만 top-level 이고 DOM 은 건드리지 않는다. 실제 주입·바인딩은
+   initSocial()이 SOCIAL=true 일 때만 실행한다 → false 면 레일·모달·seltool 이 DOM 에 아예 없다. */
+let lastRange = null, lastUnderline = "", liveIdx = 0;
+
+/* ── 채팅 ── */
+function miniPerson(color, pose){
+  const head=`<ellipse cx="8" cy="6" rx="3.8" ry="4.1" fill="${color}"/>`;
+  let body = pose===1
+    ? `<path d="M3.6 25 C3 13 13 13 12.4 25 Z" fill="${color}"/><path d="M5 15 L1.6 8" stroke="${color}" stroke-width="2.2" stroke-linecap="round"/><path d="M11 15 L14.4 7" stroke="${color}" stroke-width="2.2" stroke-linecap="round"/>`
+    : `<path d="M3.6 25 C3 14 13 14 12.4 25 Z" fill="${color}"/>`;
+  return `<svg viewBox="0 0 16 27">${body}${head}</svg>`;
+}
+function msgHTML(m, pinned){
+  const col = m.color || "#8a857c";
+  return `
+    <div class="msg ${pinned?"pin":""} ${m.liked?"liked":""}" data-id="${m.id}">
+      ${pinned ? `<div class="pintag">가장 많이 공감한 말</div>` : ``}
+      ${m.quote ? `<div class="q">${m.quote}</div>` : ``}
+      <div class="line"><span class="mini" style="--pc:${col}">${miniPerson(col, pinned?1:0)}</span><span class="who" style="color:${col}">${m.who}</span>${m.text}</div>
+      <div class="foot">
+        <button class="like" data-id="${m.id}" aria-pressed="${m.liked}">♥ <span>${m.likes}</span></button>
+        <span class="when">${m.when}</span>
+      </div>
+    </div>`;
+}
+
+function primeLive(){
+  const arr = state[curChap].chat;
+  if(!arr.some(m=>m.live)){
+    [0,1].forEach(k=>{
+      const m = LIVE_POOL[k];
+      arr.push({...m, id:"seedlive-"+curChap+"-"+k, likes:0, liked:false, when:"조금 전", quote:"", live:true, seed:false});
+    });
+  }
+}
+
+function renderChat(){
+  primeLive();
+  const chat = state[curChap].chat;
+  /* 왼쪽 — 이 장에서 가장 많이 공감한 문장만 (공감 순) */
+  const liked = chat.filter(m=>m.seed).sort((a,b)=>b.likes-a.likes);
+  $("#streamQ").innerHTML = liked.map((m,i)=>msgHTML(m, i===0)).join("");
+  $("#cntQ").textContent = liked.length;
+  /* 오른쪽 — 라이브만 (시간 순, 새 말이 아래) */
+  const live = chat.filter(m=>m.live);
+  $("#streamLive").innerHTML = live.map(m=>msgHTML(m,false)).join("");
+  $$(".like").forEach(b => b.onclick = e => {
+    e.stopPropagation();
+    const m = state[curChap].chat.find(x=>x.id===b.dataset.id);
+    m.liked = !m.liked; m.likes += m.liked ? 1 : -1;
+    const topSeed = state[curChap].chat.filter(x=>x.seed).sort((a,b)=>b.likes-a.likes)[0];
+    renderChat();
+    if(m.liked && m.seed && topSeed && topSeed.id===m.id) toast("가장 많이 공감한 문장이 맨 위로 올라갑니다");
+  });
+  $("#streamLive").scrollTop = $("#streamLive").scrollHeight;
+}
+
+function pushLive(m){
+  state[curChap].chat.push({...m, id:"live-"+Date.now()+Math.random(), likes:0, liked:false, when:"방금", quote:m.quote||"", live:true, seed:false});
+  renderChat();
+}
+
+function sendChat(){
+  const t = $("#chatBox").value.trim();
+  if(t.length < 1) return;
+  pushLive({who:"소정", color:"#4b5a6b", text:t, quote:lastUnderline||""});
+  $("#chatBox").value = "";
+  $("#chatBox").placeholder = "이 장에 대해 말해 보세요";
+  lastUnderline = "";
+}
+
+function showMatch(sent){
+  $("#matchSent").textContent = sent;
+  const pick = FRIENDS.slice(0, 2 + (sent.length % 2));
+  $("#matchFriends").innerHTML = pick.map(f=>`
+    <div class="friend">
+      <span class="ava" style="background:${f.color}">${f.init}</span>
+      <div class="fmeta"><div class="fname">${f.name}</div><div class="fwhy">${f.why}</div></div>
+    </div>`).join("");
+  $("#match").classList.add("show");
+}
+
+/* SOCIAL=true 일 때만 호출된다 — 소셜 DOM 을 새로 만들고 이벤트를 건다.
+   여기서 만든 것 외에는 소셜 흔적이 DOM 에 없다(display:none 아님). */
+function initSocial(){
+  const room = $(".room");
+  room.classList.add("social");
+  /* 좌: 공감 문장 레일 */
+  room.insertAdjacentHTML("afterbegin", `
+      <aside class="rail" id="railQuoteWrap">
+        <div class="rhead"><span>가장 많이 공감한 문장</span><span class="cnt" id="cntQ">0</span></div>
+        <div class="stream" id="streamQ"></div>
+        <div class="railnote">이 장에서 공감을 가장 많이 받은 말이 위로 모입니다.</div>
+      </aside>`);
+  /* 우: LIVE 채팅 레일 */
+  $("#sheets").insertAdjacentHTML("afterend", `
+      <aside class="rail" id="railLiveWrap">
+        <div class="rhead"><span class="livedot"></span><span>LIVE</span>
+          <span class="cnt" id="liveCnt">지금 8명이 읽는 중</span></div>
+        <div class="stream" id="streamLive"></div>
+        <div class="chatin">
+          <textarea id="chatBox" placeholder="이 장에 대해 말해 보세요"></textarea>
+          <button class="send" id="sendBtn" title="보내기">↑</button>
+        </div>
+      </aside>`);
+  /* 밑줄 도구 · 문장 매칭 모달 */
+  document.body.insertAdjacentHTML("beforeend", `
+    <div id="seltool"><button id="ulBtn">✎ 밑줄 긋기</button><button id="cmtBtn">💬 이 문장에 말 걸기</button></div>
+    <div class="match" id="match">
+      <button class="mclose" id="matchClose">✕</button>
+      <div class="mhead2">같은 곳에 밑줄 친 친구</div>
+      <div class="msent" id="matchSent"></div>
+      <div id="matchFriends"></div>
+      <button class="btn wide" id="inviteBtn" style="margin-top:11px">대화에 초대하기</button>
+    </div>`);
+
+  /* 집중 모드(채팅 접기) — 소셜 레일 전용 컨트롤 */
+  $("#focusBtn").onclick = ()=>{
+    const on = document.body.classList.toggle("focus");
+    $("#focusBtn").setAttribute("aria-pressed", on);
+    toast(on ? "채팅을 접었습니다. 지면만 보입니다" : "채팅을 다시 폈습니다");
+  };
+
+  /* 채팅 입력 */
+  $("#sendBtn").onclick = sendChat;
+  $("#chatBox").addEventListener("keydown", e=>{
+    if(e.key==="Enter" && !e.shiftKey){ e.preventDefault(); sendChat(); }
+  });
+
+  /* 실시간처럼 말이 계속 들어온다 (싸이월드처럼 살아 있는 느낌) */
+  setInterval(()=>{
+    if($("#pane-read").hidden || document.hidden) return;
+    pushLive(LIVE_POOL[liveIdx++ % LIVE_POOL.length]);
+    const n = 6 + (liveIdx % 7);
+    $("#liveCnt").textContent = `지금 ${n}명이 읽는 중`;
+  }, 4500);
+
+  /* 문장 선택 → 밑줄 도구 */
+  const seltool = $("#seltool");
+  document.addEventListener("mouseup", e => {
+    if(seltool.contains(e.target)) return;
+    const sel = window.getSelection();
+    const wrap = $("#sheets");
+    if(!sel || sel.isCollapsed || !wrap || !wrap.contains(sel.anchorNode)){ seltool.style.display="none"; return; }
+    const text = sel.toString().trim();
+    if(text.length < 2){ seltool.style.display="none"; return; }
+    lastRange = sel.getRangeAt(0).cloneRange();
+    lastUnderline = text;
+    const r = lastRange.getBoundingClientRect();
+    seltool.style.display = "flex";
+    seltool.style.left = Math.max(10, r.left + window.scrollX + r.width/2 - seltool.offsetWidth/2) + "px";
+    seltool.style.top  = (r.top + window.scrollY - seltool.offsetHeight - 10) + "px";
+  });
+  $("#ulBtn").onclick = ()=>{
+    if(!lastRange) return;
+    const m = document.createElement("mark"); m.className = "ul";
+    // 겹칠 때 중첩되던 레거시 DOM 수술 API 대신
+    // 복제→삭제→삽입으로 같은 결과를 낸다(동작 동일, 금지 API 미사용).
+    m.appendChild(lastRange.cloneContents());
+    lastRange.deleteContents();
+    lastRange.insertNode(m);
+    window.getSelection().removeAllRanges();
+    seltool.style.display = "none";
+    showMatch(lastUnderline);
+  };
+  $("#cmtBtn").onclick = ()=>{
+    seltool.style.display = "none";
+    window.getSelection().removeAllRanges();
+    if(document.body.classList.contains("focus")) $("#focusBtn").click();
+    $("#chatBox").focus();
+    $("#chatBox").placeholder = `“${lastUnderline.slice(0,20)}…”에 말 걸기`;
+    toast("밑줄 친 문장에 붙일 말을 적어 주세요");
+  };
+
+  /* 문장 매칭 → 대화 초대 모달 */
+  $("#matchClose").onclick = ()=>$("#match").classList.remove("show");
+  $("#inviteBtn").onclick = ()=>{
+    $("#modalTitle").textContent = "대화 초대를 보냈습니다";
+    $("#modalSub").textContent = "초대가 수락되면, 두 사람이 함께 밑줄 친 문장으로 대화가 열립니다.";
+    $("#sharedList").innerHTML = `
+      <div class="s"><b>함께 밑줄 친 문장 1</b>${lastUnderline}</div>
+      <div class="s"><b>함께 밑줄 친 문장 2</b>메모는 덮어쓰지 않고 쌓입니다.</div>
+      <div class="s"><b>함께 밑줄 친 문장 3</b>적어 넣은 책만이 실제로 읽은 책이 됩니다.</div>`;
+    $("#modalOk").textContent = "수락된 화면 보기";
+    $("#modalOk").hidden = false;
+    $("#modal").classList.add("show");
+  };
+  $("#modalOk").onclick = ()=>{
+    $("#modalTitle").textContent = "초대가 수락되었습니다";
+    $("#modalSub").textContent = "7월 20일 저녁 8시, 두 사람이 좋아한 문장 3개로 대화를 시작합니다.";
+    $("#sharedList").innerHTML = `
+      <div class="s"><b>첫 번째 이야깃거리</b>${lastUnderline}<br>
+        <span style="color:var(--panel-muted);font-size:.74rem">두 사람 모두 이 문장에 밑줄을 그었습니다.</span></div>
+      <div class="s"><b>상대가 남긴 말</b>저도 이 문장에서 한참 멈췄습니다.</div>`;
+    $("#modalOk").hidden = true;
+    $("#match").classList.remove("show");
+  };
+
+  renderChat();
+}
+/* ═══════════════════ /소셜 동작 ═══════════════════ */
+
+/* #modal 은 소셜 초대와 '글 엮어 보기'가 공유한다 — 닫기는 SOCIAL 과 무관하게 항상 살아 있어야 한다. */
+$("#modalClose").onclick = ()=>$("#modal").classList.remove("show");
+
+/* ─────────────── 라이팅 ─────────────── */
+const RECO = {
+  "issue": "SAMPLE",
+  "title": "이 서재를 여는 법",
+  "cover": "plate1.svg",
+  "why": "밑줄은 그었는데 다시 안 보게 된다고 쓰셨습니다. 이 장은 적어 둔 것을 어떻게 다시 만나는지에 대한 이야기입니다.",
+  "q": "이번 달 내가 다시 펼쳐 본 메모는 무엇이었나요? 왜 그것이었나요?",
+  "quote": "메모는 덮어쓰지 않고 쌓입니다. 같은 문장에 오늘 한 줄, 두 달 뒤에 또 한 줄.",
+  "from": "SAMPLE · 02 메모 「AGAIN」",
+  "chapter": "memo"
+};
+const PIECES = [
+  {
+    "d": "7월 16일",
+    "t": "밑줄만 긋고 지나간 문장이 대부분이었다. 한 줄이라도 적어 두자."
+  },
+  {
+    "d": "7월 15일",
+    "t": "다시 읽으니 처음과 다르게 읽히는 문장이 세 개 있었다."
+  },
+  {
+    "d": "7월 12일",
+    "t": "색을 나눠 쓰기 시작했다. 노랑은 동의, 파랑은 의문."
+  },
+  {
+    "d": "7월 9일",
+    "t": "접어 둔 쪽만 다시 넘겨 봤다. 그것만으로 충분했다."
+  },
+  {
+    "d": "7월 8일",
+    "t": "메모를 적는 자리를 정해 두니 덜 미루게 된다."
+  },
+  {
+    "d": "7월 4일",
+    "t": "기다린다는 건 가만히 있는 게 아니라 채우는 일이었다."
+  },
+  {
+    "d": "7월 3일",
+    "t": "끝에서부터 거꾸로 적어 봤다. 처음 해보는 방식이었다."
+  },
+  {
+    "d": "7월 2일",
+    "t": "읽은 것과 남은 것은 다르다는 걸 이번 달에 배웠다."
+  }
+];
+
+function renderPieces(){
+  $("#pieces").innerHTML = PIECES.map(p=>`
+    <div class="piece"><div class="pd">${p.d}</div><div class="pt">${p.t}</div></div>`).join("");
+}
+
+$("#weaveBtn").onclick = ()=>{
+  $("#modalTitle").textContent = "이번 달 글 초안이 만들어졌습니다";
+  $("#modalSub").textContent = "이번 달 조각들에서 한 주제를 뽑아 목차를 잡았습니다.";
+  $("#sharedList").innerHTML = `
+    <div class="s"><b>이번 달의 주제</b>다시 읽는 일</div>
+    <div class="s"><b>1. 밑줄만 남은 달</b>긋기만 하고 지나간 문장들.</div>
+    <div class="s"><b>2. 다시 펼친 쪽</b>접어 둔 곳부터 다시 읽었습니다.</div>
+    <div class="s"><b>3. 쌓이기 시작한 메모</b>같은 문장에 두 번째 줄을 적었습니다.</div>`;
+  $("#modalOk").hidden = true;
+  $("#modal").classList.add("show");
+};
+
+/* ─────────────── 이번 달 글쓰기 흐름 (인터뷰형) ─────────────── */
+const STEP_NAMES = [
+  ["돌아보기","이번 달을 돌아봅니다"],["곱씹기","조금 더 곱씹어 봅니다"],
+  ["고르기","마음에 걸리는 말을 고릅니다"],["만나기","윤소정의 생각을 만납니다"],
+  ["바꾸기","내 단어로 바꿔 봅니다"],["내 방식","내 방식으로 바꿔 봅니다"],
+  ["쓰기","한 편으로 써 봅니다"]
+];
+/* 8단계 '나누기'(비슷한 생각과 나눔)는 소셜이다. SOCIAL 에서 파생 — 켜면 휠도 자동 8칸.
+   휠 칸 수는 STEP_NAMES.length 에서 나오므로 어디에도 7/8 을 하드코딩하지 않는다. */
+if(SOCIAL) STEP_NAMES.push(["나누기","비슷한 생각과 나눕니다"]);
+/* 목차 좌표 — 장별 항목이 어느 지면으로 가는지 */
+const KEYWORDS = [
+  {
+    "k": "읽은 것과 남은 것",
+    "s": "읽는 일은 눈으로 하는 것 같지만 실은 손으로 하는 일에 가깝습니다.",
+    "more": "밑줄 하나, 메모 한 줄이 읽은 것을 남은 것으로 바꿉니다.",
+    "from": "02 · 지면 10"
+  },
+  {
+    "k": "쌓이는 메모",
+    "s": "메모는 덮어쓰지 않고 쌓입니다.",
+    "more": "같은 문장에 오늘 한 줄, 두 달 뒤에 또 한 줄. 그 간격이 실은 내가 지나온 시간입니다.",
+    "from": "02 · AGAIN"
+  },
+  {
+    "k": "색으로 나눈 갈래",
+    "s": "색은 나중에 독서노트에서 필터로 쓰입니다.",
+    "more": "나름의 규칙을 만들어 두면 다시 찾을 때 빨라집니다.",
+    "from": "01 · HOW TO"
+  },
+  {
+    "k": "접어 둔 쪽",
+    "s": "책갈피는 지금 보고 있는 쪽을 접어 두는 일입니다.",
+    "more": "접어 둔 쪽은 독서노트의 북마크 칸에 모입니다.",
+    "from": "02 · NOTEBOOK"
+  },
+  {
+    "k": "지면만 남기기",
+    "s": "마우스를 잠시 두면 위아래 표시가 스스로 물러납니다.",
+    "more": "지면만 남습니다. 읽는 데 필요한 것은 그것뿐입니다.",
+    "from": "02 · SETTINGS"
+  }
+];
+/* 단어 정의 검색(윤소정 생각) */
+const WORD_SEARCH = {
+  "읽기": "읽는 일은 눈으로 하는 것 같지만 실은 손으로 하는 일에 가깝습니다.",
+  "밑줄": "적어 넣은 책만이 실제로 읽은 책이 됩니다.",
+  "메모": "메모는 덮어쓰지 않고 쌓입니다. 그 간격이 지나온 시간입니다.",
+  "기다림": "기다린다는 건 가만히 있는 게 아니라 채우는 일이었습니다.",
+  "정리": "다시 찾을 수 있게 두는 것까지가 읽는 일입니다."
+};
+const clip = (s,n=15)=>{ s=(s||"").trim(); return s.length>n ? s.slice(0,n)+"…" : s; };
+function searchWord(w){
+  w=(w||"").trim();
+  for(const key in WORD_SEARCH){ if(w && (w.includes(key)||key.includes(w))) return WORD_SEARCH[key]; }
+  return "이 단어는 76호에 직접 나오지 않았어요. 그래서 더 흥미로운 정의가 될 수 있습니다. 당신이 먼저 뜻을 정해 보세요.";
+}
+
+function buildBeats(){
+  return [
+    {id:"p1",step:1,type:"ask",q:"이번 달, 나에게 가장 의미 있던 사람은?",ph:"이름이나 관계로 적어 주세요",min:2},
+    {id:"pr1",step:1,type:"ask",q:a=>`‘${clip(a.p1)}’ — 그 사람이 왜 당신에게 의미 있었나요?`,ph:"떠오르는 이유를 한두 문장으로",min:6},
+    {id:"p2",step:1,type:"ask",q:"이번 달, 나에게 가장 의미 있던 학습이나 문장은?",ph:"책·강의·대화에서 만난 한 문장도 좋습니다",min:2},
+    {id:"pr2",step:1,type:"ask",q:a=>`‘${clip(a.p2)}’ — 그게 왜 당신에게 남았나요?`,ph:"이유를 한두 문장으로",min:6},
+    {id:"p3",step:1,type:"ask",q:"이번 달, 나에게 가장 의미 있던 일은?",ph:"잘된 일도, 틀어진 일도 괜찮습니다",min:2},
+    {id:"pr3",step:1,type:"ask",q:a=>`‘${clip(a.p3)}’ — 그 일이 왜 의미 있었나요?`,ph:"이유를 한두 문장으로",min:6},
+    {id:"r1",step:2,type:"ask",q:a=>`‘${clip(a.p1)}’ — 그 사람의 어떤 순간이 자꾸 떠오르세요?`,ph:"그 순간의 장면을 떠올려 보세요",min:6},
+    {id:"r2",step:2,type:"ask",q:a=>`‘${clip(a.p2)}’ — 그 문장이 왜 하필 지금의 당신에게 걸렸을까요?`,ph:"지금의 나와 연결해서",min:6},
+    {id:"r3",step:2,type:"ask",q:a=>`‘${clip(a.p3)}’ — 그 일에서 가장 나다웠던 순간은 언제였나요?`,ph:"작은 순간이어도 좋습니다",min:6},
+    {id:"r4",step:2,type:"ask",q:"이렇게 과정을 돌아보니, 당신이 새롭게 생각하게 된 건 무엇인가요?",ph:"직접 써도 좋고, 아래 버튼을 누르면 지금까지 쓴 걸로 초안을 만들어 드려요",min:6,assist:true},
+    {id:"k",step:3,type:"pick",q:"윤소정의 이번 달 생각에서, 당신 마음에 걸리는 키워드를 골라 보세요.",help:"바로 답하지 않고, 먼저 다섯 개 중에서 골라 봅니다."},
+    {id:"c",step:4,type:"concept"},
+    {id:"c2",step:4,type:"ask",q:"왜 그 키워드에 공감했나요? (혹은 왜 다르게 느꼈나요?)",ph:"당신의 이번 달과 연결해서",min:8},
+    {id:"w",step:5,type:"ask",q:"이번 달, 당신이 새로 정의해 보고 싶은 단어 하나는?",ph:"예: 운, 성장, 정리, 파는 것 …",min:1,short:true},
+    {id:"ws",step:5,type:"search"},
+    {id:"w2",step:5,type:"ask",q:"윤소정의 문장을, 당신의 생활 문장으로 바꿔 써 보세요.",ph:"내 상황·내 언어로",min:8},
+    {id:"x",step:6,type:"ask",q:"그 정의를 당신 방식으로 바꾸면 어떻게 될까요?",ph:"“나에게 ○○이란 ~이다”처럼 적어 보세요",min:8},
+    {id:"wr",step:7,type:"write",q:"앞의 조각들을 모아, 5~10분 동안 당신의 생각을 한 편으로 써 보세요.",min:40},
+    {id:"ti",step:7,type:"suggest"},
+    /* 마무리 비트 — SOCIAL 이면 8단계 '나누기'(친구+저장), 아니면 7단계 끝(서재 저장+77호). step 은 SOCIAL 에서 파생. */
+    {id:"sh",step:SOCIAL?8:7,type:"connect"}
+  ];
+}
+
+let flow = {beats:[], cur:0, ans:{}, pick:null, title:null, hist:[], timer:null};
+
+function qText(b){ return typeof b.q==="function" ? b.q(flow.ans) : b.q; }
+
+function startFlow(){
+  if(flow.timer){ clearInterval(flow.timer); flow.timer=null; }
+  flow = {beats:buildBeats(), cur:0, ans:{}, pick:null, title:null, hist:[], timer:null};
+  renderFlow();
+}
+
+function renderWheel(){
+  const cs = flow.cur < flow.beats.length ? flow.beats[flow.cur].step : 9;
+  $("#wheel").innerHTML = STEP_NAMES.map((n,i)=>{
+    const step=i+1, cls = step<cs ? "done" : (step===cs ? "active" : "");
+    return `<div class="spoke ${cls}"><div class="dot"></div><div class="nm">${step}. ${n[0]}</div></div>`;
+  }).join("");
+}
+
+function renderHistory(){
+  $("#flowHistory").innerHTML = flow.hist.map(h=>`
+    <div class="hbeat">
+      <div class="ht">${h.step}. ${STEP_NAMES[h.step-1][0]}</div>
+      ${h.q ? `<div class="hq">${h.q}</div>` : ``}
+      <div class="ha">${h.a}</div>
+    </div>`).join("");
+}
+
+function pushHist(step, q, a){ flow.hist.push({step, q, a}); }
+
+function advance(){
+  if(flow.timer){ clearInterval(flow.timer); flow.timer=null; }
+  flow.cur++;
+  renderFlow();
+  const host = $("#flowActive");
+  if(host) host.scrollIntoView({behavior:"smooth", block:"center"});
+}
+
+const stepEyebrow = s => STEP_NAMES[s-1][1];
+function eyebrow(b){ return stepEyebrow(b.step); }
+
+function renderFlow(){
+  renderWheel();
+  renderHistory();
+  const host = $("#flowActive");
+  const b = flow.beats[flow.cur];
+  if(!b){ renderDone(); return; }
+  if(b.type==="ask")      host.innerHTML = askHTML(b);
+  else if(b.type==="pick")host.innerHTML = pickHTML(b);
+  else if(b.type==="concept") host.innerHTML = conceptHTML();
+  else if(b.type==="search")  host.innerHTML = searchHTML();
+  else if(b.type==="write")   host.innerHTML = writeHTML(b);
+  else if(b.type==="suggest") host.innerHTML = suggestHTML();
+  else if(b.type==="connect") host.innerHTML = connectHTML(b);
+  wireActive(b);
+}
+
+const backBtn = ()=> flow.cur>0 ? `<button class="btn ghost" id="beatBack" style="color:var(--ink-soft);border-color:var(--rule)">← 이전</button>` : ``;
+
+function askHTML(b){
+  return `
+    <div class="beat-eyebrow">${eyebrow(b)}</div>
+    <div class="beat-q">${qText(b)}</div>
+    ${b.help ? `<div class="beat-help">${b.help}</div>` : ``}
+    <textarea class="field" id="beatIn" rows="${b.short?2:4}" placeholder="${b.ph||""}"></textarea>
+    ${b.assist ? `<button class="btn ghost" id="assistBtn" style="margin-top:10px;padding:7px 13px;font-size:.8rem;color:#a1852f;border-color:rgba(242,197,61,.55)">지금까지 쓴 걸로 정리해 볼게요</button>` : ``}
+    <div class="beat-actions"><span class="sp"></span>${backBtn()}
+      <button class="btn dark" id="beatNext" disabled>다음</button></div>`;
+}
+function draftSynthesis(){
+  const a=flow.ans, bits=[];
+  if(a.p1) bits.push(`‘${clip(a.p1,12)}’${a.pr1?` — ${clip(a.pr1,26)}`:""}`);
+  if(a.p2) bits.push(`‘${clip(a.p2,16)}’${a.pr2?` — ${clip(a.pr2,26)}`:""}`);
+  if(a.p3) bits.push(`${clip(a.p3,16)}${a.pr3?` — ${clip(a.pr3,26)}`:""}`);
+  const lead = bits.length ? bits.join(", ") : "이번 달의 장면들";
+  return `이번 달을 돌아보면 ${lead}이(가) 오래 남았습니다. 이것들을 나란히 놓고 보니, 제가 새롭게 생각하게 된 건 ___ 인 것 같습니다. (여기를 고쳐서 완성하세요.)`;
+}
+function pickHTML(b){
+  return `
+    <div class="beat-eyebrow">${eyebrow(b)}</div>
+    <div class="beat-q">${b.q}</div>
+    ${b.help ? `<div class="beat-help">${b.help}</div>` : ``}
+    <div class="picks" id="picks">
+      ${KEYWORDS.map((k,i)=>`<button class="pickopt" data-i="${i}"><div class="pk">${k.k}</div><div class="pf en">76호 · ${k.from}</div></button>`).join("")}
+      <button class="pickopt" data-i="-1"><div class="pk">다른 것이 걸렸어요</div><div class="pf">직접 적기</div></button>
+    </div>
+    <textarea class="field" id="beatIn" rows="2" placeholder="다른 키워드가 있다면 적어 주세요" style="display:none;margin-top:8px"></textarea>
+    <div class="beat-actions"><span class="sp"></span>${backBtn()}
+      <button class="btn dark" id="beatNext" disabled>다음</button></div>`;
+}
+function conceptHTML(){
+  const p = flow.pick || {k:"", s:"", from:""};
+  return `
+    <div class="beat-eyebrow">${stepEyebrow(4)}</div>
+    <div class="beat-q">윤소정은 이 생각을 이렇게 씁니다.</div>
+    <div class="concept">
+      <div class="cq">${p.k}</div>
+      <div class="cs" id="conceptText">${p.s || "당신이 직접 고른 키워드예요. 다음 달, 이 키워드로 이어서 써 봐도 좋습니다."}</div>
+      ${p.more ? `<button class="btn ghost" id="moreBtn" style="margin-top:11px;padding:6px 12px;font-size:.78rem;color:var(--ink-soft);border-color:var(--rule)">이어서 더 보기</button>` : ``}
+      ${p.from ? `<div class="cf en">76호 · ${p.from}</div>` : ``}
+    </div>
+    <div class="beat-actions"><span class="sp"></span>${backBtn()}
+      <button class="btn dark" id="beatNext">읽었어요</button></div>`;
+}
+function searchHTML(){
+  const word = (flow.ans.w||"").trim();
+  const hit = searchWord(word);
+  return `
+    <div class="beat-eyebrow">${stepEyebrow(5)}</div>
+    <div class="beat-q">‘${word}’ — 윤소정은 이 단어를 이렇게 씁니다.</div>
+    <div class="concept">
+      <div class="cq">윤소정 생각 검색</div>
+      <div class="cs">${hit}</div>
+      <div class="cf">76호에서 찾음</div>
+    </div>
+    <div class="beat-actions"><span class="sp"></span>${backBtn()}
+      <button class="btn dark" id="beatNext">이 문장을 바꿔 볼게요</button></div>`;
+}
+function writeHTML(b){
+  return `
+    <div class="beat-eyebrow">${eyebrow(b)}</div>
+    <div class="beat-q">${qText(b)}</div>
+    <div class="beat-help">앞에서 쓴 조각들이 재료입니다. 후킹 한 줄로 시작해도 좋아요.</div>
+    <div class="timerbar">
+      <span class="tt" id="tt">10:00</span>
+      <div class="track"><i id="ttrack"></i></div>
+      <button class="btn ghost" id="timerBtn" style="padding:5px 12px;font-size:.74rem;color:var(--ink-soft);border-color:var(--rule)">타이머 시작</button>
+    </div>
+    <textarea class="field" id="beatIn" rows="10" placeholder="여기에 한 편으로 써 보세요"></textarea>
+    <div class="beat-actions"><span class="sp"></span>${backBtn()}
+      <button class="btn dark" id="beatNext" disabled>다 썼어요</button></div>`;
+}
+function suggestHTML(){
+  const seed = flow.ans.r4 || "", word = (flow.ans.w||"생각").trim();
+  const cands = [
+    `${word}, 다시 읽으니 달랐다`,
+    `나에게 ${word}이란`,
+    clip(seed, 20) || `이번 달, 내가 새로 정의한 ${word}`
+  ];
+  return `
+    <div class="beat-eyebrow">${stepEyebrow(7)}</div>
+    <div class="beat-q">오늘 글의 이름을 정해 볼까요?</div>
+    <div class="beat-help">후킹·제목·핵심 카피 후보예요. 하나 고르거나 직접 적어 주세요.</div>
+    <div class="picks" id="picks">
+      ${cands.map((c,i)=>`<button class="pickopt" data-i="${i}"><div class="pk">${c}</div></button>`).join("")}
+      <button class="pickopt" data-i="-1"><div class="pk">직접 지을래요</div></button>
+    </div>
+    <textarea class="field" id="beatIn" rows="2" placeholder="제목을 직접 적어 주세요" style="display:none;margin-top:8px"></textarea>
+    <div class="beat-actions"><span class="sp"></span>${backBtn()}
+      <button class="btn dark" id="beatNext" disabled>이 이름으로</button></div>`;
+}
+/* 마무리 화면. '이 글을 서재에 저장하기' + '다음 읽을거리 · 77호' 는 항상(7단계 끝) 살린다.
+   친구 추천 목록 + '초대' 버튼만 SOCIAL 에서 파생(§7). eyebrow 는 비트 step 에서 파생. */
+function connectHTML(b){
+  const friends = SOCIAL ? FRIENDS.slice(0,2).map(f=>`
+      <div class="friend-l">
+        <span class="ava" style="background:${f.color}">${f.init}</span>
+        <div class="fmeta"><div class="fname">${f.name}</div><div class="fwhy">이번 달 같은 키워드로 글을 썼어요</div></div>
+        <button class="btn ghost" data-invite style="padding:6px 12px;font-size:.76rem;color:var(--ink-soft);border-color:var(--rule)">초대</button>
+      </div>`).join("") : "";
+  return `
+    <div class="beat-eyebrow">${stepEyebrow(b.step)}</div>
+    <div class="beat-q">${SOCIAL ? "비슷한 생각을 쓴 사람과 이어 드릴게요." : "이번 달 글을 마무리할게요."}</div>
+    ${friends}
+    <div class="rec" style="margin-top:12px">
+      <div class="cover"><img src="${IMG}p01_0.jpg" alt=""></div>
+      <div class="rmeta">
+        <div class="rtitle">다음 읽을거리 · 77호</div>
+        <div class="rwhy">이번 달 당신의 키워드와 이어지는 다음 호를 준비했어요.</div>
+      </div>
+    </div>
+    <div class="beat-actions"><span class="sp"></span>
+      <button class="btn dark wide" id="saveWheel">이 글을 서재에 저장하기</button></div>`;
+}
+function renderDone(){
+  const title = flow.title || flow.ans.r4 || "이번 달의 생각";
+  $("#flowActive").innerHTML = `
+    <div class="done-hero">
+      <div class="big">한번 더 생각해봤어요</div>
+      <div class="sub">「${clip(title,24)}」 조각이 서재에 담겼습니다.<br>30개가 모이면 한 편으로 엮어 드려요.</div>
+      <div class="beat-actions" style="justify-content:center;margin-top:16px">
+        <button class="btn dark" id="restartFlow">새로 시작하기</button>
+      </div>
+    </div>`;
+  $("#restartFlow").onclick = startFlow;
+}
+
+function wireActive(b){
+  const back = $("#beatBack");
+  if(back) back.onclick = ()=>{ flow.hist.pop(); flow.cur=Math.max(0,flow.cur-1); renderFlow(); };
+
+  if(b.type==="ask" || b.type==="write"){
+    const inp = $("#beatIn"), next = $("#beatNext");
+    inp.value = flow.ans[b.id] || "";
+    const chk = ()=>{ next.disabled = inp.value.trim().length < b.min; };
+    inp.addEventListener("input", chk); chk(); inp.focus();
+    if(b.assist){
+      const ab=$("#assistBtn");
+      if(ab) ab.onclick = ()=>{ inp.value = draftSynthesis(); chk(); inp.focus(); };
+    }
+    next.onclick = ()=>{
+      const v = inp.value.trim();
+      flow.ans[b.id] = v;
+      pushHist(b.step, qText(b), v);
+      advance();
+    };
+  }
+  if(b.type==="write"){
+    const btn=$("#timerBtn"); let left=600;
+    const paint=()=>{ const m=String(Math.floor(left/60)).padStart(2,"0"), s=String(left%60).padStart(2,"0");
+      $("#tt").textContent=`${m}:${s}`; $("#ttrack").style.width=((600-left)/600*100)+"%"; };
+    btn.onclick = ()=>{
+      if(flow.timer){ clearInterval(flow.timer); flow.timer=null; btn.textContent="타이머 시작"; return; }
+      btn.textContent="멈춤";
+      flow.timer = setInterval(()=>{ left--; paint(); if(left<=0){ clearInterval(flow.timer); flow.timer=null; btn.textContent="시간 종료"; } }, 1000);
+    };
+  }
+  if(b.type==="pick" || b.type==="suggest"){
+    const next=$("#beatNext"), extra=$("#beatIn");
+    let sel=null;
+    $$("#picks .pickopt").forEach(opt => opt.onclick = ()=>{
+      $$("#picks .pickopt").forEach(o=>o.setAttribute("aria-pressed","false"));
+      opt.setAttribute("aria-pressed","true");
+      sel = +opt.dataset.i;
+      if(sel===-1){ extra.style.display="block"; extra.focus(); next.disabled = extra.value.trim().length<1; }
+      else { extra.style.display="none"; next.disabled=false; }
+    });
+    if(extra) extra.addEventListener("input", ()=>{ if(sel===-1) next.disabled = extra.value.trim().length<1; });
+    next.onclick = ()=>{
+      if(b.type==="pick"){
+        flow.pick = sel===-1 ? {k:extra.value.trim(), s:null, from:""} : KEYWORDS[sel];
+        pushHist(3, "고른 키워드", flow.pick.k);
+      } else {
+        flow.title = sel===-1 ? extra.value.trim() : $$("#picks .pickopt")[sel].querySelector(".pk").textContent;
+        pushHist(7, "글의 이름", flow.title);
+      }
+      advance();
+    };
+  }
+  if(b.type==="concept"){
+    const mb=$("#moreBtn");
+    if(mb) mb.onclick = ()=>{
+      const p=flow.pick||{};
+      if(p.more) $("#conceptText").innerHTML += " " + p.more;
+      mb.style.display="none";
+    };
+    $("#beatNext").onclick = ()=>{
+      const p=flow.pick||{}; pushHist(4, "윤소정의 생각", p.s || p.k || "");
+      advance();
+    };
+  }
+  if(b.type==="search"){
+    $("#beatNext").onclick = ()=>{
+      pushHist(5, `‘${(flow.ans.w||"").trim()}’ 검색`, searchWord(flow.ans.w));
+      advance();
+    };
+  }
+  if(b.type==="connect"){
+    if(SOCIAL) $$("[data-invite]").forEach(bt => bt.onclick = ()=>toast("초대를 보냈습니다"));
+    $("#saveWheel").onclick = ()=>{
+      const t = flow.title || flow.ans.r4 || flow.ans.wr || "이번 달의 생각";
+      PIECES.unshift({d:"이번 달", t: clip(t,40)});
+      const n = Math.min(30, +$("#pieceN").textContent + 1);
+      $("#pieceN").textContent = n;
+      $("#ringArc").setAttribute("stroke-dashoffset", String(Math.round(201 * (1 - n/30))));
+      renderPieces();
+      pushHist(b.step, "서재에 저장", `「${clip(t,24)}」`);
+      toast("이 글을 서재에 저장했어요");
+      advance();
+    };
+  }
+}
+
+/* ─────────────── 시작 ─────────────── */
+renderShelf();
+renderRail();
+applyView();                    // 저장된 보기 설정(배경·하이라이트 논리색 등)을 첫 렌더 전에 반영(step 8)
+renderSheets();
+initSelectPopover();            // 지면 드래그 → 선택 팝오버(하이라이트) — SOCIAL 무관하게 항상
+initMemoModal();                // 메모 모달 딤 클릭·Esc 닫기 바인딩(step 4)
+initTopbarPanel();              // 리더 상단바·우측 공유 패널·진행률·전체 화면·책갈피(step 5)
+initNotePanel();                // 독서노트 패널 — 열려 있을 때 메모·하이라이트 변경 즉시 반영(step 7)
+initViewPanel();                // 보기설정 — 마우스 숨기기 idle 감시 + 보기 설정 재반영(step 8)
+if(SOCIAL) initSocial();        // 소셜 레일·모달·seltool 주입 + 채팅 렌더 (false 면 아예 안 만든다)
+else $("#focusBtn")?.remove();  // 소셜 없으면 '집중 모드'(채팅 접기) 버튼도 DOM 에서 뺀다
+renderPieces();
+startFlow();
 </script>
+<script>const __IMGMAP={"plate1.svg":"data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20800%20560%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23efe7d6%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23ddd0b6%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%22800%22%20height%3D%22560%22%20fill%3D%22url(%23g)%22%2F%3E%3Ctext%20x%3D%22400%22%20y%3D%22290%22%20text-anchor%3D%22middle%22%20font-family%3D%22serif%22%20font-size%3D%2226%22%20fill%3D%22rgba(40%2C34%2C26%2C.34)%22%20letter-spacing%3D%226%22%3ESAMPLE%3C%2Ftext%3E%3C%2Fsvg%3E","plate2.svg":"data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20800%20560%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23e6e9e2%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23cdd5c9%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%22800%22%20height%3D%22560%22%20fill%3D%22url(%23g)%22%2F%3E%3Ctext%20x%3D%22400%22%20y%3D%22290%22%20text-anchor%3D%22middle%22%20font-family%3D%22serif%22%20font-size%3D%2226%22%20fill%3D%22rgba(40%2C34%2C26%2C.34)%22%20letter-spacing%3D%226%22%3ESAMPLE%3C%2Ftext%3E%3C%2Fsvg%3E","plate3.svg":"data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20800%20560%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23eae4e6%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23d5cbd0%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%22800%22%20height%3D%22560%22%20fill%3D%22url(%23g)%22%2F%3E%3Ctext%20x%3D%22400%22%20y%3D%22290%22%20text-anchor%3D%22middle%22%20font-family%3D%22serif%22%20font-size%3D%2226%22%20fill%3D%22rgba(40%2C34%2C26%2C.34)%22%20letter-spacing%3D%226%22%3ESAMPLE%3C%2Ftext%3E%3C%2Fsvg%3E","plate4.svg":"data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20800%20560%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23e8e6de%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23d2ccbb%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%22800%22%20height%3D%22560%22%20fill%3D%22url(%23g)%22%2F%3E%3Ctext%20x%3D%22400%22%20y%3D%22290%22%20text-anchor%3D%22middle%22%20font-family%3D%22serif%22%20font-size%3D%2226%22%20fill%3D%22rgba(40%2C34%2C26%2C.34)%22%20letter-spacing%3D%226%22%3ESAMPLE%3C%2Ftext%3E%3C%2Fsvg%3E"};(function(){function fx(r){r.querySelectorAll('img').forEach(im=>{const f=(im.getAttribute('src')||'').split('/').pop();if(__IMGMAP[f])im.src=__IMGMAP[f];});}new MutationObserver(ms=>{ms.forEach(m=>{m.addedNodes.forEach(n=>{if(n.nodeType===1){if(n.tagName==='IMG'){const f=(n.getAttribute('src')||'').split('/').pop();if(__IMGMAP[f])n.src=__IMGMAP[f];}fx(n);}});});}).observe(document.documentElement,{childList:true,subtree:true});fx(document);addEventListener('DOMContentLoaded',()=>fx(document));})();</script>
+<div id="demo-note" role="note">
+  <span>샘플 원고입니다 — 발행된 글은 구독자의 서재에서 열립니다.</span>
+  <button type="button" onclick="this.parentNode.remove()" aria-label="닫기">✕</button>
+</div>
+<style>
+#demo-note{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:60;
+  display:flex;align-items:center;gap:12px;background:rgba(38,34,30,.93);color:#f4efe6;
+  font-family:-apple-system,"Apple SD Gothic Neo",sans-serif;font-size:12.5px;line-height:1.5;
+  padding:10px 14px;border-radius:999px;box-shadow:0 10px 30px -12px rgba(0,0,0,.5);max-width:92vw}
+#demo-note button{background:none;border:none;color:#b8b0a4;cursor:pointer;font-size:13px;padding:0 2px}
+#demo-note button:hover{color:#fff}
+@media print{#demo-note{display:none}}
+</style>
 </body>
 </html>
