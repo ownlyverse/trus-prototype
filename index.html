@@ -77,11 +77,16 @@ a{color:inherit;text-decoration:none}
   text-shadow:0 0 22px rgba(242,109,156,.35)}
 .world h2 b{color:var(--accent)}
 .world .lead{font-size:1rem; color:#D8CFE8; line-height:1.7; margin-bottom:32px; max-width:34ch}
-.world .minis{display:flex; gap:12px; flex-wrap:wrap; margin-bottom:38px}
-.mini{background:var(--paper); color:var(--ink); border:3px solid #17171C; border-radius:11px;
-  box-shadow:4px 4px 0 rgba(0,0,0,.4); padding:13px 15px 11px; text-align:center; min-width:96px}
-.mini .em{font-size:22px; display:block; margin-bottom:7px}
-.mini .nm{font-size:.76rem; font-weight:800}
+/* 구현된 타운 라이브 미니 프리뷰 (월드맵 축소 임베드) */
+.world .preview{position:relative; width:min(460px,100%); aspect-ratio:16/10; margin-bottom:38px;
+  border:3px solid #17171C; border-radius:12px; overflow:hidden; background:#171130;
+  box-shadow:5px 5px 0 rgba(0,0,0,.4), 0 0 26px rgba(242,109,156,.18)}
+.world .preview iframe{width:250%; height:250%; transform:scale(.4); transform-origin:0 0;
+  border:0; pointer-events:none}
+.world .pv-label{position:absolute; top:-13px; left:14px; background:var(--accent); color:#fff;
+  border:2px solid var(--accent-d); border-radius:5px; padding:4px 12px; font-size:.66rem;
+  font-family:'NeoDunggeunmo','Pretendard Variable',sans-serif; letter-spacing:0; box-shadow:0 3px 0 var(--accent-d); z-index:2}
+.world .pv-wrap{position:relative; padding-top:13px}
 .px-cta{display:inline-flex; align-items:center; gap:8px; font-size:.92rem; padding:13px 22px; border-radius:6px;
   background:var(--accent); color:#fff; border:2px solid var(--accent-d); box-shadow:0 4px 0 var(--accent-d);
   transition:transform .08s, box-shadow .08s}
@@ -172,12 +177,13 @@ a{color:inherit;text-decoration:none}
       <p class="kicker pxfont">TRUS WORLD</p>
       <h2 class="pxfont">완주하는 사람들의<br><b>트루스월드</b></h2>
       <p class="lead">강의를 끝까지 듣고, 밤의 광장에서 만나는 타운이에요.</p>
-      <div class="minis" aria-hidden="true">
-        <div class="mini"><span class="em">📺</span><span class="nm">강의실</span></div>
-        <div class="mini"><span class="em">🏠</span><span class="nm">마이스페이스</span></div>
-        <div class="mini"><span class="em">⛲</span><span class="nm">광장</span></div>
+      <div class="pv-wrap">
+        <div class="preview" aria-label="구현된 타운 미리보기">
+          <span class="pv-label">지금 구현된 타운 — 라이브</span>
+          <iframe src="worldmap-prototype.html" loading="lazy" tabindex="-1" title="타운 월드맵 미리보기"></iframe>
+        </div>
       </div>
-      <a class="px-cta pxfont" href="world/">트루스월드 입장하기 <span aria-hidden="true">→</span></a>
+      <a class="px-cta pxfont" href="world/">트루스월드 보러가기 <span aria-hidden="true">→</span></a>
     </div>
   </section>
 
