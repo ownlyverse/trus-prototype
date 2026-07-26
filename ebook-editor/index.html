@@ -259,6 +259,33 @@ input,textarea{font:inherit;color:inherit}
   border-radius:11px; padding:13px 22px; cursor:pointer}
 .empty-sheet button:hover{color:var(--blue-dd); border-color:var(--blue-d)}
 
+/* ── 서재(책 목록) 뷰 ── */
+body.shelf .bar, body.shelf .body{display:none}
+.shelfview{display:none; flex:1; overflow-y:auto; background:var(--canvas)}
+body.shelf .shelfview{display:block}
+.sv-bar{display:flex; align-items:center; gap:10px; padding:13px 18px; background:#fff; border-bottom:1px solid var(--line)}
+.sv-bar .svt{font-size:.98rem; font-weight:800; margin:0 auto}
+.sv-in{max-width:880px; margin:0 auto; padding:38px 22px 80px}
+.sv-h{font-size:1.5rem; font-weight:900; letter-spacing:-.02em}
+.sv-sub{font-size:.86rem; color:var(--sub); margin:6px 0 26px}
+.sv-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(190px, 1fr)); gap:16px}
+.bkcard{position:relative; background:#fff; border:1px solid var(--line); border-radius:16px; padding:16px;
+  text-align:left; display:flex; flex-direction:column; gap:10px; min-height:230px; transition:border-color .12s, transform .12s}
+.bkcard:hover{border-color:var(--blue-d); transform:translateY(-2px)}
+.bkcard .cov{width:100%; aspect-ratio:210/297; border-radius:9px; background:#F4F1EA; border:1px solid var(--line);
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; overflow:hidden}
+.bkcard .cov img{width:100%; height:100%; object-fit:cover}
+.bkcard .cov .cno{font-size:.66rem; font-weight:800; letter-spacing:.14em; color:var(--sub)}
+.bkcard .cov .ct{font-size:.9rem; font-weight:800; text-align:center; padding:0 12px; word-break:keep-all}
+.bkcard .bt2r{display:flex; align-items:center; gap:6px; flex-wrap:wrap}
+.bkcard .bkt{font-size:.88rem; font-weight:800; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.bkcard .st{font-size:.68rem; font-weight:800; padding:3px 8px; border-radius:6px; background:var(--blue-soft); color:var(--blue-dd)}
+.bkcard .st.pub{background:#E8F5E4; color:#2E6B3E}
+.bkcard .st.gray{background:#F0EEEA; color:var(--sub)}
+.bkcard.newbk .cov{border-style:dashed; background:transparent; color:var(--sub); font-size:.88rem; font-weight:700}
+.bkcard.newbk:hover .cov{color:var(--blue-dd)}
+.bkcard.past{opacity:.75}
+
 /* ── 글자 포맷 툴바 ── */
 .fmt{position:fixed; z-index:95; background:rgba(17,17,17,.94); border-radius:11px; padding:5px;
   display:none; gap:2px; align-items:center; box-shadow:0 10px 30px rgba(0,0,0,.25)}
@@ -340,10 +367,23 @@ input,textarea{font:inherit;color:inherit}
 }
 </style>
 </head>
-<body>
+<body class="shelf">
+
+<div class="shelfview" id="shelfView">
+  <div class="sv-bar">
+    <a class="back" href="../subscribe/">← 윤소정의 생각구독</a>
+    <span class="svt serif">생각구독 서재</span>
+    <span class="tag">관리자 모드</span>
+  </div>
+  <div class="sv-in">
+    <h1 class="sv-h serif">나의 서재</h1>
+    <p class="sv-sub">발행한 호와 작업 중인 책이 모이는 곳. 책을 열어 편집하거나 새 책을 시작한다.</p>
+    <div class="sv-grid" id="shelfGrid"></div>
+  </div>
+</div>
 
 <header class="bar">
-  <a class="back" href="../ebook-reader/" title="생각구독 서재로" aria-label="생각구독 서재로">←</a>
+  <button class="back" id="backShelf" title="서재로" aria-label="서재로">←</button>
   <button class="m-toc" onclick="document.querySelector('.side').classList.toggle('open')">☰ 챕터</button>
   <span class="issue-badge" id="issueBadge" hidden></span>
   <span class="bt serif" id="bookTitle"></span>
@@ -1436,10 +1476,73 @@ document.addEventListener('keydown', e => {
   }
 });
 
-/* ── 시작 ── */
-renderAll();
-if(_draft){ lastSaved = Date.now(); refreshStat(); toast('임시저장본을 불러왔습니다'); }
-else openBookModal('new'); /* 첫 방문 — 책 기본 정보부터 (샘플 값이 채워져 있음) */
+/* ── 서재(책 목록) 뷰 ── */
+const PAST_ISSUES = [
+  { no:'75', t:'멀리 가는 마음', c:'#E7E2D6' },
+  { no:'74', t:'질문의 온도', c:'#DFE5DC' },
+  { no:'73', t:'기록이 남는 자리', c:'#E5DDE0' }
+];
+function hasDraft(){
+  try{ return !!localStorage.getItem(K_DRAFT); }catch(e){ return false; }
+}
+function renderShelf(){
+  const pub = loadKey(K_PUB);
+  const statusChips = `
+    <span class="st">${hasDraft() ? '작업 중 · 임시저장' : '새 작업'}</span>
+    ${pub ? '<span class="st pub">발행됨</span>' : ''}`;
+  $('shelfGrid').innerHTML = `
+    <button class="bkcard" data-open="cur">
+      <span class="cov">${BOOK.cover
+        ? `<img src="${BOOK.cover}" alt="표지">`
+        : `<span class="cno">${issueLabel() || 'DRAFT'}</span><span class="ct">${escHtml(BOOK.title || '(제목 없음)')}</span>`}</span>
+      <span class="bt2r"><span class="bkt">${escHtml(BOOK.title || '(제목 없음)')}</span></span>
+      <span class="bt2r">${statusChips}</span>
+    </button>
+    ${PAST_ISSUES.map(b => `
+    <button class="bkcard past" data-open="past">
+      <span class="cov" style="background:${b.c}"><span class="cno">NO.${b.no}</span><span class="ct">${b.t}</span></span>
+      <span class="bt2r"><span class="bkt">${b.t}</span></span>
+      <span class="bt2r"><span class="st gray">발행 완료</span></span>
+    </button>`).join('')}
+    <button class="bkcard newbk" data-open="new">
+      <span class="cov">＋ 새 책 만들기</span>
+      <span class="bt2r"><span class="bkt">다음 호 시작</span></span>
+      <span class="bt2r"><span class="st gray">호수·제목부터</span></span>
+    </button>`;
+}
+function goShelf(){
+  document.body.classList.add('shelf');
+  clearSel(); closePalette(); closeAsk(); closeBookModal();
+  renderShelf();
+}
+function openBook(){
+  document.body.classList.remove('shelf');
+  renderAll();
+}
+$('backShelf').addEventListener('click', goShelf);
+$('shelfGrid').addEventListener('click', e => {
+  const card = e.target.closest('[data-open]');
+  if(!card) return;
+  const kind = card.dataset.open;
+  if(kind === 'cur') openBook();
+  else if(kind === 'past') toast('프로토타입에서는 현재 호만 열 수 있습니다');
+  else if(kind === 'new'){
+    const start = () => {
+      BOOK = { v:2, issue:'', title:'', subtitle:'', cover:null,
+        chapters:[{ id: uid(), tag:'', title:'1. 새 챕터', voice:null, sheets:[{ blocks:[{ t:'ctitle', text:'1. 새 챕터' }, { t:'p', html:'' }] }] }] };
+      cur = 0; SEL = null;
+      openBook();
+      openBookModal('new');
+    };
+    if(hasDraft())
+      ask(card, '지금 작업 중인 책(임시저장)을 지우고 새 책을 시작한다. 발행본은 유지된다.', '새 책 시작', true, start);
+    else start();
+  }
+});
+
+/* ── 시작 — 서재부터 ── */
+if(_draft){ lastSaved = Date.now(); refreshStat(); }
+renderShelf();
 </script>
 </body>
 </html>
