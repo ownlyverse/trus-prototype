@@ -288,7 +288,22 @@ body.shelf .shelfview{display:block}
 .bkcard .st.gray{background:#F0EEEA; color:var(--sub)}
 .bkcard.newbk .cov{border-style:dashed; background:transparent; color:var(--sub); font-size:.88rem; font-weight:700}
 .bkcard.newbk:hover .cov{color:var(--blue-dd)}
-.bkcard.past{opacity:.75}
+.bkcard.past{opacity:1}
+/* ── etimeline 톤: 검은 서재 ── */
+body.shelf{background:#0D0D0D}
+.shelfview{background:#0D0D0D; color:#EDEDED}
+.shelfview .sv-bar{background:#101010; border-bottom:1px solid #242424}
+.shelfview .sv-bar .svt{color:#fff}
+.shelfview .sv-h{color:#fff}
+.shelfview .sv-sub{color:#9A9A9A}
+.bkcard{background:#161616; border-color:#262626}
+.bkcard:hover{border-color:#4A4A4A}
+.bkcard .cov{background:#1E1E1E; border-color:#262626}
+.bkcard .cov .cno{color:#8A8A8A}
+.bkcard .cov .ct{color:#CFCFCF}
+.bkcard .bkt{color:#F2F2F2}
+.bkcard .st.gray{background:#242424; color:#9A9A9A}
+.bkcard.newbk .cov{color:#8A8A8A; border-color:#333}
 
 /* ── 생각 정리하기 탭 ── */
 .wbody{display:none; flex:1; min-height:0}
@@ -569,6 +584,8 @@ function mockBook(){
 const K_DRAFT = 'trus_ebook_draft';
 const K_PUB   = 'trus_ebook_published';
 const K_PREV  = 'trus_ebook_preview';
+const K_LIB   = 'trus_library_v1';   /* 호수별 발행본 — 리더기 서재와 동기화 */
+const K_DRAFTS= 'trus_ebook_drafts_v1'; /* 호수별 편집 초안 */
 
 const $ = id => document.getElementById(id);
 
@@ -1457,7 +1474,15 @@ $('pubBtn').addEventListener('click', e => {
     saveKey(K_DRAFT);
     if(savePub(K_PUB, '발행 실패 — 사진 용량을 줄여 다시 시도할 것')){
       lastSaved = Date.now(); refreshStat();
-      toast('발행 완료 — 리더기에서 확인 가능합니다');
+      const digits = String(BOOK.issue || '').replace(/\D/g, '');
+      if(digits){
+        try{
+          const lib = JSON.parse(localStorage.getItem(K_LIB)) || {};
+          lib[digits] = { issue:'NO.' + digits, title:BOOK.title || '', cover:BOOK.cover || null, book: toReaderBook() };
+          localStorage.setItem(K_LIB, JSON.stringify(lib));
+        }catch(err){ toast('서재 동기화 실패 — 저장 공간을 확인할 것'); }
+      }
+      toast('발행 완료 — 리더기 서재에 반영됩니다');
     }
   });
 });
@@ -1725,94 +1750,98 @@ document.addEventListener('keydown', e => {
 });
 
 /* ── 서재(책 목록) 뷰 ── */
-/* 실사이트(younsojung.co.kr/etimeline) 단행본 카탈로그 — 오래된 호 = NO.1 */
+/* 실사이트(younsojung.co.kr/etimeline) 단행본 카탈로그 — 76호="커리어 설계의 비밀" 앵커로 실호수 매핑(최신간=79호) */
 const CATALOG = [
-  {"no": 1, "t": "3천개의 일기", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/6cdada6802af9.jpg?w=400"},
-  {"no": 2, "t": "결국은 운", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/f6aca046bca13.jpg?w=400"},
-  {"no": 3, "t": "18년 명상의 비밀", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/eb45fa6e5d52a.jpg?w=400"},
-  {"no": 4, "t": "날것의 사랑", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/9d1baf41d96f7.jpg?w=400"},
-  {"no": 5, "t": "북유럽의 영감", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/fb0ed38bdee82.jpg?w=400"},
-  {"no": 6, "t": "현실적 자립", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/6e6fe76a22a8e.jpg?w=400"},
-  {"no": 7, "t": "강자의 공부", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/c7b88a2d6e126.jpg?w=400"},
-  {"no": 8, "t": "실패 이력서", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/658f43c752383.jpg?w=400"},
-  {"no": 9, "t": "안목", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/5e9482fb4405e.jpg?w=400"},
-  {"no": 10, "t": "공개할 수 없던 일기장", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/43a79f30bf358.jpg?w=400"},
-  {"no": 11, "t": "다시 시작하는 마음", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/b1b0829fb025b.jpg?w=400"},
-  {"no": 12, "t": "코로나 시대 공부법", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/20e09a837e239.jpg?w=400"},
-  {"no": 13, "t": "생존을 위한 독학력", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/b11a5ce8505ab.jpg?w=400"},
-  {"no": 14, "t": "마음의 그릇", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/1e45867a207cc.jpg?w=400"},
-  {"no": 15, "t": "인생의 Next Step", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/16763fa6991eb.jpg?w=400"},
-  {"no": 16, "t": "난세의 평정심", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/65a506ae01ed0.jpg?w=400"},
-  {"no": 17, "t": "언제 프로가 될까?", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/1c7bad3797008.jpg?w=400"},
-  {"no": 18, "t": "내 영혼과 대화하는 법", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/ebb1ff3d98abe.jpg?w=400"},
-  {"no": 19, "t": "함께 일하는 팀", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/d363cea79e4bd.jpg?w=400"},
-  {"no": 20, "t": "엄마의 삶을 시작하며", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/26fb68cfcba3d.jpg?w=400"},
-  {"no": 21, "t": "30대, 어떻게 살까?", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/2e853dddf0b7d.jpg?w=400"},
-  {"no": 22, "t": "지치면 나만 손해", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/31ef798c09ec9.jpg?w=400"},
-  {"no": 23, "t": "나만 알고 싶던 기도", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/fd0f62e6a3294.jpg?w=400"},
-  {"no": 24, "t": "열심히 말고 현명하게", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/a0d2775c74936.jpg?w=400"},
-  {"no": 25, "t": "인맥의 자유", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/f71d58c84bfaa.jpg?w=400"},
-  {"no": 26, "t": "미국에서 배운 것들", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/d5f6f1b959be9.jpg?w=400"},
-  {"no": 27, "t": "시스템", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/6c2cfd67ee8f3.jpg?w=400"},
-  {"no": 28, "t": "기적을 꿈꾸며", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/30e8fffcaf9e9.jpg?w=400"},
-  {"no": 29, "t": "용기도 새로울 수 있나요?", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/ba13d8ebc1080.jpg?w=400"},
-  {"no": 30, "t": "커뮤니티 시대가 온다.", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/454b02bb5f609.jpg?w=400"},
-  {"no": 31, "t": "속도는 천천히, 방향은 정확히", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/6397cdc782871.jpg?w=400"},
-  {"no": 32, "t": "눈치보고 싶지 않아.", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/c47ed9984b5db.jpg?w=400"},
-  {"no": 33, "t": "관계는 지치고 사람은 그립다", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/dc4278a706ecf.jpg?w=400"},
-  {"no": 34, "t": "20대의 속도는 빠르게, 30대의 숙성은 느리게", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/9304dd8517706.jpg?w=400"},
-  {"no": 35, "t": "일의 수명, 넌 2년짜리야 20년짜리야", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/03a7cb0e36595.jpg?w=400"},
-  {"no": 36, "t": "다정한 원칙", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/12d97b3e69705.jpg?w=400"},
-  {"no": 37, "t": "화목한 가정, 화목한 일터", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/6825263b6872e.jpg?w=400"},
-  {"no": 38, "t": "착해지기 전에, 강해져야 했다.", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/9cafd52797fdd.jpg?w=400"},
-  {"no": 39, "t": "욕심이 왜 나빠요?", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/1fd2424e187c2.jpg?w=400"},
-  {"no": 40, "t": "나는 축적지향형 인간입니다", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/a62a823cfa775.jpg?w=400"},
-  {"no": 41, "t": "진화에는 방향이 없다", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/cf353768e907a.jpg?w=400"},
-  {"no": 42, "t": "계속 나아가고 있었군요", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/9e767676beef1.jpg?w=400"},
-  {"no": 43, "t": "친구의 시대", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/606da19631545.jpg?w=400"},
-  {"no": 44, "t": "시간의 세례", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/08fc87e34c238.jpg?w=400"},
-  {"no": 45, "t": "자만은 버리고, 자존은 세우며", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/402590e644d26.jpg?w=400"},
-  {"no": 46, "t": "어른의 레이어", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/f807bf6616334.jpg?w=400"},
-  {"no": 47, "t": "가치를 생각하며", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/4817b415dd0f6.jpg?w=400"},
-  {"no": 48, "t": "그릇을 키우는 시간", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/5438a514b69d1.jpg?w=400"},
-  {"no": 49, "t": "심플한 생각", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/23e37b0cd5092.jpg?w=400"},
-  {"no": 50, "t": "바운더리", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/b4fde1179b5f5.jpg?w=400"},
-  {"no": 51, "t": "좋아할수록 연결되는", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/7e0581114ab77.jpg?w=400"},
-  {"no": 52, "t": "새로운 부, 커뮤니티 자본", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/8e1cba18b5738.jpg?w=400"},
-  {"no": 53, "t": "진심의 연결", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/5cfe00b6d904a.jpg?w=400"},
-  {"no": 54, "t": "딥 다이브", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/4635c7038be9c.jpg?w=400"},
-  {"no": 55, "t": "솔직한 감각", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/72bf2204feb66.jpg?w=400"},
-  {"no": 56, "t": "새로운 적응력", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/5aa2813ee6c18.jpg?w=400"},
-  {"no": 57, "t": "어른의 재교육", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/01d3aa26d15a1.jpg?w=400"},
-  {"no": 58, "t": "중심을 찾자", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/3f508d8ca6a4f.jpg?w=400"},
-  {"no": 59, "t": "지혜로운 질투", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/5e6cbe49a1a39.jpg?w=400"},
-  {"no": 60, "t": "기다리는 실력", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/4d6033bbbc7bc.jpg?w=400"},
-  {"no": 61, "t": "생각할 시간", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/393f62d87ac23.jpg?w=400"},
-  {"no": 62, "t": "깨끗한 학습력", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/c93e2e44dbac7.jpg?w=400"},
-  {"no": 63, "t": "아름다운 정리", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/c4ec2154c13c9.jpg?w=400"},
-  {"no": 64, "t": "30대, 마지막 모험 선언문", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/72fddd998c79a.jpg?w=400"},
-  {"no": 65, "t": "매력자본부터 충전할 것", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/2e1542b6df8b7.jpg?w=400"},
-  {"no": 66, "t": "AI 시대의 실력, 쪼대로 산다", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/3dc7576fef1ab.jpg?w=400"},
-  {"no": 67, "t": "Heritage 헤리티지", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/b6203bd1aecfe.jpg?w=400"},
-  {"no": 68, "t": "알고리즘을 공유하며", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/3851be08e22d1.jpg?w=400"},
-  {"no": 69, "t": "브랜드 프렌드쉽", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/c1d09cdc85d43.jpg?w=400"},
-  {"no": 70, "t": "떠나고 싶은 사람을 위하여", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/354852ed97785.jpg?w=400"},
-  {"no": 71, "t": "너의 악마성", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/80e154ab1a710.jpg?w=400"},
-  {"no": 72, "t": "날 것의 시대", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/7979f06a8fa6c.jpg?w=400"},
-  {"no": 73, "t": "느림의 정확도", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/b6eefb9337752.jpg?w=400"},
-  {"no": 74, "t": "상하이 유학 계획서", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/1ddb29a71aedf.jpg?w=400"},
-  {"no": 75, "t": "커리어 설계의 비밀", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/93f2bc9d414e7.jpg?w=400"},
-  {"no": 76, "t": "숫자를 언어로", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/d69eb939ddfc6.jpg?w=400"},
-  {"no": 77, "t": "10년 뒤 미국에서 찾은 것들", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/7281c0b68f3de.jpg?w=400"},
-  {"no": 78, "t": "나는 '언러닝' 합니다", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/fb44b3975e92a.jpg?w=400"}
+  {"no": 2, "t": "3천개의 일기", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/6cdada6802af9.jpg?w=400"},
+  {"no": 3, "t": "결국은 운", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/f6aca046bca13.jpg?w=400"},
+  {"no": 4, "t": "18년 명상의 비밀", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/eb45fa6e5d52a.jpg?w=400"},
+  {"no": 5, "t": "날것의 사랑", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/9d1baf41d96f7.jpg?w=400"},
+  {"no": 6, "t": "북유럽의 영감", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/fb0ed38bdee82.jpg?w=400"},
+  {"no": 7, "t": "현실적 자립", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/6e6fe76a22a8e.jpg?w=400"},
+  {"no": 8, "t": "강자의 공부", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/c7b88a2d6e126.jpg?w=400"},
+  {"no": 9, "t": "실패 이력서", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/658f43c752383.jpg?w=400"},
+  {"no": 10, "t": "안목", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/5e9482fb4405e.jpg?w=400"},
+  {"no": 11, "t": "공개할 수 없던 일기장", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/43a79f30bf358.jpg?w=400"},
+  {"no": 12, "t": "다시 시작하는 마음", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/b1b0829fb025b.jpg?w=400"},
+  {"no": 13, "t": "코로나 시대 공부법", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/20e09a837e239.jpg?w=400"},
+  {"no": 14, "t": "생존을 위한 독학력", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/b11a5ce8505ab.jpg?w=400"},
+  {"no": 15, "t": "마음의 그릇", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/1e45867a207cc.jpg?w=400"},
+  {"no": 16, "t": "인생의 Next Step", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/16763fa6991eb.jpg?w=400"},
+  {"no": 17, "t": "난세의 평정심", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/65a506ae01ed0.jpg?w=400"},
+  {"no": 18, "t": "언제 프로가 될까?", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/1c7bad3797008.jpg?w=400"},
+  {"no": 19, "t": "내 영혼과 대화하는 법", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/ebb1ff3d98abe.jpg?w=400"},
+  {"no": 20, "t": "함께 일하는 팀", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/d363cea79e4bd.jpg?w=400"},
+  {"no": 21, "t": "엄마의 삶을 시작하며", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/26fb68cfcba3d.jpg?w=400"},
+  {"no": 22, "t": "30대, 어떻게 살까?", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/2e853dddf0b7d.jpg?w=400"},
+  {"no": 23, "t": "지치면 나만 손해", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/31ef798c09ec9.jpg?w=400"},
+  {"no": 24, "t": "나만 알고 싶던 기도", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/fd0f62e6a3294.jpg?w=400"},
+  {"no": 25, "t": "열심히 말고 현명하게", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/a0d2775c74936.jpg?w=400"},
+  {"no": 26, "t": "인맥의 자유", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/f71d58c84bfaa.jpg?w=400"},
+  {"no": 27, "t": "미국에서 배운 것들", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/d5f6f1b959be9.jpg?w=400"},
+  {"no": 28, "t": "시스템", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/6c2cfd67ee8f3.jpg?w=400"},
+  {"no": 29, "t": "기적을 꿈꾸며", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/30e8fffcaf9e9.jpg?w=400"},
+  {"no": 30, "t": "용기도 새로울 수 있나요?", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/ba13d8ebc1080.jpg?w=400"},
+  {"no": 31, "t": "커뮤니티 시대가 온다.", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/454b02bb5f609.jpg?w=400"},
+  {"no": 32, "t": "속도는 천천히, 방향은 정확히", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/6397cdc782871.jpg?w=400"},
+  {"no": 33, "t": "눈치보고 싶지 않아.", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/c47ed9984b5db.jpg?w=400"},
+  {"no": 34, "t": "관계는 지치고 사람은 그립다", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/dc4278a706ecf.jpg?w=400"},
+  {"no": 35, "t": "20대의 속도는 빠르게, 30대의 숙성은 느리게", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/9304dd8517706.jpg?w=400"},
+  {"no": 36, "t": "일의 수명, 넌 2년짜리야 20년짜리야", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/03a7cb0e36595.jpg?w=400"},
+  {"no": 37, "t": "다정한 원칙", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/12d97b3e69705.jpg?w=400"},
+  {"no": 38, "t": "화목한 가정, 화목한 일터", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/6825263b6872e.jpg?w=400"},
+  {"no": 39, "t": "착해지기 전에, 강해져야 했다.", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/9cafd52797fdd.jpg?w=400"},
+  {"no": 40, "t": "욕심이 왜 나빠요?", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/1fd2424e187c2.jpg?w=400"},
+  {"no": 41, "t": "나는 축적지향형 인간입니다", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/a62a823cfa775.jpg?w=400"},
+  {"no": 42, "t": "진화에는 방향이 없다", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/cf353768e907a.jpg?w=400"},
+  {"no": 43, "t": "계속 나아가고 있었군요", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/9e767676beef1.jpg?w=400"},
+  {"no": 44, "t": "친구의 시대", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/606da19631545.jpg?w=400"},
+  {"no": 45, "t": "시간의 세례", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/08fc87e34c238.jpg?w=400"},
+  {"no": 46, "t": "자만은 버리고, 자존은 세우며", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/402590e644d26.jpg?w=400"},
+  {"no": 47, "t": "어른의 레이어", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/f807bf6616334.jpg?w=400"},
+  {"no": 48, "t": "가치를 생각하며", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/4817b415dd0f6.jpg?w=400"},
+  {"no": 49, "t": "그릇을 키우는 시간", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/5438a514b69d1.jpg?w=400"},
+  {"no": 50, "t": "심플한 생각", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/23e37b0cd5092.jpg?w=400"},
+  {"no": 51, "t": "바운더리", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/b4fde1179b5f5.jpg?w=400"},
+  {"no": 52, "t": "좋아할수록 연결되는", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/7e0581114ab77.jpg?w=400"},
+  {"no": 53, "t": "새로운 부, 커뮤니티 자본", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/8e1cba18b5738.jpg?w=400"},
+  {"no": 54, "t": "진심의 연결", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/5cfe00b6d904a.jpg?w=400"},
+  {"no": 55, "t": "딥 다이브", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/4635c7038be9c.jpg?w=400"},
+  {"no": 56, "t": "솔직한 감각", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/72bf2204feb66.jpg?w=400"},
+  {"no": 57, "t": "새로운 적응력", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/5aa2813ee6c18.jpg?w=400"},
+  {"no": 58, "t": "어른의 재교육", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/01d3aa26d15a1.jpg?w=400"},
+  {"no": 59, "t": "중심을 찾자", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/3f508d8ca6a4f.jpg?w=400"},
+  {"no": 60, "t": "지혜로운 질투", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/5e6cbe49a1a39.jpg?w=400"},
+  {"no": 61, "t": "기다리는 실력", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/4d6033bbbc7bc.jpg?w=400"},
+  {"no": 62, "t": "생각할 시간", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/393f62d87ac23.jpg?w=400"},
+  {"no": 63, "t": "깨끗한 학습력", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/c93e2e44dbac7.jpg?w=400"},
+  {"no": 64, "t": "아름다운 정리", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/c4ec2154c13c9.jpg?w=400"},
+  {"no": 65, "t": "30대, 마지막 모험 선언문", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/72fddd998c79a.jpg?w=400"},
+  {"no": 66, "t": "매력자본부터 충전할 것", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/2e1542b6df8b7.jpg?w=400"},
+  {"no": 67, "t": "AI 시대의 실력, 쪼대로 산다", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/3dc7576fef1ab.jpg?w=400"},
+  {"no": 68, "t": "Heritage 헤리티지", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/b6203bd1aecfe.jpg?w=400"},
+  {"no": 69, "t": "알고리즘을 공유하며", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/3851be08e22d1.jpg?w=400"},
+  {"no": 70, "t": "브랜드 프렌드쉽", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/c1d09cdc85d43.jpg?w=400"},
+  {"no": 71, "t": "떠나고 싶은 사람을 위하여", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/354852ed97785.jpg?w=400"},
+  {"no": 72, "t": "너의 악마성", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/80e154ab1a710.jpg?w=400"},
+  {"no": 73, "t": "날 것의 시대", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/7979f06a8fa6c.jpg?w=400"},
+  {"no": 74, "t": "느림의 정확도", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/b6eefb9337752.jpg?w=400"},
+  {"no": 75, "t": "상하이 유학 계획서", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/1ddb29a71aedf.jpg?w=400"},
+  {"no": 76, "t": "커리어 설계의 비밀", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/93f2bc9d414e7.jpg?w=400"},
+  {"no": 77, "t": "숫자를 언어로", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/d69eb939ddfc6.jpg?w=400"},
+  {"no": 78, "t": "10년 뒤 미국에서 찾은 것들", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/7281c0b68f3de.jpg?w=400"},
+  {"no": 79, "t": "나는 '언러닝' 합니다", "img": "https://cdn-optimized.imweb.me/upload/S202111179cc8092b6dbbb/fb44b3975e92a.jpg?w=400"}
 ];
 const CAT = {}; CATALOG.forEach(b => CAT[b.no] = b);
 const CAT_TOTAL = CATALOG.length;
+const CAT_MAX = CATALOG.reduce((m, b) => Math.max(m, b.no), 0);
 function pastIssues(){
+  let lib = {}, dm = {};
+  try{ lib = JSON.parse(localStorage.getItem(K_LIB)) || {}; }catch(e){}
+  try{ dm = JSON.parse(localStorage.getItem(K_DRAFTS)) || {}; }catch(e){}
   const m = /NO\.(\d+)/.exec(issueLabel() || '');
-  const cur = m ? +m[1] : 77;
+  const cur = m ? +m[1] : CAT_MAX + 1;
   return CATALOG.filter(b => b.no < cur).sort((a, b) => b.no - a.no)
-    .map(b => ({ no:String(b.no), t:b.t, img:b.img }));
+    .map(b => ({ no:String(b.no), t:b.t, img:b.img, pub:!!lib[b.no], wip:!!dm[b.no] }));
 }
 function hasDraft(){
   try{ return !!localStorage.getItem(K_DRAFT); }catch(e){ return false; }
@@ -1831,10 +1860,10 @@ function renderShelf(){
       <span class="bt2r">${statusChips}</span>
     </button>
     ${pastIssues().map(b => `
-    <button class="bkcard past" data-open="past">
+    <button class="bkcard past" data-open="past" data-no="${b.no}">
       <span class="cov">${b.img ? `<img src="${b.img}" alt="" loading="lazy">` : `<span class="cno">NO.${b.no}</span><span class="ct">${b.t}</span>`}</span>
       <span class="bt2r"><span class="bkt">NO.${b.no} · ${b.t}</span></span>
-      <span class="bt2r"><span class="st gray">발행 완료</span></span>
+      <span class="bt2r">${b.pub ? '<span class="st pub">수정 발행됨</span>' : (b.wip ? '<span class="st">작업 중</span>' : '<span class="st gray">원본</span>')}</span>
     </button>`).join('')}
     <button class="bkcard newbk" data-open="new">
       <span class="cov">＋ 새 책 만들기</span>
@@ -1852,13 +1881,36 @@ function openBook(){
   document.body.classList.remove('shelf');
   renderAll();
 }
+function stashCurrentDraft(){
+  const digits = String(BOOK.issue || '').replace(/\D/g, '');
+  try{
+    const m = JSON.parse(localStorage.getItem(K_DRAFTS)) || {};
+    if(digits) m[digits] = BOOK;
+    localStorage.setItem(K_DRAFTS, JSON.stringify(m));
+  }catch(e){}
+}
+function openIssue(no){
+  stashCurrentDraft();
+  let next = null;
+  try{ next = (JSON.parse(localStorage.getItem(K_DRAFTS)) || {})[no] || null; }catch(e){}
+  if(!(next && next.v === 2 && Array.isArray(next.chapters) && next.chapters.length)){
+    const c = CAT[no];
+    next = { v:2, issue:String(no), title:(c ? c.t : ''), subtitle:'', cover:(c ? c.img : null),
+      chapters:[{ id: uid(), tag:'', title:'1. 새 챕터', voice:null, sheets:[{ blocks:[{ t:'ctitle', text:'1. 새 챕터' }, { t:'p', html:'' }] }] }] };
+  }
+  BOOK = next; cur = 0; SEL = null;
+  try{ ensureWriting(); }catch(e){}
+  saveKey(K_DRAFT);
+  openBook();
+  toast('NO.' + no + ' 편집 — 발행하면 리더기 서재에서 열려요');
+}
 $('backShelf').addEventListener('click', goShelf);
 $('shelfGrid').addEventListener('click', e => {
   const card = e.target.closest('[data-open]');
   if(!card) return;
   const kind = card.dataset.open;
   if(kind === 'cur') openBook();
-  else if(kind === 'past') toast('프로토타입에서는 현재 호만 열 수 있습니다');
+  else if(kind === 'past') openIssue(+card.dataset.no);
   else if(kind === 'new'){
     const start = () => {
       BOOK = { v:2, issue:'', title:'', subtitle:'', cover:null,
