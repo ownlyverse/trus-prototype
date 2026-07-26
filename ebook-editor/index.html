@@ -173,6 +173,10 @@ input,textarea{font:inherit;color:inherit}
 .btitle .bt1{font-size:.78rem; letter-spacing:.24em; font-weight:700; color:var(--sub); white-space:pre-line; min-height:1.2em}
 .btitle .bt2{font-size:1.65rem; letter-spacing:.08em; font-weight:800; margin-top:14px;
   font-family:Georgia,"Times New Roman",serif; white-space:pre-line; min-height:1.3em}
+.btoc{padding:10px 0}
+.btoc-i{display:flex; gap:12px; align-items:baseline; padding:9px 2px; border-bottom:1px solid var(--line); font-size:.95rem; font-weight:600}
+.btoc-no{font-size:.7rem; font-weight:800; color:var(--blue-d); letter-spacing:.08em}
+.btoc-note{font-size:.68rem; color:#A9A49B; text-align:center; padding:10px 0 0}
 .ph{position:relative; margin:6px 0}
 .ph img{display:block; width:100%; max-height:340px; object-fit:cover}
 .blk.bleed .ph{margin-left:calc(-1*var(--pad-x)); margin-right:calc(-1*var(--pad-x))}
@@ -599,6 +603,11 @@ function blkHTML(b, si, bi){
       <div class="bt1" contenteditable="true" data-si="${si}" data-bi="${bi}" data-f="t1" data-ph="ISSUE NO.76 · DECEMBER 2025">${escHtml(b.t1)}</div>
       <div class="bt2" contenteditable="true" data-si="${si}" data-bi="${bi}" data-f="t2" data-ph="CAREER PLANNING">${escHtml(b.t2)}</div>
     </div>`;
+  } else if(b.t === 'toc'){
+    body = `<div class="btoc">
+      ${BOOK.chapters.map((c, i) => `<div class="btoc-i"><span class="btoc-no">${pad2(i)}</span>${escHtml(c.title)}</div>`).join('')}
+      <div class="btoc-note">목차는 챕터 구성에서 자동으로 만들어집니다</div>
+    </div>`;
   }
   return `<div class="blk t-${b.t}${b.t === 'photo' && b.bleed ? ' bleed' : ''}" data-si="${si}" data-bi="${bi}">${h}${body}</div>`;
 }
@@ -663,7 +672,7 @@ function clearSel(){
   renderBlkProps();
 }
 const TYPE_NAME = { p:'문단', head:'헤드라인', verse:'인용·운문', photo:'사진', duo:'사진 두 장',
-  video:'영상', divider:'구분선', split:'카피+사진', cover:'전면 사진', title:'표제지' };
+  video:'영상', divider:'구분선', split:'카피+사진', cover:'전면 사진', title:'표제지', toc:'목차' };
 function renderBlkProps(){
   const box = $('blkProps');
   const b = selBlock();
@@ -696,6 +705,8 @@ function renderBlkProps(){
       <input type="text" id="ppVurl" value="${escHtml(b.url || '')}" placeholder="https://youtu.be/…">
       <div class="row"><button class="mini" data-pact="vapply">적용</button></div>
       <p class="hintp">발행 시 이 장의 머리에 영상으로 붙습니다 (장당 1개).</p>`;
+  } else if(b.t === 'toc'){
+    html += `<p class="hintp">챕터 구성(사이드바)에서 자동 생성됩니다. 리더기에서는 목차 지면으로 렌더되고, 항목을 누르면 그 장으로 이동합니다.</p>`;
   } else {
     html += `<p class="hintp">이 블록은 지면에서 바로 편집합니다.</p>`;
   }
@@ -754,13 +765,15 @@ const NEW_BLOCK = {
   video:   () => ({ t:'video', url:'', note:'' }),
   divider: () => ({ t:'divider' }),
   split:   () => ({ t:'split', en:'', ko:'', src:'' }),
+  toc:     () => ({ t:'toc' }),
   cover:   () => ({ t:'cover', src:'' }),
   title:   () => ({ t:'title', t1:'', t2:'' })
 };
 const PALETTE = [
   ['p','문','문단'], ['head','H','헤드라인'], ['verse','❝','인용·운문'],
   ['split','◧','카피+사진'], ['photo','▣','사진'], ['duo','▣▣','사진 두 장'],
-  ['cover','■','전면 사진'], ['title','T','표제지'], ['video','▶','영상'], ['divider','◆','구분선']
+  ['cover','■','전면 사진'], ['title','T','표제지'], ['toc','☰','목차'],
+  ['video','▶','영상'], ['divider','◆','구분선']
 ];
 
 let palTarget = null;
@@ -807,7 +820,7 @@ function isEmptyBlock(b){
   if(b.t === 'split') return !(b.en || '').trim() && !(b.ko || '').trim() && !b.src;
   if(b.t === 'cover') return !b.src;
   if(b.t === 'title') return !(b.t1 || '').trim() && !(b.t2 || '').trim();
-  return true; /* divider */
+  return true; /* divider·toc — 자동 생성이라 확인 없이 삭제 */
 }
 
 /* 사진 업로드: FileReader → canvas(긴 변 1600px 다운스케일) → JPEG data URI */
@@ -1056,6 +1069,7 @@ function toReaderBook(){
           if((b.t1 || '').trim() || (b.t2 || '').trim())
             blocks.push({ t:'title', t1:escHtml(b.t1 || ''), t2:escHtml(b.t2 || '') });
         }
+        else if(b.t === 'toc') blocks.push({ t:'toc' });
         else if(b.t === 'video'){
           const emb = parseYouTube(b.url);
           if(emb && !video) video = { url: emb, note: escHtml(b.note || '') };

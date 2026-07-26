@@ -2565,6 +2565,9 @@ if(PUB_BOOK){
   CHAPTERS = PUB_BOOK.chapters;
   TOC = PUB_BOOK.toc || [];
   TOC_NAV = PUB_BOOK.tocNav || CHAPTERS.map((c, i) => [ c.sheets.length ? { chapter: i, sheet: c.sheets[0].no } : null ]);
+  /* 발행본은 글 목차가 본문 지면(toc 블록)으로 들어간다 — 상단 고정 챕터 레일을 숨긴다 */
+  const _cr = document.getElementById("chaprail");
+  if(_cr) _cr.style.display = "none";
 }
 
 /* 장(그룹) 헤더가 이동할 좌표: 그 장 첫 유효 항목 좌표(없으면 null = 비활성). */
@@ -3225,6 +3228,16 @@ function renderRail(){
     curSheetNo = null; updateProgress();   // 새 챕터 기준으로 진행률·lastRead 갱신(step5)
   });
 }
+/* 본문 목차 지면(toc 블록)의 장 항목 클릭 → 그 장으로 이동 (챕터 레일과 같은 동작) */
+document.addEventListener("click", e => {
+  const g = e.target.closest(".toc .g[data-g]");
+  if(!g) return;
+  const co = tocGroupNav(+g.dataset.g);
+  if(!co) return;
+  curChap = co.chapter; renderRail(); renderSheets(); if(SOCIAL) renderChat();
+  window.scrollTo({top:0, behavior:"smooth"});
+  curSheetNo = null; updateProgress();
+});
 
 /* ─────────────── 지면(A4 낱장) ─────────────── */
 function blockHTML(b){
@@ -3239,8 +3252,8 @@ function blockHTML(b){
       </div>`;
     case "verse": return `<div class="verse">${b.text}</div>`;
     case "title": return `<div class="title-sheet"><div class="t1 en">${b.t1}</div><div class="t2 en">${b.t2}</div></div>`;
-    case "toc":   return `<div class="toc">${TOC.map(g=>`
-        <div class="g"><div class="gno en">${g.no}</div><div class="gt">${g.t}</div>
+    case "toc":   return `<div class="toc">${TOC.map((g,gi)=>`
+        <div class="g" data-g="${gi}" style="cursor:pointer"><div class="gno en">${g.no}</div><div class="gt">${g.t}</div>
         ${g.items.map(i=>`<div class="gi">${i}</div>`).join("")}</div>`).join("")}</div>`;
     case "letter":return `<div class="letter">
         <div>${LETTER.a.map((p,i)=> i===0 ? `<p class="hello">${p}</p>` : `<p>${p}</p>`).join("")}</div>
