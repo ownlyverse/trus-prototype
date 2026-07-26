@@ -152,6 +152,9 @@ input,textarea{font:inherit;color:inherit}
 .blk::before{content:""; position:absolute; left:calc(-1*var(--pad-x)); top:0; bottom:0; width:var(--pad-x)}
 .blk-h{position:absolute; left:calc(-1*var(--pad-x) + 7px); top:0; display:none; flex-direction:column; gap:1px; z-index:6}
 .blk:hover > .blk-h, .blk:focus-within > .blk-h, .blk.sel > .blk-h{display:flex}
+/* 핸들은 화면에 한 벌만 — 다른 블록에 마우스가 올라가 있으면 선택 블록의 고정 핸들은 잠시 숨긴다 (겹침 방지) */
+#sheets:has(.blk:hover) .blk.sel:not(:hover) > .blk-h{display:none}
+.blk:hover > .blk-h{z-index:8}
 .blk-h button{width:24px; height:24px; border-radius:6px; font-size:.68rem; color:#98938A; background:#fff;
   border:1px solid var(--line); display:flex; align-items:center; justify-content:center}
 .blk-h button:hover{color:var(--ink); border-color:var(--ink)}
