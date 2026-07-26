@@ -4206,10 +4206,10 @@ const CAT_MAX = CATALOG.reduce((m, b) => Math.max(m, b.no), 0);
   const curNo = (PUB_BOOK && /^NO\.(\d+)$/.test(PUB_BOOK.issue || '')) ? +PUB_BOOK.issue.slice(3) : 76;
   const curTitle = PUB_BOOK ? PUB_BOOK.title : (CAT[76] ? CAT[76].t : '이 서재를 여는 법');
   const curSub = PUB_BOOK ? (PUB_BOOK.subtitle || '') : '리더기 미리보기 · 밑줄과 메모를 시험해 보세요';
-  const OWNED_PAST = { };
-  [curNo-1, curNo-2, curNo-3, curNo-4]
-    .forEach(n => { if(n >= 1) OWNED_PAST[n] = (CAT[n] ? CAT[n].t : '지난 호'); });
-  const ownedCount = 1 + Object.keys(OWNED_PAST).length;
+  /* 열람 규칙: 이번 호(공개 76호) + 편집기에서 발행한 호만 열린다 */
+  let LIB = {};
+  try{ LIB = JSON.parse(localStorage.getItem('trus_library_v1')) || {}; }catch(e){}
+  const ownedCount = new Set([curNo, ...Object.keys(LIB).map(Number)]).size;
   document.getElementById('rsSub').textContent = `${CAT_MAX}권 중 ${ownedCount}권을 만났어요. 이번 호부터 이어서 읽어요.`;
   document.getElementById('rsNow').innerHTML = `
     <span class="cv">${(PUB_BOOK && PUB_BOOK.cover)
@@ -4220,13 +4220,11 @@ const CAT_MAX = CATALOG.reduce((m, b) => Math.max(m, b.no), 0);
     <span><span class="bt">${curTitle}</span><span class="bs" style="display:block">${curSub}</span></span>
     <span class="go">이어서 읽기 →</span>`;
   document.getElementById('rsTotal').textContent = `전체 ${CAT_MAX}권`;
-  let LIB = {};
-  try{ LIB = JSON.parse(localStorage.getItem('trus_library_v1')) || {}; }catch(e){}
   let cells = '';
   for(let n = CAT_MAX; n >= 1; n--){
     const b = CAT[n];
-    const k = (n === curNo) ? 'now' : (OWNED_PAST[n] ? 'own' : 'lock');
-    const ttl = (n === curNo) ? curTitle : (b ? b.t : (OWNED_PAST[n] || ''));
+    const k = (n === curNo) ? 'now' : (LIB[n] ? 'own' : 'lock');
+    const ttl = (n === curNo) ? curTitle : ((LIB[n] && LIB[n].title) ? LIB[n].title : (b ? b.t : ''));
     const cov = b
       ? `<span class="cvwrap"><img class="cvimg" src="${b.img}" alt="" loading="lazy">${LIB[n] ? '<i class="edited" title="발행 수정본"></i>' : ''}${k === 'lock' ? '<span class="lk">🔒</span>' : ''}</span>`
       : `<span class="cvwrap empty">NO.${n}</span>`;
