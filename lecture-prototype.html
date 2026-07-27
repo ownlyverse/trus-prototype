@@ -85,16 +85,16 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
 /* 라이브 강의실 — 코치2+나(좌 세로 3) · 강의자(가운데 세로 대형) · 메모(우 컬럼) */
 .liveroom{
   --H:min(760px, 82vh, 48vw);              /* 강의자 세로 높이 */
-  --s:calc((var(--H) - 32px)/3);           /* 미니 타일 높이 (3개+간격2 = --H) */
+  --s:calc((var(--H) - 16px)/2);           /* 코치 세로 타일 높이 (2개+간격1 = --H) */
   display:grid; justify-content:center; gap:18px; margin:14px auto 8px;
-  grid-template-columns:calc(var(--s)*16/9) calc(var(--H)*9/16) minmax(280px,380px);
+  grid-template-columns:calc(var(--s)*9/16) calc(var(--H)*9/16) minmax(280px,380px);
 }
 .mid-col{order:1}
 .vid.main{order:2}
 .liveroom > .memo{order:3}
 .vid.main{height:var(--H); aspect-ratio:9/16}
 .mid-col{display:flex; flex-direction:column; gap:16px; min-width:0}
-.mid-col .vid{height:var(--s)}
+.mid-col .vid{height:var(--s); aspect-ratio:9/16}
 .liveroom > .memo{height:var(--H); display:flex; flex-direction:column; overflow:hidden; min-width:0}
 .liveroom > .memo .memo-body{flex:1; min-height:0; max-height:none}
 
@@ -104,7 +104,7 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
   .liveroom .vid.main{height:auto; aspect-ratio:9/16; width:min(66vw,300px); align-self:center; order:1}
   .mid-col{flex-direction:row; order:2}
   .liveroom > .memo{order:3}
-  .mid-col .vid{height:auto; aspect-ratio:16/9; flex:1; min-width:0}
+  .mid-col .vid{height:auto; aspect-ratio:9/16; flex:1; min-width:0; max-width:44vw}
   .liveroom > .memo{height:auto; min-height:200px}
 }
 .vid{position:relative; border:3px solid #17171C; border-radius:6px; overflow:hidden; background:#000; box-shadow:4px 4px 0 rgba(0,0,0,.4); aspect-ratio:16/9}
@@ -112,8 +112,6 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
 .vid.main{box-shadow:7px 7px 0 rgba(0,0,0,.45)}
 .vtag{position:absolute; left:8px; bottom:8px; background:rgba(23,19,31,.88); color:#fff; font-size:.74rem; padding:2px 8px; border-radius:2px; font-family:'NeoDunggeunmo','Pretendard Variable',sans-serif; letter-spacing:0}
 .vlive{position:absolute; right:7px; top:7px; width:8px; height:8px; border-radius:50%; background:#FF4D6D; box-shadow:0 0 7px #FF4D6D; animation:blink 1.4s infinite}
-.metile{background:#241E33; display:flex; align-items:center; justify-content:center}
-.metile img{width:auto !important; height:70% !important; max-height:180px; object-fit:contain}
 .spr-box{position:relative; width:48px; height:44px}
 .me-sprite{position:absolute; top:0; left:0; width:4px; height:4px; image-rendering:pixelated}
 .memo{background:#fff; border:3px solid #17171C; border-radius:6px; box-shadow:4px 4px 0 rgba(0,0,0,.4); min-width:0}
@@ -367,7 +365,6 @@ canvas{display:block; width:100%; height:200px; touch-action:none; cursor:crossh
     <div class="mid-col">
       <div class="vid"><video id="coachA" src="assets/coach-boundary.mp4" muted loop playsinline preload="auto"></video><span class="vtag">🦉 바운더리 코치</span><span class="vlive"></span></div>
       <div class="vid"><video id="coachB" src="assets/coach-record.mp4" muted loop playsinline preload="auto"></video><span class="vtag">🐢 기록 코치</span><span class="vlive"></span></div>
-      <div class="vid metile"><img src="assets/char1.png" alt="" style="image-rendering:pixelated"><span class="vtag">나 · 김이서</span></div>
     </div>
     <div class="memo">
       <div class="memo-head"><span class="mdot r"></span><span class="mdot y"></span><span class="mdot g"></span><b>내 메모</b></div>
