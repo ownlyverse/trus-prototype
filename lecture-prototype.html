@@ -117,11 +117,11 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
   body.memo-open .spotstage{height:46dvh}
   /* 뒤로가기 */
   .vback{display:flex}
-  /* 코치 2명 = 우상단 PiP 오버레이 (누르면 스포트 교대) */
-  .mid-col{position:fixed; top:14px; right:10px; flex-direction:column; width:86px; gap:8px; z-index:45}
-  .mid-col .vid{width:86px; height:auto; aspect-ratio:16/9; border-width:2px; box-shadow:2px 2px 0 rgba(0,0,0,.45)}
-  .mid-col .vid .vtag{font-size:.5rem; left:4px; bottom:4px; padding:1px 4px}
-  .mid-col .vid .vlive{width:5px; height:5px; right:4px; top:4px}
+  /* 코치 2명 = 왼쪽 하단 PiP 오버레이 (누르면 스포트 교대) */
+  .mid-col{position:fixed; left:10px; bottom:64px; top:auto; right:auto; flex-direction:column; width:82px; gap:7px; z-index:45}
+  .mid-col .vid{width:82px; height:auto; aspect-ratio:16/9; border-width:2px; box-shadow:2px 2px 0 rgba(0,0,0,.45)}
+  .mid-col .vid .vtag{font-size:.4rem; left:3px; bottom:3px; padding:1px 3px; background:rgba(23,19,31,.65)}
+  .mid-col .vid .vlive{width:5px; height:5px; right:3px; top:3px}
   body.memo-open .mid-col{display:none}
   /* 메모 = 하단 절반 댓글창 */
   .liveroom > .memo{position:fixed; left:0; right:0; bottom:0; top:auto; height:54dvh; width:auto;
