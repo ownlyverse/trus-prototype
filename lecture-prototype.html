@@ -91,7 +91,7 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
 }
 /* 발화자 스포트라이트 무대 — 스포트 슬롯(세로 대형) + 사이드 슬롯(가로 소형).
    발화자가 바뀌면 JS가 타일을 슬롯 사이로 옮긴다 */
-.stage{display:flex; gap:16px; align-items:flex-start; grid-area:stage}
+.spotstage{display:flex; gap:16px; align-items:flex-start; grid-area:stage}
 .liveroom > .memo{grid-area:memo; align-self:start}
 .spot-slot .vid{height:var(--H); width:calc(var(--H)*9/16); aspect-ratio:9/16; cursor:default}
 .mid-col{display:flex; flex-direction:column; gap:14px; min-width:0; width:min(236px, 20vw)}
@@ -106,7 +106,7 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
 @media(max-width:860px){
   .liveroom{display:flex; flex-direction:column; align-items:center}
   .lec-head{width:min(66vw,300px); text-align:left}
-  .stage{flex-direction:column; align-items:center; width:100%}
+  .spotstage{flex-direction:column; align-items:center; width:100%}
   .spot-slot{display:flex; justify-content:center}
   .spot-slot .vid{height:auto; width:min(66vw,300px); aspect-ratio:9/16}
   .mid-col{flex-direction:row; width:min(66vw,300px); gap:10px}
@@ -374,7 +374,7 @@ canvas{display:block; width:100%; height:200px; touch-action:none; cursor:crossh
       <p class="lh-over">일의 교과서 · 커리큘럼 5단계 중 마지막</p>
       <h1 class="lh-title">1강 · 전략 설정</h1>
     </header>
-    <div class="stage">
+    <div class="spotstage">
     <div class="spot-slot" id="spotSlot">
     <div class="vid main">
       <video id="lecVid" src="assets/lecture1.mp4" poster="assets/lecture1-poster.jpg" playsinline preload="metadata"></video>
