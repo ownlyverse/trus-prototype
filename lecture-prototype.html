@@ -512,7 +512,7 @@ const $ = id => document.getElementById(id);
 
 /* ─── 실제 강의 영상 (세로 9:16) ─── */
 const lecVid = $('lecVid');
-const TEST_SEC = 4;                                     // 테스트: 각 강의 구간을 4초만 재생
+const TEST_SEC = 25;                                    // 데모: 강의 구간 25초 — 발화자 로테이션(5+6+7초) 한 사이클이 보이게
 let VID_DUR = 66;                                       // 로드되면 실제 길이로 갱신
 lecVid.addEventListener('loadedmetadata', ()=>{
   if(isFinite(lecVid.duration) && lecVid.duration > 0){ VID_DUR = lecVid.duration; updateUI(); }
@@ -520,7 +520,7 @@ lecVid.addEventListener('loadedmetadata', ()=>{
 
 /* 코치 영상(바운더리·기록) — 강의 재생과 시작점을 맞물려요 */
 const coachVids = [$('coachA'), $('coachB')];
-function coachesStart(){ coachVids.forEach(v=>{ v.currentTime = 0; v.play().catch(()=>{}); }); }
+function coachesStart(){ coachVids.forEach(v=>{ v.currentTime = 0; v.play().catch(()=>{}); }); if(typeof applyAudio === 'function') applyAudio(); }
 function coachesPause(){ coachVids.forEach(v=>v.pause()); }
 
 /* ─── 발화자 스포트라이트 — 말하는 사람이 중앙 세로형으로, 청자는 사이드 가로형으로 ─── */
@@ -529,8 +529,14 @@ const mainTile = document.querySelector('.vid.main');
 const coachTiles = coachVids.map(v => v.closest('.vid'));
 let spotTimers = [];
 function clearSpotTimers(){ spotTimers.forEach(clearTimeout); spotTimers = []; }
+/* 스포트 영상만 소리 ON, 나머지는 전부 음소거 — 상태와 무관하게 항상 강제 */
+function applyAudio(){
+  if(!started) return;
+  const sv = spotSlotEl.querySelector('video');
+  [lecVid, ...coachVids].forEach(v => { v.muted = (v !== sv); });
+}
 function spotlight(el){
-  if(!el || el.parentElement === spotSlotEl) return;
+  if(!el || el.parentElement === spotSlotEl){ applyAudio(); return; }
   const playing = [lecVid, ...coachVids].filter(v => !v.paused);
   const old = spotSlotEl.firstElementChild;
   if(old) sideSlotEl.prepend(old);
@@ -538,10 +544,7 @@ function spotlight(el){
   playing.forEach(v => v.play().catch(()=>{}));       /* DOM 이동으로 멈춘 영상 재개 */
   const cv = el.querySelector('video');
   if(cv && cv !== lecVid) cv.play().catch(()=>{});    /* 스포트로 온 코치는 살아 움직이게 */
-  if(started){                                        /* 스포트에 온 사람만 소리, 나머지 음소거 */
-    [lecVid, ...coachVids].forEach(v => { v.muted = true; });
-    if(cv) cv.muted = false;
-  }
+  applyAudio();
   [old, el].forEach(t => { if(!t) return; t.classList.remove('pop'); void t.offsetWidth; t.classList.add('pop'); });
 }
 function spotSeq(steps){ clearSpotTimers(); steps.forEach(([el, at]) => spotTimers.push(setTimeout(() => spotlight(el), at))); }
