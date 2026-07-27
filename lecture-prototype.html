@@ -130,7 +130,6 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
   body.memo-open .liveroom > .memo{transform:none}
   .spot-slot .vmemo{display:flex}
   .memo-hide{display:inline-flex}
-  .vsec{font-size:.66rem; top:12px; left:52px}
 }
 .vid{position:relative; border:3px solid #17171C; border-radius:6px; overflow:hidden; background:#000; box-shadow:4px 4px 0 rgba(0,0,0,.4); aspect-ratio:16/9}
 .vid img, .vid video{width:100%; height:100%; object-fit:cover; display:block}
@@ -228,7 +227,6 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
 .pbtn.gray:active{box-shadow:0 1px 0 #6B7684}
 .pbtn.center{justify-content:center; width:100%}
 
-.vsec{position:absolute; left:10px; top:10px; background:rgba(23,19,31,.88); color:#fff; font-size:.78rem; padding:3px 9px; border-radius:2px; font-family:'NeoDunggeunmo','Pretendard Variable',sans-serif; letter-spacing:0}
 /* 강의 헤더 — 구글풍: 오버라인 + 큰 제목, 무대 왼쪽 라인에 좌정렬 */
 .lec-head{grid-area:head; text-align:left; margin:0}
 .lh-over{margin:0; font-size:.74rem; font-weight:600; color:#9C8FB8; letter-spacing:.02em}
@@ -409,7 +407,6 @@ canvas{display:block; width:100%; height:200px; touch-action:none; cursor:crossh
     <div class="spot-slot" id="spotSlot">
     <div class="vid main">
       <video id="lecVid" src="assets/lecture1.mp4" poster="assets/lecture1-poster.jpg" playsinline preload="metadata"></video>
-      <span class="vsec" id="vSec">1/9 · 오늘, 잠깐 멈추는 시간</span>
       <span class="vlive"></span>
       <div class="vctrl">
         <button class="vplay" id="vPlay">▶</button>
@@ -512,7 +509,6 @@ function coachesPause(){ coachVids.forEach(v=>v.pause()); }
 const effDur = () => Math.min(VID_DUR, TEST_SEC);
 function updateUI(){
   const b = BLOCKS[bi];
-  $('vSec').textContent = `${bi+1}/${BLOCKS.length} · ${b.type==='lecture' ? b.t : b.name}`;
   if(b.type==='lecture'){
     $('vFill').style.width = Math.min(100, lecVid.currentTime / effDur() * 100) + '%';
     $('vTime').textContent = '-' + fmt(Math.max(0, effDur() - lecVid.currentTime));
@@ -546,6 +542,7 @@ function playLecture(){
   if(started){
     lecVid.play().catch(()=>{}); $('vPlay').textContent = '⏸';
     coachesStart();                                  // 코치 영상도 0초부터 함께 시작
+    spotCycle();                                     // 발화자 로테이션 시작 (5s→기록 10s→바운더리 10s→복귀)
   }
 }
 /* 영상 재생에 맞춰 진행바·남은시간 갱신, 끝까지 다 보면 다음 활동으로 */
@@ -1053,6 +1050,14 @@ function spotlight(el){
   [old, el].forEach(t => { if(!t) return; t.classList.remove('pop'); void t.offsetWidth; t.classList.add('pop'); });
 }
 function spotSeq(steps){ clearSpotTimers(); steps.forEach(([el, at]) => spotTimers.push(setTimeout(() => spotlight(el), at))); }
+/* 강의 중 발화자 로테이션 데모 — 소정 5초 → 기록 코치 10초 → 바운더리 코치 10초 → 소정 복귀, 반복 */
+function spotCycle(){
+  clearSpotTimers();
+  spotlight(mainTile);
+  spotTimers.push(setTimeout(() => spotlight(coachTiles[1]), 5000));    /* 🐢 기록 */
+  spotTimers.push(setTimeout(() => spotlight(coachTiles[0]), 15000));   /* 🦉 바운더리 */
+  spotTimers.push(setTimeout(spotCycle, 25000));                        /* 소정 복귀 → 반복 */
+}
 sideSlotEl.addEventListener('click', e => {
   const v = e.target.closest('.vid');
   if(v){ clearSpotTimers(); spotlight(v); }
