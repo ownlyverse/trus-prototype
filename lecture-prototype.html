@@ -548,10 +548,10 @@ function spotSeq(steps){ clearSpotTimers(); steps.forEach(([el, at]) => spotTime
 /* 강의 중 발화자 로테이션 데모 — 소정 5초 → 기록 코치 10초 → 바운더리 코치 10초 → 소정 복귀, 반복 */
 function spotCycle(){
   clearSpotTimers();
-  spotlight(mainTile);
-  spotTimers.push(setTimeout(() => spotlight(coachTiles[1]), 5000));    /* 🐢 기록 */
-  spotTimers.push(setTimeout(() => spotlight(coachTiles[0]), 15000));   /* 🦉 바운더리 */
-  spotTimers.push(setTimeout(spotCycle, 25000));                        /* 소정 복귀 → 반복 */
+  spotlight(mainTile);                                                  /* 소정님 5초 */
+  spotTimers.push(setTimeout(() => spotlight(coachTiles[0]), 5000));    /* 🦉 바운더리 6초 (소리 ON) */
+  spotTimers.push(setTimeout(() => spotlight(coachTiles[1]), 11000));   /* 🐢 기록 7초 (소리 ON) */
+  spotTimers.push(setTimeout(spotCycle, 18000));                        /* 소정 복귀 → 반복 */
 }
 sideSlotEl.addEventListener('click', e => {
   const v = e.target.closest('.vid');
