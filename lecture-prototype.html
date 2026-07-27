@@ -112,8 +112,19 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
 .vlive{position:absolute; right:7px; top:7px; width:8px; height:8px; border-radius:50%; background:#FF4D6D; box-shadow:0 0 7px #FF4D6D; animation:blink 1.4s infinite}
 .spr-box{position:relative; width:48px; height:44px}
 .me-sprite{position:absolute; top:0; left:0; width:4px; height:4px; image-rendering:pixelated}
-.memo{background:#F2EEE1; border:3px solid #1F1D1A; border-radius:6px; box-shadow:5px 5px 0 rgba(0,0,0,.4); min-width:0;
-  --tw:'NeoDunggeunmo','Pretendard Variable',sans-serif}
+.memo{position:relative; border:3px solid #1F1D1A; border-radius:8px; box-shadow:5px 5px 0 rgba(0,0,0,.4); min-width:0;
+  --tw:'NeoDunggeunmo','Pretendard Variable',sans-serif;
+  background:
+    radial-gradient(130px 90px at 88% 4%, rgba(190,160,90,.16), transparent 70%),
+    radial-gradient(170px 110px at 6% 94%, rgba(160,130,80,.13), transparent 70%),
+    radial-gradient(100px 70px at 94% 58%, rgba(150,120,70,.09), transparent 70%),
+    #F2EEE1}
+/* 색연필 낙서 — 여백 장식 (아날로그 원고 느낌) */
+.memo .md{position:absolute; pointer-events:none; z-index:0}
+.md1{top:46px; right:6px; width:132px}
+.md2{left:2px; top:38%; width:30px}
+.md3{bottom:36px; right:8px; width:102px}
+.memo-head, .memo-tools, .memo-body, .memo-foot{position:relative; z-index:1}
 /* 메모 버튼 — 쇼츠식 우측 레일 (모바일 전용, 화면에 고정이라 발화자 전환과 무관) */
 .vmemo{display:none; position:fixed; right:10px; bottom:70px; z-index:63; flex-direction:column; align-items:center;
   gap:3px; background:none; color:#fff; cursor:pointer; filter:drop-shadow(0 1px 3px rgba(0,0,0,.65))}
@@ -152,6 +163,7 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
 .mstamp::before{content:'▶ '}
 .memo-body .mstamp:first-child{border-top:none; margin-top:2px; padding-top:2px}
 .mscrap{margin:6px 0; font-size:.84rem; line-height:1.9}
+.mscrap::after{content:'|||'; color:#B03A34; margin-left:7px; font-family:var(--tw); font-size:.8rem; letter-spacing:1px}
 .pc-text{cursor:pointer}
 .pc-text:hover{text-decoration:underline}
 
@@ -443,6 +455,22 @@ canvas{display:block; width:100%; height:200px; touch-action:none; cursor:crossh
     </div>
     </div>
     <div class="memo">
+      <svg class="md md1" viewBox="0 0 140 90" aria-hidden="true">
+        <path d="M8 62 C 30 40, 55 58, 78 34 S 120 22, 134 12" fill="none" stroke="#4A5DB0" stroke-width="3" stroke-linecap="round" opacity=".5"/>
+        <path d="M14 70 C 38 50, 62 66, 86 44 S 122 30, 136 22" fill="none" stroke="#3E9B6C" stroke-width="2.6" stroke-linecap="round" opacity=".45"/>
+        <path d="M60 78 l10 -16 M74 76 l10 -16 M88 72 l10 -16" stroke="#B03A34" stroke-width="2.6" stroke-linecap="round" opacity=".55"/>
+        <path d="M100 60 C 112 52, 124 54, 132 44" fill="none" stroke="#E8C93E" stroke-width="4" stroke-linecap="round" opacity=".6"/>
+      </svg>
+      <svg class="md md2" viewBox="0 0 36 120" aria-hidden="true">
+        <path d="M18 6 C 8 26, 26 40, 14 62 S 24 96, 16 112" fill="none" stroke="#7A64B5" stroke-width="2.4" opacity=".4" stroke-linecap="round"/>
+        <path d="M10 104 L16 114 L24 102" fill="none" stroke="#7A64B5" stroke-width="2.4" opacity=".4" stroke-linecap="round"/>
+      </svg>
+      <svg class="md md3" viewBox="0 0 110 80" aria-hidden="true">
+        <circle cx="84" cy="26" r="12" fill="none" stroke="#E8C93E" stroke-width="3.4" opacity=".65"/>
+        <circle cx="84" cy="26" r="17" fill="none" stroke="#E8C93E" stroke-width="1.6" opacity=".35"/>
+        <path d="M18 58 L44 34 M22 34 L46 60 M14 46 L50 46 M31 26 L33 66" stroke="#3E9B6C" stroke-width="2.4" opacity=".45" stroke-linecap="round"/>
+        <path d="M60 66 C 76 58, 92 64, 104 54" fill="none" stroke="#B03A34" stroke-width="2.6" opacity=".45" stroke-linecap="round"/>
+      </svg>
       <div class="memo-head"><span class="mbadge">1강</span><b>MY NOTE · 전략 설정</b><span class="mdate" id="memoDate"></span><button class="memo-hide" id="memoHide" aria-label="메모 닫기">✕</button></div>
       <div class="memo-tools" id="memoTools">
         <button data-mt="bold" title="굵게"><b>B</b></button>
