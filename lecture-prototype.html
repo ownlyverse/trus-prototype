@@ -110,10 +110,6 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
   font-size:1rem; font-weight:800; color:#8A7F6A; display:flex; align-items:center; justify-content:center; z-index:5;
   background:none; border:none; box-shadow:none; padding:0; min-width:0}
 #actOverlay .ao-close:hover{background:rgba(0,0,0,.07); color:#17171C}
-.ao-return{position:fixed; left:50%; bottom:26px; transform:translateX(-50%); z-index:95;
-  background:#FFF9F1; color:#17171C; border:3px solid #17171C; border-radius:999px; padding:11px 20px;
-  font-weight:800; font-size:.88rem; box-shadow:4px 4px 0 rgba(0,0,0,.4); display:none; cursor:pointer}
-.ao-return.show{display:block}
 @keyframes tapfb{0%{opacity:1; transform:translate(-50%,-50%) scale(.82)} 100%{opacity:0; transform:translate(-50%,-50%) scale(1.15)}}
 @keyframes spotpop{from{transform:scale(.94); opacity:.55} to{transform:none; opacity:1}}
 .liveroom > .memo{height:var(--H); display:flex; flex-direction:column; overflow:hidden; min-width:0}
@@ -204,10 +200,17 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
 /* 섹션 종료 선택 */
 .sec-overlay{position:fixed; inset:0; z-index:80; background:rgba(20,15,28,.72); backdrop-filter:blur(4px); display:none; align-items:center; justify-content:center}
 .sec-overlay.show{display:flex}
-.sec-card{background:var(--paper); border:3px solid #17171C; border-radius:8px; box-shadow:8px 8px 0 rgba(0,0,0,.5); padding:30px 32px; text-align:center; width:min(420px,90vw); animation:rise .3s ease}
+.sec-card{border:3px solid #1F1D1A; border-radius:8px; box-shadow:8px 8px 0 rgba(0,0,0,.5); padding:30px 32px;
+  text-align:center; width:min(420px,90vw); animation:rise .3s ease;
+  background:
+    radial-gradient(130px 90px at 88% 4%, rgba(190,160,90,.14), transparent 70%),
+    radial-gradient(170px 110px at 6% 94%, rgba(160,130,80,.11), transparent 70%),
+    #F2EEE1}
 .sec-card .se{font-size:44px; margin-bottom:10px}
-.sec-card h2{font-size:1.3rem; font-weight:800; letter-spacing:-0.03em; margin-bottom:8px}
-.sec-card p{font-size:.86rem; color:#7A7264; line-height:1.65; margin-bottom:20px}
+.sec-card h2{font-size:1.2rem; font-weight:800; letter-spacing:.01em; margin-bottom:8px;
+  font-family:'NeoDunggeunmo','Pretendard Variable',sans-serif}
+.sec-card p{font-size:.85rem; color:#6E6659; line-height:1.75; margin-bottom:20px;
+  font-family:'NeoDunggeunmo','Pretendard Variable',sans-serif}
 .sec-card .btns{display:flex; flex-direction:column; gap:9px}
 .sec-card.wide{width:min(880px,94vw); text-align:left; position:relative}
 .ao-timer{position:absolute; top:16px; right:18px; font-family:'NeoDunggeunmo','Pretendard Variable',sans-serif; letter-spacing:0;
@@ -219,14 +222,16 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
 .ao-grid{display:grid; grid-template-columns:minmax(0,1fr) 230px; gap:14px; align-items:start}
 @media(max-width:640px){.ao-grid{grid-template-columns:1fr}}
 .ao-peers{display:flex; flex-direction:column; gap:10px}
-.pc-cap{font-size:.7rem; font-weight:800; color:#A8834A}
-.peer-card{border:2px solid #17171C; border-radius:6px; background:#FDF8EC; padding:9px 11px}
-.pc-name{font-size:.66rem; font-weight:700; color:#C24C78; display:flex; align-items:center; gap:6px; margin-bottom:6px}
+.pc-cap{font-size:.66rem; font-weight:800; color:#1F1D1A; font-family:'NeoDunggeunmo',sans-serif; letter-spacing:.06em}
+.peer-card{border:none; border-top:1.5px solid #1F1D1A; border-radius:0; background:transparent; padding:9px 2px}
+.pc-name{font-size:.6rem; font-weight:700; color:#1F1D1A; display:flex; align-items:center; gap:6px; margin-bottom:6px;
+  font-family:'NeoDunggeunmo',sans-serif}
 .pc-live{width:6px; height:6px; border-radius:50%; background:#FF4D6D; animation:blink 1.4s infinite}
 .pc-svg{display:block; width:100%; background:#fff; border-radius:4px; border:1px solid #E8DFD2}
 .pc-svg path{stroke-dasharray:340; stroke-dashoffset:340; animation:drawpath 2.8s ease forwards}
 @keyframes drawpath{to{stroke-dashoffset:0}}
-.pc-text{font-size:.76rem; line-height:1.6; color:#5A5244; min-height:40px}
+.pc-text{font-size:.74rem; line-height:1.8; color:#1F1D1A; min-height:40px; font-family:'NeoDunggeunmo',sans-serif}
+.pc-text:hover{background:linear-gradient(180deg, transparent 12%, rgba(247,223,111,.55) 12% 88%, transparent 88%)}
 .pc-text::after{content:"▌"; color:#C24C78; animation:blink 1s infinite}
 .ao-ta{width:100%; font:inherit; font-size:.98rem; border:3px solid #17171C; border-radius:6px; padding:16px 18px; background:#fff; min-height:280px; resize:vertical; line-height:1.85}
 .ao-ta:focus{outline:3px solid var(--accent-soft)}
@@ -287,7 +292,8 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
   animation:rise .4s ease;
 }
 @keyframes rise{from{opacity:0; transform:translateY(16px)}to{opacity:1; transform:none}}
-.step-label{font-size:.72rem; color:var(--accent-d); margin-bottom:10px}
+.step-label{font-size:.7rem; color:#1F1D1A; margin-bottom:10px; letter-spacing:.08em;
+  border-bottom:2.5px solid #1F1D1A; display:inline-block; padding-bottom:4px}
 .card h1{font-size:clamp(1.25rem,4vw,1.6rem); font-weight:800; letter-spacing:-0.03em; line-height:1.35; margin-bottom:6px}
 .lede{font-size:.86rem; color:#7A7264; line-height:1.6; margin-bottom:18px}
 
@@ -516,7 +522,6 @@ canvas{display:block; width:100%; height:200px; touch-action:none; cursor:crossh
   </div>
 </div>
 
-<button class="ao-return" id="aoReturn">▶ 하던 활동 이어하기</button>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -716,6 +721,10 @@ document.addEventListener('click', e => {
   const inSpot = e.target.closest('#spotSlot');
   if(!inSpot) return;
   if(e.target.closest('.vctrl, .vstart, button, input, a')) return;
+  if(BLOCKS[bi].type === 'interactive' && !$('actOverlay').classList.contains('show')){
+    $('actOverlay').classList.add('show');   /* 닫아뒀던 활동으로 복귀 */
+    return;
+  }
   togglePlayback(true);
 });
 $('vProg').addEventListener('click', blockMsg);
@@ -1020,17 +1029,12 @@ function startActTimer(sec){
 $('aoDone').addEventListener('click', () => {
   if(!SOLO || $('aoDone').disabled) return;
   clearInterval(actTimer);
-  $('aoReturn').classList.remove('show');
   endInteractive();
 });
-/* 인터랙티브 X — 잠시 닫고 강의 화면을 본다. 이어하기 칩으로 복귀 */
+/* 인터랙티브 X — 잠시 닫고 강의 화면을 본다. 영상 화면을 탭하면 활동으로 복귀 */
 $('aoClose').addEventListener('click', () => {
   $('actOverlay').classList.remove('show');
-  $('aoReturn').classList.add('show');
-});
-$('aoReturn').addEventListener('click', () => {
-  $('aoReturn').classList.remove('show');
-  $('actOverlay').classList.add('show');
+  toast('화면을 누르면 활동으로 돌아가요');
 });
 function endInteractive(){
   const b = BLOCKS[bi];
