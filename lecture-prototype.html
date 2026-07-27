@@ -84,46 +84,55 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
 
 /* 라이브 강의실 — 코치2+나(좌 세로 3) · 강의자(가운데 세로 대형) · 메모(우 컬럼) */
 .liveroom{
-  --H:min(760px, 82vh, 48vw);              /* 강의자 세로 높이 */
-  --s:calc((var(--H) - 32px)/3);           /* 미니 타일 높이 (3개+간격2 = --H) */
+  --H:min(760px, 82vh, 48vw);              /* 스포트라이트(발화자) 세로 높이 */
   display:grid; justify-content:center; gap:18px; margin:14px auto 8px;
-  grid-template-columns:calc(var(--s)*16/9) calc(var(--H)*9/16) minmax(280px,380px);
+  grid-template-columns:auto minmax(280px,380px);
 }
-.mid-col{order:1}
-.vid.main{order:2}
-.liveroom > .memo{order:3}
-.vid.main{height:var(--H); aspect-ratio:9/16}
-.mid-col{display:flex; flex-direction:column; gap:16px; min-width:0}
-.mid-col .vid{height:var(--s)}
+/* 발화자 스포트라이트 무대 — 스포트 슬롯(세로 대형) + 사이드 슬롯(가로 소형).
+   발화자가 바뀌면 JS가 타일을 슬롯 사이로 옮긴다 */
+.stage{display:flex; gap:16px; align-items:flex-start; order:1}
+.liveroom > .memo{order:2}
+.spot-slot .vid{height:var(--H); width:calc(var(--H)*9/16); aspect-ratio:9/16; cursor:default}
+.mid-col{display:flex; flex-direction:column; gap:14px; min-width:0; width:min(236px, 20vw)}
+.mid-col .vid{width:100%; height:auto; aspect-ratio:16/9; cursor:pointer}
+.mid-col .vid:hover{outline:3px solid #E86CA8; outline-offset:2px}
+.vid.pop{animation:spotpop .35s ease}
+@keyframes spotpop{from{transform:scale(.94); opacity:.55} to{transform:none; opacity:1}}
 .liveroom > .memo{height:var(--H); display:flex; flex-direction:column; overflow:hidden; min-width:0}
 .liveroom > .memo .memo-body{flex:1; min-height:0; max-height:none}
 
-/* 좁은 화면: 강의자(세로) → 미니 3개 가로 → 메모 (기본 규칙보다 반드시 뒤) */
+/* 좁은 화면: 스포트(세로) → 청자 2명 가로 일렬 → 메모 (기본 규칙보다 반드시 뒤) */
 @media(max-width:860px){
   .liveroom{display:flex; flex-direction:column; align-items:center}
-  .liveroom .vid.main{height:auto; aspect-ratio:9/16; width:min(66vw,300px); align-self:center; order:1}
-  /* 모바일: 강의자 세로 영상 하단에 코치 2명만 가로로 작게 일렬 (나 타일 숨김) */
-  .mid-col{flex-direction:row; order:2; width:min(66vw,300px); gap:10px}
-  .mid-col .metile{display:none}
+  .stage{flex-direction:column; align-items:center; width:100%}
+  .spot-slot{display:flex; justify-content:center}
+  .spot-slot .vid{height:auto; width:min(66vw,300px); aspect-ratio:9/16}
+  .mid-col{flex-direction:row; width:min(66vw,300px); gap:10px}
   .mid-col .vid{height:auto; aspect-ratio:16/9; flex:1; min-width:0}
-  .liveroom > .memo{order:3; height:auto; min-height:200px; width:min(92vw,420px)}
+  .liveroom > .memo{height:auto; min-height:200px; width:min(92vw,420px)}
 }
 .vid{position:relative; border:3px solid #17171C; border-radius:6px; overflow:hidden; background:#000; box-shadow:4px 4px 0 rgba(0,0,0,.4); aspect-ratio:16/9}
 .vid img, .vid video{width:100%; height:100%; object-fit:cover; display:block}
 .vid.main{box-shadow:7px 7px 0 rgba(0,0,0,.45)}
 .vtag{position:absolute; left:8px; bottom:8px; background:rgba(23,19,31,.88); color:#fff; font-size:.74rem; padding:2px 8px; border-radius:2px; font-family:'NeoDunggeunmo','Pretendard Variable',sans-serif; letter-spacing:0}
 .vlive{position:absolute; right:7px; top:7px; width:8px; height:8px; border-radius:50%; background:#FF4D6D; box-shadow:0 0 7px #FF4D6D; animation:blink 1.4s infinite}
-.metile{background:#241E33; display:flex; align-items:center; justify-content:center}
-.metile img{width:auto !important; height:70% !important; max-height:180px; object-fit:contain}
 .spr-box{position:relative; width:48px; height:44px}
 .me-sprite{position:absolute; top:0; left:0; width:4px; height:4px; image-rendering:pixelated}
-.memo{background:#fff; border:3px solid #17171C; border-radius:6px; box-shadow:4px 4px 0 rgba(0,0,0,.4); min-width:0}
-.memo-head{display:flex; align-items:center; gap:6px; padding:10px 12px; border-bottom:2px solid #EFE7D8; font-size:.68rem; font-weight:700; color:#8B95A1}
-.memo-head b{margin-left:4px; color:#5A5244}
-.mdot{width:8px; height:8px; border-radius:50%}
-.mdot.r{background:#FF6B6B}.mdot.y{background:#FFD93D}.mdot.g{background:#6BCB77}
-.memo-body{padding:14px 16px; min-height:220px; overflow-y:auto; font-size:.88rem; line-height:1.8; outline:none; color:#3A3428}
+.memo{background:#FFF9F1; border:3px solid #17171C; border-radius:8px; box-shadow:5px 5px 0 rgba(0,0,0,.4); min-width:0}
+.memo-head{display:flex; align-items:baseline; gap:8px; padding:12px 14px 9px; border-bottom:2px dashed #E2D6BE;
+  font-size:.82rem; font-weight:800; color:#5A5244; font-family:'NeoDunggeunmo','Pretendard Variable',sans-serif}
+.memo-head .mdate{margin-left:auto; font-size:.68rem; color:#A79C86; font-weight:700}
+.memo-body{padding:6px 16px 14px; min-height:220px; overflow-y:auto; font-size:.9rem; outline:none; color:#3A3428;
+  line-height:29px; background:repeating-linear-gradient(transparent 0 28px, rgba(23,23,28,.07) 28px 29px)}
 .memo-body:empty::before{content:attr(data-ph); color:#B0A793}
+.memo-foot{padding:8px 14px; border-top:2px dashed #E2D6BE; font-size:.68rem; color:#A79C86; font-weight:700}
+.mstamp{display:inline-block; font-size:.64rem; font-weight:800; background:#17171C; color:#FFE79A;
+  padding:2px 8px; border-radius:3px; margin:6px 0 2px; font-family:'NeoDunggeunmo','Pretendard Variable',sans-serif}
+.mscrap{border-left:3px solid #E86CA8; background:rgba(232,108,168,.09); padding:6px 10px; margin:6px 0;
+  font-size:.84rem; line-height:1.6; border-radius:0 6px 6px 0}
+.mscrap small{display:block; color:#8A8494; margin-top:3px; font-size:.7rem}
+.pc-text{cursor:pointer}
+.pc-text:hover{text-decoration:underline}
 
 /* 강의 재생바 — 섹션이 끝나기 전엔 멈출 수 없어요 */
 .vctrl{position:absolute; left:0; right:0; bottom:0; display:flex; align-items:center; gap:10px; padding:22px 12px 9px;
@@ -350,6 +359,8 @@ canvas{display:block; width:100%; height:200px; touch-action:none; cursor:crossh
 <div class="stage">
   <div class="sign pxfont"><span class="board">1강 · 전략 설정</span><small>커리큘럼 5단계 중 마지막 · 일의 교과서</small></div>
   <div class="liveroom">
+    <div class="stage">
+    <div class="spot-slot" id="spotSlot">
     <div class="vid main">
       <video id="lecVid" src="assets/lecture1.mp4" poster="assets/lecture1-poster.jpg" playsinline preload="metadata"></video>
       <span class="vsec" id="vSec">1/9 · 오늘, 잠깐 멈추는 시간</span>
@@ -365,14 +376,16 @@ canvas{display:block; width:100%; height:200px; touch-action:none; cursor:crossh
         <span>탭하여 강의 시작 · 소리 켜짐 🔊</span>
       </div>
     </div>
-    <div class="mid-col">
+    </div>
+    <div class="mid-col" id="sideSlot">
       <div class="vid"><video id="coachA" src="assets/coach-boundary.mp4" muted loop playsinline preload="auto"></video><span class="vtag">🦉 바운더리 코치</span><span class="vlive"></span></div>
       <div class="vid"><video id="coachB" src="assets/coach-record.mp4" muted loop playsinline preload="auto"></video><span class="vtag">🐢 기록 코치</span><span class="vlive"></span></div>
-      <div class="vid metile"><img src="assets/char1.png" alt="" style="image-rendering:pixelated"><span class="vtag">나 · 김이서</span></div>
+    </div>
     </div>
     <div class="memo">
-      <div class="memo-head"><span class="mdot r"></span><span class="mdot y"></span><span class="mdot g"></span><b>내 메모</b></div>
-      <div class="memo-body" id="memoBody" contenteditable="true" data-ph="수업 들으며 자유롭게 적어요…"></div>
+      <div class="memo-head"><b>📒 1강 메모</b><span class="mdate" id="memoDate"></span></div>
+      <div class="memo-body" id="memoBody" contenteditable="true" data-ph="수업 들으며 자유롭게 적어요… (코치의 말을 누르면 여기 담겨요)"></div>
+      <div class="memo-foot">수업이 끝나면 마이스페이스 책상에 꽂혀요</div>
     </div>
   </div>
 
@@ -459,6 +472,10 @@ function runBlock(){
   updateUI();
   if(b.type==='lecture'){ playLecture(); }
   else { lecVid.pause(); coachesPause(); $('vPlay').textContent = '▶'; }
+  /* 발화자 스포트라이트 — 강의 중엔 소정님, 인터랙티브 진입 땐 코치들이 차례로 말한다 */
+  if(b.type==='lecture'){ clearSpotTimers(); spotlight(mainTile); }
+  else if(b.type==='interactive'){ spotSeq([[coachTiles[0], 400], [coachTiles[1], 5400], [mainTile, 10400]]); }
+  else { clearSpotTimers(); spotlight(mainTile); }
   if(b.type==='gate') showGate(false);
   if(b.type==='interactive') showInteractive(b);
   if(b.type==='finish') showGate(true);
@@ -964,6 +981,70 @@ if(PV){
     runBlock();
   } else runBlock();
 } else runBlock();
+
+/* ─── 발화자 스포트라이트 — 말하는 사람이 중앙 세로형으로, 청자는 사이드 가로형으로 ─── */
+const spotSlotEl = $('spotSlot'), sideSlotEl = $('sideSlot');
+const mainTile = document.querySelector('.vid.main');
+const coachTiles = coachVids.map(v => v.closest('.vid'));
+let spotTimers = [];
+function clearSpotTimers(){ spotTimers.forEach(clearTimeout); spotTimers = []; }
+function spotlight(el){
+  if(!el || el.parentElement === spotSlotEl) return;
+  const playing = [lecVid, ...coachVids].filter(v => !v.paused);
+  const old = spotSlotEl.firstElementChild;
+  if(old) sideSlotEl.prepend(old);
+  spotSlotEl.appendChild(el);
+  playing.forEach(v => v.play().catch(()=>{}));       /* DOM 이동으로 멈춘 영상 재개 */
+  const cv = el.querySelector('video');
+  if(cv && cv !== lecVid) cv.play().catch(()=>{});    /* 스포트로 온 코치는 살아 움직이게 */
+  [old, el].forEach(t => { if(!t) return; t.classList.remove('pop'); void t.offsetWidth; t.classList.add('pop'); });
+}
+function spotSeq(steps){ clearSpotTimers(); steps.forEach(([el, at]) => spotTimers.push(setTimeout(() => spotlight(el), at))); }
+sideSlotEl.addEventListener('click', e => {
+  const v = e.target.closest('.vid');
+  if(v){ clearSpotTimers(); spotlight(v); }
+});
+
+/* ─── 남는 메모장 — 자동 저장 · 대목 도장 · 코치 말 스크랩 ─── */
+const memoBody = $('memoBody');
+const MEMO_KEY = 'trus_lecture_memo';
+try{
+  const m = JSON.parse(localStorage.getItem(MEMO_KEY));
+  if(m && m.v === 1 && m.html) memoBody.innerHTML = m.html;
+}catch(e){}
+$('memoDate').textContent = new Date().toLocaleDateString('ko-KR', { month:'long', day:'numeric' });
+let memoTimer = null;
+function saveMemo(){
+  try{ localStorage.setItem(MEMO_KEY, JSON.stringify({ v:1, html: memoBody.innerHTML })); }
+  catch(e){ toast('메모 저장 실패 — 브라우저 저장 공간을 확인해요'); }
+}
+memoBody.addEventListener('input', () => { clearTimeout(memoTimer); memoTimer = setTimeout(saveMemo, 700); });
+/* 대목 도장 — 새 블록에서 메모를 시작하면 지금 듣던 대목이 자동으로 찍혀요 */
+let lastStampBi = -1;
+memoBody.addEventListener('focus', () => {
+  if(bi === lastStampBi) return;
+  lastStampBi = bi;
+  const b = BLOCKS[bi];
+  const at = b.type === 'lecture' ? ` · ${fmt(lecVid.currentTime)}` : '';
+  memoBody.insertAdjacentHTML('beforeend',
+    `<div class="mstamp" contenteditable="false">${bi + 1}블록 · ${b.type === 'lecture' ? b.t : b.name}${at}</div><div><br></div>`);
+  const r = document.createRange(); r.selectNodeContents(memoBody); r.collapse(false);
+  const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r);
+  saveMemo();
+});
+/* 코치 말 스크랩 — 옆에 뜨는 코치의 말을 누르면 인용으로 담겨요 */
+document.addEventListener('click', e => {
+  const pt = e.target.closest('.pc-text');
+  if(!pt) return;
+  const card = pt.closest('.peer-card');
+  const name = card ? card.querySelector('.pc-name').textContent.trim() : '';
+  const text = pt.dataset.full || pt.textContent;
+  if(!text.trim()) return;
+  memoBody.insertAdjacentHTML('beforeend',
+    `<div class="mscrap" contenteditable="false">❝ ${text}<small>${name}</small></div><div><br></div>`);
+  saveMemo();
+  toast('코치의 말을 메모장에 담았어요 ✍️');
+});
 </script>
 </body>
 </html>
