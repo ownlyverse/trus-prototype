@@ -503,6 +503,9 @@ const BLOCKS = [
   {type:'finish', name:'마무리 · 다시 듣기'},
 ];
 
+/* 단독 수강 모드 — 인터랙티브 제한시간 없음, 완료하면 스스로 넘어간다.
+   TODO(스튜디오): 강의 업로드 시 단독/단체 수강을 선택하면 이 값이 강의 구성에 따라 결정된다. */
+const SOLO = true;
 let bi = 0, maxBi = 0, done = false, started = false;   // maxBi = 지금까지 도달한 최대 블록 (bi는 soReplay로 되감겨요)
 const fmt = s => Math.floor(s/60) + ':' + String(Math.max(0,Math.round(s))%60).toString().padStart(2,'0');
 const $ = id => document.getElementById(id);
@@ -535,6 +538,10 @@ function spotlight(el){
   playing.forEach(v => v.play().catch(()=>{}));       /* DOM 이동으로 멈춘 영상 재개 */
   const cv = el.querySelector('video');
   if(cv && cv !== lecVid) cv.play().catch(()=>{});    /* 스포트로 온 코치는 살아 움직이게 */
+  if(started){                                        /* 스포트에 온 사람만 소리, 나머지 음소거 */
+    [lecVid, ...coachVids].forEach(v => { v.muted = true; });
+    if(cv) cv.muted = false;
+  }
   [old, el].forEach(t => { if(!t) return; t.classList.remove('pop'); void t.offsetWidth; t.classList.add('pop'); });
 }
 function spotSeq(steps){ clearSpotTimers(); steps.forEach(([el, at]) => spotTimers.push(setTimeout(() => spotlight(el), at))); }
@@ -567,10 +574,8 @@ function runBlock(){
   updateUI();
   if(b.type==='lecture'){ playLecture(); }
   else { lecVid.pause(); coachesPause(); $('vPlay').textContent = '▶'; }
-  /* 발화자 스포트라이트 — 강의 중엔 소정님, 인터랙티브 진입 땐 코치들이 차례로 말한다 */
-  if(b.type==='lecture'){ clearSpotTimers(); spotlight(mainTile); }
-  else if(b.type==='interactive'){ spotSeq([[coachTiles[0], 400], [coachTiles[1], 5400], [mainTile, 10400]]); }
-  else { clearSpotTimers(); spotlight(mainTile); }
+  /* 발화자 스포트라이트 — 강의 섹션에서만 로테이션. 그 외 구간은 소정님 고정 */
+  if(b.type !== 'lecture'){ clearSpotTimers(); spotlight(mainTile); }
   if(b.type==='gate') showGate(false);
   if(b.type==='interactive') showInteractive(b);
   if(b.type==='finish') showGate(true);
@@ -762,10 +767,16 @@ function showInteractive(b){
   h.classList.remove('ready');
   $('aoDone').disabled = true;
   $('actOverlay').classList.add('show');
-  const ok = msg => { actMet = true; h.textContent = msg + ' — 시간이 끝나면 다 같이 넘어가요'; h.classList.add('ready'); $('aoDone').textContent = '다 했어요 ✓ — 함께 나가요'; };
+  const ok = msg => {
+    actMet = true; h.textContent = msg + (SOLO ? ' — 준비되면 다음으로 넘어가요' : ' — 시간이 끝나면 다 같이 넘어가요');
+    h.classList.add('ready');
+    $('aoDone').textContent = SOLO ? '다 했어요 ✓ — 다음으로' : '다 했어요 ✓ — 함께 나가요';
+    if(SOLO) $('aoDone').disabled = false;
+  };
   actMet = false;
-  $('aoDone').textContent = '시간이 끝나면 다 같이 나가요';
-  startActTimer(b.dur || 30);
+  $('aoDone').textContent = SOLO ? '활동을 완료하면 넘어갈 수 있어요' : '시간이 끝나면 다 같이 나가요';
+  if(SOLO){ clearInterval(actTimer); $('aoTimer').classList.remove('hot'); $('aoTimer').textContent = '단독 수강 · 제한시간 없음'; }
+  else startActTimer(b.dur || 30);
 
   if(b.kind==='draw') setTimeout(initPad, 60);
   if(b.kind==='write'){
@@ -918,6 +929,11 @@ function startActTimer(sec){
     if(actLeft <= 0){ clearInterval(actTimer); endInteractive(); }
   }, 1000);
 }
+$('aoDone').addEventListener('click', () => {
+  if(!SOLO || $('aoDone').disabled) return;
+  clearInterval(actTimer);
+  endInteractive();
+});
 function endInteractive(){
   const b = BLOCKS[bi];
   if(PV){ startActTimer(b.dur || 30); toast('미리보기 — 타이머를 다시 돌려요'); return; }
