@@ -378,8 +378,8 @@ canvas{display:block; width:100%; height:200px; touch-action:none; cursor:crossh
 <div class="bg-night"></div>
 
 <header class="hud">
-  <button class="hud-btn" onclick="location.href='myspace-prototype.html'" title="마이스페이스로" aria-label="마이스페이스로">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.8 12 3.5l9 7.3"/><path d="M5.5 9.7V20a1 1 0 0 0 1 1H10v-5.4h4V21h3.5a1 1 0 0 0 1-1V9.7"/></svg>
+  <button class="hud-btn" onclick="location.href='lecture-list-prototype.html'" title="나의 강의로" aria-label="나의 강의로">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
   </button>
   <span class="spacer"></span>
   <button class="hud-btn" id="menuToggle" title="목차 열기" aria-label="목차 열기" aria-expanded="false" aria-controls="menuDrawer">☰</button>
@@ -519,6 +519,38 @@ lecVid.addEventListener('loadedmetadata', ()=>{
 const coachVids = [$('coachA'), $('coachB')];
 function coachesStart(){ coachVids.forEach(v=>{ v.currentTime = 0; v.play().catch(()=>{}); }); }
 function coachesPause(){ coachVids.forEach(v=>v.pause()); }
+
+/* ─── 발화자 스포트라이트 — 말하는 사람이 중앙 세로형으로, 청자는 사이드 가로형으로 ─── */
+const spotSlotEl = $('spotSlot'), sideSlotEl = $('sideSlot');
+const mainTile = document.querySelector('.vid.main');
+const coachTiles = coachVids.map(v => v.closest('.vid'));
+let spotTimers = [];
+function clearSpotTimers(){ spotTimers.forEach(clearTimeout); spotTimers = []; }
+function spotlight(el){
+  if(!el || el.parentElement === spotSlotEl) return;
+  const playing = [lecVid, ...coachVids].filter(v => !v.paused);
+  const old = spotSlotEl.firstElementChild;
+  if(old) sideSlotEl.prepend(old);
+  spotSlotEl.appendChild(el);
+  playing.forEach(v => v.play().catch(()=>{}));       /* DOM 이동으로 멈춘 영상 재개 */
+  const cv = el.querySelector('video');
+  if(cv && cv !== lecVid) cv.play().catch(()=>{});    /* 스포트로 온 코치는 살아 움직이게 */
+  [old, el].forEach(t => { if(!t) return; t.classList.remove('pop'); void t.offsetWidth; t.classList.add('pop'); });
+}
+function spotSeq(steps){ clearSpotTimers(); steps.forEach(([el, at]) => spotTimers.push(setTimeout(() => spotlight(el), at))); }
+/* 강의 중 발화자 로테이션 데모 — 소정 5초 → 기록 코치 10초 → 바운더리 코치 10초 → 소정 복귀, 반복 */
+function spotCycle(){
+  clearSpotTimers();
+  spotlight(mainTile);
+  spotTimers.push(setTimeout(() => spotlight(coachTiles[1]), 5000));    /* 🐢 기록 */
+  spotTimers.push(setTimeout(() => spotlight(coachTiles[0]), 15000));   /* 🦉 바운더리 */
+  spotTimers.push(setTimeout(spotCycle, 25000));                        /* 소정 복귀 → 반복 */
+}
+sideSlotEl.addEventListener('click', e => {
+  const v = e.target.closest('.vid');
+  if(v){ clearSpotTimers(); spotlight(v); }
+});
+
 
 const effDur = () => Math.min(VID_DUR, TEST_SEC);
 function updateUI(){
@@ -1045,37 +1077,6 @@ if(PV){
     runBlock();
   } else runBlock();
 } else runBlock();
-
-/* ─── 발화자 스포트라이트 — 말하는 사람이 중앙 세로형으로, 청자는 사이드 가로형으로 ─── */
-const spotSlotEl = $('spotSlot'), sideSlotEl = $('sideSlot');
-const mainTile = document.querySelector('.vid.main');
-const coachTiles = coachVids.map(v => v.closest('.vid'));
-let spotTimers = [];
-function clearSpotTimers(){ spotTimers.forEach(clearTimeout); spotTimers = []; }
-function spotlight(el){
-  if(!el || el.parentElement === spotSlotEl) return;
-  const playing = [lecVid, ...coachVids].filter(v => !v.paused);
-  const old = spotSlotEl.firstElementChild;
-  if(old) sideSlotEl.prepend(old);
-  spotSlotEl.appendChild(el);
-  playing.forEach(v => v.play().catch(()=>{}));       /* DOM 이동으로 멈춘 영상 재개 */
-  const cv = el.querySelector('video');
-  if(cv && cv !== lecVid) cv.play().catch(()=>{});    /* 스포트로 온 코치는 살아 움직이게 */
-  [old, el].forEach(t => { if(!t) return; t.classList.remove('pop'); void t.offsetWidth; t.classList.add('pop'); });
-}
-function spotSeq(steps){ clearSpotTimers(); steps.forEach(([el, at]) => spotTimers.push(setTimeout(() => spotlight(el), at))); }
-/* 강의 중 발화자 로테이션 데모 — 소정 5초 → 기록 코치 10초 → 바운더리 코치 10초 → 소정 복귀, 반복 */
-function spotCycle(){
-  clearSpotTimers();
-  spotlight(mainTile);
-  spotTimers.push(setTimeout(() => spotlight(coachTiles[1]), 5000));    /* 🐢 기록 */
-  spotTimers.push(setTimeout(() => spotlight(coachTiles[0]), 15000));   /* 🦉 바운더리 */
-  spotTimers.push(setTimeout(spotCycle, 25000));                        /* 소정 복귀 → 반복 */
-}
-sideSlotEl.addEventListener('click', e => {
-  const v = e.target.closest('.vid');
-  if(v){ clearSpotTimers(); spotlight(v); }
-});
 
 /* ─── 남는 메모장 — 자동 저장 · 대목 도장 · 코치 말 스크랩 ─── */
 const memoBody = $('memoBody');
