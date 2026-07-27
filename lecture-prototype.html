@@ -1090,7 +1090,7 @@ memoBody.addEventListener('focus', () => {
   const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r);
   saveMemo();
 });
-$('vBack').addEventListener('click', () => { if(history.length > 1) history.back(); else location.href = 'hub.html'; });
+$('vBack').addEventListener('click', () => location.href = 'lecture-list-prototype.html'); /* 나의 강의 리스트로 */
 /* 모바일 — 재생바 아이콘으로 메모 댓글창 여닫기 */
 $('vMemoBtn').addEventListener('click', e => { e.stopPropagation(); document.body.classList.toggle('memo-open'); });
 $('memoHide').addEventListener('click', () => document.body.classList.remove('memo-open'));
