@@ -512,7 +512,7 @@ const $ = id => document.getElementById(id);
 
 /* ─── 실제 강의 영상 (세로 9:16) ─── */
 const lecVid = $('lecVid');
-const TEST_SEC = 25;                                    // 데모: 강의 구간 25초 — 발화자 로테이션(5+6+7초) 한 사이클이 보이게
+const TEST_SEC = 30;                                    // 데모: 강의 구간 30초 — 발화자 3명이 10초씩 한 번씩
 let VID_DUR = 66;                                       // 로드되면 실제 길이로 갱신
 lecVid.addEventListener('loadedmetadata', ()=>{
   if(isFinite(lecVid.duration) && lecVid.duration > 0){ VID_DUR = lecVid.duration; updateUI(); }
@@ -551,10 +551,10 @@ function spotSeq(steps){ clearSpotTimers(); steps.forEach(([el, at]) => spotTime
 /* 강의 중 발화자 로테이션 데모 — 소정 5초 → 기록 코치 10초 → 바운더리 코치 10초 → 소정 복귀, 반복 */
 function spotCycle(){
   clearSpotTimers();
-  spotlight(mainTile);                                                  /* 소정님 5초 */
-  spotTimers.push(setTimeout(() => spotlight(coachTiles[0]), 5000));    /* 🦉 바운더리 6초 (소리 ON) */
-  spotTimers.push(setTimeout(() => spotlight(coachTiles[1]), 11000));   /* 🐢 기록 7초 (소리 ON) */
-  spotTimers.push(setTimeout(spotCycle, 18000));                        /* 소정 복귀 → 반복 */
+  spotlight(mainTile);                                                  /* 소정님 10초 */
+  spotTimers.push(setTimeout(() => spotlight(coachTiles[0]), 10000));   /* 🦉 바운더리 10초 (소리 ON) */
+  spotTimers.push(setTimeout(() => spotlight(coachTiles[1]), 20000));   /* 🐢 기록 10초 (소리 ON) */
+  /* 한 사이클만 — 30초에 강의 구간이 끝나며 다음 블록으로 넘어간다 */
 }
 sideSlotEl.addEventListener('click', e => {
   const v = e.target.closest('.vid');
@@ -778,7 +778,7 @@ function showInteractive(b){
   };
   actMet = false;
   $('aoDone').textContent = SOLO ? '활동을 완료하면 넘어갈 수 있어요' : '시간이 끝나면 다 같이 나가요';
-  if(SOLO){ clearInterval(actTimer); $('aoTimer').classList.remove('hot'); $('aoTimer').textContent = '단독 수강 · 제한시간 없음'; }
+  if(SOLO){ clearInterval(actTimer); $('aoTimer').classList.remove('hot'); $('aoTimer').textContent = ''; }
   else startActTimer(b.dur || 30);
 
   if(b.kind==='draw') setTimeout(initPad, 60);
