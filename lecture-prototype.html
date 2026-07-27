@@ -568,13 +568,20 @@ function spotlight(el){
   [old, el].forEach(t => { if(!t) return; t.classList.remove('pop'); void t.offsetWidth; t.classList.add('pop'); });
 }
 function spotSeq(steps){ clearSpotTimers(); steps.forEach(([el, at]) => spotTimers.push(setTimeout(() => spotlight(el), at))); }
-/* 강의 중 발화자 로테이션 데모 — 소정 5초 → 기록 코치 10초 → 바운더리 코치 10초 → 소정 복귀, 반복 */
-function spotCycle(){
+/* 강의 발화자 로테이션 — 소정 0~10초 · 바운더리 10~20초 · 기록 20~30초.
+   일시정지 후 재개해도 현재 재생 시점(t) 기준으로 이어서 동기화한다 */
+function spotSync(t){
   clearSpotTimers();
-  spotlight(mainTile);                                                  /* 소정님 10초 */
-  spotTimers.push(setTimeout(() => spotlight(coachTiles[0]), 10000));   /* 🦉 바운더리 10초 (소리 ON) */
-  spotTimers.push(setTimeout(() => spotlight(coachTiles[1]), 20000));   /* 🐢 기록 10초 (소리 ON) */
-  /* 한 사이클만 — 30초에 강의 구간이 끝나며 다음 블록으로 넘어간다 */
+  if(t < 10){
+    spotlight(mainTile);
+    spotTimers.push(setTimeout(() => spotlight(coachTiles[0]), (10 - t) * 1000));
+    spotTimers.push(setTimeout(() => spotlight(coachTiles[1]), (20 - t) * 1000));
+  } else if(t < 20){
+    spotlight(coachTiles[0]);
+    spotTimers.push(setTimeout(() => spotlight(coachTiles[1]), (20 - t) * 1000));
+  } else {
+    spotlight(coachTiles[1]);
+  }
 }
 /* 수동 전환 없음 — 발화자 전환은 로테이션 스크립트가만 담당한다 */
 
@@ -613,7 +620,7 @@ function playLecture(){
   if(started){
     lecVid.play().catch(()=>{}); $('vPlay').textContent = '❚❚';
     coachesStart();                                  // 코치 영상도 0초부터 함께 시작
-    spotCycle();                                     // 발화자 로테이션 시작 (5s→기록 10s→바운더리 10s→복귀)
+    spotSync(lecVid.currentTime || 0);               // 발화자 로테이션 — 현재 시점 기준 동기화
   }
 }
 /* 영상 재생에 맞춰 진행바·남은시간 갱신, 끝까지 다 보면 다음 활동으로 */
@@ -641,14 +648,25 @@ $('vStart').addEventListener('click', ()=>{
   $('vStart').classList.add('hide');
   playLecture();
 });
-/* 강의는 멈추거나 건너뛸 수 없어요 — 끝까지 들어야 다음으로 넘어가요 */
+/* 건너뛰기는 안 돼요 — 일시정지는 가능 */
 function blockMsg(){
   if(done || BLOCKS[bi].type !== 'lecture') return;
-  toast(`강의는 멈추거나 건너뛸 수 없어요 — 남은 시간 ${fmt(Math.max(0, effDur() - lecVid.currentTime))}`);
+  toast(`강의는 건너뛸 수 없어요 — 남은 시간 ${fmt(Math.max(0, effDur() - lecVid.currentTime))}`);
 }
 $('vPlay').addEventListener('click', ()=>{
   if(!started){ $('vStart').click(); return; }   // 소리와 함께 첫 재생만 허용
-  blockMsg();
+  if(BLOCKS[bi].type !== 'lecture') return;
+  if(lecVid.paused){                              /* 재개 — 영상 전체 + 로테이션 시점 동기화 */
+    lecVid.play().catch(()=>{});
+    coachVids.forEach(v => v.play().catch(()=>{}));
+    $('vPlay').textContent = '❚❚';
+    spotSync(lecVid.currentTime || 0);
+  } else {                                        /* 일시정지 — 영상 전체 + 로테이션 정지 */
+    lecVid.pause();
+    coachVids.forEach(v => v.pause());
+    clearSpotTimers();
+    $('vPlay').textContent = '▶';
+  }
 });
 $('vProg').addEventListener('click', blockMsg);
 
@@ -1128,52 +1146,6 @@ function saveMemo(){
   catch(e){ toast('메모 저장 실패 — 브라우저 저장 공간을 확인해요'); }
 }
 memoBody.addEventListener('input', () => { clearTimeout(memoTimer); memoTimer = setTimeout(saveMemo, 700); });
-/* 대목 도장 — 새 블록에서 메모를 시작하면 지금 듣던 대목이 자동으로 찍혀요 */
-let lastStampBi = -1;
-memoBody.addEventListener('focus', () => {
-  if(bi === lastStampBi) return;
-  lastStampBi = bi;
-  const b = BLOCKS[bi];
-  const at = b.type === 'lecture' ? ` · ${fmt(lecVid.currentTime)}` : '';
-  memoBody.insertAdjacentHTML('beforeend',
-    `<div class="mstamp" contenteditable="false">${bi + 1}블록 · ${b.type === 'lecture' ? b.t : b.name}${at}</div><div><br></div>`);
-  const r = document.createRange(); r.selectNodeContents(memoBody); r.collapse(false);
-  const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r);
-  saveMemo();
-});
-$('vBack').addEventListener('click', () => location.href = 'lecture-list-prototype.html'); /* 나의 강의 리스트로 */
-/* 모바일 — 재생바 아이콘으로 메모 댓글창 여닫기 */
-$('vMemoBtn').addEventListener('click', e => { e.stopPropagation(); document.body.classList.toggle('memo-open'); });
-$('memoHide').addEventListener('click', () => document.body.classList.remove('memo-open'));
-
-/* 노션풍 메모 툴바 — 굵게·형광·체크리스트·글머리표 */
-function memoCaretEnd(){
-  const sel = getSelection();
-  if(!sel.rangeCount || !memoBody.contains(sel.anchorNode)){
-    const r = document.createRange(); r.selectNodeContents(memoBody); r.collapse(false);
-    sel.removeAllRanges(); sel.addRange(r);
-  }
-}
-$('memoTools').addEventListener('click', e => {
-  const b = e.target.closest('[data-mt]');
-  if(!b) return;
-  memoBody.focus(); memoCaretEnd();
-  const k = b.dataset.mt;
-  if(k === 'bold') document.execCommand('bold');
-  else if(k === 'hl') document.execCommand('hiliteColor', false, '#F7DF6F');
-  else if(k === 'list') document.execCommand('insertUnorderedList');
-  else if(k === 'check') document.execCommand('insertHTML', false,
-    '<div class="mcheck"><input type="checkbox"><span>&nbsp;</span></div>');
-  clearTimeout(memoTimer); memoTimer = setTimeout(saveMemo, 500);
-});
-/* 체크 상태는 attribute로 박아야 innerHTML 저장에 남아요 */
-memoBody.addEventListener('change', e => {
-  if(e.target.matches('.mcheck input')){
-    if(e.target.checked) e.target.setAttribute('checked', ''); else e.target.removeAttribute('checked');
-    saveMemo();
-  }
-});
-
 /* 코치 말 스크랩 — 옆에 뜨는 코치의 말을 누르면 인용으로 담겨요 */
 document.addEventListener('click', e => {
   const pt = e.target.closest('.pc-text');
