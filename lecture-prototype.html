@@ -94,11 +94,25 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
 .spotstage{display:flex; gap:16px; align-items:flex-start; grid-area:stage}
 .liveroom > .memo{grid-area:memo; align-self:start}
 .spot-slot .vid{height:var(--H); width:calc(var(--H)*9/16); aspect-ratio:9/16; cursor:default}
+.spot-slot .vid .vtag{bottom:44px}   /* 스포트에서는 재생바 위로 — 사이드에선 코치들과 동일 위치·크기 */
 .mid-col{display:flex; flex-direction:column; gap:14px; min-width:0; width:min(236px, 20vw)}
 .mid-col .vid{width:100%; height:auto; aspect-ratio:16/9}
 /* 시작 오버레이는 스포트에서만 — 재생바(.vctrl)는 JS가 스포트 타일로 옮겨 붙인다 */
 .mid-col .vstart{display:none}
 .vid.pop{animation:spotpop .35s ease}
+.spotstage{position:relative}
+.tapfb{position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:72px; height:72px;
+  border-radius:50%; background:rgba(0,0,0,.55); color:#fff; display:flex; align-items:center; justify-content:center;
+  font-size:1.5rem; opacity:0; pointer-events:none; z-index:9}
+.tapfb.show{animation:tapfb .7s ease}
+.ao-close{position:absolute; top:12px; right:14px; width:32px; height:32px; border-radius:8px;
+  font-size:1rem; font-weight:800; color:#8A7F6A; display:flex; align-items:center; justify-content:center; z-index:5}
+.ao-close:hover{background:rgba(0,0,0,.07); color:#17171C}
+.ao-return{position:fixed; left:50%; bottom:26px; transform:translateX(-50%); z-index:95;
+  background:#FFF9F1; color:#17171C; border:3px solid #17171C; border-radius:999px; padding:11px 20px;
+  font-weight:800; font-size:.88rem; box-shadow:4px 4px 0 rgba(0,0,0,.4); display:none; cursor:pointer}
+.ao-return.show{display:block}
+@keyframes tapfb{0%{opacity:1; transform:translate(-50%,-50%) scale(.82)} 100%{opacity:0; transform:translate(-50%,-50%) scale(1.15)}}
 @keyframes spotpop{from{transform:scale(.94); opacity:.55} to{transform:none; opacity:1}}
 .liveroom > .memo{height:var(--H); display:flex; flex-direction:column; overflow:hidden; min-width:0}
 .liveroom > .memo .memo-body{flex:1; min-height:0; max-height:none}
@@ -152,10 +166,12 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
   font-size:.56rem; font-weight:700; margin-left:6px; vertical-align:2px; letter-spacing:.05em}
 /* Bear식 #태그 — 쓰면 자동으로 칩이 된다 */
 .mtag{background:#E9DFC6; color:#B03A34; border-radius:6px; padding:0 5px; font-weight:800}
+.mdivider{border:none; border-top:1.5px solid #C9BFA8; margin:11px 0}
+.memo-body h4{font-size:1rem; font-weight:800; margin:8px 0 3px; letter-spacing:.02em}
+.memo-tools .csw{width:12px; height:12px; border-radius:3px; display:inline-block}
 .memo-foot{display:flex; align-items:center; gap:8px; padding:9px 16px; border-top:2.5px solid #1F1D1A;
   font-size:.6rem; color:#6E6659; font-weight:700; font-family:var(--tw); letter-spacing:.05em}
-.memo-foot #memoCount{margin-left:auto}
-.memo-foot::after{content:'◉ KEEP'; font-size:.6rem; color:#1F1D1A}
+.memo-foot::after{content:'◉ KEEP'; margin-left:auto; font-size:.6rem; color:#1F1D1A}
 .mstamp{display:block; font-size:.68rem; font-weight:800; background:none; color:#1F1D1A;
   border-top:1.5px solid #1F1D1A; padding:9px 0 1px; margin:10px 0 2px; font-family:var(--tw); letter-spacing:.03em}
 .mstamp::before{content:'▶ '}
@@ -431,6 +447,7 @@ canvas{display:block; width:100%; height:200px; touch-action:none; cursor:crossh
       <h1 class="lh-title">1강 · 전략 설정</h1>
     </header>
     <div class="spotstage">
+    <div class="tapfb" id="tapFb" aria-hidden="true">▶</div>
     <div class="spot-slot" id="spotSlot">
     <div class="vid main">
       <video id="lecVid" src="assets/lecture1.mp4" poster="assets/lecture1-poster.jpg" playsinline preload="metadata"></video>
@@ -440,7 +457,7 @@ canvas{display:block; width:100%; height:200px; touch-action:none; cursor:crossh
         <div class="vprog" id="vProg"><i id="vFill"></i></div>
         <span class="vtime num" id="vTime">-0:00</span>
       </div>
-      <span class="vtag" style="bottom:44px">윤소정 · 강의</span>
+      <span class="vtag">윤소정 · 강의</span>
       <div class="vstart" id="vStart">
         <button class="vstart-btn">▶</button>
         <span>탭하여 강의 시작 · 소리 켜짐 🔊</span>
@@ -459,9 +476,12 @@ canvas{display:block; width:100%; height:200px; touch-action:none; cursor:crossh
         <button data-mt="hl" title="형광펜"><span style="background:#F7DF6F;padding:0 3px">가</span></button>
         <button data-mt="check" title="체크리스트">☑</button>
         <button data-mt="list" title="글머리표">•</button>
+        <button data-mt="c-red" title="빨강 글자"><span class="csw" style="background:#B03A34"></span></button>
+        <button data-mt="c-blue" title="파랑 글자"><span class="csw" style="background:#2F5FA8"></span></button>
+        <button data-mt="c-black" title="기본 색"><span class="csw" style="background:#1F1D1A"></span></button>
       </div>
       <div class="memo-body" id="memoBody" contenteditable="true" data-ph="수업 들으며 자유롭게 적어요… (코치의 말을 누르면 여기 담겨요)"></div>
-      <div class="memo-foot"><span>수업이 끝나면 마이스페이스 책상에 꽂혀요</span><span id="memoCount"></span></div>
+      <div class="memo-foot"><span>수업이 끝나면 마이스페이스 책상에 꽂혀요</span></div>
     </div>
   </div>
 
@@ -482,6 +502,7 @@ canvas{display:block; width:100%; height:200px; touch-action:none; cursor:crossh
 
 <div class="sec-overlay" id="actOverlay">
   <div class="sec-card wide">
+    <button class="ao-close" id="aoClose" aria-label="활동 닫기">✕</button>
     <div class="step-label" id="aoLabel"></div>
     <span class="ao-timer" id="aoTimer">⏱ 0:00</span>
     <h2 id="aoTitle"></h2>
@@ -492,6 +513,7 @@ canvas{display:block; width:100%; height:200px; touch-action:none; cursor:crossh
   </div>
 </div>
 
+<button class="ao-return" id="aoReturn">▶ 하던 활동 이어하기</button>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -663,20 +685,35 @@ function blockMsg(){
   if(done || BLOCKS[bi].type !== 'lecture') return;
   toast(`강의는 건너뛸 수 없어요 — 남은 시간 ${fmt(Math.max(0, effDur() - lecVid.currentTime))}`);
 }
-$('vPlay').addEventListener('click', ()=>{
-  if(!started){ $('vStart').click(); return; }   // 소리와 함께 첫 재생만 허용
+function togglePlayback(showFb){
+  if(!started){ $('vStart').click(); return; }
   if(BLOCKS[bi].type !== 'lecture') return;
+  let icon;
   if(lecVid.paused){                              /* 재개 — 영상 전체 + 로테이션 시점 동기화 */
     lecVid.play().catch(()=>{});
     coachVids.forEach(v => v.play().catch(()=>{}));
-    $('vPlay').textContent = '❚❚';
+    $('vPlay').textContent = '❚❚'; icon = '▶';
     spotSync(lecVid.currentTime || 0);
   } else {                                        /* 일시정지 — 영상 전체 + 로테이션 정지 */
     lecVid.pause();
     coachVids.forEach(v => v.pause());
     clearSpotTimers();
-    $('vPlay').textContent = '▶';
+    $('vPlay').textContent = '▶'; icon = '❚❚';
   }
+  if(showFb){
+    const f = $('tapFb');
+    f.textContent = icon === '▶' ? '❚❚' : '▶';
+    f.textContent = lecVid.paused ? '▶' : '❚❚';
+    f.classList.remove('show'); void f.offsetWidth; f.classList.add('show');
+  }
+}
+$('vPlay').addEventListener('click', () => togglePlayback(false));
+/* 영상 화면 탭 → 유튜브처럼 중앙 아이콘과 함께 재생/일시정지 */
+document.addEventListener('click', e => {
+  const inSpot = e.target.closest('#spotSlot');
+  if(!inSpot) return;
+  if(e.target.closest('.vctrl, .vstart, button, input, a')) return;
+  togglePlayback(true);
 });
 $('vProg').addEventListener('click', blockMsg);
 
@@ -980,7 +1017,17 @@ function startActTimer(sec){
 $('aoDone').addEventListener('click', () => {
   if(!SOLO || $('aoDone').disabled) return;
   clearInterval(actTimer);
+  $('aoReturn').classList.remove('show');
   endInteractive();
+});
+/* 인터랙티브 X — 잠시 닫고 강의 화면을 본다. 이어하기 칩으로 복귀 */
+$('aoClose').addEventListener('click', () => {
+  $('actOverlay').classList.remove('show');
+  $('aoReturn').classList.add('show');
+});
+$('aoReturn').addEventListener('click', () => {
+  $('aoReturn').classList.remove('show');
+  $('actOverlay').classList.add('show');
 });
 function endInteractive(){
   const b = BLOCKS[bi];
@@ -1150,7 +1197,6 @@ try{
   if(m && m.v === 1 && m.html) memoBody.innerHTML = m.html;
 }catch(e){}
 $('memoDate').textContent = new Date().toLocaleDateString('ko-KR', { month:'long', day:'numeric' });
-setTimeout(() => { if(typeof updateCount === 'function') updateCount(); }, 0);
 let memoTimer = null;
 function saveMemo(){
   try{ localStorage.setItem(MEMO_KEY, JSON.stringify({ v:1, html: memoBody.innerHTML })); }
@@ -1181,27 +1227,59 @@ function styleTags(){
     node.parentNode.replaceChild(frag, node);
   });
 }
-/* Bear식 마크다운 — 줄 앞에 '- '를 치면 글머리표로 */
-function autoList(){
+/* 노션식 마크다운 — '- ' 글머리표 · '---' 구분선 · '# ' 제목 · '[] ' 체크박스 */
+function autoMd(){
   const sel = getSelection();
   if(!sel.rangeCount) return;
   const nA = sel.anchorNode;
-  if(nA && nA.nodeType === 3 && nA.nodeValue === '- '){
-    const par = nA.parentElement;
-    if(par && (par === memoBody || par.parentElement === memoBody)){
-      nA.nodeValue = '';
-      document.execCommand('insertUnorderedList');
-    }
-  }
+  if(!(nA && nA.nodeType === 3)) return;
+  const par = nA.parentElement;
+  if(!par || !(par === memoBody || par.parentElement === memoBody)) return;
+  const v = nA.nodeValue;
+  if(v === '- '){ nA.nodeValue = ''; document.execCommand('insertUnorderedList'); }
+  else if(v === '---'){ nA.nodeValue = ''; document.execCommand('insertHTML', false, '<hr class="mdivider"><div><br></div>'); }
+  else if(v === '# '){ nA.nodeValue = ''; document.execCommand('formatBlock', false, 'h4'); }
+  else if(v === '[] '){ nA.nodeValue = ''; document.execCommand('insertHTML', false, '<div class="mcheck"><input type="checkbox"><span>&nbsp;</span></div>'); }
 }
-function updateCount(){
-  const el = $('memoCount');
-  if(el) el.textContent = memoBody.textContent.trim().length + '자';
+/* #태그 — 스페이스를 치는 순간 즉시 칩으로 (커서 보존) */
+function tagOnBoundary(){
+  const sel = getSelection();
+  if(!sel.rangeCount || !sel.isCollapsed) return;
+  const n = sel.anchorNode;
+  if(!n || n.nodeType !== 3) return;
+  if(n.parentElement && n.parentElement.closest('.mtag, .mchip, .mstamp')) return;
+  const off = sel.anchorOffset;
+  const m = n.nodeValue.slice(0, off).match(/(^|[\s\u00A0])(#[^\s\u00A0#]{1,24})([\s\u00A0])$/);
+  if(!m) return;
+  const tagEnd = off - m[3].length;
+  const tagStart = tagEnd - m[2].length;
+  const range = document.createRange();
+  range.setStart(n, tagStart); range.setEnd(n, tagEnd);
+  const span = document.createElement('span');
+  span.className = 'mtag'; span.textContent = m[2];
+  range.deleteContents(); range.insertNode(span);
+  const after = span.nextSibling;
+  const r2 = document.createRange();
+  if(after && after.nodeType === 3) r2.setStart(after, Math.min(1, after.nodeValue.length));
+  else r2.setStartAfter(span);
+  r2.collapse(true);
+  sel.removeAllRanges(); sel.addRange(r2);
 }
 memoBody.addEventListener('input', () => {
-  autoList(); updateCount();
+  autoMd(); tagOnBoundary();
   clearTimeout(memoTimer);
   memoTimer = setTimeout(() => { styleTags(); saveMemo(); }, 700);
+});
+/* ⌘/Ctrl + B·I·U — 선택 글자 서식 */
+memoBody.addEventListener('keydown', e => {
+  if(!(e.metaKey || e.ctrlKey)) return;
+  const key = e.key.toLowerCase();
+  if(key === 'b' || key === 'i' || key === 'u'){
+    e.preventDefault();
+    document.execCommand({ b:'bold', i:'italic', u:'underline' }[key]);
+    clearTimeout(memoTimer);
+    memoTimer = setTimeout(saveMemo, 500);
+  }
 });
 /* 코치 말 스크랩 — 옆에 뜨는 코치의 말을 누르면 인용으로 담겨요 */
 document.addEventListener('click', e => {
@@ -1216,6 +1294,44 @@ document.addEventListener('click', e => {
   saveMemo();
   toast('코치의 말을 메모장에 담았어요 ✍️');
 });
+
+/* 메모 열고 닫기 — 위임 바인딩 (아이콘·✕ 어디서든 확실히) */
+document.addEventListener('click', e => {
+  if(e.target.closest('#vMemoBtn')){ e.stopPropagation(); document.body.classList.toggle('memo-open'); return; }
+  if(e.target.closest('#memoHide')) document.body.classList.remove('memo-open');
+});
+
+/* 노션풍 메모 툴바 — 굵게·형광·체크·불릿·글자색 */
+function memoCaretEnd(){
+  const sel = getSelection();
+  if(!sel.rangeCount || !memoBody.contains(sel.anchorNode)){
+    const r = document.createRange(); r.selectNodeContents(memoBody); r.collapse(false);
+    sel.removeAllRanges(); sel.addRange(r);
+  }
+}
+$('memoTools').addEventListener('click', e => {
+  const b = e.target.closest('[data-mt]');
+  if(!b) return;
+  memoBody.focus(); memoCaretEnd();
+  const k = b.dataset.mt;
+  if(k === 'bold') document.execCommand('bold');
+  else if(k === 'hl') document.execCommand('hiliteColor', false, '#F7DF6F');
+  else if(k === 'list') document.execCommand('insertUnorderedList');
+  else if(k === 'check') document.execCommand('insertHTML', false,
+    '<div class="mcheck"><input type="checkbox"><span>&nbsp;</span></div>');
+  else if(k === 'c-red') document.execCommand('foreColor', false, '#B03A34');
+  else if(k === 'c-blue') document.execCommand('foreColor', false, '#2F5FA8');
+  else if(k === 'c-black') document.execCommand('foreColor', false, '#1F1D1A');
+  clearTimeout(memoTimer); memoTimer = setTimeout(saveMemo, 500);
+});
+/* 체크 상태는 attribute로 박아야 저장에 남아요 */
+memoBody.addEventListener('change', e => {
+  if(e.target.matches('.mcheck input')){
+    if(e.target.checked) e.target.setAttribute('checked', ''); else e.target.removeAttribute('checked');
+    saveMemo();
+  }
+});
+
 </script>
 </body>
 </html>
