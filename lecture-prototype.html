@@ -115,7 +115,8 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
   .spot-slot .vid{height:100%; width:auto; max-width:100vw; aspect-ratio:9/16; border:none; border-radius:0; box-shadow:none}
   /* 메모 열림 = 쇼츠 댓글처럼 영상이 위 절반으로 줄어요 */
   body.memo-open .spotstage{height:46dvh}
-  /* 뒤로가기 */
+  /* 뒤로가기 — 기존 홈(집) 버튼은 숨기고 ‹ 가 그 자리를 가진다 */
+  .hud .hud-btn:not(#menuToggle){display:none}
   .vback{display:flex}
   /* 코치 2명 = 왼쪽 하단 PiP 오버레이 (누르면 스포트 교대) */
   .mid-col{position:fixed; left:10px; bottom:64px; top:auto; right:auto; flex-direction:column; width:82px; gap:7px; z-index:45}
@@ -145,7 +146,7 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
 .vmemo::after{content:'메모'; font-size:.55rem; font-weight:700}
 .vmemo:active{transform:scale(.92)}
 /* 뒤로가기 — 쇼츠식 좌상단 (모바일 전용) */
-.vback{display:none; position:fixed; top:12px; left:8px; z-index:46; width:40px; height:40px; align-items:center;
+.vback{display:none; position:fixed; top:12px; left:8px; z-index:62; width:40px; height:40px; align-items:center;
   justify-content:center; color:#fff; background:none; cursor:pointer; filter:drop-shadow(0 1px 3px rgba(0,0,0,.6))}
 .memo-hide{display:none; margin-left:10px; align-items:center; cursor:pointer; color:#8A7F6A; font-weight:800; font-size:.9rem}
 .memo-hide:hover{color:#17171C}
@@ -477,6 +478,19 @@ canvas{display:block; width:100%; height:200px; touch-action:none; cursor:crossh
 })();
 
 /* ─── 강의 흐름 — 각 강의 영상을 통으로 본 뒤 활동으로 이어져요 ─── */
+/* 런타임 오류 표면화 — 문제가 생기면 화면 하단에 빨간 박스로 보인다 */
+window.addEventListener('error', e => {
+  try{
+    let d = document.getElementById('errbox');
+    if(!d){
+      d = document.createElement('div'); d.id = 'errbox';
+      d.style.cssText = 'position:fixed;left:8px;right:8px;bottom:8px;z-index:999;background:#B3261E;color:#fff;font-size:12px;padding:8px 10px;border-radius:8px;font-family:monospace;word-break:break-all';
+      document.body.appendChild(d);
+    }
+    d.textContent = 'JS 오류: ' + e.message + ' (줄 ' + (e.lineno || '?') + ')';
+  }catch(_){}
+});
+
 const BLOCKS = [
   {type:'lecture', name:'강의', t:'오늘, 잠깐 멈추는 시간', src:'assets/lecture1.mp4', poster:'assets/lecture1-poster.jpg'},
   {type:'interactive', kind:'read',  name:'인터랙티브 — 밑줄 읽기', t:'오늘의 글, 밑줄 치며 읽기', dur:25},
