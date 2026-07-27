@@ -120,7 +120,7 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
     margin:0; z-index:90; border-radius:16px 16px 0 0; border-bottom:none;
     transform:translateY(calc(100% + 12px)); transition:transform .28s}
   body.memo-open .liveroom > .memo{transform:none}
-  .vmemo{display:flex}
+  .spot-slot .vmemo{display:flex}
   .memo-hide{display:inline-flex}
 }
 .vid{position:relative; border:3px solid #17171C; border-radius:6px; overflow:hidden; background:#000; box-shadow:4px 4px 0 rgba(0,0,0,.4); aspect-ratio:16/9}
@@ -131,9 +131,12 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
 .spr-box{position:relative; width:48px; height:44px}
 .me-sprite{position:absolute; top:0; left:0; width:4px; height:4px; image-rendering:pixelated}
 .memo{background:#FFF9F1; border:3px solid #17171C; border-radius:8px; box-shadow:5px 5px 0 rgba(0,0,0,.4); min-width:0}
-.vmemo{display:none; align-items:center; justify-content:center; width:30px; height:30px; border-radius:50%;
-  background:rgba(23,19,31,.62); color:#fff; font-size:.85rem; flex-shrink:0; cursor:pointer}
-.vmemo:active{transform:scale(.94)}
+/* 메모 버튼 — 쇼츠식 우측 레일 (모바일 스포트 영상 안에서만 보임) */
+.vmemo{display:none; position:absolute; right:8px; bottom:108px; z-index:7; flex-direction:column; align-items:center;
+  gap:2px; background:none; color:#fff; font-size:1.6rem; cursor:pointer;
+  filter:drop-shadow(0 1px 3px rgba(0,0,0,.65))}
+.vmemo::after{content:'메모'; font-size:.6rem; font-weight:700}
+.vmemo:active{transform:scale(.92)}
 .memo-hide{display:none; margin-left:10px; align-items:center; cursor:pointer; color:#8A7F6A; font-weight:800; font-size:.9rem}
 .memo-hide:hover{color:#17171C}
 .memo-head{display:flex; align-items:baseline; gap:8px; padding:12px 14px 9px; border-bottom:2px dashed #E2D6BE;
@@ -399,8 +402,8 @@ canvas{display:block; width:100%; height:200px; touch-action:none; cursor:crossh
         <button class="vplay" id="vPlay">▶</button>
         <div class="vprog" id="vProg"><i id="vFill"></i></div>
         <span class="vtime num" id="vTime">-0:00</span>
-        <button class="vmemo" id="vMemoBtn" aria-label="메모 열고 닫기">💬</button>
       </div>
+      <button class="vmemo" id="vMemoBtn" aria-label="메모 열고 닫기">💬</button>
       <span class="vtag" style="bottom:44px">윤소정 · 강의</span>
       <div class="vstart" id="vStart">
         <button class="vstart-btn">▶</button>
