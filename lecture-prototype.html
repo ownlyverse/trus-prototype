@@ -119,11 +119,6 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
     radial-gradient(170px 110px at 6% 94%, rgba(160,130,80,.13), transparent 70%),
     radial-gradient(100px 70px at 94% 58%, rgba(150,120,70,.09), transparent 70%),
     #F2EEE1}
-/* 색연필 낙서 — 여백 장식 (아날로그 원고 느낌) */
-.memo .md{position:absolute; pointer-events:none; z-index:0}
-.md1{top:46px; right:6px; width:132px}
-.md2{left:2px; top:38%; width:30px}
-.md3{bottom:36px; right:8px; width:102px}
 .memo-head, .memo-tools, .memo-body, .memo-foot{position:relative; z-index:1}
 /* 메모 버튼 — 쇼츠식 우측 레일 (모바일 전용, 화면에 고정이라 발화자 전환과 무관) */
 .vmemo{display:none; position:fixed; right:10px; bottom:70px; z-index:63; flex-direction:column; align-items:center;
@@ -155,9 +150,12 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
   color:inherit; padding:0 2px; -webkit-box-decoration-break:clone; box-decoration-break:clone}
 .mchip{display:inline-block; background:#1F1D1A; color:#F2EEE1; border-radius:999px; padding:2px 9px;
   font-size:.56rem; font-weight:700; margin-left:6px; vertical-align:2px; letter-spacing:.05em}
+/* Bear식 #태그 — 쓰면 자동으로 칩이 된다 */
+.mtag{background:#E9DFC6; color:#B03A34; border-radius:6px; padding:0 5px; font-weight:800}
 .memo-foot{display:flex; align-items:center; gap:8px; padding:9px 16px; border-top:2.5px solid #1F1D1A;
   font-size:.6rem; color:#6E6659; font-weight:700; font-family:var(--tw); letter-spacing:.05em}
-.memo-foot::after{content:'◉ KEEP'; margin-left:auto; font-size:.6rem; color:#1F1D1A}
+.memo-foot #memoCount{margin-left:auto}
+.memo-foot::after{content:'◉ KEEP'; font-size:.6rem; color:#1F1D1A}
 .mstamp{display:block; font-size:.68rem; font-weight:800; background:none; color:#1F1D1A;
   border-top:1.5px solid #1F1D1A; padding:9px 0 1px; margin:10px 0 2px; font-family:var(--tw); letter-spacing:.03em}
 .mstamp::before{content:'▶ '}
@@ -455,22 +453,6 @@ canvas{display:block; width:100%; height:200px; touch-action:none; cursor:crossh
     </div>
     </div>
     <div class="memo">
-      <svg class="md md1" viewBox="0 0 140 90" aria-hidden="true">
-        <path d="M8 62 C 30 40, 55 58, 78 34 S 120 22, 134 12" fill="none" stroke="#4A5DB0" stroke-width="3" stroke-linecap="round" opacity=".5"/>
-        <path d="M14 70 C 38 50, 62 66, 86 44 S 122 30, 136 22" fill="none" stroke="#3E9B6C" stroke-width="2.6" stroke-linecap="round" opacity=".45"/>
-        <path d="M60 78 l10 -16 M74 76 l10 -16 M88 72 l10 -16" stroke="#B03A34" stroke-width="2.6" stroke-linecap="round" opacity=".55"/>
-        <path d="M100 60 C 112 52, 124 54, 132 44" fill="none" stroke="#E8C93E" stroke-width="4" stroke-linecap="round" opacity=".6"/>
-      </svg>
-      <svg class="md md2" viewBox="0 0 36 120" aria-hidden="true">
-        <path d="M18 6 C 8 26, 26 40, 14 62 S 24 96, 16 112" fill="none" stroke="#7A64B5" stroke-width="2.4" opacity=".4" stroke-linecap="round"/>
-        <path d="M10 104 L16 114 L24 102" fill="none" stroke="#7A64B5" stroke-width="2.4" opacity=".4" stroke-linecap="round"/>
-      </svg>
-      <svg class="md md3" viewBox="0 0 110 80" aria-hidden="true">
-        <circle cx="84" cy="26" r="12" fill="none" stroke="#E8C93E" stroke-width="3.4" opacity=".65"/>
-        <circle cx="84" cy="26" r="17" fill="none" stroke="#E8C93E" stroke-width="1.6" opacity=".35"/>
-        <path d="M18 58 L44 34 M22 34 L46 60 M14 46 L50 46 M31 26 L33 66" stroke="#3E9B6C" stroke-width="2.4" opacity=".45" stroke-linecap="round"/>
-        <path d="M60 66 C 76 58, 92 64, 104 54" fill="none" stroke="#B03A34" stroke-width="2.6" opacity=".45" stroke-linecap="round"/>
-      </svg>
       <div class="memo-head"><span class="mbadge">1강</span><b>MY NOTE · 전략 설정</b><span class="mdate" id="memoDate"></span><button class="memo-hide" id="memoHide" aria-label="메모 닫기">✕</button></div>
       <div class="memo-tools" id="memoTools">
         <button data-mt="bold" title="굵게"><b>B</b></button>
@@ -479,7 +461,7 @@ canvas{display:block; width:100%; height:200px; touch-action:none; cursor:crossh
         <button data-mt="list" title="글머리표">•</button>
       </div>
       <div class="memo-body" id="memoBody" contenteditable="true" data-ph="수업 들으며 자유롭게 적어요… (코치의 말을 누르면 여기 담겨요)"></div>
-      <div class="memo-foot">수업이 끝나면 마이스페이스 책상에 꽂혀요</div>
+      <div class="memo-foot"><span>수업이 끝나면 마이스페이스 책상에 꽂혀요</span><span id="memoCount"></span></div>
     </div>
   </div>
 
@@ -1168,12 +1150,59 @@ try{
   if(m && m.v === 1 && m.html) memoBody.innerHTML = m.html;
 }catch(e){}
 $('memoDate').textContent = new Date().toLocaleDateString('ko-KR', { month:'long', day:'numeric' });
+setTimeout(() => { if(typeof updateCount === 'function') updateCount(); }, 0);
 let memoTimer = null;
 function saveMemo(){
   try{ localStorage.setItem(MEMO_KEY, JSON.stringify({ v:1, html: memoBody.innerHTML })); }
   catch(e){ toast('메모 저장 실패 — 브라우저 저장 공간을 확인해요'); }
 }
-memoBody.addEventListener('input', () => { clearTimeout(memoTimer); memoTimer = setTimeout(saveMemo, 700); });
+/* Bear식 #태그 — 입력이 멎으면 #단어를 칩으로 감싼다 (커서가 있는 노드는 건드리지 않음) */
+function styleTags(){
+  const sel = getSelection();
+  const anchor = sel.rangeCount ? sel.anchorNode : null;
+  const walker = document.createTreeWalker(memoBody, NodeFilter.SHOW_TEXT);
+  const targets = [];
+  let n;
+  while((n = walker.nextNode())){
+    if(n === anchor) continue;
+    if(n.parentElement && n.parentElement.closest('.mtag, .mchip, .mstamp')) continue;
+    if(/(^|[\s\u00A0])#[^\s\u00A0#]{1,24}/.test(n.nodeValue)) targets.push(n);
+  }
+  targets.forEach(node => {
+    const frag = document.createDocumentFragment();
+    node.nodeValue.split(/((?:^|[\s\u00A0])#[^\s\u00A0#]{1,24})/).forEach(part => {
+      const m = part.match(/^([\s\u00A0]*)(#[^\s\u00A0#]{1,24})$/);
+      if(m){
+        if(m[1]) frag.appendChild(document.createTextNode(m[1]));
+        const t = document.createElement('span'); t.className = 'mtag'; t.textContent = m[2];
+        frag.appendChild(t);
+      } else if(part) frag.appendChild(document.createTextNode(part));
+    });
+    node.parentNode.replaceChild(frag, node);
+  });
+}
+/* Bear식 마크다운 — 줄 앞에 '- '를 치면 글머리표로 */
+function autoList(){
+  const sel = getSelection();
+  if(!sel.rangeCount) return;
+  const nA = sel.anchorNode;
+  if(nA && nA.nodeType === 3 && nA.nodeValue === '- '){
+    const par = nA.parentElement;
+    if(par && (par === memoBody || par.parentElement === memoBody)){
+      nA.nodeValue = '';
+      document.execCommand('insertUnorderedList');
+    }
+  }
+}
+function updateCount(){
+  const el = $('memoCount');
+  if(el) el.textContent = memoBody.textContent.trim().length + '자';
+}
+memoBody.addEventListener('input', () => {
+  autoList(); updateCount();
+  clearTimeout(memoTimer);
+  memoTimer = setTimeout(() => { styleTags(); saveMemo(); }, 700);
+});
 /* 코치 말 스크랩 — 옆에 뜨는 코치의 말을 누르면 인용으로 담겨요 */
 document.addEventListener('click', e => {
   const pt = e.target.closest('.pc-text');
