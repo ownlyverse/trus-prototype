@@ -96,8 +96,8 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
 .spot-slot .vid{height:var(--H); width:calc(var(--H)*9/16); aspect-ratio:9/16; cursor:default}
 .mid-col{display:flex; flex-direction:column; gap:14px; min-width:0; width:min(236px, 20vw)}
 .mid-col .vid{width:100%; height:auto; aspect-ratio:16/9}
-/* 사이드(청자)로 간 소정님 타일에서는 재생바·시작 오버레이 숨김 — 스포트에서만 보인다 */
-.mid-col .vctrl, .mid-col .vstart{display:none}
+/* 시작 오버레이는 스포트에서만 — 재생바(.vctrl)는 JS가 스포트 타일로 옮겨 붙인다 */
+.mid-col .vstart{display:none}
 .vid.pop{animation:spotpop .35s ease}
 @keyframes spotpop{from{transform:scale(.94); opacity:.55} to{transform:none; opacity:1}}
 .liveroom > .memo{height:var(--H); display:flex; flex-direction:column; overflow:hidden; min-width:0}
@@ -372,7 +372,8 @@ canvas{display:block; width:100%; height:200px; touch-action:none; cursor:crossh
     margin:0; z-index:44; border-radius:16px 16px 0 0; border-bottom:none;
     transform:translateY(105%); transition:transform .28s}
   body.memo-open .liveroom > .memo{transform:none}
-  .vmemo{display:flex}
+  .vmemo{display:flex; right:calc((100vw - min(100vw, 100dvh*9/16))/2 + 12px)}
+  body.memo-open .vmemo{right:calc((100vw - min(100vw, 50dvh*9/16))/2 + 12px)}
   /* 시트 상단 드래그 핸들 느낌 */
   .liveroom > .memo::after{content:""; position:absolute; top:7px; left:50%; transform:translateX(-50%);
     width:44px; height:4px; border-radius:2px; background:#D8CCB4}
@@ -533,6 +534,7 @@ function coachesPause(){ coachVids.forEach(v=>v.pause()); }
 const spotSlotEl = $('spotSlot'), sideSlotEl = $('sideSlot');
 const mainTile = document.querySelector('.vid.main');
 const coachTiles = coachVids.map(v => v.closest('.vid'));
+const vctrlEl = document.querySelector('.vctrl');
 let spotTimers = [];
 function clearSpotTimers(){ spotTimers.forEach(clearTimeout); spotTimers = []; }
 /* 스포트 영상만 소리 ON, 나머지는 전부 음소거 — 상태와 무관하게 항상 강제 */
@@ -553,6 +555,7 @@ function spotlight(el){
     if(el === coachTiles[0]) cv.currentTime = 4;      /* 바운더리 코치는 4초부터 */
     cv.play().catch(()=>{});                          /* 스포트로 온 코치는 살아 움직이게 */
   }
+  el.appendChild(vctrlEl);                            /* 재생바(강의 진행)는 항상 스포트 타일 하단에 */
   applyAudio();
   [old, el].forEach(t => { if(!t) return; t.classList.remove('pop'); void t.offsetWidth; t.classList.add('pop'); });
 }
