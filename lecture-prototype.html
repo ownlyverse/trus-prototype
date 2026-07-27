@@ -112,7 +112,8 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
 .vlive{position:absolute; right:7px; top:7px; width:8px; height:8px; border-radius:50%; background:#FF4D6D; box-shadow:0 0 7px #FF4D6D; animation:blink 1.4s infinite}
 .spr-box{position:relative; width:48px; height:44px}
 .me-sprite{position:absolute; top:0; left:0; width:4px; height:4px; image-rendering:pixelated}
-.memo{background:#FFF9F1; border:3px solid #17171C; border-radius:8px; box-shadow:5px 5px 0 rgba(0,0,0,.4); min-width:0}
+.memo{background:#F2EEE1; border:3px solid #1F1D1A; border-radius:6px; box-shadow:5px 5px 0 rgba(0,0,0,.4); min-width:0;
+  --tw:'NeoDunggeunmo','Pretendard Variable',sans-serif}
 /* 메모 버튼 — 쇼츠식 우측 레일 (모바일 전용, 화면에 고정이라 발화자 전환과 무관) */
 .vmemo{display:none; position:fixed; right:10px; bottom:70px; z-index:63; flex-direction:column; align-items:center;
   gap:3px; background:none; color:#fff; cursor:pointer; filter:drop-shadow(0 1px 3px rgba(0,0,0,.65))}
@@ -123,29 +124,34 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
   justify-content:center; color:#fff; background:none; cursor:pointer; filter:drop-shadow(0 1px 3px rgba(0,0,0,.6))}
 .memo-hide{display:none; margin-left:10px; align-items:center; cursor:pointer; color:#8A7F6A; font-weight:800; font-size:.9rem}
 .memo-hide:hover{color:#17171C}
-.memo-head{display:flex; align-items:baseline; gap:8px; padding:12px 14px 9px; border-bottom:2px dashed #E2D6BE;
-  font-size:.82rem; font-weight:800; color:#5A5244; font-family:'NeoDunggeunmo','Pretendard Variable',sans-serif}
-.memo-head .mdate{margin-left:auto; font-size:.68rem; color:#A79C86; font-weight:700}
-.memo-tools{display:flex; gap:3px; padding:6px 10px; border-bottom:2px dashed #E2D6BE}
-.memo-tools button{min-width:26px; height:26px; padding:0 7px; border-radius:6px; font-size:.78rem; font-weight:800;
-  color:#8A7F6A; display:flex; align-items:center; justify-content:center; cursor:pointer}
-.memo-tools button:hover{background:#F3E9D8; color:#17171C}
-.memo-body{padding:6px 16px 14px 36px; min-height:220px; overflow-y:auto; font-size:.9rem; outline:none; color:#3A3428;
-  line-height:29px;
-  background:
-    linear-gradient(#E8B0A6,#E8B0A6) 26px 0/1.5px 100% no-repeat,
-    repeating-linear-gradient(transparent 0 28px, rgba(23,23,28,.07) 28px 29px)}
+.memo-head{display:flex; align-items:center; gap:9px; padding:14px 16px 10px; border-bottom:2.5px solid #1F1D1A;
+  font-size:.86rem; font-weight:800; color:#1F1D1A; font-family:var(--tw); letter-spacing:.06em}
+.memo-head .mbadge{width:30px; height:30px; border-radius:50%; border:2px solid #1F1D1A; display:flex;
+  align-items:center; justify-content:center; font-size:.58rem; flex-shrink:0}
+.memo-head .mdate{margin-left:auto; font-size:.62rem; color:#6E6659; font-weight:700; letter-spacing:.04em}
+.memo-tools{display:flex; gap:3px; padding:6px 12px; border-bottom:1.5px solid #1F1D1A}
+.memo-tools button{min-width:26px; height:26px; padding:0 7px; border-radius:5px; font-size:.76rem; font-weight:800;
+  color:#1F1D1A; display:flex; align-items:center; justify-content:center; cursor:pointer; font-family:var(--tw)}
+.memo-tools button:hover{background:#E4DECB}
+.memo-body{padding:12px 18px 16px; min-height:220px; overflow-y:auto; font-size:.86rem; outline:none; color:#1F1D1A;
+  line-height:2; font-family:var(--tw); letter-spacing:.01em}
 .memo-body ul{margin:0; padding-left:1.15em}
 .mcheck{display:flex; gap:8px; align-items:baseline}
 .mcheck input{accent-color:#E86CA8; transform:translateY(1px)}
 .mcheck:has(input:checked){text-decoration:line-through; color:#A79C86}
-.memo-body:empty::before{content:attr(data-ph); color:#B0A793}
-.memo-foot{padding:8px 14px; border-top:2px dashed #E2D6BE; font-size:.68rem; color:#A79C86; font-weight:700}
-.mstamp{display:inline-block; font-size:.64rem; font-weight:800; background:#17171C; color:#FFE79A;
-  padding:2px 8px; border-radius:3px; margin:6px 0 2px; font-family:'NeoDunggeunmo','Pretendard Variable',sans-serif}
-.mscrap{border-left:3px solid #E86CA8; background:rgba(232,108,168,.09); padding:6px 10px; margin:6px 0;
-  font-size:.84rem; line-height:1.6; border-radius:0 6px 6px 0}
-.mscrap small{display:block; color:#8A8494; margin-top:3px; font-size:.7rem}
+.memo-body:empty::before{content:attr(data-ph); color:#A79C86}
+.memo-body mark{background:linear-gradient(180deg, transparent 12%, #F7DF6F 12% 88%, transparent 88%);
+  color:inherit; padding:0 2px; -webkit-box-decoration-break:clone; box-decoration-break:clone}
+.mchip{display:inline-block; background:#1F1D1A; color:#F2EEE1; border-radius:999px; padding:2px 9px;
+  font-size:.56rem; font-weight:700; margin-left:6px; vertical-align:2px; letter-spacing:.05em}
+.memo-foot{display:flex; align-items:center; gap:8px; padding:9px 16px; border-top:2.5px solid #1F1D1A;
+  font-size:.6rem; color:#6E6659; font-weight:700; font-family:var(--tw); letter-spacing:.05em}
+.memo-foot::after{content:'◉ KEEP'; margin-left:auto; font-size:.6rem; color:#1F1D1A}
+.mstamp{display:block; font-size:.68rem; font-weight:800; background:none; color:#1F1D1A;
+  border-top:1.5px solid #1F1D1A; padding:9px 0 1px; margin:10px 0 2px; font-family:var(--tw); letter-spacing:.03em}
+.mstamp::before{content:'▶ '}
+.memo-body .mstamp:first-child{border-top:none; margin-top:2px; padding-top:2px}
+.mscrap{margin:6px 0; font-size:.84rem; line-height:1.9}
 .pc-text{cursor:pointer}
 .pc-text:hover{text-decoration:underline}
 
@@ -437,10 +443,10 @@ canvas{display:block; width:100%; height:200px; touch-action:none; cursor:crossh
     </div>
     </div>
     <div class="memo">
-      <div class="memo-head"><b>📒 1강 메모</b><span class="mdate" id="memoDate"></span><button class="memo-hide" id="memoHide" aria-label="메모 닫기">✕</button></div>
+      <div class="memo-head"><span class="mbadge">1강</span><b>MY NOTE · 전략 설정</b><span class="mdate" id="memoDate"></span><button class="memo-hide" id="memoHide" aria-label="메모 닫기">✕</button></div>
       <div class="memo-tools" id="memoTools">
         <button data-mt="bold" title="굵게"><b>B</b></button>
-        <button data-mt="hl" title="형광펜"><span style="background:#FFE79A;padding:0 3px">가</span></button>
+        <button data-mt="hl" title="형광펜"><span style="background:#F7DF6F;padding:0 3px">가</span></button>
         <button data-mt="check" title="체크리스트">☑</button>
         <button data-mt="list" title="글머리표">•</button>
       </div>
@@ -1154,7 +1160,7 @@ $('memoTools').addEventListener('click', e => {
   memoBody.focus(); memoCaretEnd();
   const k = b.dataset.mt;
   if(k === 'bold') document.execCommand('bold');
-  else if(k === 'hl') document.execCommand('hiliteColor', false, '#FFE79A');
+  else if(k === 'hl') document.execCommand('hiliteColor', false, '#F7DF6F');
   else if(k === 'list') document.execCommand('insertUnorderedList');
   else if(k === 'check') document.execCommand('insertHTML', false,
     '<div class="mcheck"><input type="checkbox"><span>&nbsp;</span></div>');
@@ -1177,7 +1183,7 @@ document.addEventListener('click', e => {
   const text = pt.dataset.full || pt.textContent;
   if(!text.trim()) return;
   memoBody.insertAdjacentHTML('beforeend',
-    `<div class="mscrap" contenteditable="false">❝ ${text}<small>${name}</small></div><div><br></div>`);
+    `<div class="mscrap" contenteditable="false"><mark>${text}</mark><small class="mchip">${name}</small></div><div><br></div>`);
   saveMemo();
   toast('코치의 말을 메모장에 담았어요 ✍️');
 });
