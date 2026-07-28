@@ -361,7 +361,9 @@ input,select,textarea{font:inherit;color:inherit}
           <span class="rotrow">🎬 발화 로테이션:
             강의자 <input type="number" min="3" id="rot0" value="10" onchange="setRot()">초 →
             🦉 <input type="number" min="3" id="rot1" value="10" onchange="setRot()">초 →
-            🐢 <input type="number" min="3" id="rot2" value="10" onchange="setRot()">초 (구간마다 반복)</span>
+            🐢 <input type="number" min="3" id="rot2" value="10" onchange="setRot()">초
+            <button class="fbtn" id="rotAuto" onclick="autoRot()">🎙 음성으로 자동 감지</button>
+            <span class="dim" id="rotNote">영상은 사람별 1개면 돼요 — 화면 전환은 자동이에요</span></span>
           <span style="color:var(--faint)">영상은 다음 단계에서 올려요 · 제한 시간을 못 채우면 학생은 강의 후 보충해야 다음 에피소드가 열려요</span>
         </div>
         <div class="sgwrap"><div class="sgtable" id="sgtable"></div></div>
@@ -576,6 +578,26 @@ function setMode(m){
 function setRot(){
   rot = [Math.max(3, +$('rot0').value || 10), Math.max(3, +$('rot1').value || 10), Math.max(3, +$('rot2').value || 10)];
   saved();
+}
+/* 🎙 자동 발화 감지 (목업) — 실서비스에선 업로드된 사람별 영상의 오디오 볼륨을 분석해
+   매 순간 말하는 사람을 찾고 로테이션을 자동 생성한다. 여기선 분석 흐름만 재현 */
+function autoRot(){
+  const btn = $('rotAuto');
+  btn.disabled = true;
+  let step = 0;
+  const msgs = ['🎙 오디오 추출 중…', '📊 발화 구간 분석 중…', '✂️ 전환점 계산 중…'];
+  btn.textContent = msgs[0];
+  const iv = setInterval(() => {
+    step++;
+    if(step < msgs.length){ btn.textContent = msgs[step]; return; }
+    clearInterval(iv);
+    $('rot0').value = 9; $('rot1').value = 6; $('rot2').value = 7;
+    setRot();
+    btn.textContent = '🎙 음성으로 자동 감지';
+    btn.disabled = false;
+    $('rotNote').textContent = '감지 완료 — 강의자 9초 → 🦉 6초 → 🐢 7초로 잡았어요 (수동으로 고칠 수 있어요)';
+    toast('발화 구간을 자동으로 잡았어요 ✓');
+  }, 700);
 }
 const coachCount = () => people.length - 1;
 
