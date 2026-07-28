@@ -175,16 +175,14 @@ input,select,textarea{font:inherit;color:inherit}
 .fchip button{color:var(--faint); font-size:.7rem} .fchip button:hover{color:var(--red)}
 /* 캡컷형 강의 구성 */
 .sgtable.ccmode{min-width:0; border:none; border-radius:0}
-.cc-live{display:flex; gap:16px; margin-bottom:6px}
-.cc-live iframe{width:min(620px, 58%); height:560px; border:1px solid var(--line); border-radius:12px; background:#17131F; flex-shrink:0}
-.cc-side{flex:1; display:flex; flex-direction:column; gap:9px; align-items:flex-start; min-width:0}
-.cc-segname{display:flex; align-items:center; gap:8px; font-size:.84rem; font-weight:800; flex-wrap:wrap; width:100%}
-.cc-segname .sg-t{flex:1; min-width:160px}
-.cc-segname .ops button{border:1px solid var(--line); border-radius:6px; width:26px; height:26px; background:#fff; cursor:pointer}
-.cc-segname .ops .dl{color:#C0392B}
-.cc-ctrl{display:flex; align-items:center; gap:10px}
-.cc-addbtn{border-style:solid; border-color:#3182F6; color:#3182F6; font-weight:800}
-.cc-pal{display:flex; gap:6px; flex-wrap:wrap}
+.cc-topline{display:flex; align-items:center; gap:9px; font-size:.86rem; font-weight:800; margin-bottom:8px}
+.cc-topline .sg-t{flex:0 1 340px; min-width:180px}
+.cc-topline .ops button{border:1px solid var(--line); border-radius:6px; width:26px; height:26px; background:#fff; cursor:pointer}
+.cc-topline .ops .dl{color:#C0392B}
+.cc-live{margin-bottom:10px}
+.cc-live iframe{width:100%; height:620px; border:1px solid var(--line); border-radius:12px; background:#17131F}
+.cc-pal{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px}
+.cc-plus{border-style:dashed; color:#3182F6; font-size:1.05rem; font-weight:800}
 .cc-pal button{border:1.5px solid var(--line); border-radius:8px; background:#fff; padding:7px 11px; font-size:.8rem; font-weight:700; cursor:pointer}
 .cc-pal button:hover{border-color:#3182F6; color:#3182F6}
 .cc-tl{display:flex; gap:6px; align-items:stretch; overflow-x:auto; padding:16px 2px 14px}
@@ -666,7 +664,7 @@ function condBody(i,j,a){
   return '';
 }
 /* ── ② 강의 구성 — 캡컷형: 영상 보면서 인터랙티브 끼워 넣기 ── */
-let ccSeg = 0, ccSel = null;                 /* ccSel = {i,j} 선택된 인터랙티브 */
+let ccSeg = 0, ccSel = null, ccAddTarget = 0; /* ccSel = {i,j} 선택된 인터랙티브 */
 function ccFrameSrc(){
   if(ccSel && segs[ccSel.i] && segs[ccSel.i].acts[ccSel.j])
     return `lecture-prototype.html?preview=${segs[ccSel.i].acts[ccSel.j].k}&edit=1`;
@@ -679,20 +677,14 @@ function renderStruct(){
   host.classList.add('ccmode');
   const seg = segs[ccSeg];
   host.innerHTML = `
+    <div class="cc-topline">🎬 강의 구간 ${ccSeg + 1}
+      <input class="sg-t" value="${esc(seg.t)}" onchange="segTitle(${ccSeg}, this.value)">
+      <span class="ops"><button onclick="mvSeg(${ccSeg},-1)" ${ccSeg === 0 ? 'disabled' : ''}>▲</button><button onclick="mvSeg(${ccSeg},1)" ${ccSeg === segs.length - 1 ? 'disabled' : ''}>▼</button><button class="dl" onclick="rmSeg(${ccSeg})" ${segs.length <= 1 ? 'disabled' : ''}>✕</button></span></div>
     <div class="cc-live">
       <iframe id="ccFrame" src="${ccFrameSrc()}" title="강의실 미리보기 · 편집"></iframe>
-      <div class="cc-side">
-        <div class="cc-segname">🎬 강의 구간 ${ccSeg + 1}
-          <input class="sg-t" value="${esc(seg.t)}" onchange="segTitle(${ccSeg}, this.value)">
-          <span class="ops"><button onclick="mvSeg(${ccSeg},-1)" ${ccSeg === 0 ? 'disabled' : ''}>▲</button><button onclick="mvSeg(${ccSeg},1)" ${ccSeg === segs.length - 1 ? 'disabled' : ''}>▼</button><button class="dl" onclick="rmSeg(${ccSeg})" ${segs.length <= 1 ? 'disabled' : ''}>✕</button></span></div>
-        <div class="dim"><b>왼쪽이 실제 강의실</b>이에요 — ▶를 누르면 발화자 전환까지 그대로 돌아요.
-          타임라인에서 활동을 누르면 그 화면이 열리고, <b>화면 속 텍스트를 눌러 바로 고칠 수 있어요</b> (자동 저장, 수강자에게 반영).</div>
-        <button class="fbtn cc-addbtn" id="ccAdd">＋ 이 구간 뒤에 인터랙티브 넣기</button>
-        <div class="cc-pal" id="ccPal" hidden>
-          ${Object.entries(AT).map(([k, v]) => `<button data-k="${k}">${v.ic} ${v.n}</button>`).join('')}
-        </div>
-        <div class="dim">영상은 자르지 않아요 — 활동은 구간 영상이 끝난 뒤 이어서 나와요. 순서는 아래 패널의 ◀▶로 바꿔요</div>
-      </div>
+    </div>
+    <div class="cc-pal" id="ccPal" hidden>
+      ${Object.entries(AT).map(([k, v]) => `<button data-k="${k}">${v.ic} ${v.n}</button>`).join('')}
     </div>
     <div class="cc-tl" id="ccTl">
       ${segs.map((s0, i) => {
@@ -700,19 +692,22 @@ function renderStruct(){
           <span class="cc-seglab">🎬 구간 ${i + 1}</span>
         </div>`
         + s0.acts.map((a, j) => `<button class="cc-act${ccSel && ccSel.i === i && ccSel.j === j ? ' on' : ''}" data-i="${i}" data-j="${j}"
-            title="${AT[a.k].n} · ${esc(a.t)}">${AT[a.k].ic}<small>${AT[a.k].n}</small></button>`).join('');
+            title="${AT[a.k].n} · ${esc(a.t)}">${AT[a.k].ic}<small>${AT[a.k].n}</small></button>`).join('')
+        + `<button class="cc-act cc-plus" data-add="${i}" title="이 구간 뒤에 인터랙티브 추가">＋</button>`;
       }).join('')}
       <button class="cc-addseg" onclick="addSeg()">＋ 구간</button>
     </div>
     <div class="cc-det" id="ccDet"></div>`;
 
-  $('ccAdd').addEventListener('click', () => { $('ccPal').hidden = !$('ccPal').hidden; });
   $('ccPal').addEventListener('click', e => {
     const b = e.target.closest('[data-k]');
     if(!b) return;
-    addAct(ccSeg, b.dataset.k);
+    $('ccPal').hidden = true;
+    addAct(ccAddTarget, b.dataset.k);
   });
   $('ccTl').addEventListener('click', e => {
+    const plus = e.target.closest('.cc-plus');
+    if(plus){ ccAddTarget = +plus.dataset.add; $('ccPal').hidden = !$('ccPal').hidden; return; }
     const chip = e.target.closest('.cc-act');
     if(chip){ ccSel = { i: +chip.dataset.i, j: +chip.dataset.j }; ccSeg = +chip.dataset.i; renderStruct(); return; }
     const segEl = e.target.closest('.cc-seg');
