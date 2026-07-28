@@ -495,6 +495,11 @@ canvas{display:block; width:100%; height:200px; touch-action:none; cursor:crossh
   </div>
 
   <div class="lesson-col" id="doneHost"></div>
+
+<!-- 보충·완강 팝업 — 화면 중앙 모달 -->
+<div class="sec-overlay" id="doneOverlay">
+  <div class="sec-card wide" id="doneCard" style="text-align:center; max-height:88vh; overflow-y:auto"></div>
+</div>
 </div>
 
 <div class="sec-overlay" id="secOverlay">
@@ -1059,7 +1064,7 @@ function endInteractive(){
   else if(done) toast('시간 종료 — 이미 마친 강의라 보충 목록에 담지 않아요');
   else {
     // 목차로 되돌아와 같은 활동을 또 놓칠 수 있어요 — 보충은 한 번만 하면 돼요
-    if(!missed.some(m => m.kind === b.kind && m.t === b.t)) missed.push({kind:b.kind, t:b.t});
+    if(!SOLO && !missed.some(m => m.kind === b.kind && m.t === b.t)) missed.push({kind:b.kind, t:b.t});
     toast('시간 종료 — 이 활동은 강의가 끝난 뒤 마저 완료해야 해요');
   }
   nextBlock();
@@ -1078,11 +1083,11 @@ const DONE_TOAST = {
 /* 완강 — 미완료 활동이 있으면 보충해야 다음이 열려요 */
 const MISS_LABEL = {read:'📖 밑줄 읽기', draw:'🎨 그리기', quiz:'✍️ 퀴즈', speak:'🎤 소리 내어 말하기', write:'📝 글쓰기', play:'📄 워크시트'};
 function finishLecture(){
-  if(missed.length){ showMissed(); return; }
+  if(!SOLO && missed.length){ showMissed(); return; }   /* 보충은 단체 수강(제한시간) 전용 */
   realFinish();
 }
 function showMissed(){
-  $('doneHost').innerHTML = `<div class="card done-wrap">
+  $('doneCard').innerHTML = `<div class="done-wrap">
     <div style="font-size:44px; margin-bottom:10px">⏳</div>
     <h1>거의 다 왔어요 — 못 채운 활동이 있어요</h1>
     <p class="sub">시간 안에 못 마친 활동을 완료해서 올려야<br><b>다음 에피소드가 열려요.</b></p>
@@ -1091,7 +1096,7 @@ function showMissed(){
         <button class="pbtn" style="padding:7px 14px; font-size:.78rem" onclick="clearMiss(${k})">완료하고 올리기</button></div>`).join('')}
     </div>
   </div>`;
-  $('doneHost').scrollIntoView({behavior:'smooth'});
+  $('doneOverlay').classList.add('show');
 }
 function clearMiss(k){
   missed.splice(k,1);
@@ -1108,7 +1113,7 @@ function realFinish(){
   localStorage.setItem('trus_lecture_complete','1');
   $('vPlay').textContent = '✓';
   $('vTime').textContent = '끝';
-  $('doneHost').innerHTML = `<div class="card done-wrap">
+  $('doneCard').innerHTML = `<div class="done-wrap">
     <div class="done-orb" id="dorb"><i></i><span class="emo">🎓</span></div>
     <h1>일의 프레임이 완성됐어요 — 완강!</h1>
     <div class="outdots"><span class="on">✓</span><span class="on">✓</span><span class="on">✓</span><span class="on">✓</span><span class="on">✓</span></div>
@@ -1122,9 +1127,9 @@ function realFinish(){
       <button class="pbtn" style="background:#8B95A1; border-color:#6B7684; box-shadow:0 4px 0 #6B7684" onclick="location.href='myspace-prototype.html'">🏠 마이스페이스로</button>
     </div>
   </div>`;
+  $('doneOverlay').classList.add('show');
   setTimeout(()=>$('dorb').classList.add('fill'), 100);
   toast('전체 섹션 100% 완강 — 광장이 열렸어요 ◗ +1');
-  $('doneHost').scrollIntoView({behavior:'smooth'});
 }
 
 function toast(msg){
