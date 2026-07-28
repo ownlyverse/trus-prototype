@@ -201,6 +201,10 @@ input,select,textarea{font:inherit;color:inherit}
   border:1.5px solid var(--line); border-radius:9px; background:#fff; font-size:.95rem; cursor:pointer; flex-shrink:0}
 .cc-act small{font-size:.56rem; font-weight:800; color:var(--muted)}
 .cc-act.on{border-color:#3182F6; box-shadow:0 0 0 2px rgba(49,130,246,.2)}
+.cc-act.dragging{opacity:.35}
+.cc-act.dragover{border-color:#3182F6; box-shadow:inset 3px 0 0 #3182F6}
+.cc-act.dragover-r{border-color:#3182F6; box-shadow:inset -3px 0 0 #3182F6}
+.cc-act[draggable=true]{cursor:grab}
 .cc-act:hover{border-color:#3182F6}
 .cc-addseg{flex-shrink:0; border:1.5px dashed var(--line); border-radius:9px; padding:0 16px; color:var(--muted); font-weight:700; cursor:pointer; background:none}
 .cc-addseg:hover{border-color:#3182F6; color:#3182F6}
@@ -719,7 +723,7 @@ function renderStruct(){
           <span class="cc-seglab">🎬 구간 ${i + 1} · ${Math.floor(dur / 60)}:${String(Math.floor(dur) % 60).padStart(2, '0')}</span>
           <i class="cc-ph" data-ph="${i}" style="display:none"></i>
         </div>`
-        + s0.acts.map((a, j) => `<button class="cc-act${ccSel && ccSel.i === i && ccSel.j === j ? ' on' : ''}" data-i="${i}" data-j="${j}"
+        + s0.acts.map((a, j) => `<button class="cc-act${ccSel && ccSel.i === i && ccSel.j === j ? ' on' : ''}" draggable="true" data-i="${i}" data-j="${j}"
             title="${AT[a.k].n} · ${esc(a.t)}">${AT[a.k].ic}<small>${AT[a.k].n}</small></button>`).join('')
         + `<button class="cc-act cc-plus" data-add="${i}" title="이 구간 뒤에 인터랙티브 추가">＋</button>`;
       }).join('')}
@@ -743,6 +747,41 @@ function renderStruct(){
     if(!segEl) return;
     ccSeg = +segEl.dataset.i; ccSel = null; renderStruct();
   });
+  /* 활동 칩 드래그 정렬 — 칩 위: 그 자리에 끼움 / ＋ 위: 그 구간 맨 뒤로 */
+  let drag = null;
+  $('ccTl').addEventListener('dragstart', e => {
+    const chip = e.target.closest('.cc-act:not(.cc-plus)');
+    if(!chip){ e.preventDefault(); return; }
+    drag = { i: +chip.dataset.i, j: +chip.dataset.j };
+    chip.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+  });
+  $('ccTl').addEventListener('dragend', () => {
+    drag = null;
+    document.querySelectorAll('.cc-act.dragging, .cc-act.dragover, .cc-act.dragover-r').forEach(x => x.classList.remove('dragging', 'dragover', 'dragover-r'));
+  });
+  $('ccTl').addEventListener('dragover', e => {
+    if(!drag) return;
+    const over = e.target.closest('.cc-act');
+    if(!over) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    document.querySelectorAll('.cc-act.dragover, .cc-act.dragover-r').forEach(x => x.classList.remove('dragover', 'dragover-r'));
+    const aft = e.clientX > over.getBoundingClientRect().left + over.offsetWidth / 2;
+    over.classList.add(aft ? 'dragover-r' : 'dragover');
+  });
+  $('ccTl').addEventListener('drop', e => {
+    if(!drag) return;
+    const over = e.target.closest('.cc-act');
+    if(!over) return;
+    e.preventDefault();
+    const from = drag; drag = null;
+    if(over.classList.contains('cc-plus')){ dropAct(from.i, from.j, +over.dataset.add, segs[+over.dataset.add].acts.length); return; }
+    const ti = +over.dataset.i, tj = +over.dataset.j;
+    const aft = e.clientX > over.getBoundingClientRect().left + over.offsetWidth / 2;
+    if(ti === from.i && tj === from.j) return;
+    dropAct(from.i, from.j, ti, tj + (aft ? 1 : 0));
+  });
   renderDet();
   fitFrame();
   refresh();
@@ -759,21 +798,19 @@ function renderDet(){
   box.innerHTML = `
     <div class="drow"><b>${AT[a.k].ic} ${AT[a.k].n}</b>
       <input class="sg-t" style="flex:1;min-width:180px" value="${esc(a.t)}" onchange="actTitle(${i},${j},this.value)">
-      <span class="dim">순서 ${j + 1}/${segs[i].acts.length}</span>
-      <button class="fbtn" onclick="mvAct(${i},${j},-1)" ${j === 0 ? 'disabled' : ''}>◀ 앞으로</button>
-      <button class="fbtn" onclick="mvAct(${i},${j},1)" ${j === segs[i].acts.length - 1 ? 'disabled' : ''}>뒤로 ▶</button></div>
+      <span class="dim">순서 ${j + 1}/${segs[i].acts.length} — 타임라인에서 끌어서 바꿔요</span></div>
     <div class="drow">완료 조건: ${condBody(i, j, a)}</div>
     <div class="drow">${mode === 'group' ? '제한 시간: ' + timeHtml(i, j, a) : '<span class="dim">단독 수강 — 제한 없음</span>'}
       <span style="flex:1"></span>
       <button class="fbtn" onclick="pOpen(${i},${j})">미리보기</button>
       <button class="fbtn dl" onclick="rmAct(${i},${j})">삭제</button></div>`;
 }
-function mvAct(i, j, d){
-  const arr = segs[i].acts;
-  const j2 = j + d;
-  if(j2 < 0 || j2 >= arr.length) return;
-  [arr[j], arr[j2]] = [arr[j2], arr[j]];
-  ccSel = { i, j: j2 };
+function dropAct(i, j, i2, pos){   /* (i,j)의 활동을 구간 i2의 pos 자리로 */
+  const a = segs[i].acts.splice(j, 1)[0];
+  if(i === i2 && j < pos) pos--;
+  pos = Math.max(0, Math.min(pos, segs[i2].acts.length));
+  segs[i2].acts.splice(pos, 0, a);
+  ccSel = { i: i2, j: pos }; ccSeg = i2;
   saved(); renderStruct();
 }
 function rmAct(i, j){
