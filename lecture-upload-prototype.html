@@ -179,7 +179,13 @@ input,select,textarea{font:inherit;color:inherit}
 .cc-topline .sg-t{flex:0 1 340px; min-width:180px}
 .cc-topline .ops button{border:1px solid var(--line); border-radius:6px; width:26px; height:26px; background:#fff; cursor:pointer}
 .cc-topline .ops .dl{color:#C0392B}
-.cc-live{margin-bottom:10px; overflow:hidden; border:1px solid var(--line); border-radius:12px; background:#17131F; position:relative}
+/* 프리미어식 3패널 — 좌 모니터 · 우 설정 · 하단 타임라인, 스크롤 없이 한 화면 */
+.cc-app{display:grid; grid-template-columns:minmax(0,1fr) 340px; grid-template-areas:"stage det" "south south"; gap:12px; align-items:start}
+@media(max-width:1150px){.cc-app{grid-template-columns:1fr; grid-template-areas:"stage" "det" "south"}}
+.cc-stage{grid-area:stage; background:#17131F; border:1px solid var(--line); border-radius:12px;
+  display:flex; align-items:center; justify-content:center; overflow:hidden; min-height:280px}
+.cc-south{grid-area:south; min-width:0}
+.cc-live{overflow:hidden; position:relative}
 .cc-live iframe{border:none; transform-origin:0 0; display:block}
 .cc-pal{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px}
 .cc-plus{border-style:dashed; color:#3182F6; font-size:1.05rem; font-weight:800}
@@ -198,7 +204,7 @@ input,select,textarea{font:inherit;color:inherit}
 .cc-act:hover{border-color:#3182F6}
 .cc-addseg{flex-shrink:0; border:1.5px dashed var(--line); border-radius:9px; padding:0 16px; color:var(--muted); font-weight:700; cursor:pointer; background:none}
 .cc-addseg:hover{border-color:#3182F6; color:#3182F6}
-.cc-det{border:1px solid var(--line); border-radius:10px; padding:13px 16px; background:#FBFBFD; display:flex; flex-direction:column; gap:10px}
+.cc-det{grid-area:det; align-self:stretch; overflow-y:auto; border:1px solid var(--line); border-radius:10px; padding:13px 16px; background:#FBFBFD; display:flex; flex-direction:column; gap:10px}
 .cc-det .drow{display:flex; gap:9px; align-items:center; flex-wrap:wrap; font-size:.84rem}
 .cc-det input[type=number]{width:56px; border:1px solid var(--line); border-radius:6px; padding:4px 6px}
 
@@ -524,6 +530,7 @@ function setEditStep(n){
   editStep = n;
   ['s1','s3','s4','toStep2'].forEach(id => { const el = $(id); if(el) el.hidden = n !== 1; });
   ['s2','s5','toStep1'].forEach(id => { const el = $(id); if(el) el.hidden = n !== 2; });
+  if(n === 2) requestAnimationFrame(fitFrame);
   window.scrollTo(0, 0);
 }
 function openEditor(ep){          // 에피소드 행 → 편집 화면 (ep=null 이면 새 에피소드)
@@ -655,22 +662,29 @@ setInterval(() => {
 }, 250);
 
 /* 강의실 전체가 보이게 축소 — 가상 해상도로 렌더한 뒤 scale */
-/* 가상 캔버스 — 영상 검수: 넓게 / 활동 편집: 그 화면이 거의 원본 크기로 보이게 좁고 크게 */
+/* 가상 캔버스 — 영상 검수: 강의실 무대에 딱 맞게 / 활동 편집: 그 화면이 거의 원본 크기 */
 function frameDims(){
   const focus = ccSel && segs[ccSel.i] && segs[ccSel.i].acts[ccSel.j];
-  return focus ? {w:940, h:720, hf:0.62} : {w:1100, h:880, hf:0.5};
+  return focus ? {w:940, h:720} : {w:880, h:880};   /* 880 미만이면 강의실이 모바일 레이아웃으로 바뀜 */
 }
 function fitFrame(){
-  const wrap = document.querySelector('.cc-live');
+  const stage = document.querySelector('.cc-stage');
   const fr = $('ccFrame');
-  if(!wrap || !fr) return;
-  const {w:VW, h:VH, hf} = frameDims();
-  const f = Math.min(wrap.clientWidth / VW, (window.innerHeight * hf) / VH, 1);
+  if(!stage || !fr || !stage.clientWidth) return;
+  const {w:VW, h:VH} = frameDims();
+  const south = document.querySelector('.cc-south');
+  const top = Math.max(stage.getBoundingClientRect().top, 64);
+  const availH = Math.max(300, window.innerHeight - top - (south ? south.offsetHeight : 120) - 34);
+  const f = Math.min(stage.clientWidth / VW, availH / VH, 1);
   fr.style.width = VW + 'px';
   fr.style.height = VH + 'px';
   fr.style.transform = `scale(${f})`;
-  fr.style.marginLeft = Math.max(0, Math.round((wrap.clientWidth - VW * f) / 2)) + 'px';
-  wrap.style.height = Math.round(VH * f) + 'px';
+  const live = fr.parentElement;
+  live.style.width = Math.round(VW * f) + 'px';
+  live.style.height = Math.round(VH * f) + 'px';
+  stage.style.height = Math.round(VH * f) + 'px';
+  const det = document.querySelector('.cc-det');
+  if(det) det.style.height = Math.round(VH * f) + 'px';
 }
 window.addEventListener('resize', () => fitFrame());
 function ccFrameSrc(){
@@ -688,9 +702,12 @@ function renderStruct(){
     <div class="cc-topline">🎬 강의 구간 ${ccSeg + 1}
       <input class="sg-t" value="${esc(seg.t)}" onchange="segTitle(${ccSeg}, this.value)">
       <span class="ops"><button onclick="mvSeg(${ccSeg},-1)" ${ccSeg === 0 ? 'disabled' : ''}>▲</button><button onclick="mvSeg(${ccSeg},1)" ${ccSeg === segs.length - 1 ? 'disabled' : ''}>▼</button><button class="dl" onclick="rmSeg(${ccSeg})" ${segs.length <= 1 ? 'disabled' : ''}>✕</button></span></div>
-    <div class="cc-live">
+    <div class="cc-app">
+    <div class="cc-stage"><div class="cc-live">
       <iframe id="ccFrame" src="${ccFrameSrc()}" title="강의실 미리보기 · 편집"></iframe>
-    </div>
+    </div></div>
+    <div class="cc-det" id="ccDet"></div>
+    <div class="cc-south">
     <div class="cc-pal" id="ccPal" hidden>
       ${Object.entries(AT).map(([k, v]) => `<button data-k="${k}">${v.ic} ${v.n}</button>`).join('')}
     </div>
@@ -708,7 +725,8 @@ function renderStruct(){
       }).join('')}
       <button class="cc-addseg" onclick="addSeg()">＋ 구간</button>
     </div>
-    <div class="cc-det" id="ccDet"></div>`;
+    </div>
+    </div>`;
 
   $('ccPal').addEventListener('click', e => {
     const b = e.target.closest('[data-k]');

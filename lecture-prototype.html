@@ -110,8 +110,9 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
 .edit-mode .edt:hover{outline-color:#3182F6; background:rgba(49,130,246,.06)}
 .edit-mode .edt:focus{outline:2px solid #3182F6; background:none}
 .edit-mode #aoDone{display:none}
+body.edit-mode{background:#17131F}   /* 스튜디오 모니터 패널과 이어져 보이게 */
 /* 편집(스튜디오 iframe) — 노트·뒤로가기·목차 등 학생용 UI를 걷어내고 무대만 크게 */
-.edit-mode .vback, .edit-mode .hud, .edit-mode .menu-drawer, .edit-mode .liveroom > .memo{display:none !important}
+.edit-mode .vback, .edit-mode .hud, .edit-mode .menu-drawer, .edit-mode .bg-night, .edit-mode .liveroom > .memo{display:none !important}
 .edit-mode .liveroom{grid-template-columns:auto; grid-template-areas:"head" "stage"; --H:min(760px, 82vh)}
 /* 활동 편집 포커스 — 선택한 인터랙티브 화면만 원본 크기로 */
 .edit-mode.pv-focus .lec-head, .edit-mode.pv-focus .spotstage, .edit-mode.pv-focus .lesson-col{display:none}
