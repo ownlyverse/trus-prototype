@@ -932,10 +932,10 @@ function refresh(){
   const okPeople = people.length >= 2;
   const hostOk = segs.every(s=>s.vids[0]);
   const nav = document.querySelectorAll('.snav a');
-  nav[0].classList.toggle('done', okInfo);
-  nav[1].classList.toggle('done', okStruct);
-  nav[2].classList.toggle('done', okPeople);
-  nav[3].classList.toggle('done', hostOk);
+  nav[0].classList.toggle('done', okInfo);      /* ① 강의 정보 */
+  nav[1].classList.toggle('done', okPeople);    /* ② 출연자 */
+  nav[2].classList.toggle('done', hostOk);      /* ③ 영상 업로드 */
+  nav[3].classList.toggle('done', okStruct);    /* ④ 강의 구성 */
   const errs = [];
   if(!okInfo) errs.push('에피소드 제목이 필요해요');
   segs.forEach((s,i)=>{ if(!s.vids[0]) errs.push(`강의 구간 ${i+1}의 강의자 영상이 없어요`); });
