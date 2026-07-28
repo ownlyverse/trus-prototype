@@ -173,6 +173,10 @@ input,select,textarea{font:inherit;color:inherit}
 .fchip{display:inline-flex; align-items:center; gap:5px; font-size:.74rem; font-weight:600; color:var(--sub);
   background:var(--soft); border:1px solid var(--line); border-radius:5px; padding:4px 8px}
 .fchip button{color:var(--faint); font-size:.7rem} .fchip button:hover{color:var(--red)}
+/* 음성 인식 → 메인 전환 배지 */
+.micbadge{font-size:.62rem; font-weight:800; color:#2E6B3E; background:#E7F6EE; border-radius:6px;
+  padding:2px 6px; white-space:nowrap; flex-shrink:0}
+
 /* 수강 모드 토글 */
 .modeseg{display:inline-flex; gap:3px; background:#F0EEF3; border-radius:9px; padding:3px; margin-left:10px}
 .modeseg button{font-size:.74rem; font-weight:800; padding:5px 10px; border-radius:7px; color:#8B8698; border:none; background:none; cursor:pointer}
@@ -806,7 +810,7 @@ function renderMatrix(){
     h += `<div class="mxrow" style="grid-template-columns:${cols}">
       <span class="mx-seg">강의 구간 ${i+1}<small>${esc(s.t)}</small></span>
       ${people.map((p,k)=>{
-        if(s.vids[k]) return `<div class="uslot on"><span>🎬</span><b>s${i+1}-${esc(p.name)}.mp4</b><button class="x" onclick="uVid(${i},${k},false)">✕</button></div>`;
+        if(s.vids[k]) return `<div class="uslot on"><span>🎬</span><b>s${i+1}-${esc(p.name)}.mp4</b><span class="micbadge" title="음성이 인식된 구간에서 메인 화면으로 전환돼요">🎙 메인 전환</span><button class="x" onclick="uVid(${i},${k},false)">✕</button></div>`;
         const req = p.host ? ' req' : '';
         return `<div class="uslot${req}" onclick="uVid(${i},${k},true)"><span>⬆</span> ${p.host?'영상 올리기 (필수)':'영상 올리기'}</div>`;
       }).join('')}
