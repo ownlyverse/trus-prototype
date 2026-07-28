@@ -918,7 +918,6 @@ function refresh(){
     });
   }));
   const v = $('valid');
-  nav[4].classList.toggle('done', !errs.length);
   if(errs.length){ v.className = 'valid no'; v.textContent = '✗ ' + errs.join(' · '); $('btnTop').disabled = true; }
   else {
     const upN = segs.reduce((n,s)=>n+s.vids.filter(Boolean).length,0);
@@ -927,16 +926,6 @@ function refresh(){
     $('btnTop').disabled = false;
   }
 }
-
-/* 네비 활성 */
-const secs = ['s1','s2','s3','s4','s5'].map(id=>$(id));
-const navIO = new IntersectionObserver(es=>{
-  es.forEach(e=>{ if(e.isIntersecting){
-    const i = secs.indexOf(e.target);
-    document.querySelectorAll('.snav a').forEach((a,k)=>a.classList.toggle('on', k===i));
-  }});
-}, {rootMargin:'-40% 0px -55% 0px'});
-secs.forEach(s=>navIO.observe(s));
 
 /* 액션 — 강의실이 읽는 설정(trus_lecture_config): 수강 모드·발화 로테이션·제한시간 */
 function writeConfig(){
