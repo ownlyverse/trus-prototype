@@ -193,9 +193,11 @@ input,select,textarea{font:inherit;color:inherit}
 .cc-seg.on{border-color:#3182F6; box-shadow:0 0 0 2px rgba(49,130,246,.15)}
 .cc-seglab{position:absolute; left:8px; top:5px; font-size:.66rem; font-weight:800; color:#5B667A; pointer-events:none}
 .cc-ph{position:absolute; top:0; bottom:0; width:2px; background:#FF4D6D; left:0; pointer-events:none; z-index:2}
-.cc-chip{position:absolute; bottom:4px; transform:translateX(-50%); width:27px; height:27px; border-radius:8px;
-  background:#fff; border:1.5px solid var(--line); font-size:.8rem; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:3}
-.cc-chip.on{border-color:#3182F6; box-shadow:0 0 0 2px rgba(49,130,246,.25)}
+.cc-act{display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; width:52px; height:56px;
+  border:1.5px solid var(--line); border-radius:9px; background:#fff; font-size:.95rem; cursor:pointer; flex-shrink:0}
+.cc-act small{font-size:.56rem; font-weight:800; color:var(--muted)}
+.cc-act.on{border-color:#3182F6; box-shadow:0 0 0 2px rgba(49,130,246,.2)}
+.cc-act:hover{border-color:#3182F6}
 .cc-addseg{flex-shrink:0; border:1.5px dashed var(--line); border-radius:9px; padding:0 16px; color:var(--muted); font-weight:700; cursor:pointer; background:none}
 .cc-addseg:hover{border-color:#3182F6; color:#3182F6}
 .cc-det{border:1px solid var(--line); border-radius:10px; padding:13px 16px; background:#FBFBFD; display:flex; flex-direction:column; gap:10px}
@@ -671,7 +673,6 @@ const mmss = t => Math.floor(t / 60) + ':' + String(Math.floor(t) % 60).padStart
 
 function renderStruct(){
   if(ccSeg >= segs.length) ccSeg = segs.length - 1;
-  segs.forEach(s0 => s0.acts.forEach((a, idx) => { if(a.at == null) a.at = (idx + 1) * 18; }));
   const host = $('sgtable');
   host.classList.add('ccmode');
   const seg = segs[ccSeg];
@@ -686,23 +687,23 @@ function renderStruct(){
           <button class="fbtn" id="ccPlay">▶ 재생</button>
           <span class="dim" id="ccTime">0:00 / –:––</span>
         </div>
-        <button class="fbtn cc-addbtn" id="ccAdd">＋ 이 지점에 인터랙티브 넣기</button>
+        <button class="fbtn cc-addbtn" id="ccAdd">＋ 이 구간 뒤에 인터랙티브 넣기</button>
         <div class="cc-pal" id="ccPal" hidden>
           ${Object.entries(AT).map(([k, v]) => `<button data-k="${k}">${v.ic} ${v.n}</button>`).join('')}
         </div>
-        <div class="dim">재생하다가 원하는 순간에 누르면 그 지점에 활동이 끼워져요 · 타임라인을 눌러 이동할 수 있어요</div>
+        <div class="dim">영상은 자르지 않아요 — 활동은 구간 영상이 끝난 뒤 이어서 나와요. 순서는 아래 패널의 ◀▶로 바꿔요</div>
       </div>
     </div>
     <div class="cc-tl" id="ccTl">
       ${segs.map((s0, i) => {
         const dur = ccDurs[i] || 66;
-        const w = Math.max(150, Math.min(430, Math.round(dur * 4)));
+        const w = Math.max(140, Math.min(360, Math.round(dur * 3.4)));
         return `<div class="cc-seg${i === ccSeg ? ' on' : ''}" data-i="${i}" style="width:${w}px">
           <span class="cc-seglab">🎬 구간 ${i + 1}</span>
           ${i === ccSeg ? '<i class="cc-ph" id="ccPh"></i>' : ''}
-          ${s0.acts.map((a, j) => `<button class="cc-chip${ccSel && ccSel.i === i && ccSel.j === j ? ' on' : ''}" data-i="${i}" data-j="${j}"
-            style="left:${Math.min(97, (a.at || 0) / dur * 100)}%" title="${AT[a.k].n} · ${esc(a.t)} · ${mmss(a.at || 0)} 지점">${AT[a.k].ic}</button>`).join('')}
-        </div>`;
+        </div>`
+        + s0.acts.map((a, j) => `<button class="cc-act${ccSel && ccSel.i === i && ccSel.j === j ? ' on' : ''}" data-i="${i}" data-j="${j}"
+            title="${AT[a.k].n} · ${esc(a.t)}">${AT[a.k].ic}<small>${AT[a.k].n}</small></button>`).join('');
       }).join('')}
       <button class="cc-addseg" onclick="addSeg()">＋ 구간</button>
     </div>
@@ -727,10 +728,10 @@ function renderStruct(){
   $('ccPal').addEventListener('click', e => {
     const b = e.target.closest('[data-k]');
     if(!b) return;
-    addAct(ccSeg, b.dataset.k, Math.round(vid.currentTime));
+    addAct(ccSeg, b.dataset.k);
   });
   $('ccTl').addEventListener('click', e => {
-    const chip = e.target.closest('.cc-chip');
+    const chip = e.target.closest('.cc-act');
     if(chip){ ccSel = { i: +chip.dataset.i, j: +chip.dataset.j }; ccSeg = +chip.dataset.i; renderStruct(); return; }
     const segEl = e.target.closest('.cc-seg');
     if(!segEl) return;
@@ -760,20 +761,21 @@ function renderDet(){
   box.innerHTML = `
     <div class="drow"><b>${AT[a.k].ic} ${AT[a.k].n}</b>
       <input class="sg-t" style="flex:1;min-width:180px" value="${esc(a.t)}" onchange="actTitle(${i},${j},this.value)">
-      <span class="dim">위치 ${mmss(a.at || 0)}</span>
-      <button class="fbtn" onclick="actAt(${i},${j},-5)">◀ 5초</button>
-      <button class="fbtn" onclick="actAt(${i},${j},5)">5초 ▶</button></div>
+      <span class="dim">순서 ${j + 1}/${segs[i].acts.length}</span>
+      <button class="fbtn" onclick="mvAct(${i},${j},-1)" ${j === 0 ? 'disabled' : ''}>◀ 앞으로</button>
+      <button class="fbtn" onclick="mvAct(${i},${j},1)" ${j === segs[i].acts.length - 1 ? 'disabled' : ''}>뒤로 ▶</button></div>
     <div class="drow">완료 조건: ${condBody(i, j, a)}</div>
     <div class="drow">${mode === 'group' ? '제한 시간: ' + timeHtml(i, j, a) : '<span class="dim">단독 수강 — 제한 없음</span>'}
       <span style="flex:1"></span>
       <button class="fbtn" onclick="pOpen(${i},${j})">미리보기</button>
       <button class="fbtn dl" onclick="rmAct(${i},${j})">삭제</button></div>`;
 }
-function actAt(i, j, d){
-  const a = segs[i].acts[j];
-  a.at = Math.max(0, (a.at || 0) + d);
-  segs[i].acts.sort((x, y) => (x.at || 0) - (y.at || 0));
-  ccSel = { i, j: segs[i].acts.indexOf(a) };
+function mvAct(i, j, d){
+  const arr = segs[i].acts;
+  const j2 = j + d;
+  if(j2 < 0 || j2 >= arr.length) return;
+  [arr[j], arr[j2]] = [arr[j2], arr[j]];
+  ccSel = { i, j: j2 };
   saved(); renderStruct();
 }
 function rmAct(i, j){
@@ -791,15 +793,14 @@ function togMenu(i,e){
   $('menu'+i).classList.toggle('open');
 }
 document.addEventListener('click', ()=>document.querySelectorAll('.tmenu').forEach(m=>m.classList.remove('open')));
-function addAct(i, k, at){
+function addAct(i, k){
   const def = {read:{done:1, dur:180}, draw:{done:12, dur:120}, quiz:{qs:[{q:'', opts:['',''], ans:[], multi:false}], dur:120}, speak:{done:3, dur:60}, write:{done:8, dur:120}, play:{file:'', up:false, dur:300}}[k] || {};
   const names = {read:'밑줄 치며 읽기', draw:'마음을 색으로', quiz:'잠깐, 퀴즈', speak:'소리 내어 말하기', write:'한 문장으로', play:'워크시트 내려받기'};
-  const a = Object.assign({k, t:names[k], at: at != null ? at : 18}, def);
+  const a = Object.assign({k, t:names[k]}, def);
   segs[i].acts.push(a);
-  segs[i].acts.sort((x, y) => (x.at || 0) - (y.at || 0));
-  ccSel = { i, j: segs[i].acts.indexOf(a) };
+  ccSel = { i, j: segs[i].acts.length - 1 };
   renderStruct(); saved();
-  toast(`${names[k]} — ${mmss(a.at || 0)} 지점에 들어갔어요`);
+  toast(`${names[k]} — 구간 ${i + 1} 뒤에 들어갔어요`);
 }
 function actTitle(i,j,v){ segs[i].acts[j].t = v; saved(); }
 function actDone(i,j,v){ segs[i].acts[j].done = +v; saved(); }
