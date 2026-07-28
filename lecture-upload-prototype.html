@@ -655,15 +655,21 @@ setInterval(() => {
 }, 250);
 
 /* 강의실 전체가 보이게 축소 — 가상 해상도로 렌더한 뒤 scale */
+/* 가상 캔버스 — 영상 검수: 넓게 / 활동 편집: 그 화면이 거의 원본 크기로 보이게 좁고 크게 */
+function frameDims(){
+  const focus = ccSel && segs[ccSel.i] && segs[ccSel.i].acts[ccSel.j];
+  return focus ? {w:940, h:720, hf:0.62} : {w:1100, h:880, hf:0.5};
+}
 function fitFrame(){
   const wrap = document.querySelector('.cc-live');
   const fr = $('ccFrame');
   if(!wrap || !fr) return;
-  const VW = 1500, VH = 880;
-  const f = Math.min(wrap.clientWidth / VW, (window.innerHeight * 0.5) / VH);
+  const {w:VW, h:VH, hf} = frameDims();
+  const f = Math.min(wrap.clientWidth / VW, (window.innerHeight * hf) / VH, 1);
   fr.style.width = VW + 'px';
   fr.style.height = VH + 'px';
   fr.style.transform = `scale(${f})`;
+  fr.style.marginLeft = Math.max(0, Math.round((wrap.clientWidth - VW * f) / 2)) + 'px';
   wrap.style.height = Math.round(VH * f) + 'px';
 }
 window.addEventListener('resize', () => fitFrame());
