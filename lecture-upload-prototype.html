@@ -173,6 +173,35 @@ input,select,textarea{font:inherit;color:inherit}
 .fchip{display:inline-flex; align-items:center; gap:5px; font-size:.74rem; font-weight:600; color:var(--sub);
   background:var(--soft); border:1px solid var(--line); border-radius:5px; padding:4px 8px}
 .fchip button{color:var(--faint); font-size:.7rem} .fchip button:hover{color:var(--red)}
+/* 캡컷형 강의 구성 */
+.sgtable.ccmode{min-width:0; border:none; border-radius:0}
+.cc-prev{display:flex; gap:16px; margin-bottom:6px}
+.cc-prev video{width:148px; aspect-ratio:9/16; background:#000; border-radius:10px; border:1px solid var(--line); flex-shrink:0}
+.cc-side{flex:1; display:flex; flex-direction:column; gap:9px; align-items:flex-start; min-width:0}
+.cc-segname{display:flex; align-items:center; gap:8px; font-size:.84rem; font-weight:800; flex-wrap:wrap; width:100%}
+.cc-segname .sg-t{flex:1; min-width:160px}
+.cc-segname .ops button{border:1px solid var(--line); border-radius:6px; width:26px; height:26px; background:#fff; cursor:pointer}
+.cc-segname .ops .dl{color:#C0392B}
+.cc-ctrl{display:flex; align-items:center; gap:10px}
+.cc-addbtn{border-style:solid; border-color:#3182F6; color:#3182F6; font-weight:800}
+.cc-pal{display:flex; gap:6px; flex-wrap:wrap}
+.cc-pal button{border:1.5px solid var(--line); border-radius:8px; background:#fff; padding:7px 11px; font-size:.8rem; font-weight:700; cursor:pointer}
+.cc-pal button:hover{border-color:#3182F6; color:#3182F6}
+.cc-tl{display:flex; gap:6px; align-items:stretch; overflow-x:auto; padding:16px 2px 14px}
+.cc-seg{position:relative; height:56px; border:1.5px solid var(--line); border-radius:9px;
+  background:repeating-linear-gradient(90deg, #EDF1F7 0 22px, #E4EAF2 22px 44px); cursor:pointer; flex-shrink:0}
+.cc-seg.on{border-color:#3182F6; box-shadow:0 0 0 2px rgba(49,130,246,.15)}
+.cc-seglab{position:absolute; left:8px; top:5px; font-size:.66rem; font-weight:800; color:#5B667A; pointer-events:none}
+.cc-ph{position:absolute; top:0; bottom:0; width:2px; background:#FF4D6D; left:0; pointer-events:none; z-index:2}
+.cc-chip{position:absolute; bottom:4px; transform:translateX(-50%); width:27px; height:27px; border-radius:8px;
+  background:#fff; border:1.5px solid var(--line); font-size:.8rem; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:3}
+.cc-chip.on{border-color:#3182F6; box-shadow:0 0 0 2px rgba(49,130,246,.25)}
+.cc-addseg{flex-shrink:0; border:1.5px dashed var(--line); border-radius:9px; padding:0 16px; color:var(--muted); font-weight:700; cursor:pointer; background:none}
+.cc-addseg:hover{border-color:#3182F6; color:#3182F6}
+.cc-det{border:1px solid var(--line); border-radius:10px; padding:13px 16px; background:#FBFBFD; display:flex; flex-direction:column; gap:10px}
+.cc-det .drow{display:flex; gap:9px; align-items:center; flex-wrap:wrap; font-size:.84rem}
+.cc-det input[type=number]{width:56px; border:1px solid var(--line); border-radius:6px; padding:4px 6px}
+
 /* 편집 2단계 이동 */
 .stepnav{display:flex; justify-content:flex-end; margin:4px 0 18px}
 .stepnav #toStep1{justify-content:flex-start}
@@ -382,13 +411,8 @@ input,select,textarea{font:inherit;color:inherit}
         <div class="meta">
           <span>강의 구간 <b id="mSeg">2</b>개</span>
           <span>인터랙티브 구간 <b id="mAct">6</b>개</span>
-          <span class="rotrow">🎬 발화 로테이션:
-            강의자 <input type="number" min="3" id="rot0" value="10" onchange="setRot()">초 →
-            🦉 <input type="number" min="3" id="rot1" value="10" onchange="setRot()">초 →
-            🐢 <input type="number" min="3" id="rot2" value="10" onchange="setRot()">초
-            <button class="fbtn" id="rotAuto" onclick="autoRot()">🎙 음성으로 자동 감지</button>
-            <span class="dim" id="rotNote">영상은 사람별 1개면 돼요 — 화면 전환은 자동이에요</span></span>
-          <span style="color:var(--faint)">영상은 다음 단계에서 올려요 · 제한 시간을 못 채우면 학생은 강의 후 보충해야 다음 에피소드가 열려요</span>
+          <span class="dim">🎬 1단계에서 올린 영상을 재생하면서, 원하는 지점에 인터랙티브를 끼워 넣어요 — 화면 전환은 편집된 영상이 알아서 해요</span>
+
         </div>
         <div class="sgwrap"><div class="sgtable" id="sgtable"></div></div>
       </div>
@@ -591,7 +615,6 @@ let people = [
 const MAXC = 3, MINC = 1;
 /* 수강 모드 — 단독은 제한시간 없음, 단체는 제한시간·동시퇴장. 발행 시 강의실이 읽는다 */
 let mode = 'solo';
-let rot = [10, 10, 10];
 function setMode(m){
   mode = m;
   document.querySelectorAll('#modeSeg button').forEach(b => b.classList.toggle('on', b.dataset.mode === m));
@@ -600,30 +623,7 @@ function setMode(m){
     : '단체 수강 — 제한 시간이 끝나면 모두 함께 다음으로 넘어가요';
   saved(); refresh();
 }
-function setRot(){
-  rot = [Math.max(3, +$('rot0').value || 10), Math.max(3, +$('rot1').value || 10), Math.max(3, +$('rot2').value || 10)];
-  saved();
-}
-/* 🎙 자동 발화 감지 (목업) — 실서비스에선 업로드된 사람별 영상의 오디오 볼륨을 분석해
-   매 순간 말하는 사람을 찾고 로테이션을 자동 생성한다. 여기선 분석 흐름만 재현 */
-function autoRot(){
-  const btn = $('rotAuto');
-  btn.disabled = true;
-  let step = 0;
-  const msgs = ['🎙 오디오 추출 중…', '📊 발화 구간 분석 중…', '✂️ 전환점 계산 중…'];
-  btn.textContent = msgs[0];
-  const iv = setInterval(() => {
-    step++;
-    if(step < msgs.length){ btn.textContent = msgs[step]; return; }
-    clearInterval(iv);
-    $('rot0').value = 9; $('rot1').value = 6; $('rot2').value = 7;
-    setRot();
-    btn.textContent = '🎙 음성으로 자동 감지';
-    btn.disabled = false;
-    $('rotNote').textContent = '감지 완료 — 강의자 9초 → 🦉 6초 → 🐢 7초로 잡았어요 (수동으로 고칠 수 있어요)';
-    toast('발화 구간을 자동으로 잡았어요 ✓');
-  }, 700);
-}
+
 const coachCount = () => people.length - 1;
 
 /* segs[i].vids[k] = k번째 출연자의 이 구간 영상 업로드 여부 */
@@ -663,44 +663,123 @@ function condBody(i,j,a){
     : `<button class="fbtn miss" onclick="actUp(${i},${j},true)">⬆ 파일 업로드 (필수)</button> 작성본 올려야 통과`);
   return '';
 }
+/* ── ② 강의 구성 — 캡컷형: 영상 보면서 인터랙티브 끼워 넣기 ── */
+let ccSeg = 0, ccSel = null;                 /* ccSel = {i,j} 선택된 인터랙티브 */
+const ccDurs = [];                           /* 구간별 영상 길이(초) 캐시 */
+const SEG_SRC = i => ['assets/lecture1.mp4', 'assets/lecture2.mp4'][i] || 'assets/lecture1.mp4';
+const mmss = t => Math.floor(t / 60) + ':' + String(Math.floor(t) % 60).padStart(2, '0');
+
 function renderStruct(){
-  let h = `<div class="sghead"><span></span><span>구간</span><span>제목</span><span>구간 시간</span><span>완료 조건</span><span style="text-align:right">순서</span></div>`;
-  segs.forEach((s,i)=>{
-    h += `<div class="sgrow">
-      <span class="drag" title="드래그 (목업)">⠿</span>
-      <span class="sg-no">강의 구간 ${i+1}</span>
-      <input class="sg-t" value="${esc(s.t)}" onchange="segTitle(${i},this.value)">
-      <span class="dim">영상 길이만큼</span>
-      <span class="dim">영상 끝까지 시청</span>
-      <div class="ops">
-        <button onclick="mvSeg(${i},-1)" ${i===0?'disabled style=opacity:.3':''}>▲</button>
-        <button onclick="mvSeg(${i},1)" ${i===segs.length-1?'disabled style=opacity:.3':''}>▼</button>
-        <button class="dl" onclick="rmSeg(${i})" ${segs.length<=1?'disabled style=opacity:.3':''}>✕</button>
+  if(ccSeg >= segs.length) ccSeg = segs.length - 1;
+  segs.forEach(s0 => s0.acts.forEach((a, idx) => { if(a.at == null) a.at = (idx + 1) * 18; }));
+  const host = $('sgtable');
+  host.classList.add('ccmode');
+  const seg = segs[ccSeg];
+  host.innerHTML = `
+    <div class="cc-prev">
+      <video id="ccVid" src="${SEG_SRC(ccSeg)}" playsinline></video>
+      <div class="cc-side">
+        <div class="cc-segname">🎬 강의 구간 ${ccSeg + 1}
+          <input class="sg-t" value="${esc(seg.t)}" onchange="segTitle(${ccSeg}, this.value)">
+          <span class="ops"><button onclick="mvSeg(${ccSeg},-1)" ${ccSeg === 0 ? 'disabled' : ''}>▲</button><button onclick="mvSeg(${ccSeg},1)" ${ccSeg === segs.length - 1 ? 'disabled' : ''}>▼</button><button class="dl" onclick="rmSeg(${ccSeg})" ${segs.length <= 1 ? 'disabled' : ''}>✕</button></span></div>
+        <div class="cc-ctrl">
+          <button class="fbtn" id="ccPlay">▶ 재생</button>
+          <span class="dim" id="ccTime">0:00 / –:––</span>
+        </div>
+        <button class="fbtn cc-addbtn" id="ccAdd">＋ 이 지점에 인터랙티브 넣기</button>
+        <div class="cc-pal" id="ccPal" hidden>
+          ${Object.entries(AT).map(([k, v]) => `<button data-k="${k}">${v.ic} ${v.n}</button>`).join('')}
+        </div>
+        <div class="dim">재생하다가 원하는 순간에 누르면 그 지점에 활동이 끼워져요 · 타임라인을 눌러 이동할 수 있어요</div>
       </div>
-    </div>`;
-    s.acts.forEach((a,j)=>{
-      h += `<div class="arow">
-        <span class="lk">└</span>
-        <span class="a-tag">${AT[a.k].n}</span>
-        <input class="a-t" value="${esc(a.t)}" onchange="actTitle(${i},${j},this.value)">
-        <span class="tcell">${timeHtml(i,j,a)}</span>
-        <span class="cond">${condBody(i,j,a)}</span>
-        <span class="aops">
-          <button class="fbtn" onclick="pOpen(${i},${j})">미리보기</button>
-          <button class="arm" onclick="rmAct(${i},${j})" title="삭제">✕</button>
-        </span>
-      </div>`;
-    });
-    h += `<div class="addact">
-      <button class="addab" onclick="togMenu(${i},event)">＋ 인터랙티브 구간 추가</button>
-      <div class="tmenu" id="menu${i}">${Object.keys(AT).map(k=>`<button onclick="addAct(${i},'${k}')">${AT[k].ic} ${AT[k].n}</button>`).join('')}</div>
-    </div>`;
+    </div>
+    <div class="cc-tl" id="ccTl">
+      ${segs.map((s0, i) => {
+        const dur = ccDurs[i] || 66;
+        const w = Math.max(150, Math.min(430, Math.round(dur * 4)));
+        return `<div class="cc-seg${i === ccSeg ? ' on' : ''}" data-i="${i}" style="width:${w}px">
+          <span class="cc-seglab">🎬 구간 ${i + 1}</span>
+          ${i === ccSeg ? '<i class="cc-ph" id="ccPh"></i>' : ''}
+          ${s0.acts.map((a, j) => `<button class="cc-chip${ccSel && ccSel.i === i && ccSel.j === j ? ' on' : ''}" data-i="${i}" data-j="${j}"
+            style="left:${Math.min(97, (a.at || 0) / dur * 100)}%" title="${AT[a.k].n} · ${esc(a.t)} · ${mmss(a.at || 0)} 지점">${AT[a.k].ic}</button>`).join('')}
+        </div>`;
+      }).join('')}
+      <button class="cc-addseg" onclick="addSeg()">＋ 구간</button>
+    </div>
+    <div class="cc-det" id="ccDet"></div>`;
+
+  const vid = $('ccVid');
+  vid.addEventListener('loadedmetadata', () => {
+    if(isFinite(vid.duration)) ccDurs[ccSeg] = vid.duration;
+    $('ccTime').textContent = mmss(vid.currentTime) + ' / ' + mmss(vid.duration || 0);
   });
-  h += `<div class="addseg"><button class="addsb" onclick="addSeg()">＋ 강의 구간 추가</button></div>`;
-  $('sgtable').innerHTML = h;
-  $('mSeg').textContent = segs.length;
-  $('mAct').textContent = segs.reduce((n,x)=>n+x.acts.length,0);
-  renderMatrix();
+  vid.addEventListener('timeupdate', () => {
+    $('ccTime').textContent = mmss(vid.currentTime) + ' / ' + mmss(vid.duration || 0);
+    const ph = $('ccPh');
+    if(ph && vid.duration) ph.style.left = (vid.currentTime / vid.duration * 100) + '%';
+  });
+  vid.addEventListener('ended', () => { $('ccPlay').textContent = '▶ 재생'; });
+  $('ccPlay').addEventListener('click', () => {
+    if(vid.paused){ vid.play().catch(()=>{}); $('ccPlay').textContent = '❚❚ 일시정지'; }
+    else { vid.pause(); $('ccPlay').textContent = '▶ 재생'; }
+  });
+  $('ccAdd').addEventListener('click', () => { $('ccPal').hidden = !$('ccPal').hidden; });
+  $('ccPal').addEventListener('click', e => {
+    const b = e.target.closest('[data-k]');
+    if(!b) return;
+    addAct(ccSeg, b.dataset.k, Math.round(vid.currentTime));
+  });
+  $('ccTl').addEventListener('click', e => {
+    const chip = e.target.closest('.cc-chip');
+    if(chip){ ccSel = { i: +chip.dataset.i, j: +chip.dataset.j }; ccSeg = +chip.dataset.i; renderStruct(); return; }
+    const segEl = e.target.closest('.cc-seg');
+    if(!segEl) return;
+    const i = +segEl.dataset.i;
+    const r = segEl.getBoundingClientRect();
+    const ratio = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width));
+    if(i !== ccSeg){
+      ccSeg = i; ccSel = null; renderStruct();
+      const v2 = $('ccVid');
+      v2.addEventListener('loadedmetadata', () => { v2.currentTime = ratio * (v2.duration || 0); }, { once:true });
+    } else if(vid.duration){
+      vid.currentTime = ratio * vid.duration;
+    }
+  });
+  renderDet();
+  refresh();
+}
+function renderDet(){
+  const box = $('ccDet');
+  if(!box) return;
+  if(!ccSel || !segs[ccSel.i] || !segs[ccSel.i].acts[ccSel.j]){
+    box.innerHTML = `<span class="dim">타임라인의 활동 아이콘을 누르면 여기서 설정해요 — 제목·완료 조건${mode === 'group' ? '·제한 시간' : ''}</span>`;
+    return;
+  }
+  const { i, j } = ccSel;
+  const a = segs[i].acts[j];
+  box.innerHTML = `
+    <div class="drow"><b>${AT[a.k].ic} ${AT[a.k].n}</b>
+      <input class="sg-t" style="flex:1;min-width:180px" value="${esc(a.t)}" onchange="actTitle(${i},${j},this.value)">
+      <span class="dim">위치 ${mmss(a.at || 0)}</span>
+      <button class="fbtn" onclick="actAt(${i},${j},-5)">◀ 5초</button>
+      <button class="fbtn" onclick="actAt(${i},${j},5)">5초 ▶</button></div>
+    <div class="drow">완료 조건: ${condBody(i, j, a)}</div>
+    <div class="drow">${mode === 'group' ? '제한 시간: ' + timeHtml(i, j, a) : '<span class="dim">단독 수강 — 제한 없음</span>'}
+      <span style="flex:1"></span>
+      <button class="fbtn" onclick="pOpen(${i},${j})">미리보기</button>
+      <button class="fbtn dl" onclick="rmAct(${i},${j})">삭제</button></div>`;
+}
+function actAt(i, j, d){
+  const a = segs[i].acts[j];
+  a.at = Math.max(0, (a.at || 0) + d);
+  segs[i].acts.sort((x, y) => (x.at || 0) - (y.at || 0));
+  ccSel = { i, j: segs[i].acts.indexOf(a) };
+  saved(); renderStruct();
+}
+function rmAct(i, j){
+  segs[i].acts.splice(j, 1);
+  ccSel = null;
+  saved(); renderStruct();
 }
 function segTitle(i,v){ segs[i].t = v; renderMatrix(); saved(); }
 function mvSeg(i,d){ const j = i+d; if(j<0 || j>=segs.length) return; [segs[i],segs[j]] = [segs[j],segs[i]]; renderStruct(); saved(); }
@@ -712,11 +791,15 @@ function togMenu(i,e){
   $('menu'+i).classList.toggle('open');
 }
 document.addEventListener('click', ()=>document.querySelectorAll('.tmenu').forEach(m=>m.classList.remove('open')));
-function addAct(i,k){
+function addAct(i, k, at){
   const def = {read:{done:1, dur:180}, draw:{done:12, dur:120}, quiz:{qs:[{q:'', opts:['',''], ans:[], multi:false}], dur:120}, speak:{done:3, dur:60}, write:{done:8, dur:120}, play:{file:'', up:false, dur:300}}[k] || {};
   const names = {read:'밑줄 치며 읽기', draw:'마음을 색으로', quiz:'잠깐, 퀴즈', speak:'소리 내어 말하기', write:'한 문장으로', play:'워크시트 내려받기'};
-  segs[i].acts.push(Object.assign({k, t:names[k]}, def));
+  const a = Object.assign({k, t:names[k], at: at != null ? at : 18}, def);
+  segs[i].acts.push(a);
+  segs[i].acts.sort((x, y) => (x.at || 0) - (y.at || 0));
+  ccSel = { i, j: segs[i].acts.indexOf(a) };
   renderStruct(); saved();
+  toast(`${names[k]} — ${mmss(a.at || 0)} 지점에 들어갔어요`);
 }
 function actTitle(i,j,v){ segs[i].acts[j].t = v; saved(); }
 function actDone(i,j,v){ segs[i].acts[j].done = +v; saved(); }
@@ -891,7 +974,7 @@ function writeConfig(){
   const durs = {};
   segs.forEach(s => s.acts.forEach(a => { if(durs[a.k] == null) durs[a.k] = a.dur || 120; }));
   try{
-    localStorage.setItem('trus_lecture_config', JSON.stringify({ v:1, solo: mode === 'solo', rot, durs }));
+    localStorage.setItem('trus_lecture_config', JSON.stringify({ v:1, solo: mode === 'solo', durs }));
     return true;
   }catch(e){ toast('설정 저장 실패 — 브라우저 저장 공간 확인'); return false; }
 }
