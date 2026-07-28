@@ -209,9 +209,13 @@ input,select,textarea{font:inherit;color:inherit}
   background:#EDF1F7; cursor:pointer; overflow:hidden}
 .cc-seg.on{border-color:#3182F6; box-shadow:0 0 0 2px rgba(49,130,246,.15); background:#E3EDFC}
 .cc-seglab{position:absolute; left:7px; top:50%; transform:translateY(-50%); font-size:.64rem; font-weight:800; color:#5B667A; pointer-events:none; white-space:nowrap}
-.tl-strip{position:relative; height:22px; background:#F1F3F7; border-radius:5px; cursor:copy}
-.tl-strip:hover{background:#EAEEF5}
-.tl-strip i{position:absolute; top:2px; bottom:2px; border-radius:4px; pointer-events:none; opacity:.9}
+.tl-strip{position:relative; height:34px; background:#22252E; border-radius:6px; cursor:copy; overflow:hidden}
+.tl-strip:hover{outline:1.5px solid #3182F6}
+.tl-strip .clipbg{position:absolute; inset:0; background-repeat:repeat-x; background-size:auto 100%; filter:brightness(.52) saturate(.85); pointer-events:none}
+.tl-strip .cliplab{position:absolute; left:7px; bottom:2px; font-size:.6rem; font-weight:700; color:rgba(255,255,255,.85); pointer-events:none; text-shadow:0 1px 2px rgba(0,0,0,.6); white-space:nowrap}
+.tl-strip i{position:absolute; top:0; bottom:0; border-radius:6px; border:2px solid; pointer-events:none; backdrop-filter:brightness(1.9) saturate(1.05)}
+.tl-strip.empty{background:#F4F6F9; border:1.5px dashed var(--line-2); cursor:default}
+.tl-strip .noclip{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:.68rem; font-weight:700; color:var(--faint)}
 .tl-actrow{position:relative; height:56px}
 .tl-cut{position:absolute; top:0; bottom:0; width:0; border-left:1.5px dashed #E5484D; pointer-events:none; z-index:6}
 .tl-cut b{position:absolute; top:-2px; left:-9px; font-size:.8rem; font-style:normal}
@@ -613,7 +617,7 @@ function renderCourse(){
 let people = [
   {name:'윤소정', host:true, vid:true},
   {name:'바운더리 코치', vid:true},
-  {name:'기록 코치'},
+  {name:'기록 코치', vid:true},
 ];
 const MAXC = 3, MINC = 1;
 /* 수강 모드 — 단독은 제한시간 없음, 단체는 제한시간·동시퇴장. 발행 시 강의실이 읽는다 */
@@ -752,11 +756,14 @@ function tlHTML(){
       cs.forEach((c, ci) => {
         const end = ci + 1 < cs.length ? cs[ci + 1].t : segDur(i);
         if(c.p === p && end > c.t)
-          spans += `<i style="left:${X(segOff(i) + c.t)}px; width:${Math.max(3, X(end - c.t) - 1)}px; background:${PCOLOR[p % PCOLOR.length]}"></i>`;
+          spans += `<i style="left:${X(segOff(i) + c.t)}px; width:${Math.max(3, X(end - c.t) - 1)}px; border-color:${PCOLOR[p % PCOLOR.length]}; background:${PCOLORA[p % PCOLORA.length]}"></i>`;
       });
     });
+    const body = pe.vid
+      ? `<span class="clipbg" style="${pThumbs[p] ? `background-image:url(${pThumbs[p]})` : ''}"></span>${spans}<span class="cliplab">🎬 ${esc(pe.name)}-강의전체.mp4</span>`
+      : `<span class="noclip">통영상 없음 — 1단계에서 올려요</span>`;
     return `<div class="tl-row"><span class="tl-name"><b style="background:${PCOLOR[p % PCOLOR.length]}"></b>${esc(pe.name)}</span>
-      <div class="tl-strip" data-p="${p}" style="width:${W}px" title="누르면 이 시점부터 ${esc(pe.name)}이(가) 메인">${spans}</div></div>`;
+      <div class="tl-strip${pe.vid ? '' : ' empty'}" data-p="${p}" style="width:${W}px" title="누르면 이 시점부터 ${esc(pe.name)}이(가) 메인">${body}</div></div>`;
   }).join('');
   /* 활동 행 — 구간 경계 뒤에 칩 */
   const acts = segs.map((s0, i) => {
@@ -810,6 +817,7 @@ function renderStruct(){
     if(chip){ ccSel = { i: +chip.dataset.i, j: +chip.dataset.j }; ccSeg = +chip.dataset.i; renderStruct(); return; }
     const strip = e.target.closest('.tl-strip');
     if(strip){
+      if(strip.classList.contains('empty')){ toast('이 출연자의 통영상을 1단계에서 먼저 올려주세요'); return; }
       const gt = Math.max(0, (e.clientX - strip.getBoundingClientRect().left) / ccPxs);
       setSpeakerAt(+strip.dataset.p, gt);
       return;
@@ -909,6 +917,28 @@ function renderDet(){
 }
 const PCOLOR = ['#F26D9C', '#3182F6', '#46D5B2', '#F2C14E'];
 const TL_G = 96;                       /* 트랙 이름 거터 폭 */
+const PCOLORA = ['rgba(242,109,156,.32)', 'rgba(49,130,246,.32)', 'rgba(70,213,178,.32)', 'rgba(242,193,78,.32)'];
+/* 출연자 통영상 썸네일 — 프레임 하나를 캡처해 트랙 필름스트립 배경으로 */
+const P_SRC = ['assets/lecture1.mp4', 'assets/coach-boundary.mp4', 'assets/coach-record.mp4'];
+const pThumbs = [];
+P_SRC.forEach((src, p) => {
+  const v = document.createElement('video');
+  v.src = src; v.muted = true; v.preload = 'auto';
+  v.addEventListener('loadeddata', () => { try{ v.currentTime = Math.min(1.2, (v.duration || 2) / 2); }catch(_){} }, { once: true });
+  v.addEventListener('seeked', () => {
+    try{
+      const w = 62, h = 34, c = document.createElement('canvas');
+      c.width = w; c.height = h;
+      const tr = w / h, vr = v.videoWidth / v.videoHeight;
+      let sw = v.videoWidth, sh = v.videoHeight, sx = 0, sy = 0;
+      if(vr > tr){ sw = v.videoHeight * tr; sx = (v.videoWidth - sw) / 2; }
+      else { sh = v.videoWidth / tr; sy = (v.videoHeight - sh) / 2; }
+      c.getContext('2d').drawImage(v, sx, sy, sw, sh, 0, 0, w, h);
+      pThumbs[p] = c.toDataURL('image/jpeg', .62);
+      if($('sgtable') && $('sgtable').classList.contains('ccmode')) renderStruct();
+    }catch(_){}
+  }, { once: true });
+});
 let ccPxs = 6;                         /* px per second — 렌더 때 계산 */
 function segDur(i){ const sg = segs[i]; return sg.dur != null ? sg.dur : (ccDurs[sg.srcIdx != null ? sg.srcIdx : i] || 66); }
 function segOff(i){ let o = 0; for(let k = 0; k < i; k++) o += segDur(k); return o; }
