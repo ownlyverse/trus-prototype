@@ -173,6 +173,13 @@ input,select,textarea{font:inherit;color:inherit}
 .fchip{display:inline-flex; align-items:center; gap:5px; font-size:.74rem; font-weight:600; color:var(--sub);
   background:var(--soft); border:1px solid var(--line); border-radius:5px; padding:4px 8px}
 .fchip button{color:var(--faint); font-size:.7rem} .fchip button:hover{color:var(--red)}
+/* 수강 모드 토글 */
+.modeseg{display:inline-flex; gap:3px; background:#F0EEF3; border-radius:9px; padding:3px; margin-left:10px}
+.modeseg button{font-size:.74rem; font-weight:800; padding:5px 10px; border-radius:7px; color:#8B8698; border:none; background:none; cursor:pointer}
+.modeseg button.on{background:#fff; color:#17171C; box-shadow:0 1px 3px rgba(0,0,0,.1)}
+.rotrow{display:flex; align-items:center; gap:6px; font-size:.78rem; font-weight:700; flex-wrap:wrap}
+.rotrow input{width:44px; text-align:center; border:1.5px solid var(--line); border-radius:7px; padding:4px}
+
 /* 퀴즈 구성 편집기 */
 .qedit{padding:14px 14px 14px 52px; background:#F6F8FB; border-bottom:1px solid var(--line); display:flex; flex-direction:column; gap:12px}
 .qe-q{background:#fff; border:1px solid var(--line); border-radius:8px; padding:13px}
@@ -341,11 +348,20 @@ input,select,textarea{font:inherit;color:inherit}
 
     <!-- ② 강의 구성 -->
     <section class="card" id="s2">
-      <div class="chead"><h2>강의 구성</h2><span class="hint">구간 나누기 · 인터랙티브 배치 · 제한 시간 — 시간이 끝나면 모두 함께 다음으로 넘어가요</span></div>
+      <div class="chead"><h2>강의 구성</h2>
+        <span class="modeseg" id="modeSeg">
+          <button class="on" data-mode="solo" onclick="setMode('solo')">단독 수강</button>
+          <button data-mode="group" onclick="setMode('group')">단체 수강</button>
+        </span>
+        <span class="hint" id="s2hint">단독 수강 — 제한시간 없이 각자 속도로 진행해요</span></div>
       <div class="cbody">
         <div class="meta">
           <span>강의 구간 <b id="mSeg">2</b>개</span>
           <span>인터랙티브 구간 <b id="mAct">6</b>개</span>
+          <span class="rotrow">🎬 발화 로테이션:
+            강의자 <input type="number" min="3" id="rot0" value="10" onchange="setRot()">초 →
+            🦉 <input type="number" min="3" id="rot1" value="10" onchange="setRot()">초 →
+            🐢 <input type="number" min="3" id="rot2" value="10" onchange="setRot()">초 (구간마다 반복)</span>
           <span style="color:var(--faint)">영상은 다음 단계에서 올려요 · 제한 시간을 못 채우면 학생은 강의 후 보충해야 다음 에피소드가 열려요</span>
         </div>
         <div class="sgwrap"><div class="sgtable" id="sgtable"></div></div>
@@ -546,6 +562,21 @@ let people = [
   {name:'기록 코치'},
 ];
 const MAXC = 3, MINC = 1;
+/* 수강 모드 — 단독은 제한시간 없음, 단체는 제한시간·동시퇴장. 발행 시 강의실이 읽는다 */
+let mode = 'solo';
+let rot = [10, 10, 10];
+function setMode(m){
+  mode = m;
+  document.querySelectorAll('#modeSeg button').forEach(b => b.classList.toggle('on', b.dataset.mode === m));
+  $('s2hint').textContent = m === 'solo'
+    ? '단독 수강 — 제한시간 없이 각자 속도로 진행해요'
+    : '단체 수강 — 제한 시간이 끝나면 모두 함께 다음으로 넘어가요';
+  saved(); refresh();
+}
+function setRot(){
+  rot = [Math.max(3, +$('rot0').value || 10), Math.max(3, +$('rot1').value || 10), Math.max(3, +$('rot2').value || 10)];
+  saved();
+}
 const coachCount = () => people.length - 1;
 
 /* segs[i].vids[k] = k번째 출연자의 이 구간 영상 업로드 여부 */
@@ -567,6 +598,7 @@ const AT = {
 /* ── ② 강의 구성 (구조만) ── */
 function timeHtml(i,j,a){
   if(a.dur == null) a.dur = 120;
+  if(mode === 'solo') return `<span class="dim">제한 없음</span>`;
   const mm = Math.floor(a.dur/60), ss = a.dur%60;
   return `⏱ <input type="number" min="0" value="${mm}" onchange="actDurM(${i},${j},this.value)"> 분 <input type="number" min="0" max="59" value="${ss}" onchange="actDurS(${i},${j},this.value)"> 초`;
 }
@@ -778,7 +810,7 @@ function refresh(){
   if(!okInfo) errs.push('에피소드 제목이 필요해요');
   segs.forEach((s,i)=>{ if(!s.vids[0]) errs.push(`강의 구간 ${i+1}의 강의자 영상이 없어요`); });
   segs.forEach((s,i)=>s.acts.forEach(a=>{ if(a.k==='play' && !a.up) errs.push(`강의 구간 ${i+1}의 워크시트 파일이 없어요`); }));
-  segs.forEach((s,i)=>s.acts.forEach((a,j)=>{ if((a.dur||0) < 20) errs.push(`강의 구간 ${i+1}의 인터랙티브 ${j+1} 제한 시간은 20초 이상이어야 해요`); }));
+  if(mode === 'group') segs.forEach((s,i)=>s.acts.forEach((a,j)=>{ if((a.dur||0) < 20) errs.push(`강의 구간 ${i+1}의 인터랙티브 ${j+1} 제한 시간은 20초 이상이어야 해요`); }));
   segs.forEach((s,i)=>s.acts.forEach(a=>{
     if(a.k==='quiz' && a.qs) a.qs.forEach((qz,qi)=>{
       if(!qz.q.trim()) errs.push(`강의 구간 ${i+1} 퀴즈 문항 ${qi+1}의 질문이 비어 있어요`);
@@ -807,11 +839,20 @@ const navIO = new IntersectionObserver(es=>{
 }, {rootMargin:'-40% 0px -55% 0px'});
 secs.forEach(s=>navIO.observe(s));
 
-/* 액션 */
-function preview(){ toast('강의실 미리보기로 이동해요…'); setTimeout(()=>location.href='lecture-prototype.html', 700); }
+/* 액션 — 강의실이 읽는 설정(trus_lecture_config): 수강 모드·발화 로테이션·제한시간 */
+function writeConfig(){
+  const durs = {};
+  segs.forEach(s => s.acts.forEach(a => { if(durs[a.k] == null) durs[a.k] = a.dur || 120; }));
+  try{
+    localStorage.setItem('trus_lecture_config', JSON.stringify({ v:1, solo: mode === 'solo', rot, durs }));
+    return true;
+  }catch(e){ toast('설정 저장 실패 — 브라우저 저장 공간 확인'); return false; }
+}
+function preview(){ writeConfig(); toast('강의실 미리보기로 이동해요…'); setTimeout(()=>location.href='lecture-prototype.html', 700); }
 function publish(){
   if($('btnPub').disabled){ toast('아직 제출할 수 없어요 — 체크리스트를 확인하세요'); return; }
-  toast('검수 요청됨 — 승인되면 학생에게 열려요 ✓');
+  writeConfig();
+  toast('검수 요청됨 — 수강 모드·로테이션·제한시간이 강의실에 반영됐어요 ✓');
 }
 let st, tt;
 function saved(){ $('saveState').textContent = '저장 중…'; clearTimeout(st); st = setTimeout(()=>$('saveState').textContent = '자동 저장됨', 600); }

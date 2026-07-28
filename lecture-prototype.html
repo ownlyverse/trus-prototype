@@ -562,16 +562,26 @@ const BLOCKS = [
   {type:'finish', name:'마무리 · 다시 듣기'},
 ];
 
-/* 단독 수강 모드 — 인터랙티브 제한시간 없음, 완료하면 스스로 넘어간다.
-   TODO(스튜디오): 강의 업로드 시 단독/단체 수강을 선택하면 이 값이 강의 구성에 따라 결정된다. */
-const SOLO = true;
+/* 스튜디오 발행 설정 — 수강 모드(단독/단체)·발화 로테이션·인터랙티브 제한시간.
+   스튜디오(강의 업로드)에서 발행하면 여기 반영된다. 없으면 기본값. */
+let CFG = null;
+try{
+  const _c = JSON.parse(localStorage.getItem('trus_lecture_config'));
+  if(_c && _c.v === 1) CFG = _c;
+}catch(e){}
+const SOLO = CFG ? !!CFG.solo : true;
+const ROT = (CFG && Array.isArray(CFG.rot) && CFG.rot.length === 3)
+  ? CFG.rot.map(n => Math.max(3, +n || 10)) : [10, 10, 10];
+if(CFG && CFG.durs) BLOCKS.forEach(b => {
+  if(b.type === 'interactive' && CFG.durs[b.kind] != null) b.dur = CFG.durs[b.kind];
+});
 let bi = 0, maxBi = 0, done = false, started = false;   // maxBi = 지금까지 도달한 최대 블록 (bi는 soReplay로 되감겨요)
 const fmt = s => Math.floor(s/60) + ':' + String(Math.max(0,Math.round(s))%60).toString().padStart(2,'0');
 const $ = id => document.getElementById(id);
 
 /* ─── 실제 강의 영상 (세로 9:16) ─── */
 const lecVid = $('lecVid');
-const TEST_SEC = 30;                                    // 데모: 강의 구간 30초 — 발화자 3명이 10초씩 한 번씩
+const TEST_SEC = ROT[0] + ROT[1] + ROT[2];              // 강의 구간 길이 = 발화 로테이션 합 (스튜디오 설정)
 let VID_DUR = 66;                                       // 로드되면 실제 길이로 갱신
 lecVid.addEventListener('loadedmetadata', ()=>{
   if(isFinite(lecVid.duration) && lecVid.duration > 0){ VID_DUR = lecVid.duration; updateUI(); }
@@ -616,13 +626,14 @@ function spotSeq(steps){ clearSpotTimers(); steps.forEach(([el, at]) => spotTime
    일시정지 후 재개해도 현재 재생 시점(t) 기준으로 이어서 동기화한다 */
 function spotSync(t){
   clearSpotTimers();
-  if(t < 10){
+  const b1 = ROT[0], b2 = ROT[0] + ROT[1];               /* 스튜디오 설정 로테이션 경계 */
+  if(t < b1){
     spotlight(mainTile);
-    spotTimers.push(setTimeout(() => spotlight(coachTiles[0]), (10 - t) * 1000));
-    spotTimers.push(setTimeout(() => spotlight(coachTiles[1]), (20 - t) * 1000));
-  } else if(t < 20){
+    spotTimers.push(setTimeout(() => spotlight(coachTiles[0]), (b1 - t) * 1000));
+    spotTimers.push(setTimeout(() => spotlight(coachTiles[1]), (b2 - t) * 1000));
+  } else if(t < b2){
     spotlight(coachTiles[0]);
-    spotTimers.push(setTimeout(() => spotlight(coachTiles[1]), (20 - t) * 1000));
+    spotTimers.push(setTimeout(() => spotlight(coachTiles[1]), (b2 - t) * 1000));
   } else {
     spotlight(coachTiles[1]);
   }
