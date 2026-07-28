@@ -173,9 +173,9 @@ input,select,textarea{font:inherit;color:inherit}
 .fchip{display:inline-flex; align-items:center; gap:5px; font-size:.74rem; font-weight:600; color:var(--sub);
   background:var(--soft); border:1px solid var(--line); border-radius:5px; padding:4px 8px}
 .fchip button{color:var(--faint); font-size:.7rem} .fchip button:hover{color:var(--red)}
-/* 음성 인식 → 메인 전환 배지 */
-.micbadge{font-size:.62rem; font-weight:800; color:#2E6B3E; background:#E7F6EE; border-radius:6px;
-  padding:2px 6px; white-space:nowrap; flex-shrink:0}
+/* 편집 2단계 이동 */
+.stepnav{display:flex; justify-content:flex-end; margin:4px 0 18px}
+.stepnav #toStep1{justify-content:flex-start}
 
 /* 수강 모드 토글 */
 .modeseg{display:inline-flex; gap:3px; background:#F0EEF3; border-radius:9px; padding:3px; margin-left:10px}
@@ -327,11 +327,11 @@ input,select,textarea{font:inherit;color:inherit}
   <aside class="side">
     <div class="sd-title">에피소드 만들기</div>
     <nav class="snav" id="snav">
-      <a href="#s1" class="on"><span class="ck">✓</span>강의 정보</a>
-      <a href="#s2"><span class="ck">✓</span>강의 구성</a>
-      <a href="#s3"><span class="ck">✓</span>출연자</a>
-      <a href="#s4"><span class="ck">✓</span>영상 업로드</a>
-      <a href="#s5"><span class="ck">✓</span>제출</a>
+      <a href="#s1" class="on" data-step="1"><span class="ck">✓</span>① 강의 정보</a>
+      <a href="#s3" data-step="1"><span class="ck">✓</span>② 출연자</a>
+      <a href="#s4" data-step="1"><span class="ck">✓</span>③ 영상 업로드</a>
+      <a href="#s2" data-step="2"><span class="ck">✓</span>④ 강의 구성</a>
+      <a href="#s5" data-step="2"><span class="ck">✓</span>⑤ 제출</a>
     </nav>
   </aside>
 
@@ -349,6 +349,26 @@ input,select,textarea{font:inherit;color:inherit}
         <div class="field"><label>한 줄 소개</label><input class="inp" id="fDesc" value="흩어진 계획을 3개월 실행 전략 한 장으로 좁혀요"></div>
       </div>
     </section>
+
+    <!-- ③ 출연자 -->
+    <section class="card" id="s3">
+      <div class="chead"><h2>출연자</h2><span class="hint">이 에피소드에 나오는 사람들</span></div>
+      <div class="cbody">
+        <div id="peopleList"></div>
+        <div class="paddrow"><button class="padd" id="pAdd" onclick="addCoach()">＋ 코치 추가</button></div>
+      </div>
+    </section>
+
+    <!-- ④ 영상 업로드 -->
+    <section class="card" id="s4">
+      <div class="chead"><h2>영상 업로드</h2><span class="hint">강의 구간 × 출연자별로 올려요</span></div>
+      <div class="cbody">
+        <div class="mxwrap"><div class="mx" id="mx"></div></div>
+        <div class="pnote"><b>강의자 영상은 구간마다 필수</b>예요. 코치 칸을 비워두면 그 구간에는 그 코치가 나오지 않아요. 코치 영상은 구간 시작에 맞춰 함께 재생돼요.</div>
+      </div>
+    </section>
+
+    <div class="stepnav" id="toStep2"><button class="bigbtn pri" onclick="setEditStep(2)">다음 — 강의 구성 →</button></div>
 
     <!-- ② 강의 구성 -->
     <section class="card" id="s2">
@@ -374,24 +394,7 @@ input,select,textarea{font:inherit;color:inherit}
       </div>
     </section>
 
-    <!-- ③ 출연자 -->
-    <section class="card" id="s3">
-      <div class="chead"><h2>출연자</h2><span class="hint">이 에피소드에 나오는 사람들</span></div>
-      <div class="cbody">
-        <div id="peopleList"></div>
-        <div class="paddrow"><button class="padd" id="pAdd" onclick="addCoach()">＋ 코치 추가</button></div>
-        <div class="pnote"><b>나(학생) 자리는 자동</b>이에요 — 학생 본인이 실시간으로 채워서 업로드가 없어요. 이름은 학생 화면 이름표로 그대로 보여요.</div>
-      </div>
-    </section>
-
-    <!-- ④ 영상 업로드 -->
-    <section class="card" id="s4">
-      <div class="chead"><h2>영상 업로드</h2><span class="hint">강의 구간 × 출연자별로 올려요</span></div>
-      <div class="cbody">
-        <div class="mxwrap"><div class="mx" id="mx"></div></div>
-        <div class="pnote"><b>강의자 영상은 구간마다 필수</b>예요. 코치 칸을 비워두면 그 구간에는 그 코치가 나오지 않아요. 코치 영상은 구간 시작에 맞춰 함께 재생돼요.</div>
-      </div>
-    </section>
+    <div class="stepnav" id="toStep1"><button class="bigbtn line" onclick="setEditStep(1)">← 강의 정보·출연자·영상으로</button></div>
 
     <!-- ⑤ 제출 -->
     <section class="card" id="s5">
@@ -519,6 +522,23 @@ function enterCourse(i){          // 강의 카드 → 에피소드 목록
   $('courseGate').classList.remove('hide');
   window.scrollTo(0,0);
 }
+/* 편집 2단계 — 1: 강의 정보·출연자·영상 업로드 / 2: 강의 구성·제출 */
+let editStep = 1;
+function setEditStep(n){
+  editStep = n;
+  ['s1','s3','s4','toStep2'].forEach(id => { const el = $(id); if(el) el.hidden = n !== 1; });
+  ['s2','s5','toStep1'].forEach(id => { const el = $(id); if(el) el.hidden = n !== 2; });
+  document.querySelectorAll('#snav a').forEach(a => a.classList.remove('on'));
+  const first = document.querySelector(`#snav a[data-step="${n}"]`);
+  if(first) first.classList.add('on');
+  window.scrollTo(0, 0);
+}
+document.querySelectorAll('#snav a').forEach(a => a.addEventListener('click', () => {
+  const st = +a.dataset.step;
+  if(st !== editStep) setEditStep(st);
+  document.querySelectorAll('#snav a').forEach(x => x.classList.remove('on'));
+  a.classList.add('on');
+}));
 function openEditor(ep){          // 에피소드 행 → 편집 화면 (ep=null 이면 새 에피소드)
   const c = COURSES[curCourse];
   const isNew = ep === null;
@@ -526,6 +546,7 @@ function openEditor(ep){          // 에피소드 행 → 편집 화면 (ep=null
   $('crumbEp').textContent = isNew ? '새 에피소드' : `EP${ep + 1}`;
   if(!isNew){ $('fTitle').value = c.eps[ep]; refresh(); }
   $('courseGate').classList.add('hide');
+  setEditStep(1);                 // 편집은 항상 1단계(정보·출연자·영상)부터
   window.scrollTo(0,0);
 }
 function backToCourses(){ enterCourse(curCourse); }   // 상단바 강의 이름 → 에피소드 목록으로
@@ -782,7 +803,7 @@ function renderPeople(){
       <span class="pdesc">${p.host?'구간마다 영상 필수':'구간별로 영상을 올린 곳에만 나와요'}</span>
       ${!p.host && coachCount()>MINC ? `<button class="prm" onclick="rmCoach(${i})" title="출연자 삭제">✕</button>` : ''}
     </div>`).join('')
-    + `<div class="prow"><span class="role">나 · 학생</span><span class="pdesc">학생 본인 실시간 — 업로드 없음</span></div>`;
+    ;
   $('pAdd').style.display = coachCount() >= MAXC ? 'none' : '';
 }
 function pName(i,v){ people[i].name = v; renderPeople(); renderMatrix(); saved(); }
@@ -810,7 +831,7 @@ function renderMatrix(){
     h += `<div class="mxrow" style="grid-template-columns:${cols}">
       <span class="mx-seg">강의 구간 ${i+1}<small>${esc(s.t)}</small></span>
       ${people.map((p,k)=>{
-        if(s.vids[k]) return `<div class="uslot on"><span>🎬</span><b>s${i+1}-${esc(p.name)}.mp4</b><span class="micbadge" title="음성이 인식된 구간에서 메인 화면으로 전환돼요">🎙 메인 전환</span><button class="x" onclick="uVid(${i},${k},false)">✕</button></div>`;
+        if(s.vids[k]) return `<div class="uslot on"><span>🎬</span><b>s${i+1}-${esc(p.name)}.mp4</b><button class="x" onclick="uVid(${i},${k},false)">✕</button></div>`;
         const req = p.host ? ' req' : '';
         return `<div class="uslot${req}" onclick="uVid(${i},${k},true)"><span>⬆</span> ${p.host?'영상 올리기 (필수)':'영상 올리기'}</div>`;
       }).join('')}
@@ -850,7 +871,7 @@ function refresh(){
   else {
     const upN = segs.reduce((n,s)=>n+s.vids.filter(Boolean).length,0);
     v.className = 'valid ok';
-    v.textContent = `✓ 제출 준비 완료 — 강의 구간 ${segs.length} · 인터랙티브 ${segs.reduce((n,x)=>n+x.acts.length,0)} · 영상 ${upN}개 · 출연 ${people.length+1}명(학생 포함)`;
+    v.textContent = `✓ 제출 준비 완료 — 강의 구간 ${segs.length} · 인터랙티브 ${segs.reduce((n,x)=>n+x.acts.length,0)} · 영상 ${upN}개 · 출연 ${people.length}명`;
     $('btnPub').disabled = false; $('btnTop').disabled = false;
   }
 }
