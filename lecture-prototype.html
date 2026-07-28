@@ -111,6 +111,7 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
 .edit-mode .edt:focus{outline:2px solid #3182F6; background:none}
 .edit-mode #aoDone{display:none}
 body.edit-mode{background:#17131F}   /* 스튜디오 모니터 패널과 이어져 보이게 */
+.edit-mode .ful{display:none}
 /* 편집(스튜디오 iframe) — 노트·뒤로가기·목차 등 학생용 UI를 걷어내고 무대만 크게 */
 .edit-mode .vback, .edit-mode .hud, .edit-mode .menu-drawer, .edit-mode .bg-night, .edit-mode .liveroom > .memo{display:none !important}
 .edit-mode .liveroom{grid-template-columns:auto; grid-template-areas:"head" "stage"; --H:min(760px, 82vh)}
@@ -863,10 +864,7 @@ Object.keys(CONTENT.texts).forEach(k => { if(CONTENT.texts[k]) AO_TEXT[k] = CONT
 function enableEdit(b){
   const ed = el => { if(el){ el.setAttribute('contenteditable', 'true'); el.classList.add('edt'); } };
   ed($('aoTitle')); ed($('aoText'));
-  if(b.kind === 'read'){
-    document.querySelectorAll('#reader > p').forEach((pp, i, all) => { if(i < all.length - 1) ed(pp); });
-    document.querySelectorAll('#reader .ful').forEach(x => x.setAttribute('contenteditable', 'false'));
-  }
+  if(b.kind === 'read') ed($('reader'));
   if(b.kind === 'quiz') document.querySelectorAll('.qtext, .qotext').forEach(ed);
   if(b.kind === 'speak') ed($('speakLine'));
   if(b.kind === 'write'){
@@ -901,9 +899,7 @@ if(EDIT){
     else if(t.classList && t.classList.contains('qotext')){ QUIZ_SET[+t.dataset.qi].opts[+t.dataset.oi] = t.textContent; CONTENT.quiz = QUIZ_SET; }
     else if(t.id === 'aoTa' && b.kind === 'write'){ CONTENT.writePh = t.textContent.trim(); b.ph = CONTENT.writePh; }
     else if(t.closest && t.closest('#reader')){
-      const paras = [...document.querySelectorAll('#reader > p')].slice(0, -1)
-        .map(pp => { const c = pp.cloneNode(true); c.querySelectorAll('.ful').forEach(x => x.remove()); return [c.textContent.trim()]; })
-        .filter(a => a[0]);
+      const paras = $('reader').innerText.split(/\n+/).map(x => x.trim()).filter(Boolean).map(x => [x]);
       CONTENT.read = paras; READ_PARAS = paras;
     }
     else return;
@@ -924,7 +920,9 @@ function showInteractive(b){
   } else if(b.kind==='write'){
     task = `<textarea class="ao-ta" id="aoTa" placeholder="${b.ph}"></textarea>`;
   } else if(b.kind==='read'){
-    task = `<div class="reader" id="reader">` +
+    task = EDIT
+      ? `<div class="reader" id="reader">` + READ_PARAS.map(sents=>`<p>${sents.join(' ')}</p>`).join('') + `</div>`
+      : `<div class="reader" id="reader">` +
       READ_PARAS.map((sents,pi)=>`<p>${sents.map((sn,si)=>{
         const fr = (pi===2 && si===0);
         return `<span class="${fr?'friend-ul':''}">${sn}</span>${fr?'<span class="ful">🐢 기록 코치가 밑줄 친 문장이에요</span>':''} `;
