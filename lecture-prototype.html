@@ -102,6 +102,13 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
 .vid.pop{animation:spotpop .35s ease}
 .spotstage{position:relative}
 .ao-timer:empty{display:none}
+/* 스튜디오 인라인 편집 모드 */
+.edit-badge{position:fixed; top:10px; left:50%; transform:translateX(-50%); z-index:300;
+  background:#3182F6; color:#fff; font-size:.74rem; font-weight:800; padding:7px 14px; border-radius:999px;
+  box-shadow:0 4px 14px rgba(49,130,246,.4); pointer-events:none}
+.edit-mode .edt{outline:1.5px dashed rgba(49,130,246,.55); outline-offset:3px; border-radius:4px; cursor:text}
+.edit-mode .edt:focus{outline:2px solid #3182F6}
+.edit-mode #aoDone{display:none}
 .tapfb{position:absolute; left:calc(var(--H)*9/32); top:50%; transform:translate(-50%,-50%); width:72px; height:72px;
   border-radius:50%; background:rgba(0,0,0,.55); color:#fff; display:flex; align-items:center; justify-content:center;
   font-size:1.5rem; opacity:0; pointer-events:none; z-index:9}
@@ -812,7 +819,7 @@ const AO_HINT = {
   speak:'3초 이상 꾹 누르고 말하면 완료돼요',
   play:'내려받아 작성하고, 올리면 완료돼요',
 };
-const READ_PARAS = [
+let READ_PARAS = [
   ['일은 해야 할 것들의 목록이 아니라, 하지 않을 것들의 <b>경계</b>에서 시작됩니다.'],
   ['우리는 늘 더하는 쪽으로 달립니다.','할 일을 더하고, 목표를 더하고, 채널을 더합니다.','그런데 이상하게, 더할수록 방향은 흐려집니다.'],
   ['전략이란 결국 멈춤의 기술입니다.','무엇을 하지 않을지 정하는 순간, 남은 것들이 또렷해집니다.'],
@@ -820,12 +827,85 @@ const READ_PARAS = [
   ['바운더리는 나를 가두는 벽이 아니라, 내 힘이 새어나가지 않게 하는 그릇입니다.'],
   ['이제 한 문장만 남기면 됩니다.','"나는 __을 하지 않기로 했다."','그 문장이 3개월 전략의 첫 줄이 됩니다.'],
 ];
-const QUIZ_SET = [
+let QUIZ_SET = [
   {q:'방금 이야기에서, 전략의 시작은 무엇이라고 했나요?', multi:false, ans:[1],
    opts:['더 많이 하는 것','하지 않을 것을 정하는 것','더 빨리 하는 것','남들처럼 하는 것']},
   {q:'바운더리를 설명한 말을 모두 골라보세요.', multi:true, ans:[0,2],
    opts:['힘이 새어나가지 않게 하는 그릇','나를 가두는 벽','하지 않을 것의 경계','남들이 정해주는 규칙']},
 ];
+
+/* ═══ 스튜디오 인라인 편집 (타입폼식) — ?edit=1 이면 화면 속 텍스트를 바로 고친다.
+   수정본은 trus_lecture_content 에 저장되고, 수강 모드에서도 이 값을 읽어 렌더한다. ═══ */
+const EDIT = new URLSearchParams(location.search).get('edit') === '1';
+let SPEAK_LINE = '나는 <b>하지 않을 것</b>을 정하는 데서<br>전략을 시작한다.';
+let CONTENT = { v:1, titles:{}, texts:{} };
+try{
+  const _ct = JSON.parse(localStorage.getItem('trus_lecture_content'));
+  if(_ct && _ct.v === 1) CONTENT = Object.assign({ titles:{}, texts:{} }, _ct);
+}catch(e){}
+if(Array.isArray(CONTENT.read) && CONTENT.read.length) READ_PARAS = CONTENT.read;
+if(Array.isArray(CONTENT.quiz) && CONTENT.quiz.length) QUIZ_SET = CONTENT.quiz;
+if(CONTENT.speak) SPEAK_LINE = CONTENT.speak;
+BLOCKS.forEach(b => {
+  if(b.type !== 'interactive') return;
+  if(CONTENT.titles[b.kind]) b.t = CONTENT.titles[b.kind];
+  if(b.kind === 'write' && CONTENT.writePh) b.ph = CONTENT.writePh;
+});
+Object.keys(CONTENT.texts).forEach(k => { if(CONTENT.texts[k]) AO_TEXT[k] = CONTENT.texts[k]; });
+function enableEdit(b){
+  const ed = el => { if(el){ el.setAttribute('contenteditable', 'true'); el.classList.add('edt'); } };
+  ed($('aoTitle')); ed($('aoText'));
+  if(b.kind === 'read'){
+    document.querySelectorAll('#reader > p').forEach((pp, i, all) => { if(i < all.length - 1) ed(pp); });
+    document.querySelectorAll('#reader .ful').forEach(x => x.setAttribute('contenteditable', 'false'));
+  }
+  if(b.kind === 'quiz') document.querySelectorAll('.qtext, .qotext').forEach(ed);
+  if(b.kind === 'speak') ed($('speakLine'));
+  if(b.kind === 'write'){
+    const ta = $('aoTa');
+    if(ta){
+      const d = document.createElement('div');
+      d.className = 'ao-ta edt'; d.id = 'aoTa';
+      d.contentEditable = 'true';
+      d.textContent = b.ph || '';
+      ta.replaceWith(d);
+    }
+  }
+}
+let contentTimer = null;
+function saveContent(){
+  clearTimeout(contentTimer);
+  contentTimer = setTimeout(() => {
+    try{ localStorage.setItem('trus_lecture_content', JSON.stringify(CONTENT)); }catch(e){ toast('저장 실패 — 저장 공간 확인'); }
+  }, 500);
+}
+
+if(EDIT){
+  document.body.classList.add('edit-mode');
+  const bdg = document.createElement('div');
+  bdg.className = 'edit-badge';
+  bdg.textContent = '✏️ 편집 모드 — 화면 속 텍스트를 눌러 바로 고쳐요 (자동 저장)';
+  document.body.appendChild(bdg);
+  document.addEventListener('input', e => {
+    const b = BLOCKS[bi];
+    if(!b || b.type !== 'interactive') return;
+    const t = e.target;
+    if(t.id === 'aoTitle'){ CONTENT.titles[b.kind] = t.textContent.trim(); b.t = CONTENT.titles[b.kind]; }
+    else if(t.id === 'aoText'){ CONTENT.texts[b.kind] = t.textContent.trim(); AO_TEXT[b.kind] = CONTENT.texts[b.kind]; }
+    else if(t.id === 'speakLine'){ CONTENT.speak = t.innerHTML.replace(/^“|”$/g, ''); SPEAK_LINE = CONTENT.speak; }
+    else if(t.classList && t.classList.contains('qtext')){ QUIZ_SET[+t.dataset.qi].q = t.textContent; CONTENT.quiz = QUIZ_SET; }
+    else if(t.classList && t.classList.contains('qotext')){ QUIZ_SET[+t.dataset.qi].opts[+t.dataset.oi] = t.textContent; CONTENT.quiz = QUIZ_SET; }
+    else if(t.id === 'aoTa' && b.kind === 'write'){ CONTENT.writePh = t.textContent.trim(); b.ph = CONTENT.writePh; }
+    else if(t.closest && t.closest('#reader')){
+      const paras = [...document.querySelectorAll('#reader > p')].slice(0, -1)
+        .map(pp => { const c = pp.cloneNode(true); c.querySelectorAll('.ful').forEach(x => x.remove()); return [c.textContent.trim()]; })
+        .filter(a => a[0]);
+      CONTENT.read = paras; READ_PARAS = paras;
+    }
+    else return;
+    saveContent();
+  });
+}
 
 function showInteractive(b){
   $('aoTitle').textContent = b.t;
@@ -849,12 +929,12 @@ function showInteractive(b){
   } else if(b.kind==='quiz'){
     task = `<div class="quizbox">` + QUIZ_SET.map((qz,qi)=>`
       <div class="qq">
-        <div class="quiz-q">✎ 문항 ${qi+1}. ${qz.q}${qz.multi?' <small>(복수 선택)</small>':''}</div>
-        <div class="qopts">${qz.opts.map((o,oi)=>`<button class="qopt" data-qi="${qi}" data-oi="${oi}">${oi+1}. ${o}</button>`).join('')}</div>
+        <div class="quiz-q">✎ 문항 ${qi+1}. <span class="qtext" data-qi="${qi}">${qz.q}</span>${qz.multi?' <small>(복수 선택)</small>':''}</div>
+        <div class="qopts">${qz.opts.map((o,oi)=>`<button class="qopt" data-qi="${qi}" data-oi="${oi}">${oi+1}. <span class="qotext" data-qi="${qi}" data-oi="${oi}">${o}</span></button>`).join('')}</div>
         <div class="q-verdict" id="qv${qi}"></div>
       </div>`).join('') + `<button class="qcheck" id="qSubmit" disabled>선택 완료 — 채점하기</button></div>`;
   } else if(b.kind==='speak'){
-    task = `<div class="say"><div class="line">“나는 <b>하지 않을 것</b>을 정하는 데서<br>전략을 시작한다.”</div>
+    task = `<div class="say"><div class="line" id="speakLine">“${SPEAK_LINE}”</div>
       <button class="holdbtn" id="holdBtn"><span class="fill" id="holdFill"></span><span id="holdLabel">🎤 꾹 누르고 소리 내어 말하기</span></button></div>`;
   } else if(b.kind==='play'){
     task = `<div class="say"><div class="line" style="font-size:.95rem">PLAY. 나에게 ‘일’은 어떤 감정이었나?<br><span style="font-size:.78rem;color:#7A7264">인쇄해서 책상 위에 두고, 자기 전에 한 줄씩 채워보세요.</span></div>
@@ -878,6 +958,7 @@ function showInteractive(b){
   h.classList.remove('ready');
   $('aoDone').disabled = true;
   $('actOverlay').classList.add('show');
+  if(EDIT) enableEdit(b);
   const ok = msg => {
     actMet = true; h.textContent = msg + (SOLO ? ' — 준비되면 다음으로 넘어가요' : ' — 시간이 끝나면 다 같이 넘어가요');
     h.classList.add('ready');
@@ -899,6 +980,7 @@ function showInteractive(b){
     const rd = $('reader'); let bottom=false;
     const check = ()=>{ if(rd.querySelectorAll('mark.hl').length >= 1 && bottom) ok('형광펜이 남았어요 — 완료할 수 있어요'); };
     const applyHl = ()=>{
+      if(EDIT) return;                                 /* 편집 모드 — 형광펜 대신 텍스트 수정 */
       const sel = window.getSelection();
       if(!sel || !sel.rangeCount || sel.isCollapsed) return;
       const range = sel.getRangeAt(0);
@@ -935,7 +1017,7 @@ function showInteractive(b){
     let graded = false;
     const canSubmit = () => picked.every(p=>p.size>0);
     document.querySelectorAll('.qopt').forEach(btn=>btn.addEventListener('click', ()=>{
-      if(graded) return;
+      if(EDIT || graded) return;
       const qi = +btn.dataset.qi, oi = +btn.dataset.oi, qz = QUIZ_SET[qi];
       if(!qz.multi){                                        // 단일 선택 — 라디오처럼
         document.querySelectorAll(`.qopt[data-qi="${qi}"]`).forEach(x=>x.classList.remove('pick'));

@@ -175,8 +175,8 @@ input,select,textarea{font:inherit;color:inherit}
 .fchip button{color:var(--faint); font-size:.7rem} .fchip button:hover{color:var(--red)}
 /* 캡컷형 강의 구성 */
 .sgtable.ccmode{min-width:0; border:none; border-radius:0}
-.cc-prev{display:flex; gap:16px; margin-bottom:6px}
-.cc-prev video{width:148px; aspect-ratio:9/16; background:#000; border-radius:10px; border:1px solid var(--line); flex-shrink:0}
+.cc-live{display:flex; gap:16px; margin-bottom:6px}
+.cc-live iframe{width:min(620px, 58%); height:560px; border:1px solid var(--line); border-radius:12px; background:#17131F; flex-shrink:0}
 .cc-side{flex:1; display:flex; flex-direction:column; gap:9px; align-items:flex-start; min-width:0}
 .cc-segname{display:flex; align-items:center; gap:8px; font-size:.84rem; font-weight:800; flex-wrap:wrap; width:100%}
 .cc-segname .sg-t{flex:1; min-width:160px}
@@ -667,9 +667,11 @@ function condBody(i,j,a){
 }
 /* ── ② 강의 구성 — 캡컷형: 영상 보면서 인터랙티브 끼워 넣기 ── */
 let ccSeg = 0, ccSel = null;                 /* ccSel = {i,j} 선택된 인터랙티브 */
-const ccDurs = [];                           /* 구간별 영상 길이(초) 캐시 */
-const SEG_SRC = i => ['assets/lecture1.mp4', 'assets/lecture2.mp4'][i] || 'assets/lecture1.mp4';
-const mmss = t => Math.floor(t / 60) + ':' + String(Math.floor(t) % 60).padStart(2, '0');
+function ccFrameSrc(){
+  if(ccSel && segs[ccSel.i] && segs[ccSel.i].acts[ccSel.j])
+    return `lecture-prototype.html?preview=${segs[ccSel.i].acts[ccSel.j].k}&edit=1`;
+  return 'lecture-prototype.html?edit=1';
+}
 
 function renderStruct(){
   if(ccSeg >= segs.length) ccSeg = segs.length - 1;
@@ -677,16 +679,14 @@ function renderStruct(){
   host.classList.add('ccmode');
   const seg = segs[ccSeg];
   host.innerHTML = `
-    <div class="cc-prev">
-      <video id="ccVid" src="${SEG_SRC(ccSeg)}" playsinline></video>
+    <div class="cc-live">
+      <iframe id="ccFrame" src="${ccFrameSrc()}" title="강의실 미리보기 · 편집"></iframe>
       <div class="cc-side">
         <div class="cc-segname">🎬 강의 구간 ${ccSeg + 1}
           <input class="sg-t" value="${esc(seg.t)}" onchange="segTitle(${ccSeg}, this.value)">
           <span class="ops"><button onclick="mvSeg(${ccSeg},-1)" ${ccSeg === 0 ? 'disabled' : ''}>▲</button><button onclick="mvSeg(${ccSeg},1)" ${ccSeg === segs.length - 1 ? 'disabled' : ''}>▼</button><button class="dl" onclick="rmSeg(${ccSeg})" ${segs.length <= 1 ? 'disabled' : ''}>✕</button></span></div>
-        <div class="cc-ctrl">
-          <button class="fbtn" id="ccPlay">▶ 재생</button>
-          <span class="dim" id="ccTime">0:00 / –:––</span>
-        </div>
+        <div class="dim"><b>왼쪽이 실제 강의실</b>이에요 — ▶를 누르면 발화자 전환까지 그대로 돌아요.
+          타임라인에서 활동을 누르면 그 화면이 열리고, <b>화면 속 텍스트를 눌러 바로 고칠 수 있어요</b> (자동 저장, 수강자에게 반영).</div>
         <button class="fbtn cc-addbtn" id="ccAdd">＋ 이 구간 뒤에 인터랙티브 넣기</button>
         <div class="cc-pal" id="ccPal" hidden>
           ${Object.entries(AT).map(([k, v]) => `<button data-k="${k}">${v.ic} ${v.n}</button>`).join('')}
@@ -696,11 +696,8 @@ function renderStruct(){
     </div>
     <div class="cc-tl" id="ccTl">
       ${segs.map((s0, i) => {
-        const dur = ccDurs[i] || 66;
-        const w = Math.max(140, Math.min(360, Math.round(dur * 3.4)));
-        return `<div class="cc-seg${i === ccSeg ? ' on' : ''}" data-i="${i}" style="width:${w}px">
+        return `<div class="cc-seg${i === ccSeg ? ' on' : ''}" data-i="${i}" style="width:190px">
           <span class="cc-seglab">🎬 구간 ${i + 1}</span>
-          ${i === ccSeg ? '<i class="cc-ph" id="ccPh"></i>' : ''}
         </div>`
         + s0.acts.map((a, j) => `<button class="cc-act${ccSel && ccSel.i === i && ccSel.j === j ? ' on' : ''}" data-i="${i}" data-j="${j}"
             title="${AT[a.k].n} · ${esc(a.t)}">${AT[a.k].ic}<small>${AT[a.k].n}</small></button>`).join('');
@@ -709,21 +706,6 @@ function renderStruct(){
     </div>
     <div class="cc-det" id="ccDet"></div>`;
 
-  const vid = $('ccVid');
-  vid.addEventListener('loadedmetadata', () => {
-    if(isFinite(vid.duration)) ccDurs[ccSeg] = vid.duration;
-    $('ccTime').textContent = mmss(vid.currentTime) + ' / ' + mmss(vid.duration || 0);
-  });
-  vid.addEventListener('timeupdate', () => {
-    $('ccTime').textContent = mmss(vid.currentTime) + ' / ' + mmss(vid.duration || 0);
-    const ph = $('ccPh');
-    if(ph && vid.duration) ph.style.left = (vid.currentTime / vid.duration * 100) + '%';
-  });
-  vid.addEventListener('ended', () => { $('ccPlay').textContent = '▶ 재생'; });
-  $('ccPlay').addEventListener('click', () => {
-    if(vid.paused){ vid.play().catch(()=>{}); $('ccPlay').textContent = '❚❚ 일시정지'; }
-    else { vid.pause(); $('ccPlay').textContent = '▶ 재생'; }
-  });
   $('ccAdd').addEventListener('click', () => { $('ccPal').hidden = !$('ccPal').hidden; });
   $('ccPal').addEventListener('click', e => {
     const b = e.target.closest('[data-k]');
@@ -735,16 +717,7 @@ function renderStruct(){
     if(chip){ ccSel = { i: +chip.dataset.i, j: +chip.dataset.j }; ccSeg = +chip.dataset.i; renderStruct(); return; }
     const segEl = e.target.closest('.cc-seg');
     if(!segEl) return;
-    const i = +segEl.dataset.i;
-    const r = segEl.getBoundingClientRect();
-    const ratio = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width));
-    if(i !== ccSeg){
-      ccSeg = i; ccSel = null; renderStruct();
-      const v2 = $('ccVid');
-      v2.addEventListener('loadedmetadata', () => { v2.currentTime = ratio * (v2.duration || 0); }, { once:true });
-    } else if(vid.duration){
-      vid.currentTime = ratio * vid.duration;
-    }
+    ccSeg = +segEl.dataset.i; ccSel = null; renderStruct();
   });
   renderDet();
   refresh();
