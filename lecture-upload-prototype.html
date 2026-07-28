@@ -187,7 +187,7 @@ input,select,textarea{font:inherit;color:inherit}
 .cc-pal button:hover{border-color:#3182F6; color:#3182F6}
 .cc-tl{display:flex; gap:6px; align-items:stretch; overflow-x:auto; padding:16px 2px 14px}
 .cc-seg{position:relative; height:56px; border:1.5px solid var(--line); border-radius:9px;
-  background:repeating-linear-gradient(90deg, #EDF1F7 0 22px, #E4EAF2 22px 44px); cursor:pointer; flex-shrink:0}
+  background:#EDF1F7; cursor:pointer; flex-shrink:0; overflow:hidden}
 .cc-seg.on{border-color:#3182F6; box-shadow:0 0 0 2px rgba(49,130,246,.15)}
 .cc-seglab{position:absolute; left:8px; top:5px; font-size:.66rem; font-weight:800; color:#5B667A; pointer-events:none}
 .cc-ph{position:absolute; top:0; bottom:0; width:2px; background:#FF4D6D; left:0; pointer-events:none; z-index:2}
@@ -665,6 +665,33 @@ function condBody(i,j,a){
 }
 /* ── ② 강의 구성 — 캡컷형: 영상 보면서 인터랙티브 끼워 넣기 ── */
 let ccSeg = 0, ccSel = null, ccAddTarget = 0; /* ccSel = {i,j} 선택된 인터랙티브 */
+/* 구간 영상 길이 — 타임라인 폭을 실제 길이에 비례시키기 위해 메타데이터만 읽는다 */
+const SEG_SRC = ['assets/lecture1.mp4', 'assets/lecture2.mp4'];
+const ccDurs = [];
+SEG_SRC.forEach((src, i) => {
+  const v = document.createElement('video');
+  v.preload = 'metadata'; v.src = src;
+  v.addEventListener('loadedmetadata', () => { if(isFinite(v.duration)){ ccDurs[i] = v.duration; renderStruct(); } });
+});
+/* 빨간 플레이헤드 — 같은 출처 iframe 속 강의 영상의 재생 위치를 따라간다 */
+setInterval(() => {
+  try{
+    const fr = $('ccFrame');
+    const doc = fr && fr.contentDocument;
+    const v = doc && doc.getElementById('lecVid');
+    const phs = document.querySelectorAll('.cc-ph');
+    if(!v || !v.duration){ phs.forEach(ph => ph.style.display = 'none'); return; }
+    const src = v.currentSrc || '';
+    const idx = SEG_SRC.findIndex(x => src.endsWith(x.split('/').pop()));
+    phs.forEach(ph => {
+      if(+ph.dataset.ph === idx){
+        ph.style.display = 'block';
+        ph.style.left = (v.currentTime / v.duration * 100) + '%';
+      } else ph.style.display = 'none';
+    });
+  }catch(e){}
+}, 250);
+
 /* 강의실 전체가 보이게 축소 — 가상 해상도로 렌더한 뒤 scale */
 function fitFrame(){
   const wrap = document.querySelector('.cc-live');
@@ -701,8 +728,11 @@ function renderStruct(){
     </div>
     <div class="cc-tl" id="ccTl">
       ${segs.map((s0, i) => {
-        return `<div class="cc-seg${i === ccSeg ? ' on' : ''}" data-i="${i}" style="width:190px">
-          <span class="cc-seglab">🎬 구간 ${i + 1}</span>
+        const dur = ccDurs[i] || 66;
+        const w = Math.max(160, Math.min(560, Math.round(dur * 3.2)));
+        return `<div class="cc-seg${i === ccSeg ? ' on' : ''}" data-i="${i}" style="width:${w}px">
+          <span class="cc-seglab">🎬 구간 ${i + 1} · ${Math.floor(dur / 60)}:${String(Math.floor(dur) % 60).padStart(2, '0')}</span>
+          <i class="cc-ph" data-ph="${i}" style="display:none"></i>
         </div>`
         + s0.acts.map((a, j) => `<button class="cc-act${ccSel && ccSel.i === i && ccSel.j === j ? ' on' : ''}" data-i="${i}" data-j="${j}"
             title="${AT[a.k].n} · ${esc(a.t)}">${AT[a.k].ic}<small>${AT[a.k].n}</small></button>`).join('')
