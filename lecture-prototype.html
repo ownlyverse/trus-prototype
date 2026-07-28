@@ -512,7 +512,6 @@ canvas{display:block; width:100%; height:200px; touch-action:none; cursor:crossh
 <div class="sec-overlay" id="actOverlay">
   <div class="sec-card wide">
     <button class="ao-close" id="aoClose" aria-label="활동 닫기">✕</button>
-    <div class="step-label" id="aoLabel"></div>
     <span class="ao-timer" id="aoTimer">⏱ 0:00</span>
     <h2 id="aoTitle"></h2>
     <p id="aoText" style="text-align:left; margin-bottom:14px"></p>
@@ -813,7 +812,6 @@ const QUIZ_SET = [
 ];
 
 function showInteractive(b){
-  $('aoLabel').textContent = `${bi+1}/${BLOCKS.length} · ${b.name}`;
   $('aoTitle').textContent = b.t;
   $('aoText').textContent = AO_TEXT[b.kind] || '';
   let task = '';
