@@ -887,10 +887,26 @@ function showInteractive(b){
       if(!sel || !sel.rangeCount || sel.isCollapsed) return;
       const range = sel.getRangeAt(0);
       if(!rd.contains(range.commonAncestorContainer)) return;
-      const mark = document.createElement('mark');
-      mark.className = 'hl';
-      try{ range.surroundContents(mark); }
-      catch(e){ const frag = range.extractContents(); mark.appendChild(frag); range.insertNode(mark); }
+      /* 블록·스팬 경계를 걸쳐도 안전하게 — 범위와 겹치는 텍스트 노드를 각각 mark로 감싼다.
+         (통째 감싸기는 코치 캡션 같은 블록 요소가 인라인 mark 안에 들어가 줄이 밀리는 사고가 났다) */
+      const walker = document.createTreeWalker(rd, NodeFilter.SHOW_TEXT, {
+        acceptNode: n => (range.intersectsNode(n) && n.nodeValue.trim()) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT
+      });
+      const nodes = [];
+      let tn;
+      while((tn = walker.nextNode())) nodes.push(tn);
+      nodes.forEach(node => {
+        if(node.parentElement && node.parentElement.closest('mark.hl, .ful')) return;  /* 중복 칠·코치 캡션 제외 */
+        let start = 0, end = node.nodeValue.length;
+        if(node === range.startContainer) start = range.startOffset;
+        if(node === range.endContainer) end = Math.min(end, range.endOffset);
+        if(start >= end) return;
+        const r = document.createRange();
+        r.setStart(node, start); r.setEnd(node, end);
+        const mark = document.createElement('mark');
+        mark.className = 'hl';
+        try{ r.surroundContents(mark); }catch(e){}
+      });
       sel.removeAllRanges();
       check();
     };
