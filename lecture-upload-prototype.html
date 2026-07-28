@@ -134,7 +134,7 @@ input,select,textarea{font:inherit;color:inherit}
 /* ── ② 강의 구성 (구조만) ── */
 .meta{display:flex; align-items:center; gap:14px; font-size:.78rem; color:var(--muted); margin-bottom:12px; flex-wrap:wrap}
 .meta b{color:var(--text)}
-.sgwrap{overflow:auto; max-height:64vh}
+.sgwrap{overflow:visible}
 .sgtable{border:1px solid var(--line); border-radius:8px; min-width:1060px}
 .sghead,.sgrow,.arow{display:grid; grid-template-columns:28px 168px minmax(200px,1fr) 190px minmax(230px,330px) 128px; gap:12px; align-items:center}
 .sghead{padding:8px 12px; background:var(--soft); border-bottom:1px solid var(--line); font-size:.7rem; font-weight:700; color:var(--muted); border-radius:8px 8px 0 0; position:sticky; top:0; z-index:5}
@@ -194,16 +194,29 @@ input,select,textarea{font:inherit;color:inherit}
 .cc-plus{border-style:dashed; color:#3182F6; font-size:1.05rem; font-weight:800}
 .cc-pal button{border:1.5px solid var(--line); border-radius:8px; background:#fff; padding:7px 11px; font-size:.8rem; font-weight:700; cursor:pointer}
 .cc-pal button:hover{border-color:#3182F6; color:#3182F6}
-.cc-tl{display:flex; gap:6px; align-items:stretch; overflow-x:auto; padding:16px 2px 14px}
-.cc-seg{position:relative; height:56px; border:1.5px solid var(--line); border-radius:9px;
-  background:#EDF1F7; cursor:pointer; flex-shrink:0; overflow:hidden}
-.cc-seg.on{border-color:#3182F6; box-shadow:0 0 0 2px rgba(49,130,246,.15)}
-.cc-seglab{position:absolute; left:8px; top:5px; font-size:.66rem; font-weight:800; color:#5B667A; pointer-events:none}
+.cc-tl{overflow-x:auto; padding:14px 2px 10px}
+.tl-inner{position:relative}
+.tl-row{display:flex; align-items:center; margin-bottom:5px}
+.tl-name{width:96px; flex-shrink:0; display:flex; align-items:center; gap:6px; font-size:.72rem; font-weight:800; color:#3B4453; padding-right:8px}
+.tl-name b{width:9px; height:9px; border-radius:50%; flex-shrink:0}
+.tl-name.dim2{color:var(--faint); font-weight:700}
+.tl-ruler{position:relative; height:26px; cursor:pointer; border-bottom:1px solid var(--line-2)}
+.tl-ruler i{position:absolute; bottom:0; width:1px; height:6px; background:#C6CEDB; pointer-events:none}
+.tl-ruler i.maj{height:11px; background:#8B96A8}
+.tl-ruler em{position:absolute; top:0; transform:translateX(-50%); font-style:normal; font-size:.62rem; font-weight:700; color:#8B96A8; pointer-events:none; font-variant-numeric:tabular-nums}
+.tl-band{position:relative; height:30px}
+.cc-seg{position:absolute; top:0; height:30px; border:1.5px solid var(--line); border-radius:7px;
+  background:#EDF1F7; cursor:pointer; overflow:hidden}
+.cc-seg.on{border-color:#3182F6; box-shadow:0 0 0 2px rgba(49,130,246,.15); background:#E3EDFC}
+.cc-seglab{position:absolute; left:7px; top:50%; transform:translateY(-50%); font-size:.64rem; font-weight:800; color:#5B667A; pointer-events:none; white-space:nowrap}
+.tl-strip{position:relative; height:22px; background:#F1F3F7; border-radius:5px; cursor:copy}
+.tl-strip:hover{background:#EAEEF5}
+.tl-strip i{position:absolute; top:2px; bottom:2px; border-radius:4px; pointer-events:none; opacity:.9}
+.tl-actrow{position:relative; height:56px}
+.tl-cut{position:absolute; top:0; bottom:0; width:0; border-left:1.5px dashed #E5484D; pointer-events:none; z-index:6}
+.tl-cut b{position:absolute; top:-2px; left:-9px; font-size:.8rem; font-style:normal}
+#tlPh{position:absolute; top:0; bottom:0}
 .cc-ph{position:absolute; top:0; bottom:0; width:2px; background:#FF4D6D; left:0; pointer-events:none; z-index:2}
-.cc-cue{position:absolute; top:0; bottom:0; width:3px; cursor:pointer; z-index:3}
-.cc-cue b{position:absolute; top:2px; left:50%; transform:translateX(-50%); min-width:15px; height:15px; border-radius:8px;
-  background:inherit; color:#fff; font-size:.58rem; font-weight:800; display:flex; align-items:center; justify-content:center; padding:0 2px}
-.cc-cue:hover{width:5px}
 .cuepop{position:fixed; z-index:120; background:#fff; border:1px solid var(--line); border-radius:10px; padding:8px;
   box-shadow:0 10px 30px rgba(16,24,40,.18); display:flex; flex-direction:column; gap:4px; min-width:170px}
 .cuepop .cp-t{font-size:.72rem; font-weight:800; color:var(--muted); padding:2px 4px}
@@ -214,7 +227,7 @@ input,select,textarea{font:inherit;color:inherit}
 .cuepop button .sw{width:10px; height:10px; border-radius:50%; flex-shrink:0}
 .cuepop button.del{color:#C0392B; border-top:1px solid var(--line); border-radius:0 0 7px 7px; margin-top:2px}
 .cuetag{border:1.5px solid; border-radius:99px; background:#fff; padding:4px 10px; font-size:.76rem; font-weight:700; cursor:pointer}
-.cc-act{display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; width:52px; height:56px;
+.cc-act{position:absolute; top:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; width:52px; height:56px;
   border:1.5px solid var(--line); border-radius:9px; background:#fff; font-size:.95rem; cursor:pointer; flex-shrink:0}
 .cc-act small{font-size:.56rem; font-weight:800; color:var(--muted)}
 .cc-act.on{border-color:#3182F6; box-shadow:0 0 0 2px rgba(49,130,246,.2)}
@@ -551,7 +564,7 @@ function setEditStep(n){
   editStep = n;
   ['s1','s3','s4','toStep2'].forEach(id => { const el = $(id); if(el) el.hidden = n !== 1; });
   ['s2','s5','toStep1'].forEach(id => { const el = $(id); if(el) el.hidden = n !== 2; });
-  if(n === 2) requestAnimationFrame(fitFrame);
+  if(n === 2){ setTimeout(() => fitFrame(), 30); setTimeout(() => fitFrame(), 300); }
   window.scrollTo(0, 0);
 }
 function openEditor(ep){          // 에피소드 행 → 편집 화면 (ep=null 이면 새 에피소드)
@@ -618,9 +631,9 @@ const coachCount = () => people.length - 1;
 
 /* segs[i].vids[k] = k번째 출연자의 이 구간 영상 업로드 여부 */
 let segs = [
-  {t:'오늘, 잠깐 멈추는 시간', vids:[true,true,true], cues:[{t:0,p:0},{t:10,p:1},{t:20,p:2}],
+  {t:'오늘, 잠깐 멈추는 시간', vids:[true,true,true], srcIdx:0, cues:[{t:0,p:0},{t:10,p:1},{t:20,p:2}],
    acts:[ {k:'read', t:'오늘의 글, 밑줄 치며 읽기', done:1, dur:180}, {k:'draw', t:'지금 마음을 색으로 그려보세요', done:12, dur:120} ]},
-  {t:'전략을 바운더리로', vids:[true,true,false], cues:[{t:0,p:0}],
+  {t:'전략을 바운더리로', vids:[true,true,false], srcIdx:1, cues:[{t:0,p:0}],
    acts:[ {k:'quiz', t:'방금 이야기의 핵심은?', dur:120, qs:[
      {q:'방금 이야기에서, 전략의 시작은 무엇이라고 했나요?', opts:['더 많이 하는 것','하지 않을 것을 정하는 것','더 빨리 하는 것','남들처럼 하는 것'], ans:[1], multi:false},
      {q:'바운더리를 설명한 말을 모두 골라보세요.', opts:['힘이 새어나가지 않게 하는 그릇','나를 가두는 벽','하지 않을 것의 경계','남들이 정해주는 규칙'], ans:[0,2], multi:true},
@@ -669,16 +682,15 @@ setInterval(() => {
     const fr = $('ccFrame');
     const doc = fr && fr.contentDocument;
     const v = doc && doc.getElementById('lecVid');
-    const phs = document.querySelectorAll('.cc-ph');
-    if(!v || !v.duration){ phs.forEach(ph => ph.style.display = 'none'); return; }
+    const ph = document.getElementById('tlPh');
+    if(!ph) return;
+    if(!v || !v.duration){ ph.style.display = 'none'; return; }
     const src = v.currentSrc || '';
     const idx = SEG_SRC.findIndex(x => src.endsWith(x.split('/').pop()));
-    phs.forEach(ph => {
-      if(+ph.dataset.ph === idx){
-        ph.style.display = 'block';
-        ph.style.left = (v.currentTime / v.duration * 100) + '%';
-      } else ph.style.display = 'none';
-    });
+    const si = segs.findIndex(sg => (sg.srcIdx != null ? sg.srcIdx : segs.indexOf(sg)) === idx);
+    if(si < 0){ ph.style.display = 'none'; return; }
+    ph.style.display = 'block';
+    ph.style.left = (TL_G + Math.round((segOff(si) + Math.min(v.currentTime, segDur(si))) * ccPxs)) + 'px';
   }catch(e){}
 }, 250);
 
@@ -688,7 +700,7 @@ function frameDims(){
   const focus = ccSel && segs[ccSel.i] && segs[ccSel.i].acts[ccSel.j];
   return focus ? {w:940, h:720} : {w:880, h:880};   /* 880 미만이면 강의실이 모바일 레이아웃으로 바뀜 */
 }
-function fitFrame(){
+function fitFrame(again){
   const stage = document.querySelector('.cc-stage');
   const fr = $('ccFrame');
   if(!stage || !fr || !stage.clientWidth) return;
@@ -706,6 +718,7 @@ function fitFrame(){
   stage.style.height = Math.round(VH * f) + 'px';
   const det = document.querySelector('.cc-det');
   if(det) det.style.height = Math.round(VH * f) + 'px';
+  if(!again) setTimeout(() => fitFrame(true), 120);   /* 남쪽 패널 높이가 늦게 잡히는 경우 한 번 더 */
 }
 window.addEventListener('resize', () => fitFrame());
 function ccFrameSrc(){
@@ -714,6 +727,54 @@ function ccFrameSrc(){
   return 'lecture-prototype.html?edit=1';
 }
 
+function tlHTML(){
+  const total = tlTotal();
+  const avail = Math.max(560, ((document.querySelector('.cc-south') || {}).clientWidth || 1160) - TL_G - 60);
+  ccPxs = Math.min(12, Math.max(3, avail / Math.max(1, total)));
+  const W = Math.round(total * ccPxs);
+  const X = t => Math.round(t * ccPxs);
+  /* 눈금자 — 5초 눈금, 30초 라벨 */
+  const step = total > 240 ? 10 : 5, lab = total > 240 ? 60 : 30;
+  let ruler = '';
+  for(let t = 0; t <= total; t += step){
+    ruler += `<i class="${t % lab === 0 ? 'maj' : ''}" style="left:${X(t)}px"></i>`;
+    if(t % lab === 0) ruler += `<em style="left:${X(t)}px">${fmtT(t)}</em>`;
+  }
+  /* 구간 밴드 */
+  const band = segs.map((s0, i) =>
+    `<div class="cc-seg${i === ccSeg ? ' on' : ''}" data-i="${i}" style="left:${X(segOff(i))}px; width:${Math.max(24, X(segDur(i)) - 2)}px">
+       <span class="cc-seglab">🎬 ${i + 1} · ${fmtT(segDur(i))}</span></div>`).join('');
+  /* 발화자 트랙 — 그 사람이 메인인 범위를 색으로 */
+  const tracks = people.map((pe, p) => {
+    let spans = '';
+    segs.forEach((s0, i) => {
+      const cs = (s0.cues && s0.cues.length) ? s0.cues : [{t:0, p:0}];
+      cs.forEach((c, ci) => {
+        const end = ci + 1 < cs.length ? cs[ci + 1].t : segDur(i);
+        if(c.p === p && end > c.t)
+          spans += `<i style="left:${X(segOff(i) + c.t)}px; width:${Math.max(3, X(end - c.t) - 1)}px; background:${PCOLOR[p % PCOLOR.length]}"></i>`;
+      });
+    });
+    return `<div class="tl-row"><span class="tl-name"><b style="background:${PCOLOR[p % PCOLOR.length]}"></b>${esc(pe.name)}</span>
+      <div class="tl-strip" data-p="${p}" style="width:${W}px" title="누르면 이 시점부터 ${esc(pe.name)}이(가) 메인">${spans}</div></div>`;
+  }).join('');
+  /* 활동 행 — 구간 경계 뒤에 칩 */
+  const acts = segs.map((s0, i) => {
+    const bx = X(segOff(i) + segDur(i));
+    return s0.acts.map((a, j) =>
+      `<button class="cc-act${ccSel && ccSel.i === i && ccSel.j === j ? ' on' : ''}" draggable="true" data-i="${i}" data-j="${j}"
+         style="left:${bx + j * 56}px" title="${AT[a.k].n} · ${esc(a.t)}">${AT[a.k].ic}<small>${AT[a.k].n}</small></button>`).join('')
+      + `<button class="cc-act cc-plus" data-add="${i}" style="left:${bx + s0.acts.length * 56}px" title="이 구간 뒤에 인터랙티브 추가">＋</button>`;
+  }).join('');
+  return `<div class="tl-inner" style="width:${TL_G + W + 70}px">
+    <div class="tl-row tl-rl"><span class="tl-name dim2">✂ 자르기</span><div class="tl-ruler" id="tlRuler" style="width:${W}px">${ruler}</div></div>
+    <div class="tl-row tl-bd"><span class="tl-name dim2">구간</span><div class="tl-band" style="width:${W}px">${band}</div></div>
+    ${tracks}
+    <div class="tl-row tl-ac"><span class="tl-name dim2">활동</span><div class="tl-actrow" style="width:${W}px">${acts}</div></div>
+    <i class="tl-cut" id="tlCut" hidden><b>✂</b></i>
+    <i class="cc-ph" id="tlPh" style="display:none"></i>
+  </div>`;
+}
 function renderStruct(){
   if(ccSeg >= segs.length) ccSeg = segs.length - 1;
   const host = $('sgtable');
@@ -732,21 +793,7 @@ function renderStruct(){
     <div class="cc-pal" id="ccPal" hidden>
       ${Object.entries(AT).map(([k, v]) => `<button data-k="${k}">${v.ic} ${v.n}</button>`).join('')}
     </div>
-    <div class="cc-tl" id="ccTl">
-      ${segs.map((s0, i) => {
-        const dur = ccDurs[i] || 66;
-        const w = Math.max(160, Math.min(560, Math.round(dur * 3.2)));
-        return `<div class="cc-seg${i === ccSeg ? ' on' : ''}" data-i="${i}" style="width:${w}px">
-          <span class="cc-seglab">🎬 구간 ${i + 1} · ${Math.floor(dur / 60)}:${String(Math.floor(dur) % 60).padStart(2, '0')}</span>
-          ${(s0.cues || []).map((c, ci) => `<i class="cc-cue" data-i="${i}" data-ci="${ci}" style="left:${Math.min(99, c.t / dur * 100)}%; background:${PCOLOR[c.p % PCOLOR.length]}" title="${esc((people[c.p] || {}).name || '')} · ${fmtT(c.t)}"><b>${esc(((people[c.p] || {}).name || '?')[0])}</b></i>`).join('')}
-          <i class="cc-ph" data-ph="${i}" style="display:none"></i>
-        </div>`
-        + s0.acts.map((a, j) => `<button class="cc-act${ccSel && ccSel.i === i && ccSel.j === j ? ' on' : ''}" draggable="true" data-i="${i}" data-j="${j}"
-            title="${AT[a.k].n} · ${esc(a.t)}">${AT[a.k].ic}<small>${AT[a.k].n}</small></button>`).join('')
-        + `<button class="cc-act cc-plus" data-add="${i}" title="이 구간 뒤에 인터랙티브 추가">＋</button>`;
-      }).join('')}
-      <button class="cc-addseg" onclick="addSeg()">＋ 구간</button>
-    </div>
+    <div class="cc-tl" id="ccTl">${tlHTML()}</div>
     </div>
     </div>`;
 
@@ -761,22 +808,42 @@ function renderStruct(){
     if(plus){ ccAddTarget = +plus.dataset.add; $('ccPal').hidden = !$('ccPal').hidden; return; }
     const chip = e.target.closest('.cc-act');
     if(chip){ ccSel = { i: +chip.dataset.i, j: +chip.dataset.j }; ccSeg = +chip.dataset.i; renderStruct(); return; }
-    const cueEl = e.target.closest('.cc-cue');
-    if(cueEl){ openCuePop(+cueEl.dataset.i, +cueEl.dataset.ci, e.clientX, e.clientY); return; }
+    const strip = e.target.closest('.tl-strip');
+    if(strip){
+      const gt = Math.max(0, (e.clientX - strip.getBoundingClientRect().left) / ccPxs);
+      setSpeakerAt(+strip.dataset.p, gt);
+      return;
+    }
+    const rl = e.target.closest('.tl-ruler');
+    if(rl){
+      cutAt(Math.max(0, (e.clientX - rl.getBoundingClientRect().left) / ccPxs));
+      return;
+    }
     const segEl = e.target.closest('.cc-seg');
     if(!segEl) return;
     const si = +segEl.dataset.i;
     if(ccSeg === si && !ccSel){
-      const r = segEl.getBoundingClientRect();
-      const t = Math.max(0, (e.clientX - r.left) / r.width) * (ccDurs[si] || 66);
+      const rel = Math.max(0, (e.clientX - segEl.getBoundingClientRect().left) / ccPxs);
       try{ const v = $('ccFrame').contentDocument.getElementById('lecVid');
-        if(v && v.currentSrc && SEG_SRC[si] && v.currentSrc.endsWith(SEG_SRC[si].split('/').pop())) v.currentTime = t;
+        const sIdx = segs[si].srcIdx != null ? segs[si].srcIdx : si;
+        if(v && v.currentSrc && SEG_SRC[sIdx] && v.currentSrc.endsWith(SEG_SRC[sIdx].split('/').pop())) v.currentTime = rel;
       }catch(_){}
-      openCuePop(si, null, e.clientX, e.clientY, t);
       return;
     }
     ccSeg = si; ccSel = null; renderStruct();
   });
+  /* ✂ 컷 라인 — 눈금자 호버 시 전체 트랙 세로선 */
+  const inner = $('ccTl').querySelector('.tl-inner');
+  $('ccTl').addEventListener('mousemove', e => {
+    const cut = $('tlCut');
+    if(!cut || !inner) return;
+    const rl = e.target.closest('.tl-ruler');
+    if(!rl){ cut.hidden = true; return; }
+    const x = e.clientX - inner.getBoundingClientRect().left;
+    cut.style.left = x + 'px';
+    cut.hidden = false;
+  });
+  $('ccTl').addEventListener('mouseleave', () => { const c = $('tlCut'); if(c) c.hidden = true; });
   /* 활동 칩 드래그 정렬 — 칩 위: 그 자리에 끼움 / ＋ 위: 그 구간 맨 뒤로 */
   let drag = null;
   $('ccTl').addEventListener('dragstart', e => {
@@ -822,7 +889,7 @@ function renderDet(){
   if(!ccSel || !segs[ccSel.i] || !segs[ccSel.i].acts[ccSel.j]){
     const sg = segs[ccSeg];
     box.innerHTML = `
-      <div class="drow"><b>🎬 구간 ${ccSeg + 1} 발화자</b><span class="dim">파란 구간 막대를 누르면 그 시점의 메인 발화자를 지정해요</span></div>
+      <div class="drow"><b>🎬 구간 ${ccSeg + 1} 발화자</b><span class="dim">출연자 트랙을 누르면 그 시점부터 메인이 바뀌고, ✂ 눈금자를 누르면 구간이 잘려요</span></div>
       <div class="drow" style="flex-wrap:wrap">${(sg && sg.cues ? sg.cues : []).map((c, ci) =>
         `<button class="cuetag" style="border-color:${PCOLOR[c.p % PCOLOR.length]}" onclick="openCuePop(${ccSeg},${ci},event.clientX,event.clientY)">${fmtT(c.t)}부터 ${esc((people[c.p] || {}).name || '')}</button>`).join('')}</div>
       <span class="dim">활동 아이콘을 누르면 제목·완료 조건${mode === 'group' ? '·제한 시간' : ''}을 설정해요</span>`;
@@ -841,6 +908,48 @@ function renderDet(){
       <button class="fbtn dl" onclick="rmAct(${i},${j})">삭제</button></div>`;
 }
 const PCOLOR = ['#F26D9C', '#3182F6', '#46D5B2', '#F2C14E'];
+const TL_G = 96;                       /* 트랙 이름 거터 폭 */
+let ccPxs = 6;                         /* px per second — 렌더 때 계산 */
+function segDur(i){ const sg = segs[i]; return sg.dur != null ? sg.dur : (ccDurs[sg.srcIdx != null ? sg.srcIdx : i] || 66); }
+function segOff(i){ let o = 0; for(let k = 0; k < i; k++) o += segDur(k); return o; }
+function tlTotal(){ return segs.reduce((a, _, i) => a + segDur(i), 0); }
+function segAtTime(gt){
+  let off = 0;
+  for(let i = 0; i < segs.length; i++){ const d = segDur(i); if(gt < off + d) return { i, r: gt - off, d, off }; off += d; }
+  return { i: segs.length - 1, r: segDur(segs.length - 1), d: segDur(segs.length - 1), off: segOff(segs.length - 1) };
+}
+function setSpeakerAt(p, gt){
+  const { i, r } = segAtTime(gt);
+  const sg = segs[i];
+  if(!sg.cues || !sg.cues.length) sg.cues = [{t:0, p:0}];
+  let act = sg.cues[0];
+  sg.cues.forEach(c => { if(c.t <= r) act = c; });
+  const near = sg.cues.find(c => Math.abs(c.t - r) < 1.2);
+  if(near) near.p = p;
+  else if(act.p === p){ toast((people[p] || {}).name + ' — 이미 이 시점의 메인이에요'); return; }
+  else { sg.cues.push({ t: Math.round(r * 10) / 10, p }); sg.cues.sort((a, b) => a.t - b.t); }
+  ccSeg = i;
+  saved(); renderStruct();
+}
+function cutAt(gt){
+  const { i, r, d } = segAtTime(gt);
+  if(r < 2 || d - r < 2){ toast('구간 경계와 너무 가까워요'); return; }
+  const sg = segs[i];
+  const cs = (sg.cues && sg.cues.length) ? sg.cues : [{t:0, p:0}];
+  let act = cs[0];
+  cs.forEach(c => { if(c.t <= r) act = c; });
+  const left = cs.filter(c => c.t < r);
+  const right = [{ t: 0, p: act.p }].concat(cs.filter(c => c.t > r).map(c => ({ t: Math.round((c.t - r) * 10) / 10, p: c.p })));
+  const ns = { t: sg.t + ' ②', vids: (sg.vids || []).slice(), acts: sg.acts, cues: right,
+               dur: Math.round((d - r) * 10) / 10, srcIdx: sg.srcIdx != null ? sg.srcIdx : i };
+  sg.dur = Math.round(r * 10) / 10;
+  sg.cues = left.length ? left : [{ t: 0, p: act.p }];
+  sg.acts = [];                        /* 활동은 잘린 뒤쪽 구간 뒤를 따라간다 */
+  segs.splice(i + 1, 0, ns);
+  ccSeg = i; ccSel = null;
+  toast('✂ 잘랐어요 — 잘린 자리 뒤에 인터랙티브를 넣을 수 있어요');
+  saved(); renderStruct();
+}
 const fmtT = s => Math.floor(s / 60) + ':' + String(Math.floor(s % 60)).padStart(2, '0');
 let cuePopEl = null;
 function closeCuePop(){ if(cuePopEl){ cuePopEl.remove(); cuePopEl = null; } }
