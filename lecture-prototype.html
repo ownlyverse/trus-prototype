@@ -588,6 +588,8 @@ try{
 const SOLO = CFG ? !!CFG.solo : true;
 const ROT = (CFG && Array.isArray(CFG.rot) && CFG.rot.length === 3)
   ? CFG.rot.map(n => Math.max(3, +n || 10)) : [10, 10, 10];
+/* 스튜디오 발화자 전환 마커 — CUES[구간][{t,p}]: t초부터 p번 출연자(0 강의자, 1~ 코치)가 메인 */
+const CUES = (CFG && Array.isArray(CFG.cues) && CFG.cues.length) ? CFG.cues : null;
 if(CFG && CFG.durs) BLOCKS.forEach(b => {
   if(b.type === 'interactive' && CFG.durs[b.kind] != null) b.dur = CFG.durs[b.kind];
 });
@@ -597,7 +599,7 @@ const $ = id => document.getElementById(id);
 
 /* ─── 실제 강의 영상 (세로 9:16) ─── */
 const lecVid = $('lecVid');
-const TEST_SEC = ROT[0] + ROT[1] + ROT[2];              // 강의 구간 길이 = 발화 로테이션 합 (스튜디오 설정)
+const TEST_SEC = CUES ? Infinity : ROT[0] + ROT[1] + ROT[2];   // 전환 마커가 있으면 영상을 통째로, 없으면 로테이션 합만큼
 let VID_DUR = 66;                                       // 로드되면 실제 길이로 갱신
 lecVid.addEventListener('loadedmetadata', ()=>{
   if(isFinite(lecVid.duration) && lecVid.duration > 0){ VID_DUR = lecVid.duration; updateUI(); }
@@ -642,6 +644,17 @@ function spotSeq(steps){ clearSpotTimers(); steps.forEach(([el, at]) => spotTime
    일시정지 후 재개해도 현재 재생 시점(t) 기준으로 이어서 동기화한다 */
 function spotSync(t){
   clearSpotTimers();
+  const cs = CUES ? (CUES[BLOCKS.slice(0, bi).filter(x => x.type === 'lecture').length] || []) : null;
+  if(cs && cs.length){
+    const tileOf = c => c.p === 0 ? mainTile : (coachTiles[c.p - 1] || mainTile);
+    let cur = cs[0];
+    cs.forEach(c => {
+      if(c.t <= t) cur = c;
+      else spotTimers.push(setTimeout(() => spotlight(tileOf(c)), (c.t - t) * 1000));
+    });
+    spotlight(tileOf(cur));
+    return;
+  }
   const b1 = ROT[0], b2 = ROT[0] + ROT[1];               /* 스튜디오 설정 로테이션 경계 */
   if(t < b1){
     spotlight(mainTile);

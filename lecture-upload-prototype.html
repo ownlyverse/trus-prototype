@@ -186,6 +186,9 @@ input,select,textarea{font:inherit;color:inherit}
   display:flex; align-items:center; justify-content:center; overflow:hidden; min-height:280px}
 .cc-south{grid-area:south; min-width:0}
 .cc-live{overflow:hidden; position:relative}
+.uprow{display:grid; grid-template-columns:170px minmax(240px,1fr); gap:10px; align-items:center; padding:9px 0; border-bottom:1px solid var(--line)}
+.uprow:last-child{border-bottom:none}
+.uprow .who{font-size:.86rem; font-weight:700}
 .cc-live iframe{border:none; transform-origin:0 0; display:block}
 .cc-pal{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px}
 .cc-plus{border-style:dashed; color:#3182F6; font-size:1.05rem; font-weight:800}
@@ -197,6 +200,20 @@ input,select,textarea{font:inherit;color:inherit}
 .cc-seg.on{border-color:#3182F6; box-shadow:0 0 0 2px rgba(49,130,246,.15)}
 .cc-seglab{position:absolute; left:8px; top:5px; font-size:.66rem; font-weight:800; color:#5B667A; pointer-events:none}
 .cc-ph{position:absolute; top:0; bottom:0; width:2px; background:#FF4D6D; left:0; pointer-events:none; z-index:2}
+.cc-cue{position:absolute; top:0; bottom:0; width:3px; cursor:pointer; z-index:3}
+.cc-cue b{position:absolute; top:2px; left:50%; transform:translateX(-50%); min-width:15px; height:15px; border-radius:8px;
+  background:inherit; color:#fff; font-size:.58rem; font-weight:800; display:flex; align-items:center; justify-content:center; padding:0 2px}
+.cc-cue:hover{width:5px}
+.cuepop{position:fixed; z-index:120; background:#fff; border:1px solid var(--line); border-radius:10px; padding:8px;
+  box-shadow:0 10px 30px rgba(16,24,40,.18); display:flex; flex-direction:column; gap:4px; min-width:170px}
+.cuepop .cp-t{font-size:.72rem; font-weight:800; color:var(--muted); padding:2px 4px}
+.cuepop button{display:flex; align-items:center; gap:8px; border:none; background:none; border-radius:7px; padding:7px 9px;
+  font-size:.84rem; font-weight:700; cursor:pointer; text-align:left}
+.cuepop button:hover{background:var(--soft)}
+.cuepop button.on{background:var(--blue-bg); color:var(--blue-d)}
+.cuepop button .sw{width:10px; height:10px; border-radius:50%; flex-shrink:0}
+.cuepop button.del{color:#C0392B; border-top:1px solid var(--line); border-radius:0 0 7px 7px; margin-top:2px}
+.cuetag{border:1.5px solid; border-radius:99px; background:#fff; padding:4px 10px; font-size:.76rem; font-weight:700; cursor:pointer}
 .cc-act{display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; width:52px; height:56px;
   border:1.5px solid var(--line); border-radius:9px; background:#fff; font-size:.95rem; cursor:pointer; flex-shrink:0}
 .cc-act small{font-size:.56rem; font-weight:800; color:var(--muted)}
@@ -384,10 +401,10 @@ input,select,textarea{font:inherit;color:inherit}
 
     <!-- ④ 영상 업로드 -->
     <section class="card" id="s4">
-      <div class="chead"><h2>영상 업로드</h2><span class="hint">강의 구간 × 출연자별로 올려요</span></div>
+      <div class="chead"><h2>영상 업로드</h2><span class="hint">출연자 수대로 행이 생겨요 — 1명당 강의 전체 영상 1개</span></div>
       <div class="cbody">
         <div class="mxwrap"><div class="mx" id="mx"></div></div>
-        <div class="pnote"><b>강의자 영상은 구간마다 필수</b>예요. 코치 칸을 비워두면 그 구간에는 그 코치가 나오지 않아요. 코치 영상은 구간 시작에 맞춰 함께 재생돼요.</div>
+        <div class="pnote"><b>강의자 통영상은 필수</b>예요. 코치 영상을 올려두면, 다음 단계에서 타임라인의 시점을 클릭해 그 코치를 메인 발화자로 지정할 수 있어요.</div>
       </div>
     </section>
 
@@ -581,8 +598,8 @@ function renderCourse(){
 
 /* ── 데이터: 출연자 · 강의 구간(구조) · 업로드(구간×출연자) ── */
 let people = [
-  {name:'윤소정', host:true},
-  {name:'바운더리 코치'},
+  {name:'윤소정', host:true, vid:true},
+  {name:'바운더리 코치', vid:true},
   {name:'기록 코치'},
 ];
 const MAXC = 3, MINC = 1;
@@ -601,9 +618,9 @@ const coachCount = () => people.length - 1;
 
 /* segs[i].vids[k] = k번째 출연자의 이 구간 영상 업로드 여부 */
 let segs = [
-  {t:'오늘, 잠깐 멈추는 시간', vids:[true,true,true],
+  {t:'오늘, 잠깐 멈추는 시간', vids:[true,true,true], cues:[{t:0,p:0},{t:10,p:1},{t:20,p:2}],
    acts:[ {k:'read', t:'오늘의 글, 밑줄 치며 읽기', done:1, dur:180}, {k:'draw', t:'지금 마음을 색으로 그려보세요', done:12, dur:120} ]},
-  {t:'전략을 바운더리로', vids:[true,true,false],
+  {t:'전략을 바운더리로', vids:[true,true,false], cues:[{t:0,p:0}],
    acts:[ {k:'quiz', t:'방금 이야기의 핵심은?', dur:120, qs:[
      {q:'방금 이야기에서, 전략의 시작은 무엇이라고 했나요?', opts:['더 많이 하는 것','하지 않을 것을 정하는 것','더 빨리 하는 것','남들처럼 하는 것'], ans:[1], multi:false},
      {q:'바운더리를 설명한 말을 모두 골라보세요.', opts:['힘이 새어나가지 않게 하는 그릇','나를 가두는 벽','하지 않을 것의 경계','남들이 정해주는 규칙'], ans:[0,2], multi:true},
@@ -721,6 +738,7 @@ function renderStruct(){
         const w = Math.max(160, Math.min(560, Math.round(dur * 3.2)));
         return `<div class="cc-seg${i === ccSeg ? ' on' : ''}" data-i="${i}" style="width:${w}px">
           <span class="cc-seglab">🎬 구간 ${i + 1} · ${Math.floor(dur / 60)}:${String(Math.floor(dur) % 60).padStart(2, '0')}</span>
+          ${(s0.cues || []).map((c, ci) => `<i class="cc-cue" data-i="${i}" data-ci="${ci}" style="left:${Math.min(99, c.t / dur * 100)}%; background:${PCOLOR[c.p % PCOLOR.length]}" title="${esc((people[c.p] || {}).name || '')} · ${fmtT(c.t)}"><b>${esc(((people[c.p] || {}).name || '?')[0])}</b></i>`).join('')}
           <i class="cc-ph" data-ph="${i}" style="display:none"></i>
         </div>`
         + s0.acts.map((a, j) => `<button class="cc-act${ccSel && ccSel.i === i && ccSel.j === j ? ' on' : ''}" draggable="true" data-i="${i}" data-j="${j}"
@@ -743,9 +761,21 @@ function renderStruct(){
     if(plus){ ccAddTarget = +plus.dataset.add; $('ccPal').hidden = !$('ccPal').hidden; return; }
     const chip = e.target.closest('.cc-act');
     if(chip){ ccSel = { i: +chip.dataset.i, j: +chip.dataset.j }; ccSeg = +chip.dataset.i; renderStruct(); return; }
+    const cueEl = e.target.closest('.cc-cue');
+    if(cueEl){ openCuePop(+cueEl.dataset.i, +cueEl.dataset.ci, e.clientX, e.clientY); return; }
     const segEl = e.target.closest('.cc-seg');
     if(!segEl) return;
-    ccSeg = +segEl.dataset.i; ccSel = null; renderStruct();
+    const si = +segEl.dataset.i;
+    if(ccSeg === si && !ccSel){
+      const r = segEl.getBoundingClientRect();
+      const t = Math.max(0, (e.clientX - r.left) / r.width) * (ccDurs[si] || 66);
+      try{ const v = $('ccFrame').contentDocument.getElementById('lecVid');
+        if(v && v.currentSrc && SEG_SRC[si] && v.currentSrc.endsWith(SEG_SRC[si].split('/').pop())) v.currentTime = t;
+      }catch(_){}
+      openCuePop(si, null, e.clientX, e.clientY, t);
+      return;
+    }
+    ccSeg = si; ccSel = null; renderStruct();
   });
   /* 활동 칩 드래그 정렬 — 칩 위: 그 자리에 끼움 / ＋ 위: 그 구간 맨 뒤로 */
   let drag = null;
@@ -790,7 +820,12 @@ function renderDet(){
   const box = $('ccDet');
   if(!box) return;
   if(!ccSel || !segs[ccSel.i] || !segs[ccSel.i].acts[ccSel.j]){
-    box.innerHTML = `<span class="dim">타임라인의 활동 아이콘을 누르면 여기서 설정해요 — 제목·완료 조건${mode === 'group' ? '·제한 시간' : ''}</span>`;
+    const sg = segs[ccSeg];
+    box.innerHTML = `
+      <div class="drow"><b>🎬 구간 ${ccSeg + 1} 발화자</b><span class="dim">파란 구간 막대를 누르면 그 시점의 메인 발화자를 지정해요</span></div>
+      <div class="drow" style="flex-wrap:wrap">${(sg && sg.cues ? sg.cues : []).map((c, ci) =>
+        `<button class="cuetag" style="border-color:${PCOLOR[c.p % PCOLOR.length]}" onclick="openCuePop(${ccSeg},${ci},event.clientX,event.clientY)">${fmtT(c.t)}부터 ${esc((people[c.p] || {}).name || '')}</button>`).join('')}</div>
+      <span class="dim">활동 아이콘을 누르면 제목·완료 조건${mode === 'group' ? '·제한 시간' : ''}을 설정해요</span>`;
     return;
   }
   const { i, j } = ccSel;
@@ -804,6 +839,35 @@ function renderDet(){
       <span style="flex:1"></span>
       <button class="fbtn" onclick="pOpen(${i},${j})">미리보기</button>
       <button class="fbtn dl" onclick="rmAct(${i},${j})">삭제</button></div>`;
+}
+const PCOLOR = ['#F26D9C', '#3182F6', '#46D5B2', '#F2C14E'];
+const fmtT = s => Math.floor(s / 60) + ':' + String(Math.floor(s % 60)).padStart(2, '0');
+let cuePopEl = null;
+function closeCuePop(){ if(cuePopEl){ cuePopEl.remove(); cuePopEl = null; } }
+document.addEventListener('click', e => {
+  if(cuePopEl && !cuePopEl.contains(e.target) && !e.target.closest('.cc-cue')) closeCuePop();
+}, true);
+function openCuePop(i, ci, x, y, t){   /* ci=null이면 t 시점에 새 전환 */
+  closeCuePop();
+  const cur = ci != null ? segs[i].cues[ci] : null;
+  const d = document.createElement('div');
+  d.className = 'cuepop';
+  d.innerHTML = `<div class="cp-t">${cur ? '발화자 바꾸기' : '이 시점부터 메인 발화자'} · ${fmtT(cur ? cur.t : t)}</div>`
+    + people.map((pe, k) => `<button data-p="${k}" class="${cur && cur.p === k ? 'on' : ''}"><span class="sw" style="background:${PCOLOR[k % PCOLOR.length]}"></span>${esc(pe.name)}</button>`).join('')
+    + (cur && ci > 0 ? `<button class="del" data-del="1">전환 삭제</button>` : '');
+  document.body.appendChild(d);
+  d.style.left = Math.min(x, window.innerWidth - 190) + 'px';
+  d.style.top = Math.max(10, y - d.offsetHeight - 12) + 'px';
+  d.addEventListener('click', ev => {
+    const b = ev.target.closest('button');
+    if(!b) return;
+    if(!segs[i].cues) segs[i].cues = [{t:0, p:0}];
+    if(b.dataset.del) segs[i].cues.splice(ci, 1);
+    else if(cur) cur.p = +b.dataset.p;
+    else { segs[i].cues.push({ t: Math.round(t * 10) / 10, p: +b.dataset.p }); segs[i].cues.sort((a, b2) => a.t - b2.t); }
+    closeCuePop(); saved(); renderStruct();
+  });
+  cuePopEl = d;
 }
 function dropAct(i, j, i2, pos){   /* (i,j)의 활동을 구간 i2의 pos 자리로 */
   const a = segs[i].acts.splice(j, 1)[0];
@@ -821,7 +885,7 @@ function rmAct(i, j){
 function segTitle(i,v){ segs[i].t = v; renderMatrix(); saved(); }
 function mvSeg(i,d){ const j = i+d; if(j<0 || j>=segs.length) return; [segs[i],segs[j]] = [segs[j],segs[i]]; renderStruct(); saved(); }
 function rmSeg(i){ if(segs.length<=1) return; segs.splice(i,1); renderStruct(); saved(); }
-function addSeg(){ segs.push({t:'새 강의 구간', vids:people.map(()=>false), acts:[]}); renderStruct(); saved(); }
+function addSeg(){ segs.push({t:'새 강의 구간', vids:people.map(()=>false), acts:[], cues:[{t:0,p:0}]}); renderStruct(); saved(); }
 function togMenu(i,e){
   e.stopPropagation();
   document.querySelectorAll('.tmenu').forEach(m=>{ if(m.id !== 'menu'+i) m.classList.remove('open'); });
@@ -918,7 +982,7 @@ function renderPeople(){
     <div class="prow ${p.host?'host':''}">
       <span class="role">${p.host?'강의자':'코치 '+i}</span>
       <input class="nm" value="${esc(p.name)}" onchange="pName(${i},this.value)" placeholder="화면 이름표">
-      <span class="pdesc">${p.host?'구간마다 영상 필수':'구간별로 영상을 올린 곳에만 나와요'}</span>
+      <span class="pdesc">${p.host?'강의 전체 통영상 필수':'영상을 올리면 발화자 전환으로 메인에 나와요'}</span>
       ${!p.host && coachCount()>MINC ? `<button class="prm" onclick="rmCoach(${i})" title="출연자 삭제">✕</button>` : ''}
     </div>`).join('')
     ;
@@ -928,7 +992,7 @@ function pName(i,v){ people[i].name = v; renderPeople(); renderMatrix(); saved()
 function addCoach(){
   if(coachCount() >= MAXC) return;
   const pool = ['바운더리 코치','기록 코치','머니 코치'];
-  people.push({name:pool[coachCount()] || '코치'});
+  people.push({name:pool[coachCount()] || '코치', vid:false});
   segs.forEach(s=>s.vids.push(false));
   renderPeople(); renderMatrix(); saved();
 }
@@ -939,36 +1003,26 @@ function rmCoach(i){
 }
 
 /* ── ④ 영상 업로드 매트릭스 ── */
-function renderMatrix(){
-  const cols = `150px repeat(${people.length}, minmax(220px,1fr))`;
-  let h = `<div class="mxhead" style="grid-template-columns:${cols}">
-    <span>강의 구간</span>
-    ${people.map(p=>`<span class="who">${esc(p.name)}${p.host?'<span class="tag">강의자</span>':''}</span>`).join('')}
-  </div>`;
-  segs.forEach((s,i)=>{
-    h += `<div class="mxrow" style="grid-template-columns:${cols}">
-      <span class="mx-seg">강의 구간 ${i+1}<small>${esc(s.t)}</small></span>
-      ${people.map((p,k)=>{
-        if(s.vids[k]) return `<div class="uslot on"><span>🎬</span><b>s${i+1}-${esc(p.name)}.mp4</b><button class="x" onclick="uVid(${i},${k},false)">✕</button></div>`;
-        const req = p.host ? ' req' : '';
-        return `<div class="uslot${req}" onclick="uVid(${i},${k},true)"><span>⬆</span> ${p.host?'영상 올리기 (필수)':'영상 올리기'}</div>`;
-      }).join('')}
-    </div>`;
-  });
-  $('mx').innerHTML = h;
+function renderMatrix(){   /* 출연자 수대로 행 — 1명당 강의 전체 통영상 1개 */
+  $('mx').innerHTML = people.map((p,k)=>`
+    <div class="uprow">
+      <span class="who">${esc(p.name)}${p.host?'<span class="tag">강의자</span>':''}</span>
+      ${p.vid
+        ? `<div class="uslot on"><span>🎬</span><b>${esc(p.name)}-강의전체.mp4</b><button class="x" onclick="uVid(${k},false)">✕</button></div>`
+        : `<div class="uslot${p.host?' req':''}" onclick="uVid(${k},true)"><span>⬆</span> ${p.host?'통영상 올리기 (필수)':'통영상 올리기'}</div>`}
+    </div>`).join('');
   refresh();
 }
-function uVid(i,k,on){ segs[i].vids[k] = on; renderMatrix(); saved(); if(on) toast('영상이 올라갔어요 (목업)'); }
+function uVid(k,on){ people[k].vid = on; renderMatrix(); saved(); if(on) toast('영상이 올라갔어요 (목업)'); }
 
 /* ── 체크리스트 · 검증 ── */
 function refresh(){
   const okInfo = !!$('fTitle').value.trim();
   const okStruct = segs.length >= 1;
   const okPeople = people.length >= 2;
-  const hostOk = segs.every(s=>s.vids[0]);
   const errs = [];
   if(!okInfo) errs.push('에피소드 제목이 필요해요');
-  segs.forEach((s,i)=>{ if(!s.vids[0]) errs.push(`강의 구간 ${i+1}의 강의자 영상이 없어요`); });
+  if(!people.some(pe => pe.host && pe.vid)) errs.push('강의자 통영상이 필요해요');
   segs.forEach((s,i)=>s.acts.forEach(a=>{ if(a.k==='play' && !a.up) errs.push(`강의 구간 ${i+1}의 워크시트 파일이 없어요`); }));
   if(mode === 'group') segs.forEach((s,i)=>s.acts.forEach((a,j)=>{ if((a.dur||0) < 20) errs.push(`강의 구간 ${i+1}의 인터랙티브 ${j+1} 제한 시간은 20초 이상이어야 해요`); }));
   segs.forEach((s,i)=>s.acts.forEach(a=>{
@@ -981,7 +1035,7 @@ function refresh(){
   const v = $('valid');
   if(errs.length){ v.className = 'valid no'; v.textContent = '✗ ' + errs.join(' · '); $('btnTop').disabled = true; }
   else {
-    const upN = segs.reduce((n,s)=>n+s.vids.filter(Boolean).length,0);
+    const upN = people.filter(pe => pe.vid).length;
     v.className = 'valid ok';
     v.textContent = `✓ 제출 준비 완료 — 강의 구간 ${segs.length} · 인터랙티브 ${segs.reduce((n,x)=>n+x.acts.length,0)} · 영상 ${upN}개 · 출연 ${people.length}명`;
     $('btnTop').disabled = false;
@@ -993,7 +1047,7 @@ function writeConfig(){
   const durs = {};
   segs.forEach(s => s.acts.forEach(a => { if(durs[a.k] == null) durs[a.k] = a.dur || 120; }));
   try{
-    localStorage.setItem('trus_lecture_config', JSON.stringify({ v:1, solo: mode === 'solo', durs }));
+    localStorage.setItem('trus_lecture_config', JSON.stringify({ v:1, solo: mode === 'solo', durs, cues: segs.map(sg => (sg.cues || []).map(c => ({ t: c.t, p: c.p }))) }));
     return true;
   }catch(e){ toast('설정 저장 실패 — 브라우저 저장 공간 확인'); return false; }
 }
@@ -1010,7 +1064,7 @@ $('fTitle').addEventListener('input', refresh);
 ['fTitle','fDesc'].forEach(id=>$(id).addEventListener('change', saved));
 
 /* 초기 렌더 — 강의 목록 → 에피소드 목록 → 편집 순서로 들어가요 */
-renderCourseSelect(); renderCourse(); renderPeople(); renderStruct();
+renderCourseSelect(); renderCourse(); renderPeople(); renderMatrix(); renderStruct();
 showCourses();
 </script>
 </body>
