@@ -204,7 +204,7 @@ input,select,textarea{font:inherit;color:inherit}
 
 /* 편집 2단계 이동 */
 .stepnav{display:flex; justify-content:flex-end; margin:4px 0 18px}
-.stepnav #toStep1{justify-content:flex-start}
+.stepback{margin:0 0 10px}
 
 /* 수강 모드 토글 */
 .modeseg{display:inline-flex; gap:3px; background:#F0EEF3; border-radius:9px; padding:3px; margin-left:10px}
@@ -286,10 +286,6 @@ input,select,textarea{font:inherit;color:inherit}
 .uslot.req:hover{border-color:var(--red); background:#FDECEC; color:var(--red)}
 
 /* ── 제출 ── */
-.pubnote{display:flex; gap:10px; font-size:.84rem; color:var(--sub); line-height:1.6; background:var(--blue-bg); border-radius:8px; padding:13px 15px; margin-bottom:14px}
-.pubnote b{color:var(--blue-d)}
-.pubrow{display:flex; gap:10px}
-@media(max-width:560px){.pubrow{flex-direction:column}}
 .bigbtn{flex:1; display:flex; align-items:center; justify-content:center; gap:6px; font-size:.9rem; font-weight:800; padding:13px; border-radius:8px; transition:.13s}
 .bigbtn.pri{background:var(--blue); color:#fff} .bigbtn.pri:hover{background:var(--blue-d)}
 .bigbtn.pri:disabled{background:var(--line); color:var(--faint); cursor:not-allowed}
@@ -386,6 +382,7 @@ input,select,textarea{font:inherit;color:inherit}
     </section>
 
     <div class="stepnav" id="toStep2"><button class="bigbtn pri" onclick="setEditStep(2)">다음 — 강의 구성 →</button></div>
+    <div class="stepback" id="toStep1"><button class="tbtn line" onclick="setEditStep(1)">← 강의 정보·출연자·영상</button></div>
 
     <!-- ② 강의 구성 -->
     <section class="card" id="s2">
@@ -400,17 +397,10 @@ input,select,textarea{font:inherit;color:inherit}
       </div>
     </section>
 
-    <div class="stepnav" id="toStep1"><button class="bigbtn line" onclick="setEditStep(1)">← 강의 정보·출연자·영상으로</button></div>
-
     <!-- ⑤ 제출 -->
     <section class="card" id="s5">
-      <div class="chead"><h2>제출</h2><span class="hint">검수 후 학생에게 열려요</span></div>
+      <div class="chead"><h2>제출 전 점검</h2><span class="hint">미리보기·제출은 우측 상단 버튼으로</span></div>
       <div class="cbody">
-        <div class="pubnote"><span>🎬</span><span>이 에피소드는 <b id="pmCourse">일의 교과서</b>에 추가돼요. 학생은 각 강의 구간을 끝까지 보고, 이어지는 인터랙티브 구간을 마쳐야 다음으로 넘어가요.</span></div>
-        <div class="pubrow">
-          <button class="bigbtn line" onclick="preview()">▶ 강의실에서 미리보기</button>
-          <button class="bigbtn pri" id="btnPub" onclick="publish()">검수 요청하고 제출하기</button>
-        </div>
         <div class="valid" id="valid"></div>
       </div>
     </section>
@@ -575,7 +565,6 @@ function renderCourse(){
       + c.eps.map((e,i)=>`<div class="ei"><span class="no">EP${i+1}</span>${esc(e)}</div>`).join('')
       + `<div class="ei new"><span class="no">EP${c.eps.length+1}</span>지금 만드는 에피소드</div>`
     : `<div class="el">${esc(c.name)} · 첫 에피소드예요</div>`);
-  $('pmCourse').textContent = c.name;
   $('crumbCourse').textContent = c.name;
 }
 
@@ -930,12 +919,12 @@ function refresh(){
   }));
   const v = $('valid');
   nav[4].classList.toggle('done', !errs.length);
-  if(errs.length){ v.className = 'valid no'; v.textContent = '✗ ' + errs.join(' · '); $('btnPub').disabled = true; $('btnTop').disabled = true; }
+  if(errs.length){ v.className = 'valid no'; v.textContent = '✗ ' + errs.join(' · '); $('btnTop').disabled = true; }
   else {
     const upN = segs.reduce((n,s)=>n+s.vids.filter(Boolean).length,0);
     v.className = 'valid ok';
     v.textContent = `✓ 제출 준비 완료 — 강의 구간 ${segs.length} · 인터랙티브 ${segs.reduce((n,x)=>n+x.acts.length,0)} · 영상 ${upN}개 · 출연 ${people.length}명`;
-    $('btnPub').disabled = false; $('btnTop').disabled = false;
+    $('btnTop').disabled = false;
   }
 }
 
@@ -960,7 +949,7 @@ function writeConfig(){
 }
 function preview(){ writeConfig(); toast('강의실 미리보기로 이동해요…'); setTimeout(()=>location.href='lecture-prototype.html', 700); }
 function publish(){
-  if($('btnPub').disabled){ toast('아직 제출할 수 없어요 — 체크리스트를 확인하세요'); return; }
+  if($('btnTop').disabled){ toast('아직 제출할 수 없어요 — 체크리스트를 확인하세요'); return; }
   writeConfig();
   toast('검수 요청됨 — 수강 모드·로테이션·제한시간이 강의실에 반영됐어요 ✓');
 }
