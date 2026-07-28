@@ -38,7 +38,7 @@ input,select,textarea{font:inherit;color:inherit}
 .tbtn.pri:disabled{background:var(--line); color:var(--faint); cursor:not-allowed}
 
 /* ── 본문 ── */
-.wrap{display:flex; gap:28px; max-width:1440px; margin:0 auto; padding:24px 28px 90px; align-items:flex-start}
+.wrap{display:flex; gap:28px; max-width:1560px; margin:0 auto; padding:20px 28px 90px; align-items:flex-start}
 .side{position:sticky; top:80px; width:230px; flex-shrink:0}
 @media(max-width:860px){.wrap{flex-direction:column}.side{position:static; width:100%}}
 .side .sd-title{font-size:.78rem; font-weight:800; color:var(--muted); padding:4px 12px 10px}
@@ -352,18 +352,6 @@ input,select,textarea{font:inherit;color:inherit}
 </header>
 
 <div class="wrap">
-  <!-- 좌측 체크리스트 -->
-  <aside class="side">
-    <div class="sd-title">에피소드 만들기</div>
-    <nav class="snav" id="snav">
-      <a href="#s1" class="on" data-step="1"><span class="ck">✓</span>① 강의 정보</a>
-      <a href="#s3" data-step="1"><span class="ck">✓</span>② 출연자</a>
-      <a href="#s4" data-step="1"><span class="ck">✓</span>③ 영상 업로드</a>
-      <a href="#s2" data-step="2"><span class="ck">✓</span>④ 강의 구성</a>
-      <a href="#s5" data-step="2"><span class="ck">✓</span>⑤ 제출</a>
-    </nav>
-  </aside>
-
   <div class="main">
 
     <!-- ① 강의 정보 -->
@@ -408,12 +396,6 @@ input,select,textarea{font:inherit;color:inherit}
         </span>
         <span class="hint" id="s2hint">단독 수강 — 제한시간 없이 각자 속도로 진행해요</span></div>
       <div class="cbody">
-        <div class="meta">
-          <span>강의 구간 <b id="mSeg">2</b>개</span>
-          <span>인터랙티브 구간 <b id="mAct">6</b>개</span>
-          <span class="dim">🎬 1단계에서 올린 영상을 재생하면서, 원하는 지점에 인터랙티브를 끼워 넣어요 — 화면 전환은 편집된 영상이 알아서 해요</span>
-
-        </div>
         <div class="sgwrap"><div class="sgtable" id="sgtable"></div></div>
       </div>
     </section>
@@ -552,17 +534,8 @@ function setEditStep(n){
   editStep = n;
   ['s1','s3','s4','toStep2'].forEach(id => { const el = $(id); if(el) el.hidden = n !== 1; });
   ['s2','s5','toStep1'].forEach(id => { const el = $(id); if(el) el.hidden = n !== 2; });
-  document.querySelectorAll('#snav a').forEach(a => a.classList.remove('on'));
-  const first = document.querySelector(`#snav a[data-step="${n}"]`);
-  if(first) first.classList.add('on');
   window.scrollTo(0, 0);
 }
-document.querySelectorAll('#snav a').forEach(a => a.addEventListener('click', () => {
-  const st = +a.dataset.step;
-  if(st !== editStep) setEditStep(st);
-  document.querySelectorAll('#snav a').forEach(x => x.classList.remove('on'));
-  a.classList.add('on');
-}));
 function openEditor(ep){          // 에피소드 행 → 편집 화면 (ep=null 이면 새 에피소드)
   const c = COURSES[curCourse];
   const isNew = ep === null;
@@ -944,11 +917,6 @@ function refresh(){
   const okStruct = segs.length >= 1;
   const okPeople = people.length >= 2;
   const hostOk = segs.every(s=>s.vids[0]);
-  const nav = document.querySelectorAll('.snav a');
-  nav[0].classList.toggle('done', okInfo);      /* ① 강의 정보 */
-  nav[1].classList.toggle('done', okPeople);    /* ② 출연자 */
-  nav[2].classList.toggle('done', hostOk);      /* ③ 영상 업로드 */
-  nav[3].classList.toggle('done', okStruct);    /* ④ 강의 구성 */
   const errs = [];
   if(!okInfo) errs.push('에피소드 제목이 필요해요');
   segs.forEach((s,i)=>{ if(!s.vids[0]) errs.push(`강의 구간 ${i+1}의 강의자 영상이 없어요`); });
