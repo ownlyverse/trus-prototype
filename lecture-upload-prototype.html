@@ -179,8 +179,8 @@ input,select,textarea{font:inherit;color:inherit}
 .cc-topline .sg-t{flex:0 1 340px; min-width:180px}
 .cc-topline .ops button{border:1px solid var(--line); border-radius:6px; width:26px; height:26px; background:#fff; cursor:pointer}
 .cc-topline .ops .dl{color:#C0392B}
-.cc-live{margin-bottom:10px}
-.cc-live iframe{width:100%; height:620px; border:1px solid var(--line); border-radius:12px; background:#17131F}
+.cc-live{margin-bottom:10px; overflow:hidden; border:1px solid var(--line); border-radius:12px; background:#17131F; position:relative}
+.cc-live iframe{border:none; transform-origin:0 0; display:block}
 .cc-pal{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px}
 .cc-plus{border-style:dashed; color:#3182F6; font-size:1.05rem; font-weight:800}
 .cc-pal button{border:1.5px solid var(--line); border-radius:8px; background:#fff; padding:7px 11px; font-size:.8rem; font-weight:700; cursor:pointer}
@@ -665,6 +665,19 @@ function condBody(i,j,a){
 }
 /* ── ② 강의 구성 — 캡컷형: 영상 보면서 인터랙티브 끼워 넣기 ── */
 let ccSeg = 0, ccSel = null, ccAddTarget = 0; /* ccSel = {i,j} 선택된 인터랙티브 */
+/* 강의실 전체가 보이게 축소 — 가상 해상도로 렌더한 뒤 scale */
+function fitFrame(){
+  const wrap = document.querySelector('.cc-live');
+  const fr = $('ccFrame');
+  if(!wrap || !fr) return;
+  const VW = 1500, VH = 880;
+  const f = Math.min(wrap.clientWidth / VW, (window.innerHeight * 0.5) / VH);
+  fr.style.width = VW + 'px';
+  fr.style.height = VH + 'px';
+  fr.style.transform = `scale(${f})`;
+  wrap.style.height = Math.round(VH * f) + 'px';
+}
+window.addEventListener('resize', () => fitFrame());
 function ccFrameSrc(){
   if(ccSel && segs[ccSel.i] && segs[ccSel.i].acts[ccSel.j])
     return `lecture-prototype.html?preview=${segs[ccSel.i].acts[ccSel.j].k}&edit=1`;
@@ -715,6 +728,7 @@ function renderStruct(){
     ccSeg = +segEl.dataset.i; ccSel = null; renderStruct();
   });
   renderDet();
+  fitFrame();
   refresh();
 }
 function renderDet(){
