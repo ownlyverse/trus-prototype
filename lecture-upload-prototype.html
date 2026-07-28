@@ -799,7 +799,6 @@ function actUp(i,j,on){
   renderStruct(); saved();
   toast(on ? '워크시트 파일이 올라갔어요 (목업)' : '워크시트 파일을 제거했어요');
 }
-function rmAct(i,j){ segs[i].acts.splice(j,1); renderStruct(); saved(); }
 let qCur = null;
 function qOpen(i,j){ qCur = {i,j}; renderQModal(); document.getElementById('qmbg').classList.add('on'); }
 function qClose(){ document.getElementById('qmbg').classList.remove('on'); qCur = null; renderStruct(); }
