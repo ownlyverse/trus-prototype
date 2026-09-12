@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>바운더리 타운 — 마이스페이스 (1차 오픈안)</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+/* ===== 1. 토큰 · 레이아웃 ===== */
+:root{
+  --paper:#FFFFFF; --ink:#191F28; --muted:#6B7684; --faint:#B0B8C1;
+  --line:#E5E8EB; --bg:#F7F8FA;
+  --indigo:#5B5BD6; --indigo-soft:#EEF0FF; --indigo-ink:#3F3FB0;
+  --ok:#22A06B; --warn:#F5A623; --danger:#E5484D;
+  --radius:10px; --shadow:0 4px 16px rgba(25,31,40,.06);
+  --side-w:240px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--paper);color:var(--ink);font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;font-size:15px;line-height:1.6}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+[hidden]{display:none!important}
+.app{display:flex;min-height:100vh}
+/* 사이드바 */
+.side{width:var(--side-w);flex:none;background:var(--bg);border-right:1px solid var(--line);padding:20px 14px;position:sticky;top:0;height:100vh;overflow:auto}
+.side .me{display:flex;align-items:center;gap:10px;padding:6px 8px 14px}
+.side .me b{font-size:15px}
+.side .stage{display:inline-block;font-size:11px;font-weight:600;color:var(--indigo-ink);background:var(--indigo-soft);border-radius:999px;padding:2px 8px;cursor:pointer}
+.side h4{margin:14px 8px 6px;font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.04em}
+.side .nav{display:block;width:100%;text-align:left;background:none;border:0;border-radius:8px;padding:7px 8px;font-size:14px;color:var(--ink);text-decoration:none}
+.side .nav:hover{background:rgba(25,31,40,.05)}
+.side .nav.on{background:var(--indigo-soft);color:var(--indigo-ink);font-weight:600}
+.side .nav small{display:block;font-size:11px;color:var(--muted);font-weight:400}
+.side .nav.sub{padding-left:22px;font-size:13px}
+.side .nav[disabled]{color:var(--faint);cursor:not-allowed}
+.side .foot{margin-top:auto;padding-top:16px;border-top:1px solid var(--line)}
+.side .foot .nav{color:var(--indigo-ink);font-weight:600}
+/* 문서 */
+.doc{flex:1;min-width:0;padding:0 40px 120px}
+.doc-in{max-width:860px;margin:0 auto}
+.doc-head{padding:36px 0 8px}
+.doc-head h1{margin:0;font-size:26px;font-weight:700;letter-spacing:-.01em}
+.doc-head .meta{display:flex;gap:10px;align-items:center;color:var(--muted);font-size:13px;margin-top:4px}
+.badge{display:inline-block;font-size:11px;font-weight:600;border-radius:999px;padding:2px 8px;background:var(--indigo-soft);color:var(--indigo-ink)}
+.menu-btn{display:none}
+/* 토스트 */
+.toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:13px;padding:10px 16px;border-radius:999px;z-index:60;box-shadow:var(--shadow)}
+.scrim{position:fixed;inset:0;background:rgba(25,31,40,.35);z-index:40}
+/* ===== 2. 일의 공식 ===== */
+/* ===== 3. 데일리 ===== */
+/* ===== 4. 코치 ===== */
+/* ===== 5. 반응형 (반드시 마지막) ===== */
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side" id="side">
+    <div class="me"><span>🙂</span><div><b id="meName"></b><br><span class="stage" id="meStage"></span></div></div>
+    <h4>바운더리</h4>
+    <div id="sideBoundary"></div>
+    <button class="nav" id="newBoundary" disabled title="지금 바운더리가 끝나면 열려요">＋ 새 바운더리</button>
+    <div id="sideDays"></div>
+    <div class="foot"><a class="nav" href="lecture-prototype.html" id="sideLecture">📺 강의실</a></div>
+  </aside>
+  <main class="doc">
+    <div class="doc-in">
+      <button class="menu-btn" id="menuBtn" aria-label="메뉴">☰</button>
+      <header class="doc-head">
+        <h1 id="bTitle"></h1>
+        <div class="meta"><span id="bPeriod"></span><span class="badge" id="bLeft"></span></div>
+      </header>
+      <section class="formula" id="formula"></section>
+      <section class="days" id="days"></section>
+    </div>
+  </main>
+</div>
+<button class="coach-bubble" id="coachBubble" aria-label="바운더리 코치">🦉<span class="dot" id="coachDot" hidden></span></button>
+<div class="coach-mini" id="coachMini" hidden></div>
+<div class="coach-panel" id="coachPanel" hidden></div>
+<div class="toast" id="toast" hidden></div>
+<div class="scrim" id="scrim" hidden></div>
+<script id="app">
+// ===== MOCK DATA =====
+const Q = new URLSearchParams(location.search);
+const USER = { name: '소정', stage: 2, course: 3 };
+const TAG_LABEL = { numeric: '성과', customer: '성과', problem: '문제', strategy: '전략' };
+const STAGES = [
+  { n: 1, name: '초보자', group: '노력', sells: '시간', unknown: '노력과 성과의 차이 — 자기만족에 빠져 고객만족을 모른다', point: '시스템 사고',
+    tip: { title: '시스템 사고 — 전체를 본다', quote: ['전체를 보는 사람은 10개를 배우고, 부분만 본 사람은 1개를 배운다.', '내 지도는 내 자리 주변에서 멈춰 있지 않은가?'], ask: '내 일의 시작부터 끝까지, 한 장에 그릴 수 있나요?' },
+    judge: '전체 그림에서 이 일이 어디에 있나요? 시작부터 끝까지 한 장에 그려봐요.', reviewPh: '오늘 내가 본 범위는 내 자리 주변에서 멈추지 않았나요?' },
+  { n: 2, name: '숙련자', group: '노력', sells: '숙련된 시간', unknown: '참여와 주도의 차이 — 전체 성과 중 내 기여도가 몇 %인지', point: '시그널과 노이즈',
+    tip: { title: '시그널과 노이즈 — 무엇에 반응할 것인가', quote: ['시그널은 끝점(숫자 언어)에 직접 영향을 주는 것. 노이즈는 그 외 모든 것.', '좋은 의견도 끝점에 영향이 없으면 노이즈예요.'], ask: '오늘 들어온 요청 중, 끝점에 직접 닿는 건 몇 개였나요?' },
+    judge: '이건 끝점에 닿나요? 좋은 의견도 끝점에 영향 없으면 노이즈예요.', reviewPh: '오늘 시그널이었던 건 하나뿐이었나요?' },
+  { n: 3, name: '실력자', group: '성과', sells: '성과', unknown: 'ROI — 인풋 대비 아웃풋, 탁월함을 심플함으로', point: '2:8',
+    tip: { title: '2:8 — 가장 효과 있는 하나만', quote: ['다 버리고, 가장 효과 있는 하나만 남기는 것.', '흩뿌릴수록 흐려지고, 한곳에 모을수록 선명해진다.'], ask: '내 일 중 20의 리소스로 80의 효과를 내는 그 하나는 무엇인가요?' },
+    judge: '20으로 80을 내는 일인가요? 아니면 익숙해서 중요해 보이는 일인가요?', reviewPh: '오늘 80을 만든 20은 무엇이었나요?' },
+  { n: 4, name: '전문가', group: '성과', sells: '보장된 성과', unknown: '위임 — 노하우를 이론으로, 내가 없어도 나는 성과', point: '2:8과 위임',
+    tip: { title: '2:8 — 내가 안 해도 나는 성과', quote: ['내가 하면 성과가 나는데, 내가 안 하면 성과가 안 난다 — 이 구간을 통과해야 전문가예요.', '가지치기 → 이론 → 위임.'], ask: '오늘 한 일 중 남이 그대로 할 수 있게 적어둔 게 있나요?' },
+    judge: '이 일, 남에게 넘겨도 같은 결과가 나오게 적어둘 수 있나요?', reviewPh: '오늘 위임할 수 있었는데 내가 한 일은 무엇인가요?' },
+  { n: 5, name: '구조', group: '시스템', sells: '위임된 조직', unknown: '효율 이상의 축적 — 반복이 문화가 되는 시간', point: '1원칙 사고',
+    tip: { title: '1원칙 사고 — 변하지 않는 기준', quote: ['매출은 최대로, 비용은 최소로.', '매출에 기여하는가, 비용을 줄이는가? 둘 중 하나에도 해당하지 않으면 안 한다.'], ask: '오늘 결정 중 1원칙 밖에서 한 것이 있나요?' },
+    judge: '매출에 기여하거나 비용을 줄이나요? 둘 다 아니면 안 해도 돼요.', reviewPh: '오늘 사람을 탓한 순간이 있었나요? 시스템은 어디가 문제였나요?' },
+  { n: 6, name: '문화', group: '시스템', sells: '축적된 신뢰', unknown: '내 이야기를 누가 하는가', point: '1원칙 사고',
+    tip: { title: '1원칙 사고 — 내 이야기를 누가 하는가', quote: ['결국 자본주의의 끝에는 신뢰가 있다.', '세제 하면 옥시크린, 헤어 하면 준오헤어.'], ask: '오늘 누가, 어디서 우리 이야기를 대신 했나요?' },
+    judge: '이 일이 끝나면 누가 우리 이야기를 대신 하게 되나요?', reviewPh: '오늘 우리 이야기를 대신한 사람은 누구였나요?' },
+];
+const BOUNDARY = { id: 'b1', word: '완강률 60%', from: '2026-09-01', to: '2026-11-30' };
+const FORMULA = { numeric: '완강률 60%', customer: '회사 생활 10년보다 이 강의가 더 나았어요', problem: '일의 정체기가 왔을 때 뚫는 방법을 모른다', strategy: '' };
+const PAST_DAYS = {
+  '2026-09-09': { items: [{ text: '강의 3단계 미션 제출', done: true, tag: 'strategy' }, { text: '완강률 주간 리포트 보기', done: true, tag: 'numeric' }, { text: '수강생 인터뷰 1명', done: false, tag: 'customer' }], review: '인터뷰는 못 잡았다. 리포트에서 3단계 이탈이 제일 크다.' },
+  '2026-09-10': { items: [{ text: '3단계 이탈 구간 다시 보기', done: true, tag: 'problem' }, { text: '수강생 인터뷰 1명', done: true, tag: 'customer' }, { text: '인트로 길이 재기', done: true, tag: 'strategy' }], review: '3단계 이탈 구간을 다시 봤다. 앞 3분에서 나간다.' },
+  '2026-09-11': { items: [{ text: '인트로 재편집 시작', done: true, tag: 'strategy' }, { text: '팀 주간 회의', done: false, tag: null }, { text: '외부 제안서 검토', done: false, tag: null }], review: '회의가 하루를 먹었다. 완강률에 닿은 건 하나뿐.' },
+  '2026-09-12': { items: [{ text: '인트로 재편집 끝내기', done: true, tag: 'strategy' }, { text: '완강률 대시보드 확인', done: true, tag: 'numeric' }, { text: '수강생 후기 3개 읽기', done: true, tag: 'customer' }], review: '썸네일 A/B는 내일로 미뤘다. 인트로 재편집은 끝.' },
+};
+const SUGGESTIONS = [
+  { id: 's1', text: '썸네일 A/B 두 종 올리기', why: '어제 회고에서 내일로 미뤘다고 했어요', tag: 'strategy' },
+  { id: 's2', text: '앞 3분 시청 지속 80%를 목표로 인트로 다시 자르기', why: '9월 10일 회고 — 앞 3분에서 나간다', tag: 'problem' },
+  { id: 's3', text: '강의 4단계 미션: 내 숫자 10개 적고 별표 하나', why: '커리큘럼 3/5 — 다음 미션', tag: 'numeric' },
+  { id: 's4', text: '오늘 들어온 요청 중 완강률에 안 닿는 것 하나 거절하기', why: '숙련자 학습 포인트 — 시그널/노이즈', tag: 'numeric' },
+];
+const COACH = {
+  greetAm: (name, last) => last ? `${name}님, 좋은 아침이에요. 어제 "${last}"라고 남기셨죠. 오늘의 3개, 여기서 이어가 볼까요?` : `${name}님, 좋은 아침이에요. 오늘의 3개를 정해볼까요?`,
+  greetPm: (name, done, filled) => filled ? `${name}님, 오늘 어땠어요? 3개 중 ${done}개 끝냈네요. 한 줄만 남겨볼까요?` : `${name}님, 오늘은 아직 3개를 안 정했어요. 내일 아침 것부터 하나만 정해둘까요?`,
+  signal: (word) => `"${word}"에 바로 닿는 일이네요. 시그널이에요.`,
+  orderGuard: '끝부터 정해요. 성과가 없으면 문제도 전략도 방향을 잃어요.',
+  formula: {
+    numeric: '결과 숫자보다 내일 손댈 수 있는 행동 숫자인지 봐요.',
+    customer: '구어체인가요? 딱 한 번 듣고 외울 수 있어야 해요.',
+    problem: '해결책 단어가 들어가 있지 않나요? 문제는 고객의 허들이어야 해요.',
+    strategy: '이걸 빼도 끝점에 도달하나요? 도달한다면 노이즈예요.',
+  },
+  complete: '한 장에 담겼어요. 이제 시작하면 돼요. 시작했다면 의심하지 마요.',
+  done3: (ph) => `3개 다 끝났어요. ${ph} 한 줄 남겨요.`,
+  afterReview: '내일 이어갈 하나를 골라뒀어요.',
+  added: (t) => `"${t}" 오늘의 바운더리에 넣었어요.`,
+  swapped: (t) => `"${t}"는 내일로 미뤄뒀어요.`,
+  full: '오늘 3개가 다 찼어요. 무엇과 바꿀까요?',
+  conceptToday: (name, title) => `${name}님, 오늘의 개념은 "${title}"이에요. 개념 탭에서 봐요.`,
+};
+const FREE = [
+  { k: ['정체', '막힘', '막혀', '모르겠'], r: '그 혼란은 문제가 아니에요. 끝점을 잊어버린 거예요. 지금 끝점 숫자를 한 번만 다시 봐요.' },
+  { k: ['바운더리', '3개', '세 개', '할 일'], r: '우선순위는 순서를 정하는 것이고, 바운더리는 나머지를 버리는 거예요. 3개 중 하나만 남긴다면 뭘 남기겠어요?' },
+  { k: ['노이즈', '시그널', '반응'], r: '이게 우리의 성과와 직접 연결되나요? 그 질문 하나면 돼요.' },
+  { k: ['전략', '방법', '어떻게'], r: '이걸 빼도 끝점에 도달하나요? 도달한다면 아무리 그럴듯해도 노이즈예요.' },
+  { k: ['숫자', '성과', '지표', '매출'], r: '내가 지금 책임지고 있는 숫자가 단 하나라도 있나요? 그 숫자가 내일 손댈 수 있는 행동 숫자인지 봐요.' },
+];
+const FREE_FALLBACK = '그건 강의실에서 같이 봐요. 지금은 오늘의 3개에 집중해요.';
+
+// ===== LOGIC =====
+const KEY = 'trus_myspace_v2';
+function todayStr() {
+  const p = Q.get('today');
+  if (p) return p;
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+function blank() { return { text: '', done: false, tag: null }; }
+function defaultState() {
+  return { v: 2, user: { ...USER }, boundary: { ...BOUNDARY, formula: { ...FORMULA } }, days: JSON.parse(JSON.stringify(PAST_DAYS)), coachSeen: {} };
+}
+function loadState(storage) {
+  try {
+    const raw = storage.getItem(KEY);
+    if (raw) { const s = JSON.parse(raw); if (s && s.v === 2) return s; }
+  } catch (e) { /* 무시 */ }
+  return defaultState();
+}
+function saveState(storage, state, onFail) {
+  try { storage.setItem(KEY, JSON.stringify(state)); return true; }
+  catch (e) { if (onFail) onFail(e); return false; }
+}
+function ensureDay(state, date) {
+  if (!state.days[date]) state.days[date] = { items: [blank(), blank(), blank()], review: '' };
+  return state.days[date];
+}
+const FKEYS = ['numeric', 'customer', 'problem', 'strategy'];
+function formulaCount(f) { return FKEYS.filter(k => (f[k] || '').trim()).length; }
+function endDefined(f) { return !!((f.numeric || '').trim() || (f.customer || '').trim()); }
+function dayProgress(day) {
+  const filled = day.items.filter(i => i.text.trim());
+  return { filled: filled.length, done: filled.filter(i => i.done).length };
+}
+function keywords(f) {
+  const set = new Set();
+  FKEYS.forEach(k => (f[k] || '').split(/[\s,.!?'"“”·()]+/).forEach(t => {
+    t = t.replace(/(을|를|이|가|은|는|의|에서|도|로|과|와|에)$/, '');
+    if (t.length >= 2) set.add(t);
+  }));
+  return [...set];
+}
+function judgeSignal(item, f) {
+  if (!item.text.trim()) return null;
+  if (item.tag) return 'signal';
+  return keywords(f).some(k => item.text.includes(k)) ? 'signal' : 'noise';
+}
+function stageOf(n) { return STAGES[Math.min(6, Math.max(1, Number(n) || 1)) - 1]; }
+function greeting(hour) { return hour < 18 ? 'am' : 'pm'; }
+function canFire(seen, date, key, idx) {
+  const d = seen[date] || (seen[date] = {});
+  if (idx != null) {
+    d[key] = d[key] || [];
+    if (d[key][idx]) return false;
+    d[key][idx] = true; return true;
+  }
+  if (d[key]) return false;
+  d[key] = true; return true;
+}
+function addSuggestion(day, sug) {
+  const i = day.items.findIndex(it => !it.text.trim());
+  if (i < 0) return { ok: false, reason: 'full' };
+  day.items[i] = { text: sug.text, done: false, tag: sug.tag };
+  return { ok: true, index: i };
+}
+function replaceItem(day, idx, sug) {
+  const old = day.items[idx];
+  day.items[idx] = { text: sug.text, done: false, tag: sug.tag };
+  return old;
+}
+function freeReply(text) {
+  for (const f of FREE) if (f.k.some(k => text.includes(k))) return f.r;
+  return FREE_FALLBACK;
+}
+function lastReview(state, today) {
+  const dates = Object.keys(state.days).filter(d => d < today).sort();
+  for (let i = dates.length - 1; i >= 0; i--) {
+    const r = (state.days[dates[i]].review || '').trim();
+    if (r) return { date: dates[i], review: r };
+  }
+  return null;
+}
+function daysLeft(to, today) { return Math.round((Date.parse(to) - Date.parse(today)) / 86400000); }
+function fmtDate(iso) {
+  const [y, m, d] = iso.split('-').map(Number);
+  const w = ['일', '월', '화', '수', '목', '금', '토'][new Date(y, m - 1, d).getDay()];
+  return `${m}월 ${d}일 ${w}요일`;
+}
+
+// ===== RENDER =====
+// ===== COACH =====
+// ===== BOOT =====
+</script>
+</body>
+</html>
