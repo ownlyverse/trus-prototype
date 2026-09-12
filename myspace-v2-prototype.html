@@ -51,17 +51,19 @@ button{cursor:pointer}
 .f-top{display:flex;justify-content:space-between;align-items:baseline}
 .f-top b{font-size:17px}
 .f-top .cnt{font-size:13px;color:var(--muted)}
-.f-graph{position:relative;height:190px;margin-top:6px}
+.f-graph{position:relative;height:230px;margin-top:6px}
 .f-graph svg{position:absolute;inset:0;width:100%;height:100%}
 .f-arc{fill:none;stroke:var(--indigo);stroke-width:1.5;stroke-dasharray:5 5}
 .formula.complete .f-arc{stroke-dasharray:none}
 .f-line{stroke:var(--ink);stroke-width:1.5;opacity:.7}
-.f-dot{fill:var(--indigo)}
+.f-pt{position:absolute;width:14px;height:14px;border-radius:50%;background:var(--indigo);transform:translate(-50%,-50%);top:52.2%}
+.f-pt.l{left:6%}
+.f-pt.r{left:94%}
 .f-lab{font-size:12px;color:var(--muted);display:block;margin-bottom:2px}
 .f-problem{position:absolute;top:0;left:50%;transform:translateX(-50%);text-align:center;width:60%}
-.f-chip{position:absolute;top:112px;left:50%;transform:translateX(-50%);font-size:12px;font-weight:600;color:var(--indigo-ink);background:var(--indigo-soft);border-radius:6px;padding:3px 9px;white-space:nowrap;transition:background .2s}
-.f-start{position:absolute;bottom:0;left:5%;width:40%}
-.f-end{position:absolute;bottom:0;right:5%;width:40%;text-align:right}
+.f-chip{position:absolute;top:calc(52.2% - 12px);left:50%;transform:translateX(-50%);font-size:12px;font-weight:600;color:var(--indigo-ink);background:var(--indigo-soft);border-radius:6px;padding:3px 9px;white-space:nowrap;transition:background .2s}
+.f-start{position:absolute;top:auto;bottom:0;left:5%;width:40%}
+.f-end{position:absolute;top:auto;bottom:0;right:5%;width:40%;text-align:right}
 .f-val{display:block;min-height:1.5em;outline:none;border-radius:4px;padding:1px 4px;margin:0 -4px;cursor:text}
 .f-val:hover{background:rgba(91,91,214,.06)}
 .f-val:focus{background:var(--indigo-soft)}
@@ -285,14 +287,14 @@ function renderFormula() {
   box.innerHTML = `
     <div class="f-top"><b>일의 공식</b><span class="cnt" id="fCount">${n}/4 정했어요</span></div>
     <div class="f-graph">
-      <svg viewBox="0 0 1000 190" preserveAspectRatio="none" aria-hidden="true">
+      <svg viewBox="0 0 1000 230" preserveAspectRatio="none" aria-hidden="true">
         <path class="f-arc" d="M60,120 Q500,20 940,120"/>
         <line class="f-line" x1="60" y1="120" x2="940" y2="120"/>
-        <circle class="f-dot" cx="60" cy="120" r="7"/><circle class="f-dot" cx="940" cy="120" r="7"/>
       </svg>
+      <span class="f-pt l"></span><span class="f-pt r"></span>
       <div class="f-problem"><span class="f-lab">문제</span><span class="f-val q${dim}" data-k="problem" contenteditable="true" data-ph="끝점과 지금 사이의 허들 한 문장">${esc(f.problem)}</span></div>
       <div class="f-chip" id="fChip">함께 해결 = 일</div>
-      <div class="f-start"><span class="f-lab">시작 · 전략</span><span class="f-val${dim}" data-k="strategy" contenteditable="true" data-ph="그 문제를 어떤 전략으로 풀어 성과에 닿을 것인가?">${esc(f.strategy)}</span></div>
+      <div class="f-start"><span class="f-lab">시작 · 전략</span><span class="f-val${dim}" data-k="strategy" contenteditable="true" data-ph="그 문제를 어떤 전략으로 풀어 성과에 닿을 건가요?">${esc(f.strategy)}</span></div>
       <div class="f-end"><span class="f-lab">끝 · 성과</span><span class="f-val big" data-k="numeric" contenteditable="true" data-ph="무엇이 얼마에서 얼마로 바뀌나요?">${esc(f.numeric)}</span><span class="f-val q" data-k="customer" contenteditable="true" data-ph="고객이 돈을 내고 나서 뭐라고 말하면 성공인가요?">${esc(f.customer)}</span></div>
     </div>
     <div class="f-summary" id="fSummary"><span>성과 <b>${esc(f.numeric || '—')}</b></span><span>문제 <b>${esc((f.problem || '—').slice(0, 18))}</b></span><span>전략 <b>${esc((f.strategy || '—').slice(0, 18))}</b></span><span class="cnt">${n}/4</span></div>`;
