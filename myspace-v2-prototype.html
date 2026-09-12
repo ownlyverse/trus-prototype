@@ -109,6 +109,39 @@ button{cursor:pointer}
 .empty button{border:1px solid var(--indigo);background:var(--paper);color:var(--indigo-ink);border-radius:999px;padding:8px 16px;font-weight:600}
 .days h3{font-size:13px;color:var(--muted);font-weight:600;margin:0 0 10px}
 /* ===== 4. 코치 ===== */
+.coach-bubble{position:fixed;right:24px;bottom:24px;width:56px;height:56px;border-radius:50%;border:0;background:var(--indigo);color:var(--paper);font-size:26px;box-shadow:0 8px 24px rgba(91,91,214,.35);z-index:50;display:flex;align-items:center;justify-content:center}
+.coach-bubble .dot{position:absolute;top:4px;right:4px;width:12px;height:12px;border-radius:50%;background:var(--danger);border:2px solid var(--paper)}
+.coach-mini{position:fixed;right:92px;bottom:34px;max-width:280px;background:var(--paper);border:1px solid var(--line);border-radius:12px 12px 2px 12px;padding:8px 12px;font-size:13px;box-shadow:var(--shadow);z-index:50}
+.coach-panel{position:fixed;right:24px;bottom:92px;width:360px;height:560px;max-height:calc(100vh - 110px);background:var(--paper);border:1px solid var(--line);border-radius:14px;box-shadow:0 16px 48px rgba(25,31,40,.18);z-index:55;display:flex;flex-direction:column;overflow:hidden}
+.cp-h{display:flex;align-items:center;gap:8px;padding:12px 14px;border-bottom:1px solid var(--line)}
+.cp-h b{font-size:14px}
+.cp-h small{display:block;font-size:11px;color:var(--muted)}
+.cp-h .x{margin-left:auto;border:0;background:none;font-size:18px;color:var(--muted)}
+.cp-tabs{display:flex;border-bottom:1px solid var(--line)}
+.cp-tabs button{flex:1;border:0;background:none;padding:9px;font-size:13px;color:var(--muted);border-bottom:2px solid transparent}
+.cp-tabs button.on{color:var(--indigo-ink);font-weight:600;border-bottom-color:var(--indigo)}
+.cp-body{flex:1;overflow:auto;padding:12px}
+.msg{max-width:86%;margin:0 0 8px;padding:8px 12px;border-radius:12px;font-size:13.5px;line-height:1.5}
+.msg.c{background:var(--bg);border-bottom-left-radius:3px}
+.msg.u{background:var(--indigo);color:var(--paper);margin-left:auto;border-bottom-right-radius:3px}
+.card{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin:0 0 8px;max-width:92%}
+.card .why{font-size:12px;color:var(--muted);margin:2px 0 8px}
+.card .tag{font-size:11px;color:var(--indigo-ink);background:var(--indigo-soft);border-radius:4px;padding:1px 6px;margin-left:6px}
+.card .add{border:0;background:var(--indigo);color:var(--paper);border-radius:8px;padding:6px 10px;font-size:12px;font-weight:600}
+.card .add[disabled]{background:var(--faint);cursor:default}
+.card .swap{margin-top:8px;display:flex;flex-direction:column;gap:4px}
+.card .swap button{text-align:left;border:1px solid var(--line);background:var(--paper);border-radius:8px;padding:6px 8px;font-size:12px}
+.card .swap button.keep{color:var(--muted);border-style:dashed}
+.cp-in{display:flex;gap:6px;padding:10px;border-top:1px solid var(--line)}
+.cp-in input{flex:1;border:1px solid var(--line);border-radius:8px;padding:8px 10px;outline:none}
+.cp-in input:focus{border-color:var(--indigo)}
+.cp-in button{border:0;background:var(--indigo);color:var(--paper);border-radius:8px;padding:0 12px;font-weight:600}
+.concept{border:1px solid var(--line);border-radius:10px;padding:14px}
+.concept .k{font-size:11px;color:var(--muted)}
+.concept h4{margin:2px 0 10px;font-size:15px}
+.concept blockquote{margin:0 0 6px;padding-left:10px;border-left:3px solid var(--indigo-soft);color:var(--ink);font-size:13.5px}
+.concept .ask{margin-top:12px;padding:10px;background:var(--indigo-soft);border-radius:8px;font-size:13.5px;color:var(--indigo-ink);font-weight:600}
+.concept .add{margin-top:10px;border:0;background:var(--indigo);color:var(--paper);border-radius:8px;padding:7px 10px;font-size:12px;font-weight:600}
 /* ===== 5. 반응형 (반드시 마지막) ===== */
 </style>
 </head>
@@ -429,6 +462,58 @@ function renderSide() {
   }));
 }
 // ===== COACH =====
+let coachOpen = false, coachTab = 'chat';
+function buildCoachPanel() {
+  const st = stageOf(S.user.stage);
+  $('coachPanel').innerHTML = `
+    <div class="cp-h"><span>🦉</span><div><b>바운더리 코치</b><small>${st.name} 단계 · ${st.point} 훈련 중</small></div><button class="x" id="coachClose" aria-label="닫기">✕</button></div>
+    <div class="cp-tabs"><button id="tabChat" class="on">대화</button><button id="tabConcept">오늘의 개념</button></div>
+    <div class="cp-body" id="chatLog"></div>
+    <div class="cp-body" id="conceptBody" hidden></div>
+    <div class="cp-in" id="chatBar"><input id="chatIn" placeholder="코치에게 물어봐요" maxlength="200"><button id="chatSend">보내기</button></div>`;
+  $('coachClose').addEventListener('click', closeCoach);
+  $('tabChat').addEventListener('click', () => setTab('chat'));
+  $('tabConcept').addEventListener('click', () => setTab('concept'));
+  const send = () => { const v = $('chatIn').value.trim(); if (!v) return; $('chatIn').value = ''; userSay(v); setTimeout(() => coachSay(freeReply(v)), 350); };
+  $('chatSend').addEventListener('click', send);
+  $('chatIn').addEventListener('keydown', e => { if (e.key === 'Enter') send(); });
+  renderConcept();
+}
+function setTab(t) {
+  coachTab = t;
+  $('tabChat').classList.toggle('on', t === 'chat'); $('tabConcept').classList.toggle('on', t === 'concept');
+  $('chatLog').hidden = t !== 'chat'; $('conceptBody').hidden = t !== 'concept'; $('chatBar').hidden = t !== 'chat';
+}
+function renderConcept() {
+  const st = stageOf(S.user.stage);
+  $('conceptBody').innerHTML = `<div class="concept"><span class="k">${st.name} 단계의 학습 포인트</span><h4>${esc(st.tip.title)}</h4>${st.tip.quote.map(q => `<blockquote>${esc(q)}</blockquote>`).join('')}<div class="ask">내 일에 적용 — ${esc(st.tip.ask)}</div><button class="add" id="conceptAdd">이 질문을 오늘의 바운더리에 추가</button></div>`;
+  $('conceptAdd').addEventListener('click', () => { onConceptAdd({ id: 'concept', text: st.tip.ask, why: `${st.name} 단계 학습 포인트`, tag: null }); });
+}
+let onConceptAdd = () => {}; // Task 6
+function scrollLog() { const l = $('chatLog'); l.scrollTop = l.scrollHeight; }
+function coachSay(text, opts = {}) {
+  const el = document.createElement('div'); el.className = 'msg c'; el.textContent = text; $('chatLog').appendChild(el); scrollLog();
+  if (!coachOpen && !opts.silent) { $('coachDot').hidden = false; const m = $('coachMini'); m.textContent = text; m.hidden = false; clearTimeout(coachSay._t); coachSay._t = setTimeout(() => { m.hidden = true; }, 4000); }
+  return el;
+}
+function userSay(text) { const el = document.createElement('div'); el.className = 'msg u'; el.textContent = text; $('chatLog').appendChild(el); scrollLog(); }
+function openCoach(tab) { coachOpen = true; $('coachPanel').hidden = false; $('coachDot').hidden = true; $('coachMini').hidden = true; setTab(tab || 'chat'); scrollLog(); if (window.innerWidth <= 720) $('scrim').hidden = false; }
+function closeCoach() { coachOpen = false; $('coachPanel').hidden = true; $('scrim').hidden = true; }
+function coachGreet() {
+  const mode = Q.get('time') || greeting(new Date().getHours());
+  if (!canFire(S.coachSeen, TODAY, 'greet')) return;
+  persist();
+  const day = S.days[TODAY], p = dayProgress(day), st = stageOf(S.user.stage);
+  if (mode === 'am') {
+    const lr = lastReview(S, TODAY);
+    coachSay(COACH.greetAm(S.user.name, lr ? lr.review : ''));
+    onGreetCards(); // Task 6에서 제안 카드 2~3장
+  } else {
+    coachSay(COACH.greetPm(S.user.name, p.done, p.filled));
+  }
+  setTimeout(() => coachSay(COACH.conceptToday(S.user.name, st.tip.title), { silent: true }), 600);
+}
+let onGreetCards = () => {}; // Task 6
 // ===== BOOT =====
 function renderHead() {
   const b = S.boundary;
@@ -448,6 +533,13 @@ function boot() {
   renderHead();
   renderFormula();
   renderDays();
+  buildCoachPanel();
+  $('coachBubble').addEventListener('click', () => coachOpen ? closeCoach() : openCoach('chat'));
+  $('scrim').addEventListener('click', () => { closeCoach(); $('side').classList.remove('open'); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeCoach(); });
+  $('meStage').addEventListener('click', () => openCoach('concept'));
+  onAskCoach = () => openCoach('chat');
+  setTimeout(coachGreet, 500);
   watchCollapse();
 }
 boot();

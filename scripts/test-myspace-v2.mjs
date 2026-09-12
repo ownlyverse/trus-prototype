@@ -75,4 +75,25 @@ t('lastReview: 오늘 이전 가장 최근 회고', () => {
   assert.match(r.review, /썸네일/);
 });
 
+// --- Task 4 ---
+t('greeting: 18시 기준', () => { assert.equal(L.greeting(9), 'am'); assert.equal(L.greeting(17), 'am'); assert.equal(L.greeting(18), 'pm'); });
+t('canFire: 하루 1회, 항목별 1회', () => {
+  const seen = {};
+  assert.equal(L.canFire(seen, '2026-09-13', 'greet'), true);
+  assert.equal(L.canFire(seen, '2026-09-13', 'greet'), false);
+  assert.equal(L.canFire(seen, '2026-09-14', 'greet'), true);
+  assert.equal(L.canFire(seen, '2026-09-13', 'items', 0), true);
+  assert.equal(L.canFire(seen, '2026-09-13', 'items', 0), false);
+  assert.equal(L.canFire(seen, '2026-09-13', 'items', 1), true);
+});
+t('freeReply: 키워드 매칭·폴백', () => {
+  assert.match(L.freeReply('요즘 정체기인 것 같아요'), /끝점/);
+  assert.match(L.freeReply('전략을 어떻게 잡죠'), /노이즈/);
+  assert.equal(L.freeReply('점심 뭐 먹지'), L.FREE_FALLBACK);
+});
+t('COACH 템플릿: 이름 포함', () => {
+  assert.match(L.COACH.greetAm('소정', '어제 회고'), /소정님/);
+  assert.match(L.COACH.greetPm('소정', 2, 3), /2개/);
+});
+
 console.log(`\n${n} tests passed`);
