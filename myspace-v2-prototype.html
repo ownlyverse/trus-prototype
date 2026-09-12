@@ -80,6 +80,34 @@ button{cursor:pointer}
 .formula.collapsed .f-top,.formula.collapsed .f-graph{display:none}
 .formula.collapsed .f-summary{display:flex}
 /* ===== 3. 데일리 ===== */
+.day{border:1px solid var(--line);border-radius:var(--radius);margin-bottom:12px;background:var(--paper)}
+.day-h{display:flex;align-items:center;gap:10px;padding:12px 16px;cursor:pointer;border-radius:var(--radius)}
+.day-h b{font-size:15px}
+.day-h .prog{font-size:12px;color:var(--muted);margin-left:auto}
+.day-h .peek{font-size:13px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:50%}
+.day.today .day-h{cursor:default}
+.day.today.full .day-h{background:var(--indigo-soft);border-radius:var(--radius) var(--radius) 0 0}
+.day.today.full .day-h .prog{color:var(--indigo-ink);font-weight:600}
+.day-b{padding:4px 16px 14px}
+.day:not(.today):not(.open) .day-b{display:none}
+.it{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px dashed var(--line)}
+.it:last-of-type{border-bottom:0}
+.it-chk{width:18px;height:18px;accent-color:var(--indigo);flex:none}
+.it-text{flex:1;border:0;background:none;outline:none;font-size:15px;padding:4px 2px}
+.it-text::placeholder{color:var(--faint)}
+.it.done .it-text{text-decoration:line-through;color:var(--muted)}
+.it-tag{border:1px solid var(--line);border-radius:6px;font-size:12px;color:var(--muted);padding:2px 6px;background:var(--paper)}
+.it-tag.set{color:var(--indigo-ink);border-color:var(--indigo-soft);background:var(--indigo-soft);font-weight:600}
+.it.ro .it-text{pointer-events:none}
+.rv{display:flex;gap:8px;margin-top:12px;align-items:center}
+.rv input{flex:1;border:1px solid var(--line);border-radius:8px;padding:8px 10px;outline:none}
+.rv input:focus{border-color:var(--indigo)}
+.rv button{border:0;background:var(--indigo);color:var(--paper);border-radius:8px;padding:8px 14px;font-weight:600}
+.rv .txt{flex:1;color:var(--ink);padding:6px 0;cursor:text}
+.rv .txt::before{content:'회고 · ';color:var(--muted)}
+.empty{display:flex;justify-content:center;padding:10px 0 4px}
+.empty button{border:1px solid var(--indigo);background:var(--paper);color:var(--indigo-ink);border-radius:999px;padding:8px 16px;font-weight:600}
+.days h3{font-size:13px;color:var(--muted);font-weight:600;margin:0 0 10px}
 /* ===== 4. 코치 ===== */
 /* ===== 5. 반응형 (반드시 마지막) ===== */
 </style>
@@ -325,6 +353,81 @@ function watchCollapse() {
     $('formula').classList.toggle('collapsed', y > 160 && !pinOpen);
   }, { passive: true });
 }
+let onItemSaved = () => {}, onDone3 = () => {}, onReviewSaved = () => {}, onAskCoach = () => {};
+const TAG_OPTS = [['', '태그'], ['numeric', '성과·숫자'], ['customer', '성과·고객'], ['problem', '문제'], ['strategy', '전략']];
+
+function itemRow(it, i, ro) {
+  const tagSel = TAG_OPTS.map(([v, l]) => `<option value="${v}"${(it.tag || '') === v ? ' selected' : ''}>${l}</option>`).join('');
+  return `<div class="it${it.done ? ' done' : ''}${ro ? ' ro' : ''}">
+    <input type="checkbox" class="it-chk" data-i="${i}"${it.done ? ' checked' : ''}${ro || !it.text.trim() ? ' disabled' : ''}>
+    <input type="text" class="it-text" data-i="${i}" value="${esc(it.text)}" placeholder="${ro ? '' : `오늘의 바운더리 ${i + 1}`}" maxlength="80"${ro ? ' readonly' : ''}>
+    ${ro ? (it.tag ? `<span class="it-tag set">${TAG_LABEL[it.tag]}</span>` : '') : `<select class="it-tag${it.tag ? ' set' : ''}" data-i="${i}">${tagSel}</select>`}
+  </div>`;
+}
+function renderDays() {
+  const dates = Object.keys(S.days).filter(d => d <= TODAY).sort().reverse();
+  const stage = stageOf(S.user.stage);
+  const html = dates.map(d => {
+    const day = S.days[d], p = dayProgress(day), today = d === TODAY;
+    if (today) {
+      const rows = day.items.map((it, i) => itemRow(it, i, false)).join('');
+      const rv = day.review
+        ? `<div class="rv"><span class="txt" id="reviewText">${esc(day.review)}</span></div>`
+        : `<div class="rv"><input id="reviewInput" placeholder="${esc(stage.reviewPh)}" maxlength="120"><button id="reviewSave">저장</button></div>`;
+      const empty = p.filled === 0 ? `<div class="empty"><button id="askCoach">🦉 코치와 같이 정하기</button></div>` : '';
+      return `<div class="day today${p.filled === 3 && p.done === 3 ? ' full' : ''}" data-d="${d}"><div class="day-h"><b>${fmtDate(d)}</b><span class="badge">오늘</span><span class="prog">${p.done}/3</span></div><div class="day-b">${rows}${empty}${rv}</div></div>`;
+    }
+    const rows = day.items.filter(it => it.text.trim()).map((it, i) => itemRow(it, i, true)).join('');
+    const peek = day.review ? `“${day.review.slice(0, 20)}${day.review.length > 20 ? '…' : ''}”` : '';
+    return `<div class="day" data-d="${d}"><div class="day-h"><b>${fmtDate(d)}</b><span class="peek">${esc(peek)}</span><span class="prog">${p.done}/${p.filled}</span></div><div class="day-b">${rows}${day.review ? `<div class="rv"><span class="txt">${esc(day.review)}</span></div>` : ''}</div></div>`;
+  }).join('');
+  $('days').innerHTML = `<h3>오늘의 바운더리</h3>${html}`;
+  bindDays();
+  renderSide();
+}
+function bindDays() {
+  const day = S.days[TODAY];
+  const root = $('days');
+  root.querySelectorAll('.day:not(.today) .day-h').forEach(h => h.addEventListener('click', () => h.parentElement.classList.toggle('open')));
+  root.querySelectorAll('.today .it-text').forEach(inp => {
+    inp.addEventListener('keydown', e => { if (e.key === 'Enter') inp.blur(); });
+    inp.addEventListener('blur', () => {
+      const i = Number(inp.dataset.i), v = inp.value.trim();
+      if (v === day.items[i].text) return;
+      day.items[i].text = v; if (!v) { day.items[i].done = false; day.items[i].tag = null; }
+      persist(); renderDays();
+      if (v) onItemSaved(i, day.items[i]);
+    });
+  });
+  root.querySelectorAll('.today .it-chk').forEach(c => c.addEventListener('change', () => {
+    const i = Number(c.dataset.i); day.items[i].done = c.checked; persist(); renderDays();
+    const p = dayProgress(day); if (p.filled === 3 && p.done === 3) onDone3();
+  }));
+  root.querySelectorAll('.today .it-tag').forEach(s => s.addEventListener('change', () => {
+    const i = Number(s.dataset.i); day.items[i].tag = s.value || null; persist(); renderDays();
+  }));
+  const rs = $('reviewSave');
+  if (rs) {
+    const save = () => { const v = $('reviewInput').value.trim(); if (!v) return; day.review = v; persist(); renderDays(); onReviewSaved(v); };
+    rs.addEventListener('click', save);
+    $('reviewInput').addEventListener('keydown', e => { if (e.key === 'Enter') save(); });
+  }
+  const rt = $('reviewText');
+  if (rt) rt.addEventListener('click', () => { day.review = ''; renderDays(); $('reviewInput').value = rt.textContent; $('reviewInput').focus(); });
+  const ask = $('askCoach');
+  if (ask) ask.addEventListener('click', () => onAskCoach());
+}
+function renderSide() {
+  const b = S.boundary;
+  $('sideBoundary').innerHTML = `<button class="nav on">${esc(b.word)}<small>${b.from.slice(5).replace('-', '.')} ~ ${b.to.slice(5).replace('-', '.')} · ${daysLeft(b.to, TODAY)}일 남음</small></button>`;
+  const dates = Object.keys(S.days).filter(d => d <= TODAY).sort().reverse();
+  const label = d => d === TODAY ? '오늘' : (daysLeft(TODAY, d) === 1 ? '어제' : fmtDate(d).replace(/ .요일$/, ''));
+  $('sideDays').innerHTML = `<h4>날짜</h4>` + dates.map(d => { const p = dayProgress(S.days[d]); return `<button class="nav sub" data-goto="${d}">${label(d)} <small>${p.done}/${p.filled || 3}</small></button>`; }).join('');
+  $('sideDays').querySelectorAll('[data-goto]').forEach(b => b.addEventListener('click', () => {
+    const el = document.querySelector(`.day[data-d="${b.dataset.goto}"]`);
+    if (el) { el.classList.add('open'); el.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+  }));
+}
 // ===== COACH =====
 // ===== BOOT =====
 function renderHead() {
@@ -344,6 +447,7 @@ function boot() {
   ensureDay(S, TODAY);
   renderHead();
   renderFormula();
+  renderDays();
   watchCollapse();
 }
 boot();
