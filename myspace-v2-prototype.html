@@ -44,9 +44,39 @@ button{cursor:pointer}
 .badge{display:inline-block;font-size:11px;font-weight:600;border-radius:999px;padding:2px 8px;background:var(--indigo-soft);color:var(--indigo-ink)}
 .menu-btn{display:none}
 /* 토스트 */
-.toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:13px;padding:10px 16px;border-radius:999px;z-index:60;box-shadow:var(--shadow)}
+.toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:var(--ink);color:var(--paper);font-size:13px;padding:10px 16px;border-radius:999px;z-index:60;box-shadow:var(--shadow)}
 .scrim{position:fixed;inset:0;background:rgba(25,31,40,.35);z-index:40}
 /* ===== 2. 일의 공식 ===== */
+.formula{position:sticky;top:0;z-index:5;background:var(--paper);border-bottom:1px solid var(--line);padding:14px 0 18px;margin-bottom:24px}
+.f-top{display:flex;justify-content:space-between;align-items:baseline}
+.f-top b{font-size:17px}
+.f-top .cnt{font-size:13px;color:var(--muted)}
+.f-graph{position:relative;height:190px;margin-top:6px}
+.f-graph svg{position:absolute;inset:0;width:100%;height:100%}
+.f-arc{fill:none;stroke:var(--indigo);stroke-width:1.5;stroke-dasharray:5 5}
+.formula.complete .f-arc{stroke-dasharray:none}
+.f-line{stroke:var(--ink);stroke-width:1.5;opacity:.7}
+.f-dot{fill:var(--indigo)}
+.f-lab{font-size:12px;color:var(--muted);display:block;margin-bottom:2px}
+.f-problem{position:absolute;top:0;left:50%;transform:translateX(-50%);text-align:center;width:60%}
+.f-chip{position:absolute;top:112px;left:50%;transform:translateX(-50%);font-size:12px;font-weight:600;color:var(--indigo-ink);background:var(--indigo-soft);border-radius:6px;padding:3px 9px;white-space:nowrap;transition:background .2s}
+.f-start{position:absolute;bottom:0;left:5%;width:40%}
+.f-end{position:absolute;bottom:0;right:5%;width:40%;text-align:right}
+.f-val{display:block;min-height:1.5em;outline:none;border-radius:4px;padding:1px 4px;margin:0 -4px;cursor:text}
+.f-val:hover{background:rgba(91,91,214,.06)}
+.f-val:focus{background:var(--indigo-soft)}
+.f-val:empty::before{content:attr(data-ph);color:var(--faint)}
+.f-val.big{font-size:17px;font-weight:600}
+.f-val.q{font-size:15px;font-weight:600}
+.f-val.q:not(:empty)::before{content:'“'}
+.f-val.q:not(:empty)::after{content:'”'}
+.f-val.dim{opacity:.45}
+.f-summary{display:none;gap:14px;align-items:center;font-size:13px;color:var(--muted);cursor:pointer;padding-top:4px}
+.f-summary b{color:var(--ink);font-weight:600}
+.f-summary .cnt{margin-left:auto}
+.formula.collapsed{padding:10px 0}
+.formula.collapsed .f-top,.formula.collapsed .f-graph{display:none}
+.formula.collapsed .f-summary{display:flex}
 /* ===== 3. 데일리 ===== */
 /* ===== 4. 코치 ===== */
 /* ===== 5. 반응형 (반드시 마지막) ===== */
@@ -236,8 +266,85 @@ function fmtDate(iso) {
 }
 
 // ===== RENDER =====
+const $ = (id) => document.getElementById(id);
+let S, TODAY;
+function toast(msg) { const t = $('toast'); t.textContent = msg; t.hidden = false; clearTimeout(toast._t); toast._t = setTimeout(() => { t.hidden = true; }, 2600); }
+function persist() { saveState(localStorage, S, () => toast('저장이 안 됐어요. 브라우저 저장 공간을 확인해 주세요.')); }
+function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
+let onFormulaSaved = () => {};   // Task 5에서 코치가 덮어씀
+let onOrderGuard = () => {};     // Task 5에서 코치가 덮어씀
+let onFormulaComplete = () => {}; // Task 5
+
+function renderFormula() {
+  const f = S.boundary.formula;
+  const n = formulaCount(f);
+  const end = endDefined(f);
+  const box = $('formula');
+  box.classList.toggle('complete', n === 4);
+  const dim = end ? '' : ' dim';
+  box.innerHTML = `
+    <div class="f-top"><b>일의 공식</b><span class="cnt" id="fCount">${n}/4 정했어요</span></div>
+    <div class="f-graph">
+      <svg viewBox="0 0 1000 190" preserveAspectRatio="none" aria-hidden="true">
+        <path class="f-arc" d="M60,120 Q500,20 940,120"/>
+        <line class="f-line" x1="60" y1="120" x2="940" y2="120"/>
+        <circle class="f-dot" cx="60" cy="120" r="7"/><circle class="f-dot" cx="940" cy="120" r="7"/>
+      </svg>
+      <div class="f-problem"><span class="f-lab">문제</span><span class="f-val q${dim}" data-k="problem" contenteditable="true" data-ph="끝점과 지금 사이의 허들 한 문장">${esc(f.problem)}</span></div>
+      <div class="f-chip" id="fChip">함께 해결 = 일</div>
+      <div class="f-start"><span class="f-lab">시작 · 전략</span><span class="f-val${dim}" data-k="strategy" contenteditable="true" data-ph="그 문제를 어떤 전략으로 풀어 성과에 닿을 것인가?">${esc(f.strategy)}</span></div>
+      <div class="f-end"><span class="f-lab">끝 · 성과</span><span class="f-val big" data-k="numeric" contenteditable="true" data-ph="무엇이 얼마에서 얼마로 바뀌나요?">${esc(f.numeric)}</span><span class="f-val q" data-k="customer" contenteditable="true" data-ph="고객이 돈을 내고 나서 뭐라고 말하면 성공인가요?">${esc(f.customer)}</span></div>
+    </div>
+    <div class="f-summary" id="fSummary"><span>성과 <b>${esc(f.numeric || '—')}</b></span><span>문제 <b>${esc((f.problem || '—').slice(0, 18))}</b></span><span>전략 <b>${esc((f.strategy || '—').slice(0, 18))}</b></span><span class="cnt">${n}/4</span></div>`;
+  box.querySelectorAll('.f-val').forEach(el => {
+    el.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); el.blur(); } });
+    el.addEventListener('focus', () => { if (el.classList.contains('dim')) onOrderGuard(); });
+    el.addEventListener('blur', () => {
+      const k = el.dataset.k, v = el.textContent.trim();
+      if (v === (f[k] || '')) return;
+      const before = formulaCount(f);
+      f[k] = v; persist(); renderFormula();
+      onFormulaSaved(k, v);
+      if (before < 4 && formulaCount(f) === 4) {
+        const chip = $('fChip'); chip.textContent = '한 장에 담겼어요';
+        setTimeout(() => { if ($('fChip')) $('fChip').textContent = '함께 해결 = 일'; }, 3000);
+        onFormulaComplete();
+      }
+    });
+  });
+  $('fSummary').addEventListener('click', () => { pinOpen = true; box.classList.remove('collapsed'); });
+}
+let pinOpen = false;
+function watchCollapse() {
+  window.addEventListener('scroll', () => {
+    const y = window.scrollY;
+    if (y < 40) pinOpen = false;
+    if (document.activeElement && document.activeElement.classList.contains('f-val')) return;
+    $('formula').classList.toggle('collapsed', y > 160 && !pinOpen);
+  }, { passive: true });
+}
 // ===== COACH =====
 // ===== BOOT =====
+function renderHead() {
+  const b = S.boundary;
+  $('meName').textContent = S.user.name;
+  $('meStage').textContent = `${stageOf(S.user.stage).name} · ${S.user.stage}/6`;
+  $('bTitle').textContent = b.word;
+  $('bPeriod').textContent = `${b.from.slice(5).replace('-', '.')} ~ ${b.to.slice(5).replace('-', '.')}`;
+  $('bLeft').textContent = `${daysLeft(b.to, TODAY)}일 남음`;
+  $('sideLecture').textContent = `📺 강의실 · 커리큘럼 ${S.user.course}/5`;
+}
+function boot() {
+  if (Q.get('reset') === '1') { try { localStorage.removeItem(KEY); } catch (e) {} }
+  S = loadState(localStorage);
+  if (Q.get('stage')) S.user.stage = Number(Q.get('stage'));
+  TODAY = todayStr();
+  ensureDay(S, TODAY);
+  renderHead();
+  renderFormula();
+  watchCollapse();
+}
+boot();
 </script>
 </body>
 </html>
