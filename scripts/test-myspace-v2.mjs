@@ -12,7 +12,7 @@ assert(m, 'script#app 없음');
 const src = m[1];
 const cut = src.indexOf('// ===== RENDER =====');
 assert(cut > 0, 'RENDER 마커 없음');
-const EXPORTS = '\n;({KEY,todayStr,defaultState,loadState,saveState,ensureDay,blank,formulaCount,endDefined,dayProgress,keywords,judgeSignal,stageOf,greeting,canFire,addSuggestion,replaceItem,freeReply,lastReview,daysLeft,fmtDate,USER,STAGES,BOUNDARY,FORMULA,PAST_DAYS,SUGGESTIONS,COACH,FREE,FREE_FALLBACK,TAG_LABEL})';
+const EXPORTS = '\n;({KEY,todayStr,defaultState,loadState,saveState,ensureDay,blank,formulaCount,endDefined,dayProgress,keywords,judgeSignal,stageOf,greeting,canFire,addSuggestion,replaceItem,freeReply,lastReview,daysLeft,fmtDate,USER,STAGES,BOUNDARY,FORMULA,PAST_DAYS,SUGGESTIONS,COACH,FREE,FREE_FALLBACK,blankReview,reviewDone,reviewHintFor,REVIEW_Q,KEY_QUESTION,ITEM_PH,SUGGEST})';
 const ctx = { location: { search: '' }, URLSearchParams, console };
 const L = vm.runInNewContext(src.slice(0, cut) + EXPORTS, ctx);
 
@@ -20,26 +20,27 @@ function mem(init) { const s = { ...init }; return { getItem: k => (k in s ? s[k
 let n = 0; const t = (name, fn) => { fn(); n++; console.log('ok', name); };
 
 // --- Task 1 ---
-t('defaultState: v=2, 지난 4일, 오늘 없음', () => {
+t('defaultState: v=3, 지난 4일, 회고 객체', () => {
   const s = L.defaultState();
-  assert.equal(s.v, 2);
+  assert.equal(s.v, 3);
   assert.equal(Object.keys(s.days).length, 4);
+  assert.equal(s.days['2026-09-12'].review.q1, true);
   assert.equal(s.boundary.formula.strategy, '');
 });
 t('loadState: 저장 없음 → 기본', () => {
   assert.equal(L.loadState(mem({})).user.name, '소정');
 });
 t('loadState: v 다르면 무시', () => {
-  const st = mem({ [L.KEY]: JSON.stringify({ v: 1, user: { name: 'X' } }) });
+  const st = mem({ [L.KEY]: JSON.stringify({ v: 2, user: { name: 'X' } }) });
   assert.equal(L.loadState(st).user.name, '소정');
 });
-t('loadState: v=2면 복원', () => {
+t('loadState: v=3이면 복원', () => {
   const s = L.defaultState(); s.user.name = '호';
   const st = mem({ [L.KEY]: JSON.stringify(s) });
   assert.equal(L.loadState(st).user.name, '호');
 });
 t('loadState: 깨진 JSON → 기본', () => {
-  assert.equal(L.loadState(mem({ [L.KEY]: '{oops' })).v, 2);
+  assert.equal(L.loadState(mem({ [L.KEY]: '{oops' })).v, 3);
 });
 t('saveState: 실패 시 onFail', () => {
   let failed = false;
@@ -51,7 +52,8 @@ t('ensureDay: 빈 3줄 생성, 멱등', () => {
   const s = L.defaultState();
   const d = L.ensureDay(s, '2026-09-13');
   assert.equal(d.items.length, 3);
-  assertLoose.deepEqual(d.items[0], { text: '', done: false, tag: null });
+  assertLoose.deepEqual(d.items[0], { text: '', done: false });
+  assertLoose.deepEqual(d.review, { q1: null, q2: null, text: '' });
   d.items[0].text = 'a';
   assert.equal(L.ensureDay(s, '2026-09-13').items[0].text, 'a');
 });
@@ -101,11 +103,10 @@ t('keywords: 조사 제거·2글자 이상', () => {
   const k = L.keywords(L.FORMULA);
   assert(k.includes('완강률')); assert(k.includes('정체기')); assert(!k.includes('이'));
 });
-t('judgeSignal: 태그 있으면 시그널, 키워드 매칭, 아니면 노이즈, 빈 항목 null', () => {
-  assert.equal(L.judgeSignal({ text: '팀 회의', done: false, tag: 'strategy' }, L.FORMULA), 'signal');
-  assert.equal(L.judgeSignal({ text: '완강률 대시보드 보기', done: false, tag: null }, L.FORMULA), 'signal');
-  assert.equal(L.judgeSignal({ text: '팀 주간 회의', done: false, tag: null }, L.FORMULA), 'noise');
-  assert.equal(L.judgeSignal({ text: '  ', done: false, tag: null }, L.FORMULA), null);
+t('judgeSignal: 키워드 매칭이면 시그널, 아니면 노이즈, 빈 항목 null', () => {
+  assert.equal(L.judgeSignal({ text: '완강률 대시보드 보기', done: false }, L.FORMULA), 'signal');
+  assert.equal(L.judgeSignal({ text: '팀 주간 회의', done: false }, L.FORMULA), 'noise');
+  assert.equal(L.judgeSignal({ text: '  ', done: false }, L.FORMULA), null);
 });
 t('stageOf: 범위 클램프', () => { assert.equal(L.stageOf(0).n, 1); assert.equal(L.stageOf(9).n, 6); assert.equal(L.stageOf('3').n, 3); });
 
@@ -114,7 +115,6 @@ t('addSuggestion: 빈 줄에 삽입, 꽉 차면 full', () => {
   const day = { items: [L.blank(), { text: 'x', done: false, tag: null }, L.blank()], review: '' };
   const r = L.addSuggestion(day, L.SUGGESTIONS[0]);
   assertLoose.deepEqual(r, { ok: true, index: 0 });
-  assert.equal(day.items[0].tag, 'strategy');
   L.addSuggestion(day, L.SUGGESTIONS[1]);
   assertLoose.deepEqual(L.addSuggestion(day, L.SUGGESTIONS[2]), { ok: false, reason: 'full' });
 });
@@ -122,6 +122,24 @@ t('replaceItem: 교체하고 옛 항목 반환', () => {
   const day = { items: [{ text: 'a', done: true, tag: null }, L.blank(), L.blank()], review: '' };
   const old = L.replaceItem(day, 0, L.SUGGESTIONS[3]);
   assert.equal(old.text, 'a'); assert.equal(day.items[0].text, L.SUGGESTIONS[3].text); assert.equal(day.items[0].done, false);
+});
+
+// --- Task 10 ---
+t('reviewDone: text 있어야 완료', () => {
+  assert.equal(L.reviewDone({ q1: true, q2: false, text: '' }), false);
+  assert.equal(L.reviewDone({ q1: null, q2: null, text: '한 줄' }), true);
+});
+t('reviewHintFor: OX에 따라 유도 문구', () => {
+  const st = L.stageOf(2);
+  assert.match(L.reviewHintFor({ q1: false, q2: null, text: '' }, st), /끼어들/);
+  assert.match(L.reviewHintFor({ q1: true, q2: true, text: '' }, st), /바꿀지/);
+  assert.equal(L.reviewHintFor({ q1: null, q2: null, text: '' }, st), st.reviewPh);
+});
+t('SUGGEST 플래그 꺼짐, 키 퀘스천·문항 상수', () => {
+  assert.equal(L.SUGGEST, false);
+  assert.match(L.KEY_QUESTION, /3가지/);
+  assert.equal(L.REVIEW_Q.length, 2);
+  assert.equal(L.ITEM_PH.length, 3);
 });
 
 console.log(`\n${n} tests passed`);

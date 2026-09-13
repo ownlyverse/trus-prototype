@@ -97,18 +97,24 @@ button{cursor:pointer}
 .it-text{flex:1;border:0;background:none;outline:none;font-size:15px;padding:4px 2px}
 .it-text::placeholder{color:var(--faint)}
 .it.done .it-text{text-decoration:line-through;color:var(--faint)}
-.it-tag{border:0;border-radius:6px;font-size:11px;color:var(--muted);padding:2px 6px;background:rgba(25,31,40,.05)}
-.it-tag.set{color:var(--indigo-ink);background:var(--indigo-soft);font-weight:600}
-.it-tag:not(.set){opacity:.5}
-.it-tag:not(.set):hover,.it-tag:not(.set):focus{opacity:1}
-.it.ro .it-text{pointer-events:none}
-.rv{display:flex;gap:8px;margin-top:12px;align-items:center}
-.rv input{flex:1;border:0;border-bottom:1px solid var(--line);border-radius:0;padding:8px 2px;outline:none}
-.rv input::placeholder{color:var(--faint)}
-.rv input:focus{border-bottom-color:var(--indigo)}
-.rv button{border:0;background:none;color:var(--indigo-ink);padding:8px 6px;font-size:13px;font-weight:600}
-.rv .txt{flex:1;color:var(--ink);font-size:14px;padding:6px 0;cursor:text}
-.rv .txt::before{content:'회고 · ';color:var(--muted)}
+.keyq{font-size:13px;color:var(--muted);margin:-6px 0 12px}
+.it.frog .it-text{font-weight:600}
+.it .frog-tag{font-size:11px;color:var(--indigo-ink);background:var(--indigo-soft);border-radius:4px;padding:1px 6px;flex:none}
+.rv{margin-top:14px}
+.rv .q{display:flex;align-items:center;gap:8px;font-size:13.5px;padding:4px 0}
+.rv .q span{flex:1}
+.rv .ox{width:28px;height:24px;border:1px solid var(--line);background:none;border-radius:6px;font-size:12px;color:var(--muted)}
+.rv .ox.on{border-color:var(--indigo);color:var(--indigo-ink);background:var(--indigo-soft);font-weight:700}
+.rv textarea{display:block;width:100%;min-height:64px;resize:vertical;border:0;border-bottom:1px solid var(--line);border-radius:0;padding:8px 2px;margin-top:6px;outline:none;line-height:1.6}
+.rv textarea::placeholder{color:var(--faint)}
+.rv textarea:focus{border-bottom-color:var(--indigo)}
+.rv .rv-act{display:flex;justify-content:flex-end}
+.rv .rv-act button{border:0;background:none;color:var(--indigo-ink);padding:8px 6px;font-size:13px;font-weight:600}
+.rv-sum{margin-top:12px;cursor:text}
+.rv-sum .chips{display:flex;gap:6px;margin-bottom:6px}
+.rv-sum .chip{font-size:11px;color:var(--muted);background:rgba(25,31,40,.05);border-radius:4px;padding:2px 7px}
+.rv-sum .chip.on{color:var(--indigo-ink);background:var(--indigo-soft)}
+.rv-sum .txt{font-size:14px;white-space:pre-wrap;line-height:1.6}
 .empty{display:flex;justify-content:flex-start;padding:6px 0 4px}
 .empty button{border:0;background:none;color:var(--indigo-ink);padding:8px 4px;font-weight:600}
 .days h3{font-size:13px;color:var(--muted);font-weight:600;margin:0 0 10px}
@@ -146,6 +152,7 @@ button{cursor:pointer}
 .concept blockquote{margin:0 0 6px;padding-left:10px;border-left:3px solid var(--indigo-soft);color:var(--ink);font-size:13.5px}
 .concept .ask{margin-top:12px;padding:10px;background:var(--indigo-soft);border-radius:8px;font-size:13.5px;color:var(--indigo-ink);font-weight:600}
 .concept .add{margin-top:10px;border:0;background:var(--indigo);color:var(--paper);border-radius:8px;padding:7px 10px;font-size:12px;font-weight:600}
+.concept-card .ask{color:var(--indigo-ink);font-weight:600}
 /* ===== 5. 반응형 (반드시 마지막) ===== */
 </style>
 </head>
@@ -180,7 +187,10 @@ button{cursor:pointer}
 // ===== MOCK DATA =====
 const Q = new URLSearchParams(location.search);
 const USER = { name: '소정', stage: 2, course: 3 };
-const TAG_LABEL = { numeric: '성과', customer: '성과', problem: '문제', strategy: '전략' };
+const SUGGEST = false; // 코치 업무 추천 카드 — 추천 근거 DB 확보 전까지 끔 (피드백 2026-09-13)
+const KEY_QUESTION = '끝점(성과)에 가장 빠르게 도달할 수 있는 중요한 일 3가지인가요?';
+const ITEM_PH = ['오늘 반드시 끝낼 일 하나 — 가장 먼저 해요', '그다음으로 중요한 일', '그다음으로 중요한 일'];
+const REVIEW_Q = ['오늘의 바운더리는 끝점(성과)에 도달하는 일이었나요?', '만약 다시 한다면 다르게 일 할 것 같나요?'];
 const STAGES = [
   { n: 1, name: '초보자', group: '노력', sells: '시간', unknown: '노력과 성과의 차이 — 자기만족에 빠져 고객만족을 모른다', point: '시스템 사고',
     tip: { title: '시스템 사고 — 전체를 본다', quote: ['전체를 보는 사람은 10개를 배우고, 부분만 본 사람은 1개를 배운다.', '내 지도는 내 자리 주변에서 멈춰 있지 않은가?'], ask: '내 일의 시작부터 끝까지, 한 장에 그릴 수 있나요?' },
@@ -204,20 +214,21 @@ const STAGES = [
 const BOUNDARY = { id: 'b1', word: '완강률 60%', from: '2026-09-01', to: '2026-11-30' };
 const FORMULA = { numeric: '완강률 60%', customer: '회사 생활 10년보다 이 강의가 더 나았어요', problem: '일의 정체기가 왔을 때 뚫는 방법을 모른다', strategy: '' };
 const PAST_DAYS = {
-  '2026-09-09': { items: [{ text: '강의 3단계 미션 제출', done: true, tag: 'strategy' }, { text: '완강률 주간 리포트 보기', done: true, tag: 'numeric' }, { text: '수강생 인터뷰 1명', done: false, tag: 'customer' }], review: '인터뷰는 못 잡았다. 리포트에서 3단계 이탈이 제일 크다.' },
-  '2026-09-10': { items: [{ text: '3단계 이탈 구간 다시 보기', done: true, tag: 'problem' }, { text: '수강생 인터뷰 1명', done: true, tag: 'customer' }, { text: '인트로 길이 재기', done: true, tag: 'strategy' }], review: '3단계 이탈 구간을 다시 봤다. 앞 3분에서 나간다.' },
-  '2026-09-11': { items: [{ text: '인트로 재편집 시작', done: true, tag: 'strategy' }, { text: '팀 주간 회의', done: false, tag: null }, { text: '외부 제안서 검토', done: false, tag: null }], review: '회의가 하루를 먹었다. 완강률에 닿은 건 하나뿐.' },
-  '2026-09-12': { items: [{ text: '인트로 재편집 끝내기', done: true, tag: 'strategy' }, { text: '완강률 대시보드 확인', done: true, tag: 'numeric' }, { text: '수강생 후기 3개 읽기', done: true, tag: 'customer' }], review: '썸네일 A/B는 내일로 미뤘다. 인트로 재편집은 끝.' },
+  '2026-09-09': { items: [{ text: '강의 3단계 미션 제출', done: true }, { text: '완강률 주간 리포트 보기', done: true }, { text: '수강생 인터뷰 1명', done: false }], review: { q1: false, q2: true, text: '인터뷰는 못 잡았다. 리포트에서 3단계 이탈이 제일 크다.\n인터뷰를 먼저 잡았어야 했다.' } },
+  '2026-09-10': { items: [{ text: '3단계 이탈 구간 다시 보기', done: true }, { text: '수강생 인터뷰 1명', done: true }, { text: '인트로 길이 재기', done: true }], review: { q1: true, q2: false, text: '3단계 이탈 구간을 다시 봤다. 앞 3분에서 나간다.' } },
+  '2026-09-11': { items: [{ text: '인트로 재편집 시작', done: true }, { text: '팀 주간 회의', done: false }, { text: '외부 제안서 검토', done: false }], review: { q1: false, q2: true, text: '회의가 하루를 먹었다. 완강률에 닿은 건 하나뿐.\n회의는 오후로 미루고 인트로부터 했어야 했다.' } },
+  '2026-09-12': { items: [{ text: '인트로 재편집 끝내기', done: true }, { text: '완강률 대시보드 확인', done: true }, { text: '수강생 후기 3개 읽기', done: true }], review: { q1: true, q2: false, text: '썸네일 A/B는 내일로 미뤘다. 인트로 재편집은 끝.' } },
 };
 const SUGGESTIONS = [
-  { id: 's1', text: '썸네일 A/B 두 종 올리기', why: '어제 회고에서 내일로 미뤘다고 했어요', tag: 'strategy' },
-  { id: 's2', text: '앞 3분 시청 지속 80%를 목표로 인트로 다시 자르기', why: '9월 10일 회고 — 앞 3분에서 나간다', tag: 'problem' },
-  { id: 's3', text: '강의 4단계 미션: 내 숫자 10개 적고 별표 하나', why: '커리큘럼 3/5 — 다음 미션', tag: 'numeric' },
-  { id: 's4', text: '오늘 들어온 요청 중 완강률에 안 닿는 것 하나 거절하기', why: '숙련자 학습 포인트 — 시그널/노이즈', tag: 'numeric' },
+  { id: 's1', text: '썸네일 A/B 두 종 올리기', why: '어제 회고에서 내일로 미뤘다고 했어요' },
+  { id: 's2', text: '앞 3분 시청 지속 80%를 목표로 인트로 다시 자르기', why: '9월 10일 회고 — 앞 3분에서 나간다' },
+  { id: 's3', text: '강의 4단계 미션: 내 숫자 10개 적고 별표 하나', why: '커리큘럼 3/5 — 다음 미션' },
+  { id: 's4', text: '오늘 들어온 요청 중 완강률에 안 닿는 것 하나 거절하기', why: '숙련자 학습 포인트 — 시그널/노이즈' },
 ];
 const COACH = {
-  greetAm: (name, last) => last ? `${name}님, 좋은 아침이에요. 어제 "${last}"라고 남기셨죠. 오늘의 3개, 여기서 이어가 볼까요?` : `${name}님, 좋은 아침이에요. 오늘의 3개를 정해볼까요?`,
-  greetPm: (name, done, filled) => filled ? `${name}님, 오늘 어땠어요? 3개 중 ${done}개 끝냈네요. 한 줄만 남겨볼까요?` : `${name}님, 오늘은 아직 3개를 안 정했어요. 내일 아침 것부터 하나만 정해둘까요?`,
+  greetAm: (name, last) => last ? `${name}님, 좋은 아침이에요. 어제 "${last}"라고 남기셨죠.` : `${name}님, 좋은 아침이에요.`,
+  keyQ: `오늘 하루가 끝났을 때 무엇이 되어 있으면 성공인가요? 그 기준으로 ${KEY_QUESTION} 첫 줄엔 가장 먼저 끝낼 일 하나를 적어요.`,
+  greetPm: (name, done, filled) => filled ? `${name}님, 3개 중 ${done}개 끝냈네요. 회고 질문 두 개에 O/X부터 찍어봐요.` : `${name}님, 오늘은 아직 3개를 안 정했어요. 내일 아침 것부터 하나만 정해둘까요?`,
   signal: (word) => `"${word}"에 바로 닿는 일이네요. 시그널이에요.`,
   orderGuard: '끝부터 정해요. 성과가 없으면 문제도 전략도 방향을 잃어요.',
   formula: {
@@ -227,8 +238,10 @@ const COACH = {
     strategy: '이걸 빼도 끝점에 도달하나요? 도달한다면 노이즈예요.',
   },
   complete: '한 장에 담겼어요. 이제 시작하면 돼요. 시작했다면 의심하지 마요.',
-  done3: (ph) => `3개 다 끝났어요. ${ph} 한 줄 남겨요.`,
-  afterReview: '내일 이어갈 하나를 골라뒀어요.',
+  done3: () => '3개 다 끝났어요. 회고 질문 두 개에 O/X를 찍고 몇 줄 남겨요.',
+  afterReview: '회고 남겼어요. 내일 아침에 이걸 근거로 다시 물을게요.',
+  hintQ1no: '끝점에 안 닿았다면, 무엇이 끼어들었는지 적어요.',
+  hintQ2yes: '다시 한다면 무엇을 바꿀지 적어요.',
   added: (t) => `"${t}" 오늘의 바운더리에 넣었어요.`,
   swapped: (t) => `"${t}"는 내일로 미뤄뒀어요.`,
   full: '오늘 3개가 다 찼어요. 무엇과 바꿀까요?',
@@ -251,14 +264,15 @@ function todayStr() {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
-function blank() { return { text: '', done: false, tag: null }; }
+function blank() { return { text: '', done: false }; }
+function blankReview() { return { q1: null, q2: null, text: '' }; }
 function defaultState() {
-  return { v: 2, user: { ...USER }, boundary: { ...BOUNDARY, formula: { ...FORMULA } }, days: JSON.parse(JSON.stringify(PAST_DAYS)), coachSeen: {} };
+  return { v: 3, user: { ...USER }, boundary: { ...BOUNDARY, formula: { ...FORMULA } }, days: JSON.parse(JSON.stringify(PAST_DAYS)), coachSeen: {} };
 }
 function loadState(storage) {
   try {
     const raw = storage.getItem(KEY);
-    if (raw) { const s = JSON.parse(raw); if (s && s.v === 2) return s; }
+    if (raw) { const s = JSON.parse(raw); if (s && s.v === 3) return s; }
   } catch (e) { /* 무시 */ }
   return defaultState();
 }
@@ -267,7 +281,7 @@ function saveState(storage, state, onFail) {
   catch (e) { if (onFail) onFail(e); return false; }
 }
 function ensureDay(state, date) {
-  if (!state.days[date]) state.days[date] = { items: [blank(), blank(), blank()], review: '' };
+  if (!state.days[date]) state.days[date] = { items: [blank(), blank(), blank()], review: blankReview() };
   return state.days[date];
 }
 const FKEYS = ['numeric', 'customer', 'problem', 'strategy'];
@@ -287,7 +301,6 @@ function keywords(f) {
 }
 function judgeSignal(item, f) {
   if (!item.text.trim()) return null;
-  if (item.tag) return 'signal';
   return keywords(f).some(k => item.text.includes(k)) ? 'signal' : 'noise';
 }
 function stageOf(n) { return STAGES[Math.min(6, Math.max(1, Number(n) || 1)) - 1]; }
@@ -305,13 +318,19 @@ function canFire(seen, date, key, idx) {
 function addSuggestion(day, sug) {
   const i = day.items.findIndex(it => !it.text.trim());
   if (i < 0) return { ok: false, reason: 'full' };
-  day.items[i] = { text: sug.text, done: false, tag: sug.tag };
+  day.items[i] = { text: sug.text, done: false };
   return { ok: true, index: i };
 }
 function replaceItem(day, idx, sug) {
   const old = day.items[idx];
-  day.items[idx] = { text: sug.text, done: false, tag: sug.tag };
+  day.items[idx] = { text: sug.text, done: false };
   return old;
+}
+function reviewDone(review) { return !!((review && review.text) || '').trim(); }
+function reviewHintFor(review, stage) {
+  if (review.q1 === false) return COACH.hintQ1no;
+  if (review.q2 === true) return COACH.hintQ2yes;
+  return stage.reviewPh;
 }
 function freeReply(text) {
   for (const f of FREE) if (f.k.some(k => text.includes(k))) return f.r;
@@ -320,8 +339,8 @@ function freeReply(text) {
 function lastReview(state, today) {
   const dates = Object.keys(state.days).filter(d => d < today).sort();
   for (let i = dates.length - 1; i >= 0; i--) {
-    const r = (state.days[dates[i]].review || '').trim();
-    if (r) return { date: dates[i], review: r };
+    const r = ((state.days[dates[i]].review || {}).text || '').trim();
+    if (r) return { date: dates[i], review: r.split('\n')[0] };
   }
   return null;
 }
@@ -391,69 +410,78 @@ function watchCollapse() {
   }, { passive: true });
 }
 let onItemSaved = () => {}, onDone3 = () => {}, onReviewSaved = () => {}, onAskCoach = () => {};
-const TAG_OPTS = [['', '태그'], ['numeric', '성과·숫자'], ['customer', '성과·고객'], ['problem', '문제'], ['strategy', '전략']];
 
-function itemRow(it, i, ro) {
-  const tagSel = TAG_OPTS.map(([v, l]) => `<option value="${v}"${(it.tag || '') === v ? ' selected' : ''}>${l}</option>`).join('');
-  return `<div class="it${it.done ? ' done' : ''}${ro ? ' ro' : ''}">
-    <input type="checkbox" class="it-chk" data-i="${i}"${it.done ? ' checked' : ''}${ro || !it.text.trim() ? ' disabled' : ''}>
-    <input type="text" class="it-text" data-i="${i}" value="${esc(it.text)}" placeholder="${ro ? '' : `오늘의 바운더리 ${i + 1}`}" maxlength="80"${ro ? ' readonly' : ''}>
-    ${ro ? (it.tag ? `<span class="it-tag set">${TAG_LABEL[it.tag]}</span>` : '') : `<select class="it-tag${it.tag ? ' set' : ''}" data-i="${i}">${tagSel}</select>`}
+let editingReview = null; // 'YYYY-MM-DD' — 저장된 회고를 다시 여는 중인 날짜
+function itemRow(it, i, d) {
+  return `<div class="it${it.done ? ' done' : ''}${i === 0 ? ' frog' : ''}">
+    <input type="checkbox" class="it-chk" data-d="${d}" data-i="${i}"${it.done ? ' checked' : ''}${!it.text.trim() ? ' disabled' : ''}>
+    <input type="text" class="it-text" data-d="${d}" data-i="${i}" value="${esc(it.text)}" placeholder="${ITEM_PH[i]}" maxlength="80">
+    ${i === 0 ? '<span class="frog-tag">먼저</span>' : ''}
   </div>`;
+}
+function reviewBlock(day, d, stage) {
+  const r = day.review;
+  const ox = (q) => `<div class="q"><span>${esc(REVIEW_Q[q - 1])}</span><button class="ox${r['q' + q] === true ? ' on' : ''}" data-d="${d}" data-q="${q}" data-v="1">O</button><button class="ox${r['q' + q] === false ? ' on' : ''}" data-d="${d}" data-q="${q}" data-v="0">X</button></div>`;
+  if (reviewDone(r) && editingReview !== d) {
+    const chip = (q, label) => `<span class="chip${r['q' + q] != null ? ' on' : ''}">${label} ${r['q' + q] === true ? 'O' : r['q' + q] === false ? 'X' : '–'}</span>`;
+    return `<div class="rv-sum" data-d="${d}"><div class="chips">${chip(1, '끝점 도달')}${chip(2, '다르게')}</div><div class="txt">${esc(r.text)}</div></div>`;
+  }
+  return `<div class="rv" data-d="${d}">${ox(1)}${ox(2)}<textarea class="rv-text" data-d="${d}" placeholder="${esc(reviewHintFor(r, stage))}" maxlength="600">${esc(r.text)}</textarea><div class="rv-act"><button class="rv-save" data-d="${d}">저장</button></div></div>`;
 }
 function renderDays() {
   const dates = Object.keys(S.days).filter(d => d <= TODAY).sort().reverse();
   const stage = stageOf(S.user.stage);
   const html = dates.map(d => {
     const day = S.days[d], p = dayProgress(day), today = d === TODAY;
-    if (today) {
-      const rows = day.items.map((it, i) => itemRow(it, i, false)).join('');
-      const rv = day.review
-        ? `<div class="rv"><span class="txt" id="reviewText">${esc(day.review)}</span></div>`
-        : `<div class="rv"><input id="reviewInput" placeholder="${esc(stage.reviewPh)}" maxlength="120"><button id="reviewSave">저장</button></div>`;
-      const empty = p.filled === 0 ? `<div class="empty"><button id="askCoach">🦉 코치와 같이 정하기</button></div>` : '';
-      return `<div class="day today${p.filled === 3 && p.done === 3 ? ' full' : ''}" data-d="${d}"><div class="day-h"><b>${fmtDate(d)}</b><span class="badge">오늘</span><span class="prog">${p.done}/3</span></div><div class="day-b">${rows}${empty}${rv}</div></div>`;
-    }
-    const rows = day.items.filter(it => it.text.trim()).map((it, i) => itemRow(it, i, true)).join('');
-    const peek = day.review ? `“${day.review.slice(0, 20)}${day.review.length > 20 ? '…' : ''}”` : '';
-    return `<div class="day" data-d="${d}"><div class="day-h"><b>${fmtDate(d)}</b><span class="peek">${esc(peek)}</span><span class="prog">${p.done}/${p.filled}</span></div><div class="day-b">${rows}${day.review ? `<div class="rv"><span class="txt">${esc(day.review)}</span></div>` : ''}</div></div>`;
+    const rows = day.items.map((it, i) => itemRow(it, i, d)).join('');
+    const empty = today && p.filled === 0 ? `<div class="empty"><button id="askCoach">🦉 코치와 같이 정하기</button></div>` : '';
+    const showReview = today || p.filled > 0 || reviewDone(day.review);
+    const body = `<div class="day-b">${rows}${empty}${showReview ? reviewBlock(day, d, stage) : ''}</div>`;
+    if (today) return `<div class="day today${p.filled === 3 && p.done === 3 ? ' full' : ''}" data-d="${d}"><div class="day-h"><b>${fmtDate(d)}</b><span class="badge">오늘</span><span class="prog">${p.done}/3</span></div>${body}</div>`;
+    const first = (day.review.text || '').split('\n')[0];
+    const peek = first ? `“${first.slice(0, 20)}${first.length > 20 ? '…' : ''}”` : '';
+    return `<div class="day${editingReview === d ? ' open' : ''}" data-d="${d}"><div class="day-h"><b>${fmtDate(d)}</b><span class="peek">${esc(peek)}</span><span class="prog">${p.done}/${p.filled}</span></div>${body}</div>`;
   }).join('');
-  $('days').innerHTML = `<h3>오늘의 바운더리</h3>${html}`;
+  $('days').innerHTML = `<h3>오늘의 바운더리</h3><p class="keyq">${esc(KEY_QUESTION)}</p>${html}`;
   bindDays();
   renderSide();
 }
 function bindDays() {
-  const day = S.days[TODAY];
   const root = $('days');
   root.querySelectorAll('.day:not(.today) .day-h').forEach(h => h.addEventListener('click', () => h.parentElement.classList.toggle('open')));
-  root.querySelectorAll('.today .it-text').forEach(inp => {
+  root.querySelectorAll('.it-text').forEach(inp => {
     inp.addEventListener('keydown', e => { if (e.key === 'Enter') inp.blur(); });
     inp.addEventListener('blur', () => {
-      const i = Number(inp.dataset.i), v = inp.value.trim();
+      const d = inp.dataset.d, i = Number(inp.dataset.i), day = S.days[d], v = inp.value.trim();
       if (v === day.items[i].text) return;
-      day.items[i].text = v; if (!v) { day.items[i].done = false; day.items[i].tag = null; }
-      persist(); renderDays();
-      if (v) onItemSaved(i, day.items[i]);
+      day.items[i].text = v; if (!v) day.items[i].done = false;
+      persist(); renderDays(); if (d !== TODAY) openDay(d);
+      if (v && d === TODAY) onItemSaved(i, day.items[i]);
     });
   });
-  root.querySelectorAll('.today .it-chk').forEach(c => c.addEventListener('change', () => {
-    const i = Number(c.dataset.i); day.items[i].done = c.checked; persist(); renderDays();
-    const p = dayProgress(day); if (p.filled === 3 && p.done === 3) onDone3();
+  root.querySelectorAll('.it-chk').forEach(c => c.addEventListener('change', () => {
+    const d = c.dataset.d, i = Number(c.dataset.i), day = S.days[d];
+    day.items[i].done = c.checked; persist(); renderDays(); if (d !== TODAY) openDay(d);
+    const p = dayProgress(day); if (d === TODAY && p.filled === 3 && p.done === 3) onDone3();
   }));
-  root.querySelectorAll('.today .it-tag').forEach(s => s.addEventListener('change', () => {
-    const i = Number(s.dataset.i); day.items[i].tag = s.value || null; persist(); renderDays();
+  root.querySelectorAll('.ox').forEach(b => b.addEventListener('click', () => {
+    const d = b.dataset.d, day = S.days[d];
+    day.review['q' + b.dataset.q] = b.dataset.v === '1'; persist();
+    const ta = root.querySelector(`.rv-text[data-d="${d}"]`); const keep = ta ? ta.value : day.review.text;
+    renderDays(); if (d !== TODAY) openDay(d);
+    const ta2 = root.querySelector(`.rv-text[data-d="${d}"]`); if (ta2) ta2.value = keep;
   }));
-  const rs = $('reviewSave');
-  if (rs) {
-    const save = () => { const v = $('reviewInput').value.trim(); if (!v) return; day.review = v; persist(); renderDays(); onReviewSaved(v); };
-    rs.addEventListener('click', save);
-    $('reviewInput').addEventListener('keydown', e => { if (e.key === 'Enter') save(); });
-  }
-  const rt = $('reviewText');
-  if (rt) rt.addEventListener('click', () => { day.review = ''; renderDays(); $('reviewInput').value = rt.textContent; $('reviewInput').focus(); });
+  root.querySelectorAll('.rv-save').forEach(b => b.addEventListener('click', () => {
+    const d = b.dataset.d, day = S.days[d], v = root.querySelector(`.rv-text[data-d="${d}"]`).value.trim();
+    if (!v) return;
+    day.review.text = v; editingReview = null; persist(); renderDays(); if (d !== TODAY) openDay(d);
+    if (d === TODAY) onReviewSaved(v);
+  }));
+  root.querySelectorAll('.rv-sum').forEach(s => s.addEventListener('click', () => { editingReview = s.dataset.d; renderDays(); if (s.dataset.d !== TODAY) openDay(s.dataset.d); const ta = root.querySelector(`.rv-text[data-d="${s.dataset.d}"]`); if (ta) ta.focus(); }));
   const ask = $('askCoach');
   if (ask) ask.addEventListener('click', () => onAskCoach());
 }
+function openDay(d) { const el = document.querySelector(`.day[data-d="${d}"]`); if (el) el.classList.add('open'); }
 function renderSide() {
   const b = S.boundary;
   $('sideBoundary').innerHTML = `<button class="nav on">${esc(b.word)}<small>${b.from.slice(5).replace('-', '.')} ~ ${b.to.slice(5).replace('-', '.')} · ${daysLeft(b.to, TODAY)}일 남음</small></button>`;
@@ -491,7 +519,7 @@ function setTab(t) {
 function renderConcept() {
   const st = stageOf(S.user.stage);
   $('conceptBody').innerHTML = `<div class="concept"><span class="k">${st.name} 단계의 학습 포인트</span><h4>${esc(st.tip.title)}</h4>${st.tip.quote.map(q => `<blockquote>${esc(q)}</blockquote>`).join('')}<div class="ask">내 일에 적용 — ${esc(st.tip.ask)}</div><button class="add" id="conceptAdd">이 질문을 오늘의 바운더리에 추가</button></div>`;
-  $('conceptAdd').addEventListener('click', () => { onConceptAdd({ id: 'concept', text: st.tip.ask, why: `${st.name} 단계 학습 포인트`, tag: null }); });
+  $('conceptAdd').addEventListener('click', () => { onConceptAdd({ id: 'concept', text: st.tip.ask, why: `${st.name} 단계 학습 포인트` }); });
 }
 let onConceptAdd = () => {}; // Task 6
 function scrollLog() { const l = $('chatLog'); l.scrollTop = l.scrollHeight; }
@@ -511,16 +539,25 @@ function coachGreet() {
   if (mode === 'am') {
     const lr = lastReview(S, TODAY);
     coachSay(COACH.greetAm(S.user.name, lr ? lr.review : ''));
-    onGreetCards(); // Task 6에서 제안 카드 2~3장
+    setTimeout(() => conceptInChat(), 400);
+    setTimeout(() => coachSay(COACH.keyQ), 900);
+    if (SUGGEST) setTimeout(onGreetCards, 1200);
   } else {
     coachSay(COACH.greetPm(S.user.name, p.done, p.filled));
+    setTimeout(() => coachSay(COACH.conceptToday(S.user.name, st.tip.title), { silent: true }), 600);
   }
-  setTimeout(() => coachSay(COACH.conceptToday(S.user.name, st.tip.title), { silent: true }), 600);
+}
+function conceptInChat() {
+  const st = stageOf(S.user.stage);
+  const el = document.createElement('div'); el.className = 'card concept-card';
+  el.innerHTML = `<span class="why">오늘의 개념 · ${esc(st.name)} 단계</span><b>${esc(st.tip.title)}</b>${st.tip.quote.map(q => `<div class="why">${esc(q)}</div>`).join('')}<div class="why ask">${esc(st.tip.ask)}</div><button class="add">이 질문을 오늘의 바운더리에 추가</button>`;
+  $('chatLog').appendChild(el); scrollLog();
+  el.querySelector('.add').addEventListener('click', () => onConceptAdd({ id: 'concept', text: st.tip.ask, why: `${st.name} 단계 학습 포인트` }));
 }
 let onGreetCards = () => {}; // Task 6
 function coachCard(sug, opts = {}) {
   const el = document.createElement('div'); el.className = 'card';
-  el.innerHTML = `<b>${esc(sug.text)}</b>${sug.tag ? `<span class="tag">${TAG_LABEL[sug.tag]}</span>` : ''}<div class="why">${esc(sug.why)}</div>${opts.noAdd ? '<div class="why">내일 아침에 다시 물어볼게요.</div>' : '<button class="add">오늘의 바운더리에 추가</button>'}`;
+  el.innerHTML = `<b>${esc(sug.text)}</b><div class="why">${esc(sug.why)}</div>${opts.noAdd ? '<div class="why">내일 아침에 다시 물어볼게요.</div>' : '<button class="add">오늘의 바운더리에 추가</button>'}`;
   $('chatLog').appendChild(el); scrollLog();
   const btn = el.querySelector('.add');
   if (btn) btn.addEventListener('click', () => tryAdd(sug, el, btn));
@@ -543,6 +580,7 @@ function tryAdd(sug, el, btn) {
   sw.querySelector('.keep').addEventListener('click', () => sw.remove());
 }
 onGreetCards = () => {
+  if (!SUGGEST) return;
   const used = new Set(S.days[TODAY].items.map(it => it.text));
   SUGGESTIONS.filter(s => !used.has(s.text)).slice(0, 3).forEach((s, i) => setTimeout(() => coachCard(s), 300 * (i + 1)));
 };
@@ -561,13 +599,15 @@ function wireCoachReactions() {
   };
   onOrderGuard = () => { if (!canFire(S.coachSeen, TODAY, 'guard')) return; persist(); coachSay(COACH.orderGuard); };
   onFormulaComplete = () => { if (!canFire(S.coachSeen, TODAY, 'complete')) return; persist(); coachSay(COACH.complete); };
-  onDone3 = () => { if (!canFire(S.coachSeen, TODAY, 'done3')) return; persist(); coachSay(COACH.done3(st().reviewPh)); };
+  onDone3 = () => { if (!canFire(S.coachSeen, TODAY, 'done3')) return; persist(); coachSay(COACH.done3()); };
   onReviewSaved = () => {
     if (!canFire(S.coachSeen, TODAY, 'review')) return; persist();
     coachSay(COACH.afterReview);
-    const used = new Set(S.days[TODAY].items.map(it => it.text));
-    const next = SUGGESTIONS.find(s => !used.has(s.text)) || SUGGESTIONS[0];
-    coachCard(next, { noAdd: true });
+    if (SUGGEST) {
+      const used = new Set(S.days[TODAY].items.map(it => it.text));
+      const next = SUGGESTIONS.find(s => !used.has(s.text)) || SUGGESTIONS[0];
+      coachCard(next, { noAdd: true });
+    }
   };
 }
 // ===== BOOT =====
