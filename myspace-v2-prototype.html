@@ -8,8 +8,8 @@
 <style>
 /* ===== 1. 토큰 · 레이아웃 ===== */
 :root{
-  --paper:#FFFFFF; --ink:#191F28; --muted:#6B7684; --faint:#B0B8C1;
-  --line:#E5E8EB; --bg:#F7F8FA;
+  --paper:#FFFFFF; --ink:#191F28; --muted:#787774; --faint:#B4B4B0;
+  --line:#EDEDEB; --bg:#F7F7F5;
   --indigo:#5B5BD6; --indigo-soft:#EEF0FF; --indigo-ink:#3F3FB0;
   --ok:#22A06B; --warn:#F5A623; --danger:#E5484D;
   --radius:10px; --shadow:0 4px 16px rgba(25,31,40,.06);
@@ -27,19 +27,19 @@ button{cursor:pointer}
 .side .me b{font-size:15px}
 .side .stage{display:inline-block;font-size:11px;font-weight:600;color:var(--indigo-ink);background:var(--indigo-soft);border-radius:999px;padding:2px 8px;cursor:pointer}
 .side h4{margin:14px 8px 6px;font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.04em}
-.side .nav{display:block;width:100%;text-align:left;background:none;border:0;border-radius:8px;padding:7px 8px;font-size:14px;color:var(--ink);text-decoration:none}
+.side .nav{display:block;width:100%;text-align:left;background:none;border:0;border-radius:6px;padding:4px 8px;font-size:13px;color:var(--ink);text-decoration:none}
 .side .nav:hover{background:rgba(25,31,40,.05)}
-.side .nav.on{background:var(--indigo-soft);color:var(--indigo-ink);font-weight:600}
+.side .nav.on{background:rgba(25,31,40,.06);color:var(--ink);font-weight:600}
 .side .nav small{display:block;font-size:11px;color:var(--muted);font-weight:400}
-.side .nav.sub{padding-left:22px;font-size:13px}
+.side .nav.sub{padding-left:16px;font-size:13px}
 .side .nav[disabled]{color:var(--faint);cursor:not-allowed}
 .side .foot{margin-top:auto;padding-top:16px;border-top:1px solid var(--line)}
-.side .foot .nav{color:var(--indigo-ink);font-weight:600}
+.side .foot .nav{color:var(--ink);font-weight:400}
 /* 문서 */
 .doc{flex:1;min-width:0;padding:0 40px 120px}
-.doc-in{max-width:860px;margin:0 auto}
-.doc-head{padding:36px 0 8px}
-.doc-head h1{margin:0;font-size:26px;font-weight:700;letter-spacing:-.01em}
+.doc-in{max-width:720px;margin:0 auto}
+.doc-head{padding:64px 0 4px}
+.doc-head h1{margin:0;font-size:32px;font-weight:700;letter-spacing:-.01em}
 .doc-head .meta{display:flex;gap:10px;align-items:center;color:var(--muted);font-size:13px;margin-top:4px}
 .badge{display:inline-block;font-size:11px;font-weight:600;border-radius:999px;padding:2px 8px;background:var(--indigo-soft);color:var(--indigo-ink)}
 .menu-btn{display:none}
@@ -47,10 +47,10 @@ button{cursor:pointer}
 .toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:var(--ink);color:var(--paper);font-size:13px;padding:10px 16px;border-radius:999px;z-index:60;box-shadow:var(--shadow)}
 .scrim{position:fixed;inset:0;background:rgba(25,31,40,.35);z-index:40}
 /* ===== 2. 일의 공식 ===== */
-.formula{position:sticky;top:0;z-index:5;background:var(--paper);border-bottom:1px solid var(--line);padding:14px 0 18px;margin-bottom:24px}
+.formula{position:sticky;top:0;z-index:5;background:var(--paper);border-bottom:0;padding:28px 0 18px;margin-bottom:24px}
 .f-top{display:flex;justify-content:space-between;align-items:baseline}
-.f-top b{font-size:17px}
-.f-top .cnt{font-size:13px;color:var(--muted)}
+.f-top b{font-size:18px;font-weight:600}
+.f-top .cnt{font-size:12px;color:var(--muted)}
 .f-graph{position:relative;height:230px;margin-top:6px}
 .f-graph svg{position:absolute;inset:0;width:100%;height:100%}
 .f-arc{fill:none;stroke:var(--indigo);stroke-width:1.5;stroke-dasharray:5 5}
@@ -59,7 +59,7 @@ button{cursor:pointer}
 .f-pt{position:absolute;width:14px;height:14px;border-radius:50%;background:var(--indigo);transform:translate(-50%,-50%);top:52.2%}
 .f-pt.l{left:6%}
 .f-pt.r{left:94%}
-.f-lab{font-size:12px;color:var(--muted);display:block;margin-bottom:2px}
+.f-lab{font-size:11px;color:var(--faint);display:block;margin-bottom:2px}
 .f-problem{position:absolute;top:0;left:50%;transform:translateX(-50%);text-align:center;width:60%}
 .f-chip{position:absolute;top:calc(52.2% - 12px);left:50%;transform:translateX(-50%);font-size:12px;font-weight:600;color:var(--indigo-ink);background:var(--indigo-soft);border-radius:6px;padding:3px 9px;white-space:nowrap;transition:background .2s}
 .f-start{position:absolute;top:auto;bottom:0;left:5%;width:40%}
@@ -76,37 +76,41 @@ button{cursor:pointer}
 .f-summary{display:none;gap:14px;align-items:center;font-size:13px;color:var(--muted);cursor:pointer;padding-top:4px}
 .f-summary b{color:var(--ink);font-weight:600}
 .f-summary .cnt{margin-left:auto}
-.formula.collapsed{padding:10px 0}
+.formula.collapsed{padding:10px 0;border-bottom:1px solid var(--line)}
 .formula.collapsed .f-top,.formula.collapsed .f-graph{display:none}
 .formula.collapsed .f-summary{display:flex}
 /* ===== 3. 데일리 ===== */
-.day{border:1px solid var(--line);border-radius:var(--radius);margin-bottom:12px;background:var(--paper)}
-.day-h{display:flex;align-items:center;gap:10px;padding:12px 16px;cursor:pointer;border-radius:var(--radius)}
-.day-h b{font-size:15px}
+.day{border:0;margin-bottom:6px}
+.day-h{display:flex;align-items:center;gap:8px;padding:4px 0;cursor:pointer}
+.day-h::before{content:'▸';display:inline-block;color:var(--faint);font-size:10px;flex:none;transition:transform .15s ease}
+.day.open .day-h::before{transform:rotate(90deg)}
+.day-h b{font-size:15px;font-weight:600}
 .day-h .prog{font-size:12px;color:var(--muted);margin-left:auto}
 .day-h .peek{font-size:13px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:50%}
 .day.today .day-h{cursor:default}
-.day.today.full .day-h{background:var(--indigo-soft);border-radius:var(--radius) var(--radius) 0 0}
+.day.today .day-h::before{content:none}
 .day.today.full .day-h .prog{color:var(--indigo-ink);font-weight:600}
-.day-b{padding:4px 16px 14px}
+.day-b{padding:2px 0 10px 16px}
 .day:not(.today):not(.open) .day-b{display:none}
-.it{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px dashed var(--line)}
-.it:last-of-type{border-bottom:0}
-.it-chk{width:18px;height:18px;accent-color:var(--indigo);flex:none}
+.it{display:flex;align-items:center;gap:10px;padding:3px 0}
+.it-chk{width:16px;height:16px;accent-color:var(--indigo);flex:none}
 .it-text{flex:1;border:0;background:none;outline:none;font-size:15px;padding:4px 2px}
 .it-text::placeholder{color:var(--faint)}
-.it.done .it-text{text-decoration:line-through;color:var(--muted)}
-.it-tag{border:1px solid var(--line);border-radius:6px;font-size:12px;color:var(--muted);padding:2px 6px;background:var(--paper)}
-.it-tag.set{color:var(--indigo-ink);border-color:var(--indigo-soft);background:var(--indigo-soft);font-weight:600}
+.it.done .it-text{text-decoration:line-through;color:var(--faint)}
+.it-tag{border:0;border-radius:6px;font-size:11px;color:var(--muted);padding:2px 6px;background:rgba(25,31,40,.05)}
+.it-tag.set{color:var(--indigo-ink);background:var(--indigo-soft);font-weight:600}
+.it-tag:not(.set){opacity:.5}
+.it-tag:not(.set):hover,.it-tag:not(.set):focus{opacity:1}
 .it.ro .it-text{pointer-events:none}
 .rv{display:flex;gap:8px;margin-top:12px;align-items:center}
-.rv input{flex:1;border:1px solid var(--line);border-radius:8px;padding:8px 10px;outline:none}
-.rv input:focus{border-color:var(--indigo)}
-.rv button{border:0;background:var(--indigo);color:var(--paper);border-radius:8px;padding:8px 14px;font-weight:600}
-.rv .txt{flex:1;color:var(--ink);padding:6px 0;cursor:text}
+.rv input{flex:1;border:0;border-bottom:1px solid var(--line);border-radius:0;padding:8px 2px;outline:none}
+.rv input::placeholder{color:var(--faint)}
+.rv input:focus{border-bottom-color:var(--indigo)}
+.rv button{border:0;background:none;color:var(--indigo-ink);padding:8px 6px;font-size:13px;font-weight:600}
+.rv .txt{flex:1;color:var(--ink);font-size:14px;padding:6px 0;cursor:text}
 .rv .txt::before{content:'회고 · ';color:var(--muted)}
-.empty{display:flex;justify-content:center;padding:10px 0 4px}
-.empty button{border:1px solid var(--indigo);background:var(--paper);color:var(--indigo-ink);border-radius:999px;padding:8px 16px;font-weight:600}
+.empty{display:flex;justify-content:flex-start;padding:6px 0 4px}
+.empty button{border:0;background:none;color:var(--indigo-ink);padding:8px 4px;font-weight:600}
 .days h3{font-size:13px;color:var(--muted);font-weight:600;margin:0 0 10px}
 /* ===== 4. 코치 ===== */
 .coach-bubble{position:fixed;right:24px;bottom:24px;width:56px;height:56px;border-radius:50%;border:0;background:var(--indigo);color:var(--paper);font-size:26px;box-shadow:0 8px 24px rgba(91,91,214,.35);z-index:50;display:flex;align-items:center;justify-content:center}
@@ -148,12 +152,12 @@ button{cursor:pointer}
 <body>
 <div class="app">
   <aside class="side" id="side">
-    <div class="me"><span>🙂</span><div><b id="meName"></b><br><span class="stage" id="meStage"></span></div></div>
+    <div class="me"><div><b id="meName"></b><br><span class="stage" id="meStage"></span></div></div>
     <h4>바운더리</h4>
     <div id="sideBoundary"></div>
     <button class="nav" id="newBoundary" disabled title="지금 바운더리가 끝나면 열려요">＋ 새 바운더리</button>
     <div id="sideDays"></div>
-    <div class="foot"><a class="nav" href="lecture-prototype.html" id="sideLecture">📺 강의실</a></div>
+    <div class="foot"><a class="nav" href="lecture-prototype.html" id="sideLecture">강의실</a></div>
   </aside>
   <main class="doc">
     <div class="doc-in">
@@ -574,7 +578,7 @@ function renderHead() {
   $('bTitle').textContent = b.word;
   $('bPeriod').textContent = `${b.from.slice(5).replace('-', '.')} ~ ${b.to.slice(5).replace('-', '.')}`;
   $('bLeft').textContent = `${daysLeft(b.to, TODAY)}일 남음`;
-  $('sideLecture').textContent = `📺 강의실 · 커리큘럼 ${S.user.course}/5`;
+  $('sideLecture').textContent = `강의실 · 커리큘럼 ${S.user.course}/5`;
 }
 function boot() {
   if (Q.get('reset') === '1') { try { localStorage.removeItem(KEY); } catch (e) {} }
@@ -590,7 +594,7 @@ function boot() {
   $('coachBubble').addEventListener('click', () => coachOpen ? closeCoach() : openCoach('chat'));
   $('scrim').addEventListener('click', () => { closeCoach(); $('side').classList.remove('open'); });
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeCoach(); });
-  document.addEventListener('click', e => { if (coachOpen && !$('coachPanel').contains(e.target) && !$('coachBubble').contains(e.target)) closeCoach(); });
+  document.addEventListener('click', e => { if (coachOpen && !$('coachPanel').contains(e.target) && !$('coachBubble').contains(e.target) && !$('days').contains(e.target)) closeCoach(); });
   $('meStage').addEventListener('click', () => setTimeout(() => openCoach('concept'), 0));
   onAskCoach = () => setTimeout(() => openCoach('chat'), 0);
   setTimeout(coachGreet, 500);
