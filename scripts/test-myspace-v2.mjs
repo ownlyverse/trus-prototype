@@ -12,7 +12,7 @@ assert(m, 'script#app 없음');
 const src = m[1];
 const cut = src.indexOf('// ===== RENDER =====');
 assert(cut > 0, 'RENDER 마커 없음');
-const EXPORTS = '\n;({KEY,todayStr,defaultState,loadState,saveState,ensureDay,blank,formulaCount,endDefined,dayProgress,keywords,judgeSignal,stageOf,greeting,canFire,addSuggestion,replaceItem,freeReply,lastReview,daysLeft,fmtDate,USER,STAGES,BOUNDARY,FORMULA,PAST_DAYS,SUGGESTIONS,COACH,FREE,FREE_FALLBACK,blankReview,reviewDone,reviewHintFor,REVIEW_Q,KEY_QUESTION,ITEM_PH,SUGGEST})';
+const EXPORTS = '\n;({KEY,todayStr,defaultState,loadState,saveState,ensureDay,blank,formulaCount,endDefined,dayProgress,keywords,judgeSignal,stageOf,greeting,canFire,addSuggestion,replaceItem,freeReply,lastReview,daysLeft,fmtDate,USER,STAGES,BOUNDARY,FORMULA,PAST_DAYS,SUGGESTIONS,COACH,FREE,FREE_FALLBACK,blankReview,reviewDone,reviewHintFor,REVIEW_Q,KEY_QUESTION,ITEM_PH,SUGGEST,dumpAdd,dumpRemove,dumpPick,MAX_PICK})';
 const ctx = { location: { search: '' }, URLSearchParams, console };
 const L = vm.runInNewContext(src.slice(0, cut) + EXPORTS, ctx);
 
@@ -140,6 +140,42 @@ t('SUGGEST 플래그 꺼짐, 키 퀘스천·문항 상수', () => {
   assert.match(L.KEY_QUESTION, /3가지/);
   assert.equal(L.REVIEW_Q.length, 2);
   assert.equal(L.ITEM_PH.length, 3);
+});
+
+// --- Task 11 ---
+t('dumpAdd/dumpRemove: 공백 무시·중복 무시', () => {
+  const day = L.ensureDay(L.defaultState(), '2026-09-13');
+  assert.equal(L.dumpAdd(day, '  '), false);
+  assert.equal(L.dumpAdd(day, '썸네일 A/B'), true);
+  assert.equal(L.dumpAdd(day, '썸네일 A/B'), false);
+  L.dumpAdd(day, '회의');
+  assert.equal(day.dump.length, 2);
+  L.dumpRemove(day, 0);
+  assertLoose.deepEqual(day.dump, ['회의']);
+});
+t('dumpPick: 선택 3개는 items로, 나머지는 dropped로, 첫 선택이 Frog', () => {
+  const day = L.ensureDay(L.defaultState(), '2026-09-13');
+  ['a', 'b', 'c', 'd', 'e'].forEach(x => L.dumpAdd(day, x));
+  const r = L.dumpPick(day, [3, 1, 0]);
+  assert.equal(r.ok, true);
+  assert.equal(day.items[0].text, 'd');
+  assert.equal(day.items[2].text, 'a');
+  assertLoose.deepEqual(day.dropped, ['c', 'e']);
+  assertLoose.deepEqual(day.dump, []);
+});
+t('dumpPick: 0개 또는 4개 이상은 거부', () => {
+  const day = L.ensureDay(L.defaultState(), '2026-09-13');
+  ['a', 'b', 'c', 'd'].forEach(x => L.dumpAdd(day, x));
+  assert.equal(L.dumpPick(day, []).ok, false);
+  assert.equal(L.dumpPick(day, [0, 1, 2, 3]).ok, false);
+  assert.equal(day.dump.length, 4);
+});
+t('ensureDay: dump/dropped 초기화, 구데이터엔 보강', () => {
+  const s = L.defaultState();
+  const d = L.ensureDay(s, '2026-09-13');
+  assertLoose.deepEqual(d.dump, []); assertLoose.deepEqual(d.dropped, []);
+  const old = L.ensureDay(s, '2026-09-12');
+  assert(Array.isArray(old.dump) && Array.isArray(old.dropped));
 });
 
 console.log(`\n${n} tests passed`);

@@ -118,6 +118,31 @@ button{cursor:pointer}
 .empty{display:flex;justify-content:flex-start;padding:6px 0 4px}
 .empty button{border:0;background:none;color:var(--indigo-ink);padding:8px 4px;font-weight:600}
 .days h3{font-size:13px;color:var(--muted);font-weight:600;margin:0 0 10px}
+.dump{margin:4px 0 8px;padding:10px 12px;background:var(--bg);border-radius:8px}
+.dump .dump-title{font-size:13px;font-weight:600;margin:0 0 6px}
+.dump .dump-sub{font-size:12px;color:var(--muted);margin:0 0 8px}
+.dump-in{display:flex;gap:6px}
+.dump-in input{flex:1;border:0;border-bottom:1px solid var(--line);background:none;padding:6px 2px;outline:none;font-size:14px}
+.dump-in input:focus{border-bottom-color:var(--indigo)}
+.dump-in button{border:0;background:none;color:var(--indigo-ink);font-size:13px;font-weight:600;padding:4px 6px}
+.dump-list{margin:8px 0 0}
+.dump-row{display:flex;align-items:center;gap:8px;padding:3px 0;font-size:14px}
+.dump-row .dump-chk{width:16px;height:16px;accent-color:var(--indigo)}
+.dump-row .n{font-size:11px;color:var(--indigo-ink);background:var(--indigo-soft);border-radius:4px;padding:0 5px;min-width:16px;text-align:center}
+.dump-row .n:empty{display:none}
+.dump-row .t{flex:1}
+.dump-row .dump-x{border:0;background:none;color:var(--faint);font-size:14px;padding:0 4px}
+.dump-row .dump-x:hover{color:var(--danger)}
+.dump-act{display:flex;justify-content:space-between;align-items:center;margin-top:8px}
+.dump-act .cnt{font-size:12px;color:var(--muted)}
+.dump-act button{border:0;background:var(--indigo);color:var(--paper);border-radius:8px;padding:6px 12px;font-size:13px;font-weight:600}
+.dump-act button[disabled]{background:var(--faint);cursor:default}
+.dropped{margin-top:10px;font-size:12.5px;color:var(--muted)}
+.dropped summary{cursor:pointer;list-style:none}
+.dropped summary::before{content:'▸ ';color:var(--faint)}
+.dropped[open] summary::before{content:'▾ '}
+.dropped ul{margin:4px 0 0 14px;padding:0}
+.dropped li{text-decoration:line-through;color:var(--faint);padding:1px 0}
 /* ===== 4. 코치 ===== */
 .coach-bubble{position:fixed;right:24px;bottom:24px;width:56px;height:56px;border-radius:50%;border:0;background:var(--indigo);color:var(--paper);font-size:26px;box-shadow:0 8px 24px rgba(91,91,214,.35);z-index:50;display:flex;align-items:center;justify-content:center}
 .coach-bubble .dot{position:absolute;top:4px;right:4px;width:12px;height:12px;border-radius:50%;background:var(--danger);border:2px solid var(--paper)}
@@ -136,7 +161,6 @@ button{cursor:pointer}
 .msg.u{background:var(--indigo);color:var(--paper);margin-left:auto;border-bottom-right-radius:3px}
 .card{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin:0 0 8px;max-width:92%}
 .card .why{font-size:12px;color:var(--muted);margin:2px 0 8px}
-.card .tag{font-size:11px;color:var(--indigo-ink);background:var(--indigo-soft);border-radius:4px;padding:1px 6px;margin-left:6px}
 .card .add{border:0;background:var(--indigo);color:var(--paper);border-radius:8px;padding:6px 10px;font-size:12px;font-weight:600}
 .card .add[disabled]{background:var(--faint);cursor:default}
 .card .swap{margin-top:8px;display:flex;flex-direction:column;gap:4px}
@@ -214,10 +238,10 @@ const STAGES = [
 const BOUNDARY = { id: 'b1', word: '완강률 60%', from: '2026-09-01', to: '2026-11-30' };
 const FORMULA = { numeric: '완강률 60%', customer: '회사 생활 10년보다 이 강의가 더 나았어요', problem: '일의 정체기가 왔을 때 뚫는 방법을 모른다', strategy: '' };
 const PAST_DAYS = {
-  '2026-09-09': { items: [{ text: '강의 3단계 미션 제출', done: true }, { text: '완강률 주간 리포트 보기', done: true }, { text: '수강생 인터뷰 1명', done: false }], review: { q1: false, q2: true, text: '인터뷰는 못 잡았다. 리포트에서 3단계 이탈이 제일 크다.\n인터뷰를 먼저 잡았어야 했다.' } },
-  '2026-09-10': { items: [{ text: '3단계 이탈 구간 다시 보기', done: true }, { text: '수강생 인터뷰 1명', done: true }, { text: '인트로 길이 재기', done: true }], review: { q1: true, q2: false, text: '3단계 이탈 구간을 다시 봤다. 앞 3분에서 나간다.' } },
-  '2026-09-11': { items: [{ text: '인트로 재편집 시작', done: true }, { text: '팀 주간 회의', done: false }, { text: '외부 제안서 검토', done: false }], review: { q1: false, q2: true, text: '회의가 하루를 먹었다. 완강률에 닿은 건 하나뿐.\n회의는 오후로 미루고 인트로부터 했어야 했다.' } },
-  '2026-09-12': { items: [{ text: '인트로 재편집 끝내기', done: true }, { text: '완강률 대시보드 확인', done: true }, { text: '수강생 후기 3개 읽기', done: true }], review: { q1: true, q2: false, text: '썸네일 A/B는 내일로 미뤘다. 인트로 재편집은 끝.' } },
+  '2026-09-09': { items: [{ text: '강의 3단계 미션 제출', done: true }, { text: '완강률 주간 리포트 보기', done: true }, { text: '수강생 인터뷰 1명', done: false }], review: { q1: false, q2: true, text: '인터뷰는 못 잡았다. 리포트에서 3단계 이탈이 제일 크다.\n인터뷰를 먼저 잡았어야 했다.' }, dump: [], dropped: [] },
+  '2026-09-10': { items: [{ text: '3단계 이탈 구간 다시 보기', done: true }, { text: '수강생 인터뷰 1명', done: true }, { text: '인트로 길이 재기', done: true }], review: { q1: true, q2: false, text: '3단계 이탈 구간을 다시 봤다. 앞 3분에서 나간다.' }, dump: [], dropped: [] },
+  '2026-09-11': { items: [{ text: '인트로 재편집 시작', done: true }, { text: '팀 주간 회의', done: false }, { text: '외부 제안서 검토', done: false }], review: { q1: false, q2: true, text: '회의가 하루를 먹었다. 완강률에 닿은 건 하나뿐.\n회의는 오후로 미루고 인트로부터 했어야 했다.' }, dump: [], dropped: ['슬랙 답장 정리', '다음 달 강의 기획 초안'] },
+  '2026-09-12': { items: [{ text: '인트로 재편집 끝내기', done: true }, { text: '완강률 대시보드 확인', done: true }, { text: '수강생 후기 3개 읽기', done: true }], review: { q1: true, q2: false, text: '썸네일 A/B는 내일로 미뤘다. 인트로 재편집은 끝.' }, dump: [], dropped: ['썸네일 A/B 두 종 올리기'] },
 };
 const SUGGESTIONS = [
   { id: 's1', text: '썸네일 A/B 두 종 올리기', why: '어제 회고에서 내일로 미뤘다고 했어요' },
@@ -227,7 +251,12 @@ const SUGGESTIONS = [
 ];
 const COACH = {
   greetAm: (name, last) => last ? `${name}님, 좋은 아침이에요. 어제 "${last}"라고 남기셨죠.` : `${name}님, 좋은 아침이에요.`,
-  keyQ: `오늘 하루가 끝났을 때 무엇이 되어 있으면 성공인가요? 그 기준으로 ${KEY_QUESTION} 첫 줄엔 가장 먼저 끝낼 일 하나를 적어요.`,
+  keyQ1: '오늘 하루가 끝났을 때 무엇이 되어 있으면 성공인가요?',
+  keyQ2: `${KEY_QUESTION} 첫 줄엔 가장 먼저 끝낼 일 하나를 적어요.`,
+  dumpIntro: '머릿속에 있는 할 일을 전부 꺼내놔요. 많아도 괜찮아요, 고르는 건 다음이에요.',
+  dumpPick: '이 중 끝점(성과)에 가장 큰 영향을 주는 일 3개만 골라요. 첫 번째로 고른 게 오늘 가장 먼저 끝낼 일이에요.',
+  dumpDone: (n) => n ? `3개를 정했어요. 나머지 ${n}개는 오늘 안 해요. 위임하거나 버려요.` : '3개를 정했어요. 첫 줄부터 시작해요.',
+  frogSplit: '첫 줄이 커 보이면 오늘 끝낼 단위로 쪼개요. 끝날 때까지 다른 일로 넘어가지 않아요.',
   greetPm: (name, done, filled) => filled ? `${name}님, 3개 중 ${done}개 끝냈네요. 회고 질문 두 개에 O/X부터 찍어봐요.` : `${name}님, 오늘은 아직 3개를 안 정했어요. 내일 아침 것부터 하나만 정해둘까요?`,
   signal: (word) => `"${word}"에 바로 닿는 일이네요. 시그널이에요.`,
   orderGuard: '끝부터 정해요. 성과가 없으면 문제도 전략도 방향을 잃어요.',
@@ -280,9 +309,28 @@ function saveState(storage, state, onFail) {
   try { storage.setItem(KEY, JSON.stringify(state)); return true; }
   catch (e) { if (onFail) onFail(e); return false; }
 }
+const MAX_PICK = 3;
 function ensureDay(state, date) {
-  if (!state.days[date]) state.days[date] = { items: [blank(), blank(), blank()], review: blankReview() };
-  return state.days[date];
+  if (!state.days[date]) state.days[date] = { items: [blank(), blank(), blank()], review: blankReview(), dump: [], dropped: [] };
+  const d = state.days[date];
+  if (!Array.isArray(d.dump)) d.dump = [];
+  if (!Array.isArray(d.dropped)) d.dropped = [];
+  return d;
+}
+function dumpAdd(day, text) {
+  const v = (text || '').trim();
+  if (!v || day.dump.includes(v)) return false;
+  day.dump.push(v); return true;
+}
+function dumpRemove(day, idx) { day.dump.splice(idx, 1); }
+function dumpPick(day, idxs) {
+  const sel = [...new Set(idxs)].filter(i => i >= 0 && i < day.dump.length);
+  if (sel.length === 0 || sel.length > MAX_PICK) return { ok: false, reason: sel.length === 0 ? 'none' : 'toomany' };
+  const picked = sel.map(i => day.dump[i]);
+  day.items = [0, 1, 2].map(i => picked[i] ? { text: picked[i], done: false } : blank());
+  day.dropped = day.dump.filter((_, i) => !sel.includes(i));
+  day.dump = [];
+  return { ok: true, picked: picked.length, dropped: day.dropped.length };
 }
 const FKEYS = ['numeric', 'customer', 'problem', 'strategy'];
 function formulaCount(f) { return FKEYS.filter(k => (f[k] || '').trim()).length; }
@@ -410,6 +458,7 @@ function watchCollapse() {
   }, { passive: true });
 }
 let onItemSaved = () => {}, onDone3 = () => {}, onReviewSaved = () => {}, onAskCoach = () => {};
+let onDumpOpen = () => {}, onDumpPicked = () => {};
 
 let editingReview = null; // 'YYYY-MM-DD' — 저장된 회고를 다시 여는 중인 날짜
 function itemRow(it, i, d) {
@@ -418,6 +467,15 @@ function itemRow(it, i, d) {
     <input type="text" class="it-text" data-d="${d}" data-i="${i}" value="${esc(it.text)}" placeholder="${ITEM_PH[i]}" maxlength="80">
     ${i === 0 ? '<span class="frog-tag">먼저</span>' : ''}
   </div>`;
+}
+let dumpSel = []; // 덤프에서 체크한 인덱스(선택 순서 유지)
+function dumpBlock(day) {
+  const rows = day.dump.map((t, i) => { const k = dumpSel.indexOf(i); return `<div class="dump-row" data-i="${i}"><input type="checkbox" class="dump-chk" data-i="${i}"${k >= 0 ? ' checked' : ''}><span class="n">${k >= 0 ? k + 1 : ''}</span><span class="t">${esc(t)}</span><button class="dump-x" data-i="${i}" aria-label="빼기">✕</button></div>`; }).join('');
+  return `<div class="dump" id="dump"><p class="dump-title">먼저, 머릿속 할 일을 전부 꺼내놔요</p><p class="dump-sub">많아도 괜찮아요. 다 적은 뒤에 끝점에 가장 큰 영향을 주는 3개만 골라요. 첫 번째로 고른 게 오늘 가장 먼저 끝낼 일이에요.</p><div class="dump-in"><input id="dumpIn" placeholder="할 일 하나 적고 Enter" maxlength="80"><button id="dumpAdd">추가</button></div><div class="dump-list">${rows}</div>${day.dump.length ? `<div class="dump-act"><span class="cnt">${dumpSel.length}/${MAX_PICK} 골랐어요</span><button id="dumpPick"${dumpSel.length === 0 ? ' disabled' : ''}>이 ${dumpSel.length || ''}개로 오늘을 시작해요</button></div>` : ''}</div>`;
+}
+function droppedBlock(day) {
+  if (!day.dropped.length) return '';
+  return `<details class="dropped"><summary>오늘 안 하는 일 ${day.dropped.length}개</summary><ul>${day.dropped.map(t => `<li>${esc(t)}</li>`).join('')}</ul></details>`;
 }
 function reviewBlock(day, d, stage) {
   const r = day.review;
@@ -434,9 +492,11 @@ function renderDays() {
   const html = dates.map(d => {
     const day = S.days[d], p = dayProgress(day), today = d === TODAY;
     const rows = day.items.map((it, i) => itemRow(it, i, d)).join('');
-    const empty = today && p.filled === 0 ? `<div class="empty"><button id="askCoach">🦉 코치와 같이 정하기</button></div>` : '';
+    const dumpMode = today && p.filled === 0;
+    const empty = dumpMode ? dumpBlock(day) : '';
+    const dropped = today ? droppedBlock(day) : '';
     const showReview = today || p.filled > 0 || reviewDone(day.review);
-    const body = `<div class="day-b">${rows}${empty}${showReview ? reviewBlock(day, d, stage) : ''}</div>`;
+    const body = `<div class="day-b">${dumpMode ? empty : rows}${dropped}${showReview && !dumpMode ? reviewBlock(day, d, stage) : ''}</div>`;
     if (today) return `<div class="day today${p.filled === 3 && p.done === 3 ? ' full' : ''}" data-d="${d}"><div class="day-h"><b>${fmtDate(d)}</b><span class="badge">오늘</span><span class="prog">${p.done}/3</span></div>${body}</div>`;
     const first = (day.review.text || '').split('\n')[0];
     const peek = first ? `“${first.slice(0, 20)}${first.length > 20 ? '…' : ''}”` : '';
@@ -478,8 +538,32 @@ function bindDays() {
     if (d === TODAY) onReviewSaved(v);
   }));
   root.querySelectorAll('.rv-sum').forEach(s => s.addEventListener('click', () => { editingReview = s.dataset.d; renderDays(); if (s.dataset.d !== TODAY) openDay(s.dataset.d); const ta = root.querySelector(`.rv-text[data-d="${s.dataset.d}"]`); if (ta) ta.focus(); }));
-  const ask = $('askCoach');
-  if (ask) ask.addEventListener('click', () => onAskCoach());
+  const di = $('dumpIn');
+  if (di) {
+    const day = S.days[TODAY];
+    const add = () => { if (dumpAdd(day, di.value)) { persist(); renderDays(); $('dumpIn').focus(); } else di.value = ''; };
+    di.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); add(); } });
+    $('dumpAdd').addEventListener('click', add);
+    if (day.dump.length === 0 && dumpSel.length === 0) onDumpOpen();
+    root.querySelectorAll('.dump-chk').forEach(c => c.addEventListener('change', () => {
+      const i = Number(c.dataset.i);
+      if (c.checked) { if (dumpSel.length >= MAX_PICK) { c.checked = false; toast('3개까지만 골라요. 나머지는 오늘 안 하는 일이에요.'); return; } dumpSel.push(i); }
+      else dumpSel = dumpSel.filter(x => x !== i);
+      renderDays();
+    }));
+    root.querySelectorAll('.dump-x').forEach(b => b.addEventListener('click', () => {
+      const i = Number(b.dataset.i); dumpRemove(day, i);
+      dumpSel = dumpSel.filter(x => x !== i).map(x => x > i ? x - 1 : x);
+      persist(); renderDays();
+    }));
+    const pk = $('dumpPick');
+    if (pk) pk.addEventListener('click', () => {
+      const r = dumpPick(day, dumpSel);
+      if (!r.ok) return;
+      dumpSel = []; persist(); renderDays();
+      onDumpPicked(r);
+    });
+  }
 }
 function openDay(d) { const el = document.querySelector(`.day[data-d="${d}"]`); if (el) el.classList.add('open'); }
 function renderSide() {
@@ -540,7 +624,9 @@ function coachGreet() {
     const lr = lastReview(S, TODAY);
     coachSay(COACH.greetAm(S.user.name, lr ? lr.review : ''));
     setTimeout(() => conceptInChat(), 400);
-    setTimeout(() => coachSay(COACH.keyQ), 900);
+    setTimeout(() => coachSay(COACH.keyQ1), 900);
+    setTimeout(() => coachSay(COACH.keyQ2), 1300);
+    if (p.filled === 0) setTimeout(() => coachSay(COACH.dumpPick, { silent: true }), 1700);
     if (SUGGEST) setTimeout(onGreetCards, 1200);
   } else {
     coachSay(COACH.greetPm(S.user.name, p.done, p.filled));
@@ -550,7 +636,7 @@ function coachGreet() {
 function conceptInChat() {
   const st = stageOf(S.user.stage);
   const el = document.createElement('div'); el.className = 'card concept-card';
-  el.innerHTML = `<span class="why">오늘의 개념 · ${esc(st.name)} 단계</span><b>${esc(st.tip.title)}</b>${st.tip.quote.map(q => `<div class="why">${esc(q)}</div>`).join('')}<div class="why ask">${esc(st.tip.ask)}</div><button class="add">이 질문을 오늘의 바운더리에 추가</button>`;
+  el.innerHTML = `<div class="why">오늘의 개념 · ${esc(st.name)} 단계</div><b>${esc(st.tip.title)}</b>${st.tip.quote.map(q => `<div class="why">${esc(q)}</div>`).join('')}<div class="why ask">${esc(st.tip.ask)}</div><button class="add">이 질문을 오늘의 바운더리에 추가</button>`;
   $('chatLog').appendChild(el); scrollLog();
   el.querySelector('.add').addEventListener('click', () => onConceptAdd({ id: 'concept', text: st.tip.ask, why: `${st.name} 단계 학습 포인트` }));
 }
@@ -608,6 +694,14 @@ function wireCoachReactions() {
       const next = SUGGESTIONS.find(s => !used.has(s.text)) || SUGGESTIONS[0];
       coachCard(next, { noAdd: true });
     }
+  };
+  onDumpOpen = () => { if (!canFire(S.coachSeen, TODAY, 'dumpOpen')) return; persist(); coachSay(COACH.dumpIntro, { silent: true }); };
+  onDumpPicked = (r) => {
+    if (!canFire(S.coachSeen, TODAY, 'dumpPicked')) return; persist();
+    coachSay(COACH.dumpDone(r.dropped));
+    setTimeout(() => coachSay(COACH.frogSplit, { silent: true }), 700);
+    const day = S.days[TODAY];
+    day.items.forEach((it, i) => { if (it.text) onItemSaved(i, it); });
   };
 }
 // ===== BOOT =====
