@@ -8,7 +8,7 @@
 <style>
 /* ===== 1. 토큰 · 레이아웃 ===== */
 :root{
-  --paper:#FFFFFF; --ink:#191F28; --muted:#787774; --faint:#B4B4B0;
+  --paper:#FFFFFF; --ink:#191F28; --muted:#6E6D69; --faint:#B4B4B0;
   --line:#EDEDEB; --bg:#F7F7F5;
   --indigo:#5B5BD6; --indigo-soft:#EEF0FF; --indigo-ink:#3F3FB0;
   --ok:#22A06B; --warn:#F5A623; --danger:#E5484D;
@@ -59,12 +59,12 @@ button{cursor:pointer}
 .f-pt{position:absolute;width:14px;height:14px;border-radius:50%;background:var(--indigo);transform:translate(-50%,-50%);top:52.2%}
 .f-pt.l{left:6%}
 .f-pt.r{left:94%}
-.f-lab{font-size:11px;color:var(--faint);display:block;margin-bottom:2px}
+.f-lab{font-size:11px;color:var(--muted);display:block;margin-bottom:2px}
 .f-problem{position:absolute;top:0;left:50%;transform:translateX(-50%);text-align:center;width:60%}
 .f-chip{position:absolute;top:calc(52.2% - 12px);left:50%;transform:translateX(-50%);font-size:12px;font-weight:600;color:var(--indigo-ink);background:var(--indigo-soft);border-radius:6px;padding:3px 9px;white-space:nowrap;transition:background .2s}
 .f-start{position:absolute;top:auto;bottom:0;left:5%;width:40%}
 .f-end{position:absolute;top:auto;bottom:0;right:5%;width:40%;text-align:right}
-.f-val{display:block;min-height:1.5em;outline:none;border-radius:4px;padding:1px 4px;margin:0 -4px;cursor:text}
+.f-val{display:block;min-height:1.5em;outline:none;border-radius:4px;padding:1px 4px;margin:0 -4px;cursor:text;word-break:keep-all}
 .f-val:hover{background:rgba(91,91,214,.06)}
 .f-val:focus{background:var(--indigo-soft)}
 .f-val:empty::before{content:attr(data-ph);color:var(--faint)}
@@ -115,8 +115,6 @@ button{cursor:pointer}
 .rv-sum .chip{font-size:11px;color:var(--muted);background:rgba(25,31,40,.05);border-radius:4px;padding:2px 7px}
 .rv-sum .chip.on{color:var(--indigo-ink);background:var(--indigo-soft)}
 .rv-sum .txt{font-size:14px;white-space:pre-wrap;line-height:1.6}
-.empty{display:flex;justify-content:flex-start;padding:6px 0 4px}
-.empty button{border:0;background:none;color:var(--indigo-ink);padding:8px 4px;font-weight:600}
 .days h3{font-size:13px;color:var(--muted);font-weight:600;margin:0 0 10px}
 .dump{margin:4px 0 8px;padding:10px 12px;background:var(--bg);border-radius:8px}
 .dump .dump-title{font-size:13px;font-weight:600;margin:0 0 6px}
@@ -178,6 +176,23 @@ button{cursor:pointer}
 .concept .add{margin-top:10px;border:0;background:var(--indigo);color:var(--paper);border-radius:8px;padding:7px 10px;font-size:12px;font-weight:600}
 .concept-card .ask{color:var(--indigo-ink);font-weight:600}
 /* ===== 5. 반응형 (반드시 마지막) ===== */
+@media (max-width: 720px){
+  .side{position:fixed;left:0;top:0;bottom:0;z-index:45;transform:translateX(-100%);transition:transform .2s}
+  .side.open{transform:none}
+  .doc{padding:0 16px 120px}
+  .menu-btn{display:inline-block;border:1px solid var(--line);background:var(--paper);border-radius:8px;padding:4px 10px;margin-top:14px}
+  .doc-head{padding-top:12px}
+  .f-graph{height:auto;display:flex;flex-direction:column;gap:12px;padding-left:14px;border-left:2px dashed var(--indigo)}
+  .f-graph svg,.f-pt{display:none}
+  .f-problem,.f-start,.f-end{position:static;transform:none;width:auto;text-align:left}
+  .f-end{order:1}.f-problem{order:2}.f-chip{order:3}.f-start{order:4}
+  .f-chip{position:static;transform:none;align-self:flex-start}
+  .dump-act{flex-wrap:wrap;gap:8px}
+  .dump-row .dump-x{padding:5px 6px}
+  .coach-panel{right:0;bottom:0;left:0;width:auto;height:88vh;max-height:none;border-radius:14px 14px 0 0}
+  .coach-mini{right:16px;bottom:90px}
+  .coach-bubble{right:16px;bottom:16px}
+}
 </style>
 </head>
 <body>
@@ -722,10 +737,11 @@ function boot() {
   ensureDay(S, TODAY);
   renderHead();
   renderFormula();
-  renderDays();
-  buildCoachPanel();
   wireCoachReactions();
+  buildCoachPanel();
+  renderDays();
   $('coachBubble').addEventListener('click', () => coachOpen ? closeCoach() : openCoach('chat'));
+  $('menuBtn').addEventListener('click', () => { $('side').classList.toggle('open'); $('scrim').hidden = !$('side').classList.contains('open'); });
   $('scrim').addEventListener('click', () => { closeCoach(); $('side').classList.remove('open'); });
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeCoach(); });
   document.addEventListener('click', e => { if (coachOpen && !$('coachPanel').contains(e.target) && !$('coachBubble').contains(e.target) && !$('days').contains(e.target)) closeCoach(); });
