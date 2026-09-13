@@ -514,7 +514,35 @@ function coachGreet() {
   setTimeout(() => coachSay(COACH.conceptToday(S.user.name, st.tip.title), { silent: true }), 600);
 }
 let onGreetCards = () => {}; // Task 6
-let coachCard = () => {}; // Task 6
+function coachCard(sug, opts = {}) {
+  const el = document.createElement('div'); el.className = 'card';
+  el.innerHTML = `<b>${esc(sug.text)}</b>${sug.tag ? `<span class="tag">${TAG_LABEL[sug.tag]}</span>` : ''}<div class="why">${esc(sug.why)}</div>${opts.noAdd ? '<div class="why">내일 아침에 다시 물어볼게요.</div>' : '<button class="add">오늘의 바운더리에 추가</button>'}`;
+  $('chatLog').appendChild(el); scrollLog();
+  const btn = el.querySelector('.add');
+  if (btn) btn.addEventListener('click', () => tryAdd(sug, el, btn));
+  return el;
+}
+function tryAdd(sug, el, btn) {
+  const day = S.days[TODAY];
+  const r = addSuggestion(day, sug);
+  if (r.ok) { persist(); renderDays(); btn.textContent = '추가됨 ✓'; btn.disabled = true; coachSay(COACH.added(sug.text), { silent: true }); S.coachSeen[TODAY] = S.coachSeen[TODAY] || {}; if (!S.coachSeen[TODAY].items) S.coachSeen[TODAY].items = []; S.coachSeen[TODAY].items[r.index] = true; persist(); return; }
+  if (el.querySelector('.swap')) return;
+  coachSay(COACH.full, { silent: true });
+  const sw = document.createElement('div'); sw.className = 'swap';
+  sw.innerHTML = day.items.map((it, i) => `<button data-i="${i}">↔ ${esc(it.text)}</button>`).join('') + `<button class="keep">그냥 둘게요</button>`;
+  el.appendChild(sw); scrollLog();
+  sw.querySelectorAll('button[data-i]').forEach(b => b.addEventListener('click', () => {
+    const old = replaceItem(day, Number(b.dataset.i), sug); persist(); renderDays();
+    sw.remove(); btn.textContent = '추가됨 ✓'; btn.disabled = true;
+    coachSay(COACH.swapped(old.text), { silent: true });
+  }));
+  sw.querySelector('.keep').addEventListener('click', () => sw.remove());
+}
+onGreetCards = () => {
+  const used = new Set(S.days[TODAY].items.map(it => it.text));
+  SUGGESTIONS.filter(s => !used.has(s.text)).slice(0, 3).forEach((s, i) => setTimeout(() => coachCard(s), 300 * (i + 1)));
+};
+onConceptAdd = (sug) => { setTab('chat'); const el = coachCard(sug); tryAdd(sug, el, el.querySelector('.add')); };
 function wireCoachReactions() {
   const st = () => stageOf(S.user.stage);
   onItemSaved = (i, item) => {
@@ -528,7 +556,7 @@ function wireCoachReactions() {
     coachSay(COACH.formula[k]);
   };
   onOrderGuard = () => { if (!canFire(S.coachSeen, TODAY, 'guard')) return; persist(); coachSay(COACH.orderGuard); };
-  onFormulaComplete = () => coachSay(COACH.complete);
+  onFormulaComplete = () => { if (!canFire(S.coachSeen, TODAY, 'complete')) return; persist(); coachSay(COACH.complete); };
   onDone3 = () => { if (!canFire(S.coachSeen, TODAY, 'done3')) return; persist(); coachSay(COACH.done3(st().reviewPh)); };
   onReviewSaved = () => {
     if (!canFire(S.coachSeen, TODAY, 'review')) return; persist();

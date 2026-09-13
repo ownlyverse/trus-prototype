@@ -109,4 +109,19 @@ t('judgeSignal: 태그 있으면 시그널, 키워드 매칭, 아니면 노이�
 });
 t('stageOf: 범위 클램프', () => { assert.equal(L.stageOf(0).n, 1); assert.equal(L.stageOf(9).n, 6); assert.equal(L.stageOf('3').n, 3); });
 
+// --- Task 6 ---
+t('addSuggestion: 빈 줄에 삽입, 꽉 차면 full', () => {
+  const day = { items: [L.blank(), { text: 'x', done: false, tag: null }, L.blank()], review: '' };
+  const r = L.addSuggestion(day, L.SUGGESTIONS[0]);
+  assertLoose.deepEqual(r, { ok: true, index: 0 });
+  assert.equal(day.items[0].tag, 'strategy');
+  L.addSuggestion(day, L.SUGGESTIONS[1]);
+  assertLoose.deepEqual(L.addSuggestion(day, L.SUGGESTIONS[2]), { ok: false, reason: 'full' });
+});
+t('replaceItem: 교체하고 옛 항목 반환', () => {
+  const day = { items: [{ text: 'a', done: true, tag: null }, L.blank(), L.blank()], review: '' };
+  const old = L.replaceItem(day, 0, L.SUGGESTIONS[3]);
+  assert.equal(old.text, 'a'); assert.equal(day.items[0].text, L.SUGGESTIONS[3].text); assert.equal(day.items[0].done, false);
+});
+
 console.log(`\n${n} tests passed`);
