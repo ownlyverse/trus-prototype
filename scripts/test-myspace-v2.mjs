@@ -96,4 +96,17 @@ t('COACH 템플릿: 이름 포함', () => {
   assert.match(L.COACH.greetPm('소정', 2, 3), /2개/);
 });
 
+// --- Task 5 ---
+t('keywords: 조사 제거·2글자 이상', () => {
+  const k = L.keywords(L.FORMULA);
+  assert(k.includes('완강률')); assert(k.includes('정체기')); assert(!k.includes('이'));
+});
+t('judgeSignal: 태그 있으면 시그널, 키워드 매칭, 아니면 노이즈, 빈 항목 null', () => {
+  assert.equal(L.judgeSignal({ text: '팀 회의', done: false, tag: 'strategy' }, L.FORMULA), 'signal');
+  assert.equal(L.judgeSignal({ text: '완강률 대시보드 보기', done: false, tag: null }, L.FORMULA), 'signal');
+  assert.equal(L.judgeSignal({ text: '팀 주간 회의', done: false, tag: null }, L.FORMULA), 'noise');
+  assert.equal(L.judgeSignal({ text: '  ', done: false, tag: null }, L.FORMULA), null);
+});
+t('stageOf: 범위 클램프', () => { assert.equal(L.stageOf(0).n, 1); assert.equal(L.stageOf(9).n, 6); assert.equal(L.stageOf('3').n, 3); });
+
 console.log(`\n${n} tests passed`);

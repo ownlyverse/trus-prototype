@@ -514,6 +514,30 @@ function coachGreet() {
   setTimeout(() => coachSay(COACH.conceptToday(S.user.name, st.tip.title), { silent: true }), 600);
 }
 let onGreetCards = () => {}; // Task 6
+let coachCard = () => {}; // Task 6
+function wireCoachReactions() {
+  const st = () => stageOf(S.user.stage);
+  onItemSaved = (i, item) => {
+    if (!canFire(S.coachSeen, TODAY, 'items', i)) return; persist();
+    const j = judgeSignal(item, S.boundary.formula);
+    const f = S.boundary.formula;
+    coachSay(j === 'signal' ? COACH.signal(f.numeric || f.customer || '끝점') : st().judge);
+  };
+  onFormulaSaved = (k, v) => {
+    if (!v || !canFire(S.coachSeen, TODAY, 'formula_' + k)) return; persist();
+    coachSay(COACH.formula[k]);
+  };
+  onOrderGuard = () => { if (!canFire(S.coachSeen, TODAY, 'guard')) return; persist(); coachSay(COACH.orderGuard); };
+  onFormulaComplete = () => coachSay(COACH.complete);
+  onDone3 = () => { if (!canFire(S.coachSeen, TODAY, 'done3')) return; persist(); coachSay(COACH.done3(st().reviewPh)); };
+  onReviewSaved = () => {
+    if (!canFire(S.coachSeen, TODAY, 'review')) return; persist();
+    coachSay(COACH.afterReview);
+    const used = new Set(S.days[TODAY].items.map(it => it.text));
+    const next = SUGGESTIONS.find(s => !used.has(s.text)) || SUGGESTIONS[0];
+    coachCard(next, { noAdd: true });
+  };
+}
 // ===== BOOT =====
 function renderHead() {
   const b = S.boundary;
@@ -534,11 +558,13 @@ function boot() {
   renderFormula();
   renderDays();
   buildCoachPanel();
+  wireCoachReactions();
   $('coachBubble').addEventListener('click', () => coachOpen ? closeCoach() : openCoach('chat'));
   $('scrim').addEventListener('click', () => { closeCoach(); $('side').classList.remove('open'); });
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeCoach(); });
-  $('meStage').addEventListener('click', () => openCoach('concept'));
-  onAskCoach = () => openCoach('chat');
+  document.addEventListener('click', e => { if (coachOpen && !$('coachPanel').contains(e.target) && !$('coachBubble').contains(e.target)) closeCoach(); });
+  $('meStage').addEventListener('click', () => setTimeout(() => openCoach('concept'), 0));
+  onAskCoach = () => setTimeout(() => openCoach('chat'), 0);
   setTimeout(coachGreet, 500);
   watchCollapse();
 }
