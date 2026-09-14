@@ -6,7 +6,8 @@
 <title>바운더리 타운 — 마이스페이스 (1차 오픈안)</title>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"></noscript>
 <style>
 /* ===== 1. 토큰 · 레이아웃 ===== */
 :root{
@@ -58,6 +59,9 @@ button{cursor:pointer}
 .prop-edit input[type=date]:focus{outline:2px solid var(--indigo);outline-offset:1px;border-color:var(--indigo)}
 .prop-arrow{color:var(--muted)}
 .prop-ok{border:0;background:var(--indigo);color:var(--paper);border-radius:6px;padding:6px 14px;font-size:13px;font-weight:600}
+.prop-cancel{border:0;background:none;color:var(--muted);border-radius:6px;padding:6px 8px;font-size:13px}
+.prop-cancel:hover{background:rgba(25,31,40,.05)}
+.prop-cancel:focus-visible{outline:2px solid var(--indigo);outline-offset:1px}
 .badge{display:inline-block;font-size:12px;font-weight:500;border-radius:4px;padding:1px 7px;background:rgba(25,31,40,.06);color:var(--muted)}
 .menu-btn{display:none}
 /* 토스트 */
@@ -224,7 +228,7 @@ button{cursor:pointer}
     <div class="doc-in">
       <button class="menu-btn" id="menuBtn" aria-label="메뉴">☰</button>
       <header class="doc-head">
-        <h1 id="bTitle" contenteditable="plaintext-only" role="textbox" aria-label="바운더리 이름 — 언제든 고칠 수 있어요" data-ph="바운더리 이름을 지어요 (예: 정체기 탈출 강의 완주 프로젝트)"></h1>
+        <h1 id="bTitle" contenteditable="plaintext-only" aria-label="바운더리 이름 — 언제든 고칠 수 있어요" data-ph="바운더리 이름을 지어요 (예: 정체기 탈출 강의 완주 프로젝트)"></h1>
         <div class="props" id="props"></div>
       </header>
       <section class="formula" id="formula"></section>
@@ -779,7 +783,7 @@ function renderHead() {
   if (document.activeElement !== $('bTitle')) $('bTitle').textContent = b.title || '';
   $('sideLecture').textContent = `강의실 · 커리큘럼 ${S.user.course}/5`;
   const period = editingPeriod
-    ? `<span class="prop-edit"><input type="date" id="pFrom" value="${b.from}" aria-label="시작 날짜"><span class="prop-arrow">→</span><input type="date" id="pTo" value="${b.to}" aria-label="끝 날짜"><button class="prop-ok" id="pOk">확인</button></span>`
+    ? `<span class="prop-edit"><input type="date" id="pFrom" value="${b.from}" aria-label="시작 날짜"><span class="prop-arrow">→</span><input type="date" id="pTo" value="${b.to}" aria-label="끝 날짜"><button class="prop-ok" id="pOk">확인</button><button class="prop-cancel" id="pCancel">취소</button></span>`
     : `<span class="prop-v prop-period" id="bPeriod" role="button" tabindex="0" aria-label="기간 고치기">${shortDate(b.from)} → ${shortDate(b.to)}</span>`;
   $('props').innerHTML = `
     <div class="prop"><span class="prop-k">기간</span>${period}</div>
@@ -802,6 +806,10 @@ function bindPeriod() {
     S.boundary.from = from; S.boundary.to = to; editingPeriod = false;
     persist(); renderHead(); renderSide();
   });
+  const cancel = $('pCancel');
+  const cancelEdit = () => { editingPeriod = false; renderHead(); };
+  if (cancel) cancel.addEventListener('click', cancelEdit);
+  ['pFrom', 'pTo'].forEach(id => { const inp = $(id); if (inp) inp.addEventListener('keydown', e => { if (e.key === 'Escape') { e.preventDefault(); cancelEdit(); } }); });
 }
 function bindTitle() {
   const el = $('bTitle');
@@ -809,9 +817,12 @@ function bindTitle() {
     if (e.key === 'Enter') { e.preventDefault(); el.blur(); }
     else if (e.key === 'Escape') { e.preventDefault(); el.textContent = S.boundary.title || ''; el.blur(); }
   });
+  // 전부 지우면 contenteditable이 <br>을 남겨 :empty 플레이스홀더가 안 뜬다 → 비운다
+  el.addEventListener('input', () => { if (!el.textContent.trim()) el.textContent = ''; });
   el.addEventListener('blur', () => {
     const v = el.textContent.trim();
-    if (v === (S.boundary.title || '')) { el.textContent = v; return; }
+    el.textContent = v; // 남은 <br>·공백 제거해 :empty 성립
+    if (v === (S.boundary.title || '')) return;
     S.boundary.title = v; persist(); renderSide();
   });
 }
