@@ -108,7 +108,6 @@ button{cursor:pointer}
 .day-h .prog{font-size:13px;color:var(--muted);margin-left:auto}
 .miss{color:var(--danger);font-weight:600}
 .day-h .miss{font-size:13px;margin-left:auto}
-.side .nav small.miss{color:var(--danger)}
 .day-h .peek{font-size:13px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:50%}
 .day.today .day-h{cursor:default}
 .day.today .day-h::before{content:none}
@@ -639,7 +638,7 @@ function renderSide() {
   $('sideBoundary').innerHTML = `<button class="nav on">${esc(b.title || '이름 없는 바운더리')}<small>${b.from.slice(5).replace('-', '.')} ~ ${b.to.slice(5).replace('-', '.')} · ${daysLeft(b.to, TODAY)}일 남음</small></button>`;
   const dates = Object.keys(S.days).filter(d => d <= TODAY).sort().reverse();
   const label = d => d === TODAY ? '오늘' : (daysLeft(TODAY, d) === 1 ? '어제' : fmtDate(d).replace(/ .요일$/, ''));
-  $('sideDays').innerHTML = `<h4>날짜</h4>` + dates.map(d => { const p = dayProgress(S.days[d]); return `<button class="nav sub" data-goto="${d}">${label(d)} ${d === TODAY ? `<small>${p.done}/3</small>` : missLabel(p)}</button>`; }).join('');
+  $('sideDays').innerHTML = `<h4>날짜</h4>` + dates.map(d => { const p = dayProgress(S.days[d]); return `<button class="nav sub" data-goto="${d}">${label(d)}${d === TODAY ? ` <small>${p.done}/3</small>` : ''}</button>`; }).join('');
   $('sideDays').querySelectorAll('[data-goto]').forEach(b => b.addEventListener('click', () => {
     const el = document.querySelector(`.day[data-d="${b.dataset.goto}"]`);
     if (el) { el.classList.add('open'); el.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
