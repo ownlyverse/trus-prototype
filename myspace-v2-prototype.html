@@ -8,7 +8,7 @@
 <style>
 /* ===== 1. 토큰 · 레이아웃 ===== */
 :root{
-  --paper:#FFFFFF; --ink:#191F28; --muted:#6E6D69; --faint:#B4B4B0;
+  --paper:#FFFFFF; --ink:#191F28; --muted:#6E6D69; --faint:#9B9B97;
   --line:#EDEDEB; --bg:#F7F7F5;
   --indigo:#5B5BD6; --indigo-soft:#EEF0FF; --indigo-ink:#3F3FB0;
   --ok:#22A06B; --warn:#F5A623; --danger:#E5484D;
@@ -225,6 +225,7 @@ button{cursor:pointer}
 <script id="app">
 // ===== MOCK DATA =====
 const Q = new URLSearchParams(location.search);
+const STAGE_OVERRIDE = Q.get('stage') ? Number(Q.get('stage')) : null;
 const USER = { name: '소정', stage: 2, course: 3 };
 const SUGGEST = false; // 코치 업무 추천 카드 — 추천 근거 DB 확보 전까지 끔 (피드백 2026-09-13)
 const KEY_QUESTION = '끝점(성과)에 가장 빠르게 도달할 수 있는 중요한 일 3가지인가요?';
@@ -413,13 +414,14 @@ function fmtDate(iso) {
   const w = ['일', '월', '화', '수', '목', '금', '토'][new Date(y, m - 1, d).getDay()];
   return `${m}월 ${d}일 ${w}요일`;
 }
+function curStage() { return stageOf(STAGE_OVERRIDE ?? S.user.stage); }
 
 // ===== RENDER =====
 const $ = (id) => document.getElementById(id);
 let S, TODAY;
 function toast(msg) { const t = $('toast'); t.textContent = msg; t.hidden = false; clearTimeout(toast._t); toast._t = setTimeout(() => { t.hidden = true; }, 2600); }
 function persist() { saveState(localStorage, S, () => toast('저장이 안 됐어요. 브라우저 저장 공간을 확인해 주세요.')); }
-function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
+function esc(s) { return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
 let onFormulaSaved = () => {};   // Task 5에서 코치가 덮어씀
 let onOrderGuard = () => {};     // Task 5에서 코치가 덮어씀
 let onFormulaComplete = () => {}; // Task 5
@@ -452,13 +454,16 @@ function renderFormula() {
       const k = el.dataset.k, v = el.textContent.trim();
       if (v === (f[k] || '')) return;
       const before = formulaCount(f);
-      f[k] = v; persist(); renderFormula();
-      onFormulaSaved(k, v);
-      if (before < 4 && formulaCount(f) === 4) {
-        const chip = $('fChip'); chip.textContent = '한 장에 담겼어요';
-        setTimeout(() => { if ($('fChip')) $('fChip').textContent = '함께 해결 = 일'; }, 3000);
-        onFormulaComplete();
-      }
+      f[k] = v; persist();
+      setTimeout(() => {
+        renderFormula();
+        onFormulaSaved(k, v);
+        if (before < 4 && formulaCount(f) === 4) {
+          const chip = $('fChip'); chip.textContent = '한 장에 담겼어요';
+          setTimeout(() => { if ($('fChip')) $('fChip').textContent = '함께 해결 = 일'; }, 3000);
+          onFormulaComplete();
+        }
+      }, 0);
     });
   });
   $('fSummary').addEventListener('click', () => { pinOpen = true; box.classList.remove('collapsed'); });
@@ -472,7 +477,7 @@ function watchCollapse() {
     $('formula').classList.toggle('collapsed', y > 160 && !pinOpen);
   }, { passive: true });
 }
-let onItemSaved = () => {}, onDone3 = () => {}, onReviewSaved = () => {}, onAskCoach = () => {};
+let onItemSaved = () => {}, onDone3 = () => {}, onReviewSaved = () => {};
 let onDumpOpen = () => {}, onDumpPicked = () => {};
 
 let editingReview = null; // 'YYYY-MM-DD' — 저장된 회고를 다시 여는 중인 날짜
@@ -486,7 +491,7 @@ function itemRow(it, i, d) {
 let dumpSel = []; // 덤프에서 체크한 인덱스(선택 순서 유지)
 function dumpBlock(day) {
   const rows = day.dump.map((t, i) => { const k = dumpSel.indexOf(i); return `<div class="dump-row" data-i="${i}"><input type="checkbox" class="dump-chk" data-i="${i}"${k >= 0 ? ' checked' : ''}><span class="n">${k >= 0 ? k + 1 : ''}</span><span class="t">${esc(t)}</span><button class="dump-x" data-i="${i}" aria-label="빼기">✕</button></div>`; }).join('');
-  return `<div class="dump" id="dump"><p class="dump-title">먼저, 머릿속 할 일을 전부 꺼내놔요</p><p class="dump-sub">많아도 괜찮아요. 다 적은 뒤에 끝점에 가장 큰 영향을 주는 3개만 골라요. 첫 번째로 고른 게 오늘 가장 먼저 끝낼 일이에요.</p><div class="dump-in"><input id="dumpIn" placeholder="할 일 하나 적고 Enter" maxlength="80"><button id="dumpAdd">추가</button></div><div class="dump-list">${rows}</div>${day.dump.length ? `<div class="dump-act"><span class="cnt">${dumpSel.length}/${MAX_PICK} 골랐어요</span><button id="dumpPick"${dumpSel.length === 0 ? ' disabled' : ''}>이 ${dumpSel.length || ''}개로 오늘을 시작해요</button></div>` : ''}</div>`;
+  return `<div class="dump" id="dump"><p class="dump-title">먼저, 머릿속 할 일을 전부 꺼내놔요</p><p class="dump-sub">많아도 괜찮아요. 다 적은 뒤에 끝점에 가장 큰 영향을 주는 3개만 골라요. 첫 번째로 고른 게 오늘 가장 먼저 끝낼 일이에요.</p><div class="dump-in"><input id="dumpIn" placeholder="할 일 하나 적고 Enter" maxlength="80"><button id="dumpAdd">추가</button></div><div class="dump-list">${rows}</div>${day.dump.length ? `<div class="dump-act"><span class="cnt">${dumpSel.length}/${MAX_PICK} 골랐어요</span><button id="dumpPick"${dumpSel.length === 0 ? ' disabled' : ''}>${dumpSel.length ? `이 ${dumpSel.length}개로 오늘을 시작해요` : '3개를 골라요'}</button></div>` : ''}</div>`;
 }
 function droppedBlock(day) {
   if (!day.dropped.length) return '';
@@ -503,13 +508,13 @@ function reviewBlock(day, d, stage) {
 }
 function renderDays() {
   const dates = Object.keys(S.days).filter(d => d <= TODAY).sort().reverse();
-  const stage = stageOf(S.user.stage);
+  const stage = curStage();
   const html = dates.map(d => {
     const day = S.days[d], p = dayProgress(day), today = d === TODAY;
     const rows = day.items.map((it, i) => itemRow(it, i, d)).join('');
     const dumpMode = today && p.filled === 0;
     const empty = dumpMode ? dumpBlock(day) : '';
-    const dropped = today ? droppedBlock(day) : '';
+    const dropped = droppedBlock(day);
     const showReview = today || p.filled > 0 || reviewDone(day.review);
     const body = `<div class="day-b">${dumpMode ? empty : rows}${dropped}${showReview && !dumpMode ? reviewBlock(day, d, stage) : ''}</div>`;
     if (today) return `<div class="day today${p.filled === 3 && p.done === 3 ? ' full' : ''}" data-d="${d}"><div class="day-h"><b>${fmtDate(d)}</b><span class="badge">오늘</span><span class="prog">${p.done}/3</span></div>${body}</div>`;
@@ -530,8 +535,11 @@ function bindDays() {
       const d = inp.dataset.d, i = Number(inp.dataset.i), day = S.days[d], v = inp.value.trim();
       if (v === day.items[i].text) return;
       day.items[i].text = v; if (!v) day.items[i].done = false;
-      persist(); renderDays(); if (d !== TODAY) openDay(d);
-      if (v && d === TODAY) onItemSaved(i, day.items[i]);
+      persist();
+      setTimeout(() => {
+        renderDays(); if (d !== TODAY) openDay(d);
+        if (v && d === TODAY) onItemSaved(i, day.items[i]);
+      }, 0);
     });
   });
   root.querySelectorAll('.it-chk').forEach(c => c.addEventListener('change', () => {
@@ -548,7 +556,7 @@ function bindDays() {
   }));
   root.querySelectorAll('.rv-save').forEach(b => b.addEventListener('click', () => {
     const d = b.dataset.d, day = S.days[d], v = root.querySelector(`.rv-text[data-d="${d}"]`).value.trim();
-    if (!v) return;
+    if (!v) { toast('한 줄이라도 적어요.'); return; }
     day.review.text = v; editingReview = null; persist(); renderDays(); if (d !== TODAY) openDay(d);
     if (d === TODAY) onReviewSaved(v);
   }));
@@ -556,7 +564,7 @@ function bindDays() {
   const di = $('dumpIn');
   if (di) {
     const day = S.days[TODAY];
-    const add = () => { if (dumpAdd(day, di.value)) { persist(); renderDays(); $('dumpIn').focus(); } else di.value = ''; };
+    const add = () => { const v = di.value; if (dumpAdd(day, v)) { persist(); renderDays(); $('dumpIn').focus(); } else { if (v.trim()) toast('이미 적어뒀어요.'); di.value = ''; } };
     di.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); add(); } });
     $('dumpAdd').addEventListener('click', add);
     if (day.dump.length === 0 && dumpSel.length === 0) onDumpOpen();
@@ -595,7 +603,7 @@ function renderSide() {
 // ===== COACH =====
 let coachOpen = false, coachTab = 'chat';
 function buildCoachPanel() {
-  const st = stageOf(S.user.stage);
+  const st = curStage();
   $('coachPanel').innerHTML = `
     <div class="cp-h"><span>🦉</span><div><b>바운더리 코치</b><small>${st.name} 단계 · ${st.point} 훈련 중</small></div><button class="x" id="coachClose" aria-label="닫기">✕</button></div>
     <div class="cp-tabs"><button id="tabChat" class="on">대화</button><button id="tabConcept">오늘의 개념</button></div>
@@ -616,7 +624,7 @@ function setTab(t) {
   $('chatLog').hidden = t !== 'chat'; $('conceptBody').hidden = t !== 'concept'; $('chatBar').hidden = t !== 'chat';
 }
 function renderConcept() {
-  const st = stageOf(S.user.stage);
+  const st = curStage();
   $('conceptBody').innerHTML = `<div class="concept"><span class="k">${st.name} 단계의 학습 포인트</span><h4>${esc(st.tip.title)}</h4>${st.tip.quote.map(q => `<blockquote>${esc(q)}</blockquote>`).join('')}<div class="ask">내 일에 적용 — ${esc(st.tip.ask)}</div><button class="add" id="conceptAdd">이 질문을 오늘의 바운더리에 추가</button></div>`;
   $('conceptAdd').addEventListener('click', () => { onConceptAdd({ id: 'concept', text: st.tip.ask, why: `${st.name} 단계 학습 포인트` }); });
 }
@@ -634,14 +642,14 @@ function coachGreet() {
   const mode = Q.get('time') || greeting(new Date().getHours());
   if (!canFire(S.coachSeen, TODAY, 'greet')) return;
   persist();
-  const day = S.days[TODAY], p = dayProgress(day), st = stageOf(S.user.stage);
+  const day = S.days[TODAY], p = dayProgress(day), st = curStage();
   if (mode === 'am') {
     const lr = lastReview(S, TODAY);
     coachSay(COACH.greetAm(S.user.name, lr ? lr.review : ''));
     setTimeout(() => conceptInChat(), 400);
     setTimeout(() => coachSay(COACH.keyQ1), 900);
     setTimeout(() => coachSay(COACH.keyQ2), 1300);
-    if (p.filled === 0) setTimeout(() => coachSay(COACH.dumpPick, { silent: true }), 1700);
+    if (p.filled === 0) setTimeout(() => coachSay(COACH.dumpPick, { silent: true }), 2200);
     if (SUGGEST) setTimeout(onGreetCards, 1200);
   } else {
     coachSay(COACH.greetPm(S.user.name, p.done, p.filled));
@@ -649,7 +657,7 @@ function coachGreet() {
   }
 }
 function conceptInChat() {
-  const st = stageOf(S.user.stage);
+  const st = curStage();
   const el = document.createElement('div'); el.className = 'card concept-card';
   el.innerHTML = `<div class="why">오늘의 개념 · ${esc(st.name)} 단계</div><b>${esc(st.tip.title)}</b>${st.tip.quote.map(q => `<div class="why">${esc(q)}</div>`).join('')}<div class="why ask">${esc(st.tip.ask)}</div><button class="add">이 질문을 오늘의 바운더리에 추가</button>`;
   $('chatLog').appendChild(el); scrollLog();
@@ -666,8 +674,16 @@ function coachCard(sug, opts = {}) {
 }
 function tryAdd(sug, el, btn) {
   const day = S.days[TODAY];
+  const wasDump = dayProgress(day).filled === 0;
   const r = addSuggestion(day, sug);
-  if (r.ok) { persist(); renderDays(); btn.textContent = '추가됨 ✓'; btn.disabled = true; coachSay(COACH.added(sug.text), { silent: true }); S.coachSeen[TODAY] = S.coachSeen[TODAY] || {}; if (!S.coachSeen[TODAY].items) S.coachSeen[TODAY].items = []; S.coachSeen[TODAY].items[r.index] = true; persist(); return; }
+  if (r.ok) {
+    let movedN = 0;
+    if (wasDump) { movedN = day.dump.length; day.dropped = day.dropped.concat(day.dump); day.dump = []; dumpSel = []; }
+    persist(); renderDays(); btn.textContent = '추가됨 ✓'; btn.disabled = true;
+    coachSay(COACH.added(sug.text), { silent: true });
+    if (movedN) coachSay(COACH.dumpDone(movedN), { silent: true });
+    S.coachSeen[TODAY] = S.coachSeen[TODAY] || {}; if (!S.coachSeen[TODAY].items) S.coachSeen[TODAY].items = []; S.coachSeen[TODAY].items[r.index] = true; persist(); return;
+  }
   if (el.querySelector('.swap')) return;
   coachSay(COACH.full, { silent: true });
   const sw = document.createElement('div'); sw.className = 'swap';
@@ -687,7 +703,7 @@ onGreetCards = () => {
 };
 onConceptAdd = (sug) => { setTab('chat'); const el = coachCard(sug); tryAdd(sug, el, el.querySelector('.add')); };
 function wireCoachReactions() {
-  const st = () => stageOf(S.user.stage);
+  const st = () => curStage();
   onItemSaved = (i, item) => {
     if (!canFire(S.coachSeen, TODAY, 'items', i)) return; persist();
     const j = judgeSignal(item, S.boundary.formula);
@@ -710,7 +726,7 @@ function wireCoachReactions() {
       coachCard(next, { noAdd: true });
     }
   };
-  onDumpOpen = () => { if (!canFire(S.coachSeen, TODAY, 'dumpOpen')) return; persist(); coachSay(COACH.dumpIntro, { silent: true }); };
+  onDumpOpen = () => { if (!canFire(S.coachSeen, TODAY, 'dumpOpen')) return; persist(); setTimeout(() => coachSay(COACH.dumpIntro, { silent: true }), 2300); };
   onDumpPicked = (r) => {
     if (!canFire(S.coachSeen, TODAY, 'dumpPicked')) return; persist();
     coachSay(COACH.dumpDone(r.dropped));
@@ -723,7 +739,7 @@ function wireCoachReactions() {
 function renderHead() {
   const b = S.boundary;
   $('meName').textContent = S.user.name;
-  $('meStage').textContent = `${stageOf(S.user.stage).name} · ${S.user.stage}/6`;
+  $('meStage').textContent = `${curStage().name} · ${curStage().n}/6`;
   $('bTitle').textContent = b.word;
   $('bPeriod').textContent = `${b.from.slice(5).replace('-', '.')} ~ ${b.to.slice(5).replace('-', '.')}`;
   $('bLeft').textContent = `${daysLeft(b.to, TODAY)}일 남음`;
@@ -732,7 +748,6 @@ function renderHead() {
 function boot() {
   if (Q.get('reset') === '1') { try { localStorage.removeItem(KEY); } catch (e) {} }
   S = loadState(localStorage);
-  if (Q.get('stage')) S.user.stage = Number(Q.get('stage'));
   TODAY = todayStr();
   ensureDay(S, TODAY);
   renderHead();
@@ -744,9 +759,8 @@ function boot() {
   $('menuBtn').addEventListener('click', () => { $('side').classList.toggle('open'); $('scrim').hidden = !$('side').classList.contains('open'); });
   $('scrim').addEventListener('click', () => { $('side').classList.remove('open'); closeCoach(); });
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeCoach(); });
-  document.addEventListener('click', e => { if (coachOpen && !$('coachPanel').contains(e.target) && !$('coachBubble').contains(e.target) && !$('days').contains(e.target)) closeCoach(); });
+  document.addEventListener('click', e => { if (coachOpen && !$('coachPanel').contains(e.target) && !$('coachBubble').contains(e.target) && !document.querySelector('.doc').contains(e.target)) closeCoach(); });
   $('meStage').addEventListener('click', () => setTimeout(() => openCoach('concept'), 0));
-  onAskCoach = () => setTimeout(() => openCoach('chat'), 0);
   setTimeout(coachGreet, 500);
   watchCollapse();
 }

@@ -174,7 +174,8 @@ t('ensureDay: dump/dropped 초기화, 구데이터엔 보강', () => {
   const s = L.defaultState();
   const d = L.ensureDay(s, '2026-09-13');
   assertLoose.deepEqual(d.dump, []); assertLoose.deepEqual(d.dropped, []);
-  const old = L.ensureDay(s, '2026-09-12');
+  s.days['2026-09-01'] = { items: [L.blank(), L.blank(), L.blank()], review: L.blankReview() };
+  const old = L.ensureDay(s, '2026-09-01');
   assert(Array.isArray(old.dump) && Array.isArray(old.dropped));
 });
 
