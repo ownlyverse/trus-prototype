@@ -38,7 +38,9 @@ button{cursor:pointer}
 .side .nav.sub{padding-left:24px;font-size:14px}
 .side .nav[disabled]{color:var(--faint);cursor:not-allowed}
 .side .foot{margin-top:auto;padding-top:16px;border-top:1px solid var(--line)}
-.side .foot .nav{color:var(--ink);font-weight:400}
+.side .foot .lec-btn{display:block;text-align:center;background:var(--indigo);color:var(--paper);text-decoration:none;font-size:13px;font-weight:600;border-radius:6px;padding:9px 10px;word-break:keep-all}
+.side .foot .lec-btn:hover{background:var(--indigo-ink)}
+.side .foot .lec-sub{display:block;text-align:center;font-size:11px;color:var(--muted);margin-top:6px}
 /* 문서 */
 .doc{flex:1;min-width:0;padding:0 40px 120px}
 .doc-in{max-width:720px;margin:0 auto}
@@ -225,7 +227,7 @@ button{cursor:pointer}
     <div id="sideBoundary"></div>
     <button class="nav" id="newBoundary" disabled title="지금 바운더리가 끝나면 열려요">＋ 새 바운더리</button>
     <div id="sideDays"></div>
-    <div class="foot"><a class="nav" href="lecture-prototype.html" id="sideLecture">강의실</a></div>
+    <div class="foot"><a class="lec-btn" href="lecture-prototype.html" id="sideLecture">일의 프레임 강의 보러가기</a><small class="lec-sub" id="sideCourse"></small></div>
   </aside>
   <main class="doc">
     <div class="doc-in">
@@ -786,7 +788,7 @@ function renderHead() {
   $('meName').textContent = S.user.name;
   $('meStage').textContent = `${st.name} · ${st.n}/6`;
   if (document.activeElement !== $('bTitle')) $('bTitle').textContent = b.title || '';
-  $('sideLecture').textContent = `강의실 · 커리큘럼 ${S.user.course}/5`;
+  $('sideCourse').textContent = `커리큘럼 ${S.user.course}/5 진행 중`;
   const period = editingPeriod
     ? `<span class="prop-edit"><input type="date" id="pFrom" value="${b.from}" aria-label="시작 날짜"><span class="prop-arrow">→</span><input type="date" id="pTo" value="${b.to}" aria-label="끝 날짜"><button class="prop-ok" id="pOk">확인</button><button class="prop-cancel" id="pCancel">취소</button></span>`
     : `<span class="prop-v prop-period" id="bPeriod" role="button" tabindex="0" aria-label="기간 고치기">${shortDate(b.from)} → ${shortDate(b.to)}</span>`;
