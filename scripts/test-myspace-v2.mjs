@@ -12,7 +12,7 @@ assert(m, 'script#app 없음');
 const src = m[1];
 const cut = src.indexOf('// ===== RENDER =====');
 assert(cut > 0, 'RENDER 마커 없음');
-const EXPORTS = '\n;({KEY,todayStr,defaultState,ensureBoundary,loadState,saveState,ensureDay,blank,formulaCount,endDefined,dayProgress,keywords,judgeSignal,stageOf,greeting,canFire,addSuggestion,replaceItem,freeReply,lastReview,daysLeft,fmtDate,USER,STAGES,BOUNDARY,FORMULA,PAST_DAYS,SUGGESTIONS,COACH,FREE,FREE_FALLBACK,blankReview,reviewDone,reviewHintFor,REVIEW_Q,KEY_QUESTION,ITEM_PH,SUGGEST,dumpAdd,dumpRemove,dumpPick,MAX_PICK})';
+const EXPORTS = '\n;({KEY,todayStr,defaultState,ensureBoundary,loadState,saveState,ensureDay,blank,formulaCount,endDefined,dayProgress,keywords,judgeSignal,stageOf,greeting,canFire,addSuggestion,replaceItem,freeReply,lastReview,daysLeft,fmtDate,USER,STAGES,BOUNDARY,FORMULA,PAST_DAYS,SUGGESTIONS,COACH,FREE,FREE_FALLBACK,blankReview,reviewDone,reviewHintFor,REVIEW_Q,KEY_QUESTION,ITEM_PH,SUGGEST,dumpAdd,dumpRemove,dumpPick,MAX_PICK,migrateV3,carryOver,dropKind,setDue,isPastDue,tomorrowAdd,tomorrowRemove,route,monthGrid,dayStats})';
 const ctx = { location: { search: '' }, URLSearchParams, console };
 const L = vm.runInNewContext(src.slice(0, cut) + EXPORTS, ctx);
 
@@ -22,7 +22,7 @@ let n = 0; const t = (name, fn) => { fn(); n++; console.log('ok', name); };
 // --- Task 1 ---
 t('defaultState: v=3, 지난 11일, 회고 객체, 자유 제목', () => {
   const s = L.defaultState();
-  assert.equal(s.v, 3);
+  assert.equal(s.v, 4);
   assert.equal(Object.keys(s.days).length, 11);
   assert.equal(s.days['2026-09-12'].review.q1, true);
   assert.equal(typeof s.boundary.title, 'string');
@@ -35,7 +35,7 @@ t('loadState: v 다르면 무시', () => {
   const st = mem({ [L.KEY]: JSON.stringify({ v: 2, user: { name: 'X' } }) });
   assert.equal(L.loadState(st).user.name, '소정');
 });
-t('loadState: v=3이면 복원 + boundary.word 보강', () => {
+t('loadState: 같은 버전이면 복원 + boundary.word 보강', () => {
   const s = L.defaultState(); s.user.name = '호';
   delete s.boundary.title; s.boundary.word = '옛제목';
   const st = mem({ [L.KEY]: JSON.stringify(s) });
@@ -45,7 +45,7 @@ t('loadState: v=3이면 복원 + boundary.word 보강', () => {
   assert.equal(out.boundary.word, undefined);
 });
 t('loadState: 깨진 JSON → 기본', () => {
-  assert.equal(L.loadState(mem({ [L.KEY]: '{oops' })).v, 3);
+  assert.equal(L.loadState(mem({ [L.KEY]: '{oops' })).v, 4);
 });
 t('saveState: 실패 시 onFail', () => {
   let failed = false;
@@ -165,7 +165,7 @@ t('dumpPick: 선택 3개는 items로, 나머지는 dropped로, 첫 선택이 Fro
   assert.equal(r.ok, true);
   assert.equal(day.items[0].text, 'd');
   assert.equal(day.items[2].text, 'a');
-  assertLoose.deepEqual(day.dropped, ['c', 'e']);
+  assertLoose.deepEqual(day.dropped, [{ text: 'c', kind: 'later' }, { text: 'e', kind: 'later' }]); // v4: 남은 건 '나중에' 객체
   assertLoose.deepEqual(day.dump, []);
 });
 t('dumpPick: 0개 또는 4개 이상은 거부', () => {
@@ -182,6 +182,90 @@ t('ensureDay: dump/dropped 초기화, 구데이터엔 보강', () => {
   s.days['2026-09-01'] = { items: [L.blank(), L.blank(), L.blank()], review: L.blankReview() };
   const old = L.ensureDay(s, '2026-09-01');
   assert(Array.isArray(old.dump) && Array.isArray(old.dropped));
+});
+
+// --- Task 13 ---
+t('migrateV3: v4 승격 — dropped 객체화·due:null·coachLog·tomorrow', () => {
+  const v3 = { v: 3, user: { name: '호' }, boundary: { title: 't' }, coachSeen: {},
+    days: { '2026-09-01': { items: [{ text: 'a', done: true }, L.blank(), L.blank()], review: L.blankReview(), dump: [], dropped: ['버린 일'] } } };
+  const out = L.migrateV3(v3);
+  assert.equal(out.v, 4);
+  const d = out.days['2026-09-01'];
+  assertLoose.deepEqual(d.dropped[0], { text: '버린 일', kind: 'later' });
+  assert.equal(d.items[0].due, null);
+  assertLoose.deepEqual(d.coachLog, []);
+  assertLoose.deepEqual(d.tomorrow, []);
+});
+t('migrateV3: loadState가 v3 저장분을 승격해 데이터 보존', () => {
+  const v3 = { v: 3, user: { name: '민' }, boundary: { title: '옛것' }, coachSeen: {},
+    days: { '2026-09-01': { items: [L.blank(), L.blank(), L.blank()], review: L.blankReview(), dump: [], dropped: ['x'] } } };
+  const out = L.loadState(mem({ [L.KEY]: JSON.stringify(v3) }));
+  assert.equal(out.v, 4);
+  assert.equal(out.user.name, '민');
+  assert.equal(out.days['2026-09-01'].dropped[0].kind, 'later');
+});
+t('carryOver: 어제 tomorrow + later dropped를 오늘 dump로, 멱등', () => {
+  const s = { v: 4, days: {
+    '2026-09-14': { items: [L.blank(), L.blank(), L.blank()], review: L.blankReview(), dump: [], dropped: [{ text: 'y', kind: 'later' }, { text: 'z', kind: 'delete' }], tomorrow: ['x'], coachLog: [] },
+    '2026-09-15': { items: [L.blank(), L.blank(), L.blank()], review: L.blankReview(), dump: [], dropped: [], tomorrow: [], coachLog: [] },
+  } };
+  L.carryOver(s, '2026-09-15');
+  assertLoose.deepEqual(s.days['2026-09-15'].dump, ['x', 'y']);
+  assert.equal(s.days['2026-09-15'].carried, true);
+  L.carryOver(s, '2026-09-15'); // 멱등
+  assert.equal(s.days['2026-09-15'].dump.length, 2);
+});
+t('dropKind: dropped 항목 분류 변경', () => {
+  const day = { dropped: [{ text: 'a', kind: 'later' }] };
+  L.dropKind(day, 0, 'delegate');
+  assert.equal(day.dropped[0].kind, 'delegate');
+});
+t('setDue: 형식 검증 — 첫 줄만, 잘못된 형식 거부', () => {
+  const day = L.ensureDay(L.defaultState(), '2026-09-20');
+  assert.equal(L.setDue(day, '11:00'), true);
+  assert.equal(day.items[0].due, '11:00');
+  assert.equal(L.setDue(day, '25:99'), false);
+  assert.equal(L.setDue(day, '9시'), false);
+  assert.equal(day.items[0].due, '11:00');
+  assert.equal(L.setDue(day, ''), true);
+  assert.equal(day.items[0].due, null);
+});
+t('isPastDue: 마감 지났고 due 있을 때만', () => {
+  const day = { items: [{ text: 'a', done: false, due: '11:00' }] };
+  assert.equal(L.isPastDue(day, '11:30'), true);
+  assert.equal(L.isPastDue(day, '10:30'), false);
+  assert.equal(L.isPastDue({ items: [{ text: 'a', done: false, due: null }] }, '23:59'), false);
+});
+t('tomorrowAdd/tomorrowRemove: 공백·중복 무시', () => {
+  const day = L.ensureDay(L.defaultState(), '2026-09-20');
+  assert.equal(L.tomorrowAdd(day, '  '), false);
+  assert.equal(L.tomorrowAdd(day, '내일 인터뷰'), true);
+  assert.equal(L.tomorrowAdd(day, '내일 인터뷰'), false);
+  L.tomorrowAdd(day, '대시보드');
+  assert.equal(day.tomorrow.length, 2);
+  L.tomorrowRemove(day, 0);
+  assertLoose.deepEqual(day.tomorrow, ['대시보드']);
+});
+t('route: 해시 5케이스 파싱', () => {
+  assertLoose.deepEqual(L.route('#/'), { page: 'boundary' });
+  assertLoose.deepEqual(L.route('#/day/2026-09-14'), { page: 'day', id: '2026-09-14' });
+  assertLoose.deepEqual(L.route('#/records/calendar'), { page: 'records', view: 'calendar' });
+  assertLoose.deepEqual(L.route('#/concept/2'), { page: 'concept', id: 2 });
+  assertLoose.deepEqual(L.route('#/coach'), { page: 'coach' });
+  assertLoose.deepEqual(L.route(''), { page: 'boundary' });
+});
+t('monthGrid: 월요일 시작·7의 배수·해당 월 포함', () => {
+  const g = L.monthGrid('2026-09');
+  assert.equal(g.length % 7, 0);
+  assert.equal(g.length, 35);
+  assert.equal(g[0].date, '2026-08-31');
+  assert.equal(g[0].inMonth, false);
+  const today = g.find(c => c.date === '2026-09-14');
+  assert(today && today.inMonth === true);
+});
+t('dayStats: filled/done/missed/reached', () => {
+  assertLoose.deepEqual(L.dayStats(L.PAST_DAYS['2026-09-11']), { filled: 3, done: 1, missed: 2, reached: false });
+  assertLoose.deepEqual(L.dayStats(L.PAST_DAYS['2026-09-10']), { filled: 3, done: 3, missed: 0, reached: true });
 });
 
 console.log(`\n${n} tests passed`);
