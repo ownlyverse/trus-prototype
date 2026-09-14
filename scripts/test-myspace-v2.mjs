@@ -12,7 +12,7 @@ assert(m, 'script#app 없음');
 const src = m[1];
 const cut = src.indexOf('// ===== RENDER =====');
 assert(cut > 0, 'RENDER 마커 없음');
-const EXPORTS = '\n;({KEY,todayStr,defaultState,ensureBoundary,loadState,saveState,ensureDay,blank,formulaCount,endDefined,dayProgress,keywords,judgeSignal,stageOf,greeting,canFire,addSuggestion,replaceItem,freeReply,lastReview,daysLeft,fmtDate,USER,STAGES,BOUNDARY,FORMULA,PAST_DAYS,SUGGESTIONS,COACH,FREE,FREE_FALLBACK,blankReview,reviewDone,reviewHintFor,REVIEW_Q,KEY_QUESTION,ITEM_PH,SUGGEST,dumpAdd,dumpRemove,dumpPick,MAX_PICK,migrateV3,carryOver,dropKind,setDue,isPastDue,tomorrowAdd,tomorrowRemove,route,monthGrid,dayStats})';
+const EXPORTS = '\n;({KEY,todayStr,defaultState,ensureBoundary,loadState,saveState,ensureDay,blank,formulaCount,endDefined,dayProgress,keywords,judgeSignal,stageOf,greeting,canFire,addSuggestion,replaceItem,freeReply,lastReview,daysLeft,fmtDate,USER,STAGES,BOUNDARY,FORMULA,PAST_DAYS,SUGGESTIONS,COACH,FREE,FREE_FALLBACK,blankReview,reviewDone,reviewHintFor,REVIEW_Q,KEY_QUESTION,ITEM_PH,SUGGEST,dumpAdd,dumpRemove,dumpPick,MAX_PICK,migrateV3,carryOver,dropKind,setDue,isPastDue,tomorrowAdd,tomorrowRemove,route,monthGrid,dayStats,validDate,validHHMM})';
 const ctx = { location: { search: '' }, URLSearchParams, console };
 const L = vm.runInNewContext(src.slice(0, cut) + EXPORTS, ctx);
 
@@ -20,7 +20,7 @@ function mem(init) { const s = { ...init }; return { getItem: k => (k in s ? s[k
 let n = 0; const t = (name, fn) => { fn(); n++; console.log('ok', name); };
 
 // --- Task 1 ---
-t('defaultState: v=3, 지난 11일, 회고 객체, 자유 제목', () => {
+t('defaultState: v=4, 지난 11일, 회고 객체, 자유 제목', () => {
   const s = L.defaultState();
   assert.equal(s.v, 4);
   assert.equal(Object.keys(s.days).length, 11);
@@ -266,6 +266,26 @@ t('monthGrid: 월요일 시작·7의 배수·해당 월 포함', () => {
 t('dayStats: filled/done/missed/reached', () => {
   assertLoose.deepEqual(L.dayStats(L.PAST_DAYS['2026-09-11']), { filled: 3, done: 1, missed: 2, reached: false });
   assertLoose.deepEqual(L.dayStats(L.PAST_DAYS['2026-09-10']), { filled: 3, done: 3, missed: 0, reached: true });
+});
+t('validDate/validHHMM: 형식 검증 — 비정형 거부(반사형 XSS·오탐 차단)', () => {
+  assert.equal(L.validDate('2026-09-14'), true);
+  assert.equal(L.validDate('x" onmouseover=1'), false);
+  assert.equal(L.validDate('2026-9-1'), false);
+  assert.equal(L.validDate(null), false);
+  assert.equal(L.validHHMM('11:30'), true);
+  assert.equal(L.validHHMM('9:05'), false);
+  assert.equal(L.validHHMM('abc'), false);
+});
+t('monthGrid: 12월 경계 — 마지막 셀이 다음 해 1월', () => {
+  const g = L.monthGrid('2025-12');
+  assert.equal(g.length % 7, 0);
+  assert.equal(g[g.length - 1].date, '2026-01-04');
+  assert(g.some(c => c.date === '2025-12-01' && c.inMonth));
+});
+t('monthGrid: 6주 걸치는 달은 42셀', () => {
+  const g = L.monthGrid('2026-03'); // 3/1 일요일 → 6주
+  assert.equal(g.length, 42);
+  assert.equal(g[0].date, '2026-02-23');
 });
 
 console.log(`\n${n} tests passed`);
