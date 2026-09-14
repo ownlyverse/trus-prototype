@@ -12,7 +12,7 @@ assert(m, 'script#app 없음');
 const src = m[1];
 const cut = src.indexOf('// ===== RENDER =====');
 assert(cut > 0, 'RENDER 마커 없음');
-const EXPORTS = '\n;({KEY,todayStr,defaultState,loadState,saveState,ensureDay,blank,formulaCount,endDefined,dayProgress,keywords,judgeSignal,stageOf,greeting,canFire,addSuggestion,replaceItem,freeReply,lastReview,daysLeft,fmtDate,USER,STAGES,BOUNDARY,FORMULA,PAST_DAYS,SUGGESTIONS,COACH,FREE,FREE_FALLBACK,blankReview,reviewDone,reviewHintFor,REVIEW_Q,KEY_QUESTION,ITEM_PH,SUGGEST,dumpAdd,dumpRemove,dumpPick,MAX_PICK})';
+const EXPORTS = '\n;({KEY,todayStr,defaultState,ensureBoundary,loadState,saveState,ensureDay,blank,formulaCount,endDefined,dayProgress,keywords,judgeSignal,stageOf,greeting,canFire,addSuggestion,replaceItem,freeReply,lastReview,daysLeft,fmtDate,USER,STAGES,BOUNDARY,FORMULA,PAST_DAYS,SUGGESTIONS,COACH,FREE,FREE_FALLBACK,blankReview,reviewDone,reviewHintFor,REVIEW_Q,KEY_QUESTION,ITEM_PH,SUGGEST,dumpAdd,dumpRemove,dumpPick,MAX_PICK})';
 const ctx = { location: { search: '' }, URLSearchParams, console };
 const L = vm.runInNewContext(src.slice(0, cut) + EXPORTS, ctx);
 
@@ -20,12 +20,13 @@ function mem(init) { const s = { ...init }; return { getItem: k => (k in s ? s[k
 let n = 0; const t = (name, fn) => { fn(); n++; console.log('ok', name); };
 
 // --- Task 1 ---
-t('defaultState: v=3, 지난 4일, 회고 객체', () => {
+t('defaultState: v=3, 지난 11일, 회고 객체, 자유 제목', () => {
   const s = L.defaultState();
   assert.equal(s.v, 3);
-  assert.equal(Object.keys(s.days).length, 4);
+  assert.equal(Object.keys(s.days).length, 11);
   assert.equal(s.days['2026-09-12'].review.q1, true);
-  assert.equal(s.boundary.formula.strategy, '');
+  assert.equal(typeof s.boundary.title, 'string');
+  assert.match(s.boundary.formula.strategy, /인트로/);
 });
 t('loadState: 저장 없음 → 기본', () => {
   assert.equal(L.loadState(mem({})).user.name, '소정');
@@ -34,10 +35,14 @@ t('loadState: v 다르면 무시', () => {
   const st = mem({ [L.KEY]: JSON.stringify({ v: 2, user: { name: 'X' } }) });
   assert.equal(L.loadState(st).user.name, '소정');
 });
-t('loadState: v=3이면 복원', () => {
+t('loadState: v=3이면 복원 + boundary.word 보강', () => {
   const s = L.defaultState(); s.user.name = '호';
+  delete s.boundary.title; s.boundary.word = '옛제목';
   const st = mem({ [L.KEY]: JSON.stringify(s) });
-  assert.equal(L.loadState(st).user.name, '호');
+  const out = L.loadState(st);
+  assert.equal(out.user.name, '호');
+  assert.equal(out.boundary.title, '옛제목');
+  assert.equal(out.boundary.word, undefined);
 });
 t('loadState: 깨진 JSON → 기본', () => {
   assert.equal(L.loadState(mem({ [L.KEY]: '{oops' })).v, 3);
@@ -50,15 +55,15 @@ t('saveState: 실패 시 onFail', () => {
 });
 t('ensureDay: 빈 3줄 생성, 멱등', () => {
   const s = L.defaultState();
-  const d = L.ensureDay(s, '2026-09-13');
+  const d = L.ensureDay(s, '2026-09-20');
   assert.equal(d.items.length, 3);
   assertLoose.deepEqual(d.items[0], { text: '', done: false });
   assertLoose.deepEqual(d.review, { q1: null, q2: null, text: '' });
   d.items[0].text = 'a';
-  assert.equal(L.ensureDay(s, '2026-09-13').items[0].text, 'a');
+  assert.equal(L.ensureDay(s, '2026-09-20').items[0].text, 'a');
 });
 t('formulaCount / endDefined', () => {
-  assert.equal(L.formulaCount(L.FORMULA), 3);
+  assert.equal(L.formulaCount(L.FORMULA), 4);
   assert.equal(L.formulaCount({ numeric: ' ', customer: '', problem: '', strategy: '' }), 0);
   assert.equal(L.endDefined({ numeric: '', customer: 'x' }), true);
   assert.equal(L.endDefined({ numeric: '', customer: '' }), false);
@@ -74,7 +79,7 @@ t('daysLeft / fmtDate', () => {
 t('lastReview: 오늘 이전 가장 최근 회고', () => {
   const r = L.lastReview(L.defaultState(), '2026-09-13');
   assert.equal(r.date, '2026-09-12');
-  assert.match(r.review, /썸네일/);
+  assert.match(r.review, /재편집/);
 });
 
 // --- Task 4 ---
@@ -101,7 +106,7 @@ t('COACH 템플릿: 이름 포함', () => {
 // --- Task 5 ---
 t('keywords: 조사 제거·2글자 이상', () => {
   const k = L.keywords(L.FORMULA);
-  assert(k.includes('완강률')); assert(k.includes('정체기')); assert(!k.includes('이'));
+  assert(k.includes('완강률')); assert(k.includes('인트로')); assert(!k.includes('이'));
 });
 t('judgeSignal: 키워드 매칭이면 시그널, 아니면 노이즈, 빈 항목 null', () => {
   assert.equal(L.judgeSignal({ text: '완강률 대시보드 보기', done: false }, L.FORMULA), 'signal');
@@ -144,7 +149,7 @@ t('SUGGEST 플래그 꺼짐, 키 퀘스천·문항 상수', () => {
 
 // --- Task 11 ---
 t('dumpAdd/dumpRemove: 공백 무시·중복 무시', () => {
-  const day = L.ensureDay(L.defaultState(), '2026-09-13');
+  const day = L.ensureDay(L.defaultState(), '2026-09-20');
   assert.equal(L.dumpAdd(day, '  '), false);
   assert.equal(L.dumpAdd(day, '썸네일 A/B'), true);
   assert.equal(L.dumpAdd(day, '썸네일 A/B'), false);
@@ -154,7 +159,7 @@ t('dumpAdd/dumpRemove: 공백 무시·중복 무시', () => {
   assertLoose.deepEqual(day.dump, ['회의']);
 });
 t('dumpPick: 선택 3개는 items로, 나머지는 dropped로, 첫 선택이 Frog', () => {
-  const day = L.ensureDay(L.defaultState(), '2026-09-13');
+  const day = L.ensureDay(L.defaultState(), '2026-09-20');
   ['a', 'b', 'c', 'd', 'e'].forEach(x => L.dumpAdd(day, x));
   const r = L.dumpPick(day, [3, 1, 0]);
   assert.equal(r.ok, true);
@@ -164,7 +169,7 @@ t('dumpPick: 선택 3개는 items로, 나머지는 dropped로, 첫 선택이 Fro
   assertLoose.deepEqual(day.dump, []);
 });
 t('dumpPick: 0개 또는 4개 이상은 거부', () => {
-  const day = L.ensureDay(L.defaultState(), '2026-09-13');
+  const day = L.ensureDay(L.defaultState(), '2026-09-20');
   ['a', 'b', 'c', 'd'].forEach(x => L.dumpAdd(day, x));
   assert.equal(L.dumpPick(day, []).ok, false);
   assert.equal(L.dumpPick(day, [0, 1, 2, 3]).ok, false);
@@ -172,7 +177,7 @@ t('dumpPick: 0개 또는 4개 이상은 거부', () => {
 });
 t('ensureDay: dump/dropped 초기화, 구데이터엔 보강', () => {
   const s = L.defaultState();
-  const d = L.ensureDay(s, '2026-09-13');
+  const d = L.ensureDay(s, '2026-09-20');
   assertLoose.deepEqual(d.dump, []); assertLoose.deepEqual(d.dropped, []);
   s.days['2026-09-01'] = { items: [L.blank(), L.blank(), L.blank()], review: L.blankReview() };
   const old = L.ensureDay(s, '2026-09-01');

@@ -4,19 +4,22 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>바운더리 타운 — 마이스페이스 (1차 오픈안)</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <style>
 /* ===== 1. 토큰 · 레이아웃 ===== */
 :root{
-  --paper:#FFFFFF; --ink:#191F28; --muted:#6E6D69; --faint:#9B9B97;
-  --line:#EDEDEB; --bg:#F7F7F5;
+  --paper:#FFFFFF; --ink:#37352F; --muted:#6E6D69; --faint:#9B9B97;
+  --line:#E9E9E7; --bg:#F7F7F5;
   --indigo:#5B5BD6; --indigo-soft:#EEF0FF; --indigo-ink:#3F3FB0;
   --ok:#22A06B; --warn:#F5A623; --danger:#E5484D;
   --radius:10px; --shadow:0 4px 16px rgba(25,31,40,.06);
+  --popover:0 8px 24px rgba(15,15,15,.12);
   --side-w:240px;
 }
 *{box-sizing:border-box}
-html,body{margin:0;background:var(--paper);color:var(--ink);font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;font-size:15px;line-height:1.6}
+html,body{margin:0;background:var(--paper);color:var(--ink);font-family:'Pretendard Variable',Pretendard,-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;font-size:15px;line-height:1.6}
 button,input,select,textarea{font:inherit;color:inherit}
 button{cursor:pointer}
 [hidden]{display:none!important}
@@ -24,33 +27,45 @@ button{cursor:pointer}
 /* 사이드바 */
 .side{width:var(--side-w);flex:none;background:var(--bg);border-right:1px solid var(--line);padding:20px 14px;position:sticky;top:0;height:100vh;overflow:auto}
 .side .me{display:flex;align-items:center;gap:10px;padding:6px 8px 14px}
-.side .me b{font-size:15px}
-.side .stage{display:inline-block;font-size:11px;font-weight:600;color:var(--indigo-ink);background:var(--indigo-soft);border-radius:999px;padding:2px 8px;cursor:pointer}
-.side h4{margin:14px 8px 6px;font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.04em}
-.side .nav{display:block;width:100%;text-align:left;background:none;border:0;border-radius:6px;padding:4px 8px;font-size:13px;color:var(--ink);text-decoration:none}
+.side .me b{font-size:14px}
+.side .stage{display:inline-block;font-size:11px;font-weight:600;color:var(--indigo-ink);background:var(--indigo-soft);border-radius:999px;padding:2px 8px;cursor:pointer;margin-top:4px}
+.side h4{margin:14px 8px 6px;font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+.side .nav{display:block;width:100%;text-align:left;background:none;border:0;border-radius:4px;padding:3px 8px;font-size:14px;color:var(--ink);text-decoration:none;word-break:keep-all}
 .side .nav:hover{background:rgba(25,31,40,.05)}
 .side .nav.on{background:rgba(25,31,40,.06);color:var(--ink);font-weight:600}
 .side .nav small{display:block;font-size:11px;color:var(--muted);font-weight:400}
-.side .nav.sub{padding-left:16px;font-size:13px}
+.side .nav.sub{padding-left:24px;font-size:14px}
 .side .nav[disabled]{color:var(--faint);cursor:not-allowed}
 .side .foot{margin-top:auto;padding-top:16px;border-top:1px solid var(--line)}
 .side .foot .nav{color:var(--ink);font-weight:400}
 /* 문서 */
 .doc{flex:1;min-width:0;padding:0 40px 120px}
 .doc-in{max-width:720px;margin:0 auto}
-.doc-head{padding:64px 0 4px}
-.doc-head h1{margin:0;font-size:32px;font-weight:700;letter-spacing:-.01em}
-.doc-head .meta{display:flex;gap:10px;align-items:center;color:var(--muted);font-size:13px;margin-top:4px}
-.badge{display:inline-block;font-size:11px;font-weight:600;border-radius:999px;padding:2px 8px;background:var(--indigo-soft);color:var(--indigo-ink)}
+.doc-head{padding:64px 0 24px;border-bottom:1px solid var(--line)}
+.doc-head h1{margin:0;font-size:40px;font-weight:700;letter-spacing:-.02em;line-height:1.2;word-break:keep-all;cursor:text;border-radius:4px;padding:2px 4px;margin-left:-4px}
+.doc-head h1:hover{background:rgba(25,31,40,.03)}
+.doc-head h1:focus{outline:2px solid var(--indigo);outline-offset:2px}
+.doc-head h1:empty::before{content:attr(data-ph);color:var(--faint)}
+.props{margin-top:18px}
+.prop{display:flex;align-items:baseline;gap:8px;padding:3px 0;font-size:14px;word-break:keep-all}
+.prop-k{flex:none;width:120px;color:var(--muted);font-size:13px}
+.prop-v{color:var(--ink)}
+.prop-period{cursor:pointer;border-radius:4px;padding:1px 5px;margin:0 -5px}
+.prop-period:hover{background:rgba(25,31,40,.05)}
+.prop-period:focus{outline:2px solid var(--indigo);outline-offset:1px}
+.prop-edit{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.prop-edit input[type=date]{border:1px solid var(--line);border-radius:4px;padding:5px 7px;font-size:13px;background:var(--paper)}
+.prop-edit input[type=date]:focus{outline:2px solid var(--indigo);outline-offset:1px;border-color:var(--indigo)}
+.prop-arrow{color:var(--muted)}
+.prop-ok{border:0;background:var(--indigo);color:var(--paper);border-radius:6px;padding:6px 14px;font-size:13px;font-weight:600}
+.badge{display:inline-block;font-size:12px;font-weight:500;border-radius:4px;padding:1px 7px;background:rgba(25,31,40,.06);color:var(--muted)}
 .menu-btn{display:none}
 /* 토스트 */
 .toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:var(--ink);color:var(--paper);font-size:13px;padding:10px 16px;border-radius:999px;z-index:60;box-shadow:var(--shadow)}
 .scrim{position:fixed;inset:0;background:rgba(25,31,40,.35);z-index:40}
 /* ===== 2. 일의 공식 ===== */
-.formula{position:sticky;top:0;z-index:5;background:var(--paper);border-bottom:0;padding:28px 0 18px;margin-bottom:24px}
-.f-top{display:flex;justify-content:space-between;align-items:baseline}
-.f-top b{font-size:18px;font-weight:600}
-.f-top .cnt{font-size:12px;color:var(--muted)}
+.formula{position:sticky;top:0;z-index:5;background:var(--paper);border-bottom:1px solid var(--line);padding:28px 0 24px;margin-bottom:0}
+.sec-h{font-size:24px;font-weight:600;letter-spacing:-.01em;line-height:1.3;margin:0 0 8px;word-break:keep-all}
 .f-graph{position:relative;height:230px;margin-top:6px}
 .f-graph svg{position:absolute;inset:0;width:100%;height:100%}
 .f-arc{fill:none;stroke:var(--indigo);stroke-width:1.5;stroke-dasharray:5 5}
@@ -73,19 +88,18 @@ button{cursor:pointer}
 .f-val.q:not(:empty)::before{content:'“'}
 .f-val.q:not(:empty)::after{content:'”'}
 .f-val.dim{opacity:.45}
-.f-summary{display:none;gap:14px;align-items:center;font-size:13px;color:var(--muted);cursor:pointer;padding-top:4px}
+.f-summary{display:none;gap:14px;align-items:center;flex-wrap:wrap;font-size:13px;color:var(--muted);cursor:pointer;padding-top:4px}
 .f-summary b{color:var(--ink);font-weight:600}
-.f-summary .cnt{margin-left:auto}
 .formula.collapsed{padding:10px 0;border-bottom:1px solid var(--line)}
-.formula.collapsed .f-top,.formula.collapsed .f-graph{display:none}
+.formula.collapsed .sec-h,.formula.collapsed .f-graph{display:none}
 .formula.collapsed .f-summary{display:flex}
 /* ===== 3. 데일리 ===== */
 .day{border:0;margin-bottom:6px}
 .day-h{display:flex;align-items:center;gap:8px;padding:4px 0;cursor:pointer}
-.day-h::before{content:'▸';display:inline-block;color:var(--faint);font-size:10px;flex:none;transition:transform .15s ease}
+.day-h::before{content:'▸';display:inline-block;color:var(--faint);font-size:12px;flex:none;transition:transform .15s ease}
 .day.open .day-h::before{transform:rotate(90deg)}
-.day-h b{font-size:15px;font-weight:600}
-.day-h .prog{font-size:12px;color:var(--muted);margin-left:auto}
+.day-h b{font-size:18px;font-weight:600}
+.day-h .prog{font-size:13px;color:var(--muted);margin-left:auto}
 .day-h .peek{font-size:13px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:50%}
 .day.today .day-h{cursor:default}
 .day.today .day-h::before{content:none}
@@ -97,27 +111,28 @@ button{cursor:pointer}
 .it-text{flex:1;border:0;background:none;outline:none;font-size:15px;padding:4px 2px}
 .it-text::placeholder{color:var(--faint)}
 .it.done .it-text{text-decoration:line-through;color:var(--faint)}
-.keyq{font-size:13px;color:var(--muted);margin:-6px 0 12px}
+.keyq{font-size:15px;color:var(--ink);border-left:3px solid var(--ink);padding:2px 0 2px 14px;margin:0 0 16px;line-height:1.6;word-break:keep-all}
 .it.frog .it-text{font-weight:600}
 .it .frog-tag{font-size:11px;color:var(--indigo-ink);background:var(--indigo-soft);border-radius:4px;padding:1px 6px;flex:none}
 .rv{margin-top:14px}
-.rv .q{display:flex;align-items:center;gap:8px;font-size:13.5px;padding:4px 0}
-.rv .q span{flex:1}
-.rv .ox{width:28px;height:24px;border:1px solid var(--line);background:none;border-radius:6px;font-size:12px;color:var(--muted)}
+.rv .q{display:flex;align-items:center;gap:8px;font-size:14px;padding:4px 0}
+.rv .q span{flex:1;color:var(--muted);word-break:keep-all}
+.rv .ox{width:28px;height:26px;border:1px solid var(--line);background:none;border-radius:6px;font-size:12px;color:var(--muted)}
+.rv .ox:focus-visible{outline:2px solid var(--indigo);outline-offset:1px}
 .rv .ox.on{border-color:var(--indigo);color:var(--indigo-ink);background:var(--indigo-soft);font-weight:700}
-.rv textarea{display:block;width:100%;min-height:64px;resize:vertical;border:0;border-bottom:1px solid var(--line);border-radius:0;padding:8px 2px;margin-top:6px;outline:none;line-height:1.6}
+.rv textarea{display:block;width:100%;min-height:72px;resize:vertical;border:0;border-radius:4px;padding:8px;margin-top:8px;outline:none;line-height:1.7;font-size:15px}
 .rv textarea::placeholder{color:var(--faint)}
-.rv textarea:focus{border-bottom-color:var(--indigo)}
+.rv textarea:focus{background:rgba(25,31,40,.03)}
 .rv .rv-act{display:flex;justify-content:flex-end}
 .rv .rv-act button{border:0;background:none;color:var(--indigo-ink);padding:8px 6px;font-size:13px;font-weight:600}
 .rv-sum{margin-top:12px;cursor:text}
 .rv-sum .chips{display:flex;gap:6px;margin-bottom:6px}
 .rv-sum .chip{font-size:11px;color:var(--muted);background:rgba(25,31,40,.05);border-radius:4px;padding:2px 7px}
 .rv-sum .chip.on{color:var(--indigo-ink);background:var(--indigo-soft)}
-.rv-sum .txt{font-size:14px;white-space:pre-wrap;line-height:1.6}
-.days h3{font-size:13px;color:var(--muted);font-weight:600;margin:0 0 10px}
-.dump{margin:4px 0 8px;padding:10px 12px;background:var(--bg);border-radius:8px}
-.dump .dump-title{font-size:13px;font-weight:600;margin:0 0 6px}
+.rv-sum .txt{font-size:15px;white-space:pre-wrap;line-height:1.7;word-break:keep-all}
+.days .sec-h{margin-top:24px}
+.dump{margin:4px 0 8px;padding:16px;background:var(--bg);border-radius:4px}
+.dump .dump-title{font-size:15px;font-weight:600;margin:0 0 6px;word-break:keep-all}
 .dump .dump-sub{font-size:12px;color:var(--muted);margin:0 0 8px}
 .dump-in{display:flex;gap:6px}
 .dump-in input{flex:1;border:0;border-bottom:1px solid var(--line);background:none;padding:6px 2px;outline:none;font-size:14px}
@@ -145,7 +160,7 @@ button{cursor:pointer}
 .coach-bubble{position:fixed;right:24px;bottom:24px;width:56px;height:56px;border-radius:50%;border:0;background:var(--indigo);color:var(--paper);font-size:26px;box-shadow:0 8px 24px rgba(91,91,214,.35);z-index:50;display:flex;align-items:center;justify-content:center}
 .coach-bubble .dot{position:absolute;top:4px;right:4px;width:12px;height:12px;border-radius:50%;background:var(--danger);border:2px solid var(--paper)}
 .coach-mini{position:fixed;right:92px;bottom:34px;max-width:280px;background:var(--paper);border:1px solid var(--line);border-radius:12px 12px 2px 12px;padding:8px 12px;font-size:13px;box-shadow:var(--shadow);z-index:50}
-.coach-panel{position:fixed;right:24px;bottom:92px;width:360px;height:560px;max-height:calc(100vh - 110px);background:var(--paper);border:1px solid var(--line);border-radius:14px;box-shadow:0 16px 48px rgba(25,31,40,.18);z-index:55;display:flex;flex-direction:column;overflow:hidden}
+.coach-panel{position:fixed;right:24px;bottom:92px;width:360px;height:560px;max-height:calc(100vh - 110px);background:var(--paper);border:1px solid var(--line);border-radius:8px;box-shadow:var(--popover);z-index:55;display:flex;flex-direction:column;overflow:hidden}
 .cp-h{display:flex;align-items:center;gap:8px;padding:12px 14px;border-bottom:1px solid var(--line)}
 .cp-h b{font-size:14px}
 .cp-h small{display:block;font-size:11px;color:var(--muted)}
@@ -209,8 +224,8 @@ button{cursor:pointer}
     <div class="doc-in">
       <button class="menu-btn" id="menuBtn" aria-label="메뉴">☰</button>
       <header class="doc-head">
-        <h1 id="bTitle"></h1>
-        <div class="meta"><span id="bPeriod"></span><span class="badge" id="bLeft"></span></div>
+        <h1 id="bTitle" contenteditable="plaintext-only" role="textbox" aria-label="바운더리 이름 — 언제든 고칠 수 있어요" data-ph="바운더리 이름을 지어요 (예: 정체기 탈출 강의 완주 프로젝트)"></h1>
+        <div class="props" id="props"></div>
       </header>
       <section class="formula" id="formula"></section>
       <section class="days" id="days"></section>
@@ -233,31 +248,43 @@ const ITEM_PH = ['오늘 반드시 끝낼 일 하나 — 가장 먼저 해요', 
 const REVIEW_Q = ['오늘의 바운더리는 끝점(성과)에 도달하는 일이었나요?', '만약 다시 한다면 다르게 일 할 것 같나요?'];
 const STAGES = [
   { n: 1, name: '초보자', group: '노력', sells: '시간', unknown: '노력과 성과의 차이 — 자기만족에 빠져 고객만족을 모른다', point: '시스템 사고',
-    tip: { title: '시스템 사고 — 전체를 본다', quote: ['전체를 보는 사람은 10개를 배우고, 부분만 본 사람은 1개를 배운다.', '내 지도는 내 자리 주변에서 멈춰 있지 않은가?'], ask: '내 일의 시작부터 끝까지, 한 장에 그릴 수 있나요?' },
+    tip: { title: '시스템 사고 — 전체를 본다', quote: ['전체를 보는 사람은 10개를 배우고, 부분만 본 사람은 1개를 배운다.', '내 지도는 내 자리 주변에서 멈춰 있지 않은가? 어디서 와서 어디로 가는지 그려봤는가?', '같은 프로젝트를 한 번 했는데 전체를 본 사람과 부분만 본 사람의 다음 해는 다르다.'], ask: '내가 맡은 일의 앞과 뒤에 누가 있고, 최종 고객까지 어떻게 닿는지 한 장에 그릴 수 있나요?' },
     judge: '전체 그림에서 이 일이 어디에 있나요? 시작부터 끝까지 한 장에 그려봐요.', reviewPh: '오늘 내가 본 범위는 내 자리 주변에서 멈추지 않았나요?' },
   { n: 2, name: '숙련자', group: '노력', sells: '숙련된 시간', unknown: '참여와 주도의 차이 — 전체 성과 중 내 기여도가 몇 %인지', point: '시그널과 노이즈',
-    tip: { title: '시그널과 노이즈 — 무엇에 반응할 것인가', quote: ['시그널은 끝점(숫자 언어)에 직접 영향을 주는 것. 노이즈는 그 외 모든 것.', '좋은 의견도 끝점에 영향이 없으면 노이즈예요.'], ask: '오늘 들어온 요청 중, 끝점에 직접 닿는 건 몇 개였나요?' },
+    tip: { title: '시그널과 노이즈 — 무엇에 반응할 것인가', quote: ['시그널은 끝점(숫자 언어)에 직접 영향을 주는 것. 노이즈는 그 외 모든 것.', '좋은 의견도 끝점에 영향이 없으면 노이즈예요. 요란한 것이 중요한 것은 아니에요.', '이게 우리의 성과와 직접 연결되는가? 이 질문 하나면 돼요.'], ask: '오늘 들어온 요청·회의·메시지 중 끝점에 직접 닿는 건 몇 개였나요? 나머지엔 어떻게 반응했나요?' },
     judge: '이건 끝점에 닿나요? 좋은 의견도 끝점에 영향 없으면 노이즈예요.', reviewPh: '오늘 시그널이었던 건 하나뿐이었나요?' },
   { n: 3, name: '실력자', group: '성과', sells: '성과', unknown: 'ROI — 인풋 대비 아웃풋, 탁월함을 심플함으로', point: '2:8',
-    tip: { title: '2:8 — 가장 효과 있는 하나만', quote: ['다 버리고, 가장 효과 있는 하나만 남기는 것.', '흩뿌릴수록 흐려지고, 한곳에 모을수록 선명해진다.'], ask: '내 일 중 20의 리소스로 80의 효과를 내는 그 하나는 무엇인가요?' },
+    tip: { title: '2:8 — 가장 효과 있는 하나만', quote: ['다 버리고, 가장 효과 있는 하나만 남기는 것.', '흩뿌릴수록 흐려지고, 한곳에 모을수록 선명해진다.', '친하니까, 편하니까 중요하다고 부르는 건 중요가 아니라 익숙함이에요.'], ask: '내 일 중 20의 리소스로 80의 효과를 내는 그 하나는 무엇인가요? 나머지 80의 일은 오늘 어디에 뒀나요?' },
     judge: '20으로 80을 내는 일인가요? 아니면 익숙해서 중요해 보이는 일인가요?', reviewPh: '오늘 80을 만든 20은 무엇이었나요?' },
   { n: 4, name: '전문가', group: '성과', sells: '보장된 성과', unknown: '위임 — 노하우를 이론으로, 내가 없어도 나는 성과', point: '2:8과 위임',
-    tip: { title: '2:8 — 내가 안 해도 나는 성과', quote: ['내가 하면 성과가 나는데, 내가 안 하면 성과가 안 난다 — 이 구간을 통과해야 전문가예요.', '가지치기 → 이론 → 위임.'], ask: '오늘 한 일 중 남이 그대로 할 수 있게 적어둔 게 있나요?' },
+    tip: { title: '2:8과 위임 — 내가 안 해도 나는 성과', quote: ['내가 하면 성과가 나는데, 내가 안 하면 성과가 안 난다 — 이 구간을 통과해야 전문가예요.', '가지치기 → 이론 → 위임. 노하우를 남이 그대로 할 수 있게 적는 것이 이론이에요.', '내가 빠졌는데도 같은 품질의 결과가 나온 일이 있나요?'], ask: '오늘 한 일 중 남이 그대로 할 수 있게 적어둔 게 있나요? 없다면 어떤 일부터 적어둘 건가요?' },
     judge: '이 일, 남에게 넘겨도 같은 결과가 나오게 적어둘 수 있나요?', reviewPh: '오늘 위임할 수 있었는데 내가 한 일은 무엇인가요?' },
   { n: 5, name: '구조', group: '시스템', sells: '위임된 조직', unknown: '효율 이상의 축적 — 반복이 문화가 되는 시간', point: '1원칙 사고',
-    tip: { title: '1원칙 사고 — 변하지 않는 기준', quote: ['매출은 최대로, 비용은 최소로.', '매출에 기여하는가, 비용을 줄이는가? 둘 중 하나에도 해당하지 않으면 안 한다.'], ask: '오늘 결정 중 1원칙 밖에서 한 것이 있나요?' },
+    tip: { title: '1원칙 사고 — 변하지 않는 기준', quote: ['매출은 최대로, 비용은 최소로.', '매출에 기여하는가, 비용을 줄이는가? 둘 중 하나에도 해당하지 않으면 안 한다.', '잘 안 되는 것이 생겼을 때 사람을 탓하기 시작하면 아직 여기에 못 온 것이다. 사람은 잘못이 없다. 시스템이 문제다.'], ask: '오늘 내린 결정 중 1원칙 밖에서 한 것이 있나요? 그 결정을 시스템으로 바꾸면 무엇이 되나요?' },
     judge: '매출에 기여하거나 비용을 줄이나요? 둘 다 아니면 안 해도 돼요.', reviewPh: '오늘 사람을 탓한 순간이 있었나요? 시스템은 어디가 문제였나요?' },
   { n: 6, name: '문화', group: '시스템', sells: '축적된 신뢰', unknown: '내 이야기를 누가 하는가', point: '1원칙 사고',
-    tip: { title: '1원칙 사고 — 내 이야기를 누가 하는가', quote: ['결국 자본주의의 끝에는 신뢰가 있다.', '세제 하면 옥시크린, 헤어 하면 준오헤어.'], ask: '오늘 누가, 어디서 우리 이야기를 대신 했나요?' },
+    tip: { title: '1원칙 사고 — 내 이야기를 누가 하는가', quote: ['결국 자본주의의 끝에는 신뢰가 있다.', '세제 하면 옥시크린, 헤어 하면 준오헤어. 이름이 선택 기준이 되는 것.', '내 이야기를 누가 하는가. 내가 말하지 않아도 남이 대신 말하는가.'], ask: '오늘 누가, 어디서 우리 이야기를 대신 했나요? 그 사람이 다음에도 말하게 하려면 무엇이 필요한가요?' },
     judge: '이 일이 끝나면 누가 우리 이야기를 대신 하게 되나요?', reviewPh: '오늘 우리 이야기를 대신한 사람은 누구였나요?' },
 ];
-const BOUNDARY = { id: 'b1', word: '완강률 60%', from: '2026-09-01', to: '2026-11-30' };
-const FORMULA = { numeric: '완강률 60%', customer: '회사 생활 10년보다 이 강의가 더 나았어요', problem: '일의 정체기가 왔을 때 뚫는 방법을 모른다', strategy: '' };
+const BOUNDARY = { id: 'b1', title: '정체기 탈출 강의, 3단계 완주 프로젝트', from: '2026-09-01', to: '2026-11-30' };
+const FORMULA = {
+  numeric: '3단계 완강률 38% → 60% (10월 말 코호트 기준)',
+  customer: '회사 생활 10년보다 이 강의 3주가 더 나았어요',
+  problem: '수강생이 3단계 앞 3분에서 "내 얘기가 아니네" 하고 나간다',
+  strategy: '3단계 인트로를 수강생 인터뷰 문장으로 다시 자르고, 매주 완강률과 앞 3분 이탈률 두 숫자만 본다',
+};
 const PAST_DAYS = {
-  '2026-09-09': { items: [{ text: '강의 3단계 미션 제출', done: true }, { text: '완강률 주간 리포트 보기', done: true }, { text: '수강생 인터뷰 1명', done: false }], review: { q1: false, q2: true, text: '인터뷰는 못 잡았다. 리포트에서 3단계 이탈이 제일 크다.\n인터뷰를 먼저 잡았어야 했다.' }, dump: [], dropped: [] },
-  '2026-09-10': { items: [{ text: '3단계 이탈 구간 다시 보기', done: true }, { text: '수강생 인터뷰 1명', done: true }, { text: '인트로 길이 재기', done: true }], review: { q1: true, q2: false, text: '3단계 이탈 구간을 다시 봤다. 앞 3분에서 나간다.' }, dump: [], dropped: [] },
-  '2026-09-11': { items: [{ text: '인트로 재편집 시작', done: true }, { text: '팀 주간 회의', done: false }, { text: '외부 제안서 검토', done: false }], review: { q1: false, q2: true, text: '회의가 하루를 먹었다. 완강률에 닿은 건 하나뿐.\n회의는 오후로 미루고 인트로부터 했어야 했다.' }, dump: [], dropped: ['슬랙 답장 정리', '다음 달 강의 기획 초안'] },
-  '2026-09-12': { items: [{ text: '인트로 재편집 끝내기', done: true }, { text: '완강률 대시보드 확인', done: true }, { text: '수강생 후기 3개 읽기', done: true }], review: { q1: true, q2: false, text: '썸네일 A/B는 내일로 미뤘다. 인트로 재편집은 끝.' }, dump: [], dropped: ['썸네일 A/B 두 종 올리기'] },
+  '2026-09-01': { items: [{ text: '3개월 바운더리 한 문장으로 정하기 — 완강률 60%', done: true }, { text: '지난 코호트 완강률 리포트 전부 다시 읽기', done: true }, { text: '팀에 바운더리 공유하고 안 할 일 목록 합의', done: true }], review: { q1: true, q2: false, text: '바운더리를 완강률 하나로 좁혔다. 리포트를 다시 보니 1·2단계는 80% 넘게 완주하는데 3단계에서 38%로 떨어진다. 문제는 강의 전체가 아니라 3단계 하나다.\n팀에 "이번 분기엔 신규 강의 기획 안 한다"고 말했다. 반대는 없었다.' }, dump: [], dropped: ['신규 강의 기획 초안', '홈페이지 리뉴얼 견적 비교', '뉴스레터 디자인 교체'] },
+  '2026-09-02': { items: [{ text: '3단계 이탈 시점 초 단위로 찍어보기 (영상 히트맵)', done: true }, { text: '3단계 중도 이탈자 5명에게 DM 보내기', done: true }, { text: '3단계 강의 대본 다시 읽고 밑줄', done: false }], review: { q1: true, q2: true, text: '히트맵을 보니 이탈이 3단계 시작 2분 40초 부근에 몰려 있다. 강의 중반이 아니라 앞부분이다.\nDM 5통 보냈고 2명이 답장했다. 대본 밑줄은 못 했다. 다시 한다면 대본보다 DM 답장부터 기다렸을 것 같다.' }, dump: [], dropped: ['강의 플랫폼 이전 검토'] },
+  '2026-09-03': { items: [{ text: '이탈자 답장 2건 정리 — 나간 이유를 그대로 옮겨 적기', done: true }, { text: '3단계 인트로 3분 대본 문장 단위로 쪼개기', done: true }, { text: '인트로에서 "내 얘기" 문장이 몇 초에 처음 나오는지 재기', done: true }], review: { q1: true, q2: false, text: '이탈자 말을 그대로 옮기니 둘 다 같은 말이다. "앞부분이 이론이라 내 상황이랑 상관없는 줄 알았어요." 인트로에서 수강생 상황이 처음 언급되는 게 3분 10초다. 이탈 시점보다 늦다.\n문제가 한 문장으로 잡혔다. 수강생이 3단계 앞 3분에서 내 얘기가 아니라고 느끼고 나간다.' }, dump: [], dropped: [] },
+  '2026-09-04': { items: [{ text: '일의 공식 4칸 채우고 팀 리뷰 받기', done: true }, { text: '3단계 인트로 새 구성안 — 인터뷰 문장으로 시작', done: true }, { text: '주간 지표 2개 정하기 (완강률·앞 3분 이탈률)', done: true }], review: { q1: true, q2: false, text: '일의 공식을 한 장에 적었다. 끝은 완강률 60%, 고객 언어는 "회사 생활 10년보다 이 강의 3주가 더 나았어요", 문제는 앞 3분, 전략은 인트로를 인터뷰 문장으로 다시 자르기.\n팀 리뷰에서 "전략이 인트로 하나뿐이라 불안하지 않냐"는 말이 나왔다. 불안하지만 하나만 한다. 이걸 빼면 끝점에 못 가고, 다른 건 빼도 간다.' }, dump: [], dropped: ['강의 전체 리뉴얼 논의', '수료증 디자인'] },
+  '2026-09-07': { items: [{ text: '새 인트로 대본 초안 쓰기 — 첫 문장은 이탈자 말로', done: true }, { text: '수강생 인터뷰 2명 잡기 (이번 주 안)', done: true }, { text: '앞 3분 이탈률 대시보드 셀 만들기', done: false }], review: { q1: true, q2: true, text: '초안을 썼다. 첫 문장은 "앞부분이 이론이라 내 얘기가 아닌 줄 알았어요"로 시작한다. 읽어보니 이론 설명은 뒤로 다 밀렸다.\n인터뷰는 수요일·금요일로 잡혔다. 대시보드 셀은 못 만들었는데, 다시 한다면 셀부터 만들었을 것이다. 숫자를 매주 보려면 그게 먼저다.' }, dump: [], dropped: ['SNS 홍보 문구 다듬기'] },
+  '2026-09-08': { items: [{ text: '앞 3분 이탈률 대시보드 셀 만들기', done: true }, { text: '새 인트로 초안 소리 내서 읽고 3분 안에 끝나는지 재기', done: true }, { text: '촬영 일정 잡기', done: true }], review: { q1: true, q2: false, text: '셀을 만들었다. 지난주 앞 3분 이탈률 41%. 이 숫자를 매주 월요일에 본다.\n초안을 읽으니 3분 20초다. 20초를 잘라야 한다. 촬영은 목요일.' }, dump: [], dropped: [] },
+  '2026-09-09': { items: [{ text: '인트로 대본 20초 줄이기 — 이론 문장 3개 삭제', done: true }, { text: '수강생 인터뷰 1명 (수요일)', done: true }, { text: '완강률 주간 리포트 보기', done: false }], review: { q1: false, q2: true, text: '대본은 2분 55초로 줄였다. 인터뷰에서 새 문장을 얻었다. "3단계에서 갑자기 선생님 얘기가 돼서 창을 닫았어요."\n리포트는 못 봤다. 오후에 외부 미팅 요청이 두 건 들어왔고 하나를 받았다. 끝점에 안 닿는 일이었다. 다시 한다면 미팅을 다음 주로 미뤘을 것이다.' }, dump: [], dropped: ['외부 협업 미팅 (받음 — 실수)', '강의 소개 페이지 문구 수정'] },
+  '2026-09-10': { items: [{ text: '3단계 이탈 구간 히트맵 다시 보기 — 새 대본과 겹쳐 비교', done: true }, { text: '수강생 인터뷰 1명 (금요일 → 오늘로 당김)', done: true }, { text: '인트로 촬영 (목요일)', done: true }], review: { q1: true, q2: false, text: '촬영했다. 새 인트로는 2분 50초, 첫 15초가 이탈자 말이다. 히트맵과 겹쳐보니 옛 인트로에서 이탈이 몰리던 2분 40초 지점이 새 대본에선 "당신 상황" 문장이 나오는 자리다.\n인터뷰 두 번째 사람도 같은 말을 했다. 고객 언어가 맞는 것 같다.' }, dump: [], dropped: ['편집 툴 업그레이드'] },
+  '2026-09-11': { items: [{ text: '인트로 재편집 시작 — 자막·컷 정리', done: true }, { text: '팀 주간 회의', done: false }, { text: '외부 제안서 검토', done: false }], review: { q1: false, q2: true, text: '회의가 하루를 먹었다. 완강률에 닿은 건 재편집 하나뿐이었고 그것도 절반만 했다.\n회의와 제안서는 오늘의 3개에 넣지 말았어야 했다. 둘 다 끝점에 안 닿는다. 다시 한다면 회의는 오후 30분으로 자르고 제안서는 다음 주로 넘겼을 것이다.' }, dump: [], dropped: ['슬랙 답장 정리', '다음 달 강의 기획 초안'] },
+  '2026-09-12': { items: [{ text: '인트로 재편집 끝내기 — 2분 50초 확정', done: true }, { text: '완강률 대시보드 확인 (이번 주 41% → 43%)', done: true }, { text: '수강생 후기 3개 읽고 고객 언어 문장 골라내기', done: true }], review: { q1: true, q2: false, text: '재편집 끝. 월요일에 새 인트로로 교체한다.\n후기 3개 중 하나가 "회사 생활 10년보다 이 강의 3주가 더 나았어요"였다. 고객 언어를 이걸로 바꿨다. 썸네일 A/B는 내일로 미뤘다.' }, dump: [], dropped: ['썸네일 A/B 두 종 올리기'] },
+  '2026-09-13': { items: [{ text: '새 인트로로 3단계 영상 교체', done: true }, { text: '썸네일 A/B 두 종 올리기', done: true }, { text: '교체 공지 — 기존 수강생에게 "3단계 다시 보기" 메일', done: true }], review: { q1: true, q2: false, text: '교체했다. 이제 숫자가 움직이는지 보는 일만 남았다. 이번 주 앞 3분 이탈률과 완강률, 두 개만 본다.\n메일은 짧게 썼다. "3단계 앞부분을 여러분 말로 다시 만들었어요. 3분만 다시 봐주세요."' }, dump: [], dropped: ['신규 강의 기획 (또 올라옴 — 안 함)', '홈페이지 리뉴얼'] },
 };
 const SUGGESTIONS = [
   { id: 's1', text: '썸네일 A/B 두 종 올리기', why: '어제 회고에서 내일로 미뤘다고 했어요' },
@@ -271,9 +298,9 @@ const COACH = {
   keyQ2: `${KEY_QUESTION} 첫 줄엔 가장 먼저 끝낼 일 하나를 적어요.`,
   dumpIntro: '머릿속에 있는 할 일을 전부 꺼내놔요. 많아도 괜찮아요, 고르는 건 다음이에요.',
   dumpPick: '이 중 끝점(성과)에 가장 큰 영향을 주는 일 3개만 골라요. 첫 번째로 고른 게 오늘 가장 먼저 끝낼 일이에요.',
-  dumpDone: (n) => n ? `3개를 정했어요. 나머지 ${n}개는 오늘 안 해요. 위임하거나 버려요.` : '3개를 정했어요. 첫 줄부터 시작해요.',
+  dumpDone: (n) => n ? `3개를 골랐어요. 나머지 ${n}개는 오늘 안 해요. 위임하거나 버려요.` : '3개를 골랐어요. 첫 줄부터 시작해요.',
   frogSplit: '첫 줄이 커 보이면 오늘 끝낼 단위로 쪼개요. 끝날 때까지 다른 일로 넘어가지 않아요.',
-  greetPm: (name, done, filled) => filled ? `${name}님, 3개 중 ${done}개 끝냈네요. 회고 질문 두 개에 O/X부터 찍어봐요.` : `${name}님, 오늘은 아직 3개를 안 정했어요. 내일 아침 것부터 하나만 정해둘까요?`,
+  greetPm: (name, done, filled) => filled ? `${name}님, 3개 중 ${done}개 끝냈네요. 회고 질문 두 개에 O/X부터 찍어봐요.` : `${name}님, 오늘은 아직 3개를 안 골랐어요. 내일 아침 것부터 하나만 정해둘까요?`,
   signal: (word) => `"${word}"에 바로 닿는 일이네요. 시그널이에요.`,
   orderGuard: '끝부터 정해요. 성과가 없으면 문제도 전략도 방향을 잃어요.',
   formula: {
@@ -314,10 +341,17 @@ function blankReview() { return { q1: null, q2: null, text: '' }; }
 function defaultState() {
   return { v: 3, user: { ...USER }, boundary: { ...BOUNDARY, formula: { ...FORMULA } }, days: JSON.parse(JSON.stringify(PAST_DAYS)), coachSeen: {} };
 }
+function ensureBoundary(state) {
+  if (state && state.boundary) {
+    if (!state.boundary.title) state.boundary.title = state.boundary['word'] || ''; // 옛 스키마 제목 보강
+    delete state.boundary['word'];
+  }
+  return state;
+}
 function loadState(storage) {
   try {
     const raw = storage.getItem(KEY);
-    if (raw) { const s = JSON.parse(raw); if (s && s.v === 3) return s; }
+    if (raw) { const s = JSON.parse(raw); if (s && s.v === 3) return ensureBoundary(s); }
   } catch (e) { /* 무시 */ }
   return defaultState();
 }
@@ -434,7 +468,7 @@ function renderFormula() {
   box.classList.toggle('complete', n === 4);
   const dim = end ? '' : ' dim';
   box.innerHTML = `
-    <div class="f-top"><b>일의 공식</b><span class="cnt" id="fCount">${n}/4 정했어요</span></div>
+    <h2 class="sec-h">일의 공식</h2>
     <div class="f-graph">
       <svg viewBox="0 0 1000 230" preserveAspectRatio="none" aria-hidden="true">
         <path class="f-arc" d="M60,120 Q500,20 940,120"/>
@@ -446,7 +480,7 @@ function renderFormula() {
       <div class="f-start"><span class="f-lab">시작 · 전략</span><span class="f-val${dim}" data-k="strategy" contenteditable="true" data-ph="그 문제를 어떤 전략으로 풀어 성과에 닿을 건가요?">${esc(f.strategy)}</span></div>
       <div class="f-end"><span class="f-lab">끝 · 성과</span><span class="f-val big" data-k="numeric" contenteditable="true" data-ph="무엇이 얼마에서 얼마로 바뀌나요?">${esc(f.numeric)}</span><span class="f-val q" data-k="customer" contenteditable="true" data-ph="고객이 돈을 내고 나서 뭐라고 말하면 성공인가요?">${esc(f.customer)}</span></div>
     </div>
-    <div class="f-summary" id="fSummary"><span>성과 <b>${esc(f.numeric || '—')}</b></span><span>문제 <b>${esc((f.problem || '—').slice(0, 18))}</b></span><span>전략 <b>${esc((f.strategy || '—').slice(0, 18))}</b></span><span class="cnt">${n}/4</span></div>`;
+    <div class="f-summary" id="fSummary"><span>성과 <b>${esc(f.numeric || '—')}</b></span><span>문제 <b>${esc((f.problem || '—').slice(0, 18))}</b></span><span>전략 <b>${esc((f.strategy || '—').slice(0, 18))}</b></span></div>`;
   box.querySelectorAll('.f-val').forEach(el => {
     el.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); el.blur(); } });
     el.addEventListener('focus', () => { if (el.classList.contains('dim')) onOrderGuard(); });
@@ -522,7 +556,7 @@ function renderDays() {
     const peek = first ? `“${first.slice(0, 20)}${first.length > 20 ? '…' : ''}”` : '';
     return `<div class="day${editingReview === d ? ' open' : ''}" data-d="${d}"><div class="day-h"><b>${fmtDate(d)}</b><span class="peek">${esc(peek)}</span><span class="prog">${p.done}/${p.filled}</span></div>${body}</div>`;
   }).join('');
-  $('days').innerHTML = `<h3>오늘의 바운더리</h3><p class="keyq">${esc(KEY_QUESTION)}</p>${html}`;
+  $('days').innerHTML = `<h2 class="sec-h">오늘의 바운더리</h2><p class="keyq">${esc(KEY_QUESTION)}</p>${html}`;
   bindDays();
   renderSide();
 }
@@ -591,7 +625,7 @@ function bindDays() {
 function openDay(d) { const el = document.querySelector(`.day[data-d="${d}"]`); if (el) el.classList.add('open'); }
 function renderSide() {
   const b = S.boundary;
-  $('sideBoundary').innerHTML = `<button class="nav on">${esc(b.word)}<small>${b.from.slice(5).replace('-', '.')} ~ ${b.to.slice(5).replace('-', '.')} · ${daysLeft(b.to, TODAY)}일 남음</small></button>`;
+  $('sideBoundary').innerHTML = `<button class="nav on">${esc(b.title || '이름 없는 바운더리')}<small>${b.from.slice(5).replace('-', '.')} ~ ${b.to.slice(5).replace('-', '.')} · ${daysLeft(b.to, TODAY)}일 남음</small></button>`;
   const dates = Object.keys(S.days).filter(d => d <= TODAY).sort().reverse();
   const label = d => d === TODAY ? '오늘' : (daysLeft(TODAY, d) === 1 ? '어제' : fmtDate(d).replace(/ .요일$/, ''));
   $('sideDays').innerHTML = `<h4>날짜</h4>` + dates.map(d => { const p = dayProgress(S.days[d]); return `<button class="nav sub" data-goto="${d}">${label(d)} <small>${p.done}/${p.filled || 3}</small></button>`; }).join('');
@@ -736,14 +770,50 @@ function wireCoachReactions() {
   };
 }
 // ===== BOOT =====
+let editingPeriod = false;
+function shortDate(iso) { return iso.slice(5).replace('-', '.'); }
 function renderHead() {
-  const b = S.boundary;
+  const b = S.boundary, st = curStage();
   $('meName').textContent = S.user.name;
-  $('meStage').textContent = `${curStage().name} · ${curStage().n}/6`;
-  $('bTitle').textContent = b.word;
-  $('bPeriod').textContent = `${b.from.slice(5).replace('-', '.')} ~ ${b.to.slice(5).replace('-', '.')}`;
-  $('bLeft').textContent = `${daysLeft(b.to, TODAY)}일 남음`;
+  $('meStage').textContent = `${st.name} · ${st.n}/6`;
+  if (document.activeElement !== $('bTitle')) $('bTitle').textContent = b.title || '';
   $('sideLecture').textContent = `강의실 · 커리큘럼 ${S.user.course}/5`;
+  const period = editingPeriod
+    ? `<span class="prop-edit"><input type="date" id="pFrom" value="${b.from}" aria-label="시작 날짜"><span class="prop-arrow">→</span><input type="date" id="pTo" value="${b.to}" aria-label="끝 날짜"><button class="prop-ok" id="pOk">확인</button></span>`
+    : `<span class="prop-v prop-period" id="bPeriod" role="button" tabindex="0" aria-label="기간 고치기">${shortDate(b.from)} → ${shortDate(b.to)}</span>`;
+  $('props').innerHTML = `
+    <div class="prop"><span class="prop-k">기간</span>${period}</div>
+    <div class="prop"><span class="prop-k">남은 일수</span><span class="prop-v">${daysLeft(b.to, TODAY)}일</span></div>
+    <div class="prop"><span class="prop-k">단계</span><span class="prop-v">${esc(st.name)} ${st.n}/6</span></div>`;
+  bindPeriod();
+}
+function bindPeriod() {
+  const bp = $('bPeriod');
+  if (bp) {
+    const open = () => { editingPeriod = true; renderHead(); const f = $('pFrom'); if (f) f.focus(); };
+    bp.addEventListener('click', open);
+    bp.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); } });
+  }
+  const ok = $('pOk');
+  if (ok) ok.addEventListener('click', () => {
+    const from = $('pFrom').value, to = $('pTo').value;
+    if (!from || !to) { toast('시작과 끝 날짜를 모두 골라요.'); return; }
+    if (to < from) { toast('끝 날짜가 시작보다 앞이에요.'); return; }
+    S.boundary.from = from; S.boundary.to = to; editingPeriod = false;
+    persist(); renderHead(); renderSide();
+  });
+}
+function bindTitle() {
+  const el = $('bTitle');
+  el.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); el.blur(); }
+    else if (e.key === 'Escape') { e.preventDefault(); el.textContent = S.boundary.title || ''; el.blur(); }
+  });
+  el.addEventListener('blur', () => {
+    const v = el.textContent.trim();
+    if (v === (S.boundary.title || '')) { el.textContent = v; return; }
+    S.boundary.title = v; persist(); renderSide();
+  });
 }
 function boot() {
   if (Q.get('reset') === '1') { try { localStorage.removeItem(KEY); } catch (e) {} }
@@ -751,6 +821,7 @@ function boot() {
   TODAY = todayStr();
   ensureDay(S, TODAY);
   renderHead();
+  bindTitle();
   renderFormula();
   wireCoachReactions();
   buildCoachPanel();
