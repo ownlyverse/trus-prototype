@@ -70,14 +70,13 @@ button{cursor:pointer}
 .f-graph{position:relative;height:230px;margin-top:6px}
 .f-graph svg{position:absolute;inset:0;width:100%;height:100%}
 .f-arc{fill:none;stroke:var(--indigo);stroke-width:1.5;stroke-dasharray:5 5}
-.formula.complete .f-arc{stroke-dasharray:none}
 .f-line{stroke:var(--ink);stroke-width:1.5;opacity:.7}
 .f-pt{position:absolute;width:14px;height:14px;border-radius:50%;background:var(--indigo);transform:translate(-50%,-50%);top:52.2%}
 .f-pt.l{left:6%}
 .f-pt.r{left:94%}
 .f-lab{font-size:11px;color:var(--muted);display:block;margin-bottom:2px}
 .f-problem{position:absolute;top:0;left:50%;transform:translateX(-50%);text-align:center;width:60%}
-.f-chip{position:absolute;top:calc(52.2% - 12px);left:50%;transform:translateX(-50%);font-size:12px;font-weight:600;color:var(--indigo-ink);background:var(--indigo-soft);border-radius:6px;padding:3px 9px;white-space:nowrap;transition:background .2s}
+.f-chip{position:absolute;top:calc(52.2% + 14px);left:50%;transform:translateX(-50%);font-size:12px;font-weight:600;color:var(--indigo-ink);background:var(--indigo-soft);border-radius:6px;padding:3px 9px;white-space:nowrap;transition:background .2s}
 .f-start{position:absolute;top:auto;bottom:0;left:5%;width:40%}
 .f-end{position:absolute;top:auto;bottom:0;right:5%;width:40%;text-align:right}
 .f-val{display:block;min-height:1.5em;outline:none;border-radius:4px;padding:1px 4px;margin:0 -4px;cursor:text;word-break:keep-all}
@@ -89,6 +88,7 @@ button{cursor:pointer}
 .f-val.q:not(:empty)::before{content:'“'}
 .f-val.q:not(:empty)::after{content:'”'}
 .f-val.dim{opacity:.45}
+.f-cap{display:block;color:var(--muted);font-size:15px;line-height:1.6;word-break:keep-all}
 .f-summary{display:none;gap:14px;align-items:center;flex-wrap:wrap;font-size:13px;color:var(--muted);cursor:pointer;padding-top:4px}
 .f-summary b{color:var(--ink);font-weight:600}
 /* ===== 3. 데일리 ===== */
@@ -332,7 +332,7 @@ button{cursor:pointer}
 .sec-row .sec-h{flex:1}
 .btn-ghost{font-size:13px;font-weight:600;color:var(--indigo-ink);border:1px solid var(--line);border-radius:6px;padding:6px 12px;text-decoration:none;white-space:nowrap}
 .btn-ghost:hover{background:rgba(25,31,40,.04)}
-.eps{display:flex;gap:6px;margin:8px 0 4px;flex-wrap:wrap}
+.eps{display:flex;gap:6px;margin:8px 0 16px;flex-wrap:wrap}
 .ep{display:inline-flex;align-items:center;gap:6px;font-size:12px;border:1px solid var(--line);border-radius:999px;padding:3px 10px 3px 6px;background:var(--paper);word-break:keep-all}
 .ep .n{width:18px;height:18px;border-radius:50%;background:var(--ink);color:var(--paper);font-size:10px;font-weight:700;display:inline-flex;align-items:center;justify-content:center}
 .ep.done .n{background:var(--indigo)}
@@ -750,7 +750,6 @@ function renderFormula() {
   const dim = end ? '' : ' dim';
   const ce = LECTURE_LOCK ? 'false' : 'true';
   const lk = LECTURE_LOCK ? ' locked' : '';
-  const src = (n) => LECTURE_LOCK ? `<span class="src">${n}화</span>` : '';
   const eps = LECTURE_LOCK ? `<div class="eps">${episodeStates(S.boundary.title, f).map((ok, i) => `<span class="ep${ok ? ' done' : ''}"><span class="n">${LECTURE_EPS[i].n}</span>${LECTURE_EPS[i].name}${ok ? '<span class="ok">✓</span>' : '<span class="small muted">· 아직</span>'}</span>`).join('')}</div>` : '';
   box.innerHTML = `
     <div class="sec-row"><h2 class="sec-h">일의 공식${LECTURE_LOCK ? ' <span class="src">강의에서 가져옴</span>' : ''}</h2>${LECTURE_LOCK ? '<a class="btn-ghost" href="lecture-prototype.html">강의실에서 고치기 →</a>' : ''}</div>
@@ -761,10 +760,10 @@ function renderFormula() {
         <line class="f-line" x1="60" y1="120" x2="940" y2="120"/>
       </svg>
       <span class="f-pt l"></span><span class="f-pt r"></span>
-      <div class="f-problem"><span class="f-lab">문제 ${src(4)}</span><span class="f-val q${dim}${lk}" data-k="problem" contenteditable="${ce}" data-ph="끝점과 지금 사이의 허들 한 문장">${esc(f.problem)}</span></div>
+      <div class="f-problem"><span class="f-lab">문제</span><span class="f-val q${dim}${lk}" data-k="problem" contenteditable="${ce}" data-ph="끝점과 지금 사이의 허들 한 문장">${esc(f.problem)}</span></div>
       <div class="f-chip" id="fChip">함께 해결 = 일</div>
-      <div class="f-start"><span class="f-lab">시작 · 전략 ${src(5)}</span><span class="f-val${dim}${lk}" data-k="strategy" contenteditable="${ce}" data-ph="그 문제를 어떤 전략으로 풀어 성과에 닿을 건가요?">${esc(f.strategy)}</span></div>
-      <div class="f-end"><span class="f-lab">${LECTURE_LOCK ? `${src(2)} 숫자언어 · ${src(3)} 고객언어` : '끝 · 성과'}</span><span class="f-val big${lk}" data-k="numeric" contenteditable="${ce}" data-ph="무엇이 얼마에서 얼마로 바뀌나요?">${esc(f.numeric)}</span><span class="f-val q${lk}" data-k="customer" contenteditable="${ce}" data-ph="고객이 돈을 내고 나서 뭐라고 말하면 성공인가요?">${esc(f.customer)}</span></div>
+      <div class="f-start"><span class="f-lab">시작 · 바운더리</span><span class="f-cap">그 문제를 어떤 바운더리로 풀어 성과에 닿을 것인가?</span></div>
+      <div class="f-end"><span class="f-lab">끝 · 성과</span><span class="f-val big${lk}" data-k="numeric" contenteditable="${ce}" data-ph="무엇이 얼마에서 얼마로 바뀌나요?">${esc(f.numeric)}</span><span class="f-val q${lk}" data-k="customer" contenteditable="${ce}" data-ph="고객이 돈을 내고 나서 뭐라고 말하면 성공인가요?">${esc(f.customer)}</span></div>
     </div>
     ${LECTURE_LOCK ? '<p class="lockn">강의를 들으며 인터랙티브 창에 적은 내용이 여기로 내려와요. 여기서는 읽기만 하고, 고칠 땐 그 화의 인터랙티브 창에서 고쳐요.</p>' : ''}
 `;
