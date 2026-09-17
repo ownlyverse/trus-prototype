@@ -347,6 +347,7 @@ button{cursor:pointer}
 .home-list .list-day{border:1px solid var(--line);border-radius:8px;padding:8px 14px;margin:8px 0}
 .home-list .list-day .day-h{padding:4px 0}
 .home-more{display:flex;gap:10px;align-items:baseline;margin:10px 0 0}
+.today-h{margin-top:36px}
 
 /* ===== 5. 반응형 (반드시 마지막) ===== */
 @media (max-width: 720px){
@@ -976,7 +977,7 @@ function renderBoundaryPage() {
     <section class="formula" id="formula"></section>
     <div class="f-bar" id="fBar"><div class="f-summary" id="fSummary"></div></div>
     ${SHOW_DROPPED_TOTALS ? `<div class="drop-toggle-slot">${droppedTotalsBlock()}</div><div class="hr"></div>` : ''}
-    <h2 class="sec-h">오늘의 바운더리</h2>
+    <h2 class="sec-h today-h">오늘의 바운더리</h2>
     <p class="keyq">${esc(KEY_QUESTION)}</p>
     <div class="h3-row"><span class="h3"><a class="day-link" href="#/day/${TODAY}">${fmtDate(TODAY)}</a> <span class="tag gray">오늘</span></span><span class="h3-meta">${p.done}/3</span></div>
     <div class="day today${p.filled === 3 && p.done === 3 ? ' full' : ''}" id="todayBlock" data-d="${TODAY}"><div class="day-b">${itemsHTML(day, TODAY)}${showReview ? reviewBlock(day, TODAY, stage) : ''}</div></div>
