@@ -713,6 +713,7 @@ const SHOW_PROPS = false;   // 제목 아래 속성 3줄(기간·상태·내 단
 const LECTURE_LOCK = true;  // 제목·일의 공식은 여기서 읽기만, 고치는 건 강의실 인터랙티브 창
 const SHOW_EPS = false;     // 1~5화 진행 칩·자물쇠 안내문 — 숨김 (사용자 지시 2026-09-17)
 const SHOW_DROPPED_TOTALS = false; // '3개월 동안 안 하기로 한 일' 토글 — 홈에서 숨김
+const SHOW_HOME_REVIEW = false;    // 홈 오늘 카드의 회고(OX·글·저장) — 숨김, 회고는 날짜 페이지에서 (사용자 지시 2026-09-17)
 const LECTURE_KEY = 'trus_lecture_outputs'; // 강의실이 화별 산출물을 저장하는 키 {v:1,title,numeric,customer,problem,strategy}
 const LECTURE_EPS = [
   { n: 1, name: '나의 바운더리', k: 'title' }, { n: 2, name: '숫자언어', k: 'numeric' }, { n: 3, name: '고객언어', k: 'customer' },
@@ -965,7 +966,7 @@ function renderApp() {
 // ===== 페이지: 바운더리(홈) =====
 function renderBoundaryPage() {
   const day = S.days[TODAY], stage = curStage(), p = dayProgress(day);
-  const showReview = p.filled > 0 || reviewDone(day.review) || LECTURE_LOCK; // 강의 연동안: 오늘 카드에 회고까지 한 장
+  const showReview = SHOW_HOME_REVIEW && (p.filled > 0 || reviewDone(day.review));
   const pastDates = recentDates(4).filter(d => d !== TODAY);
   const total = allDates().length;
   $('docIn').innerHTML = `
