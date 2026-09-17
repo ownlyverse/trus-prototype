@@ -12,7 +12,7 @@ assert(m, 'script#app 없음');
 const src = m[1];
 const cut = src.indexOf('// ===== RENDER =====');
 assert(cut > 0, 'RENDER 마커 없음');
-const EXPORTS = '\n;({KEY,todayStr,defaultState,ensureBoundary,loadState,saveState,ensureDay,blank,formulaCount,endDefined,dayProgress,keywords,judgeSignal,stageOf,greeting,canFire,addSuggestion,replaceItem,freeReply,lastReview,daysLeft,fmtDate,USER,STAGES,BOUNDARY,FORMULA,PAST_DAYS,SUGGESTIONS,COACH,FREE,FREE_FALLBACK,blankReview,reviewDone,reviewHintFor,REVIEW_Q,KEY_QUESTION,ITEM_PH,SUGGEST,dumpAdd,dumpRemove,dumpPick,MAX_PICK,migrateV3,carryOver,dropKind,setDue,isPastDue,tomorrowAdd,tomorrowRemove,route,monthGrid,dayStats,validDate,validHHMM})';
+const EXPORTS = '\n;({KEY,todayStr,defaultState,ensureBoundary,loadState,saveState,ensureDay,blank,formulaCount,endDefined,dayProgress,keywords,judgeSignal,stageOf,greeting,canFire,addSuggestion,replaceItem,freeReply,lastReview,daysLeft,fmtDate,USER,STAGES,BOUNDARY,FORMULA,PAST_DAYS,SUGGESTIONS,COACH,FREE,FREE_FALLBACK,blankReview,reviewDone,reviewHintFor,REVIEW_Q,KEY_QUESTION,ITEM_PH,SUGGEST,dumpAdd,dumpRemove,dumpPick,MAX_PICK,migrateV3,carryOver,dropKind,setDue,isPastDue,tomorrowAdd,tomorrowRemove,route,monthGrid,dayStats,validDate,validHHMM,lectureOutputs,applyLecture,episodeStates,LECTURE_KEY,SIDEBAR,SHOW_PROPS})';
 const ctx = { location: { search: '' }, URLSearchParams, console };
 const L = vm.runInNewContext(src.slice(0, cut) + EXPORTS, ctx);
 
@@ -286,6 +286,35 @@ t('monthGrid: 6주 걸치는 달은 42셀', () => {
   const g = L.monthGrid('2026-03'); // 3/1 일요일 → 6주
   assert.equal(g.length, 42);
   assert.equal(g[0].date, '2026-02-23');
+});
+
+
+// --- 강의 연동 (2026-09-17) ---
+t('lectureOutputs: 저장 없음·깨짐·다른 v → null', () => {
+  assert.equal(L.lectureOutputs(mem({})), null);
+  assert.equal(L.lectureOutputs(mem({ [L.LECTURE_KEY]: '{oops' })), null);
+  assert.equal(L.lectureOutputs(mem({ [L.LECTURE_KEY]: JSON.stringify({ v: 9, title: 'x' }) })), null);
+});
+t('lectureOutputs: v1이면 문자열 5칸만 정제해 돌려준다', () => {
+  const o = L.lectureOutputs(mem({ [L.LECTURE_KEY]: JSON.stringify({ v: 1, title: ' 새 제목 ', numeric: 'A', customer: 7, problem: null, strategy: 'S', extra: 1 }) }));
+  assertLoose.deepEqual(o, { title: '새 제목', numeric: 'A', customer: '', problem: '', strategy: 'S' });
+});
+t('applyLecture: 채워진 칸만 덮어쓰고 빈 칸은 기존 값 유지', () => {
+  const s = L.defaultState();
+  L.applyLecture(s, { title: '새 제목', numeric: '', customer: '', problem: '문제', strategy: '' });
+  assert.equal(s.boundary.title, '새 제목');
+  assert.equal(s.boundary.formula.problem, '문제');
+  assert.equal(s.boundary.formula.numeric, L.FORMULA.numeric);
+  assert.equal(L.applyLecture(s, null), s);
+});
+t('episodeStates: 1화 제목 → 5화 전략 순서로 채움 여부', () => {
+  const f = { numeric: 'n', customer: '', problem: 'p', strategy: '' };
+  assertLoose.deepEqual(L.episodeStates('제목', f), [true, true, false, true, false]);
+  assertLoose.deepEqual(L.episodeStates('', { numeric: '', customer: '', problem: '', strategy: '' }), [false, false, false, false, false]);
+});
+t('플래그: 사이드바·속성 숨김(우선)', () => {
+  assert.equal(L.SIDEBAR, false);
+  assert.equal(L.SHOW_PROPS, false);
 });
 
 console.log(`\n${n} tests passed`);
