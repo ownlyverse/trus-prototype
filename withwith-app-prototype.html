@@ -205,6 +205,64 @@ button{cursor:pointer}
 .sheet .row2 .pill{flex:none;width:100%}
 @keyframes up{from{transform:translateY(40px)}to{transform:none}}
 
+/* ===== 9c. D-day · 고치기 · 어제 못 한 일 · 월요일 · 밤 회고 · 7일 · 위젯 · 체크 손맛 ===== */
+.fhead .dd{margin-left:6px;font-weight:600;color:var(--accent-ink);font-variant-numeric:tabular-nums}
+.fbtns{display:flex;gap:6px}
+.carry{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:14px}
+.carry .clab{font-size:13px;line-height:20px;color:var(--faint)}
+.carry .chip{white-space:normal}
+.wk-ask{margin-top:18px;padding:14px 16px;background:var(--fill2);border-radius:16px}
+.wk-ask p{margin:0;font-size:14px;line-height:22px;color:var(--sub)}
+.wk-ask p b{color:var(--ink);font-weight:600}
+.wk-ask form{display:flex;gap:8px;margin-top:10px}
+.wk-ask input{flex:1;min-width:0;height:40px;border:0;border-radius:12px;background:var(--paper);box-shadow:var(--inring);padding:0 12px;font-size:15px;outline:0;cursor:text}
+.wk-ask input:focus{box-shadow:var(--ring)}
+.nr{margin-top:22px}
+.nr textarea{width:100%;margin-top:8px;border:0;border-radius:14px;background:var(--fill);padding:12px 14px;font-size:15px;line-height:24px;resize:none;outline:0;cursor:text}
+.nr textarea:focus{background:var(--paper);box-shadow:var(--ring)}
+.nr-bar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:8px}
+.nr-bar .hint{margin:0}
+.yrv{margin:14px 0 0;padding:12px 14px;background:var(--fill2);border-radius:14px;font-size:14px;line-height:22px;color:var(--sub);white-space:pre-wrap}
+.yrv b{color:var(--ink);font-weight:600}
+.week{margin-top:26px}
+.wk-row{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:10px}
+.wk-cell{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:12px;line-height:16px;color:var(--faint)}
+.wk-cell.now{color:var(--ink);font-weight:600}
+.wk-dot{width:22px;height:22px;border-radius:50%;box-shadow:inset 0 0 0 1.5px var(--line)}
+.wk-dot.full{background:var(--ink);box-shadow:none}
+.wk-dot.half{background:linear-gradient(90deg,var(--ink) 50%,var(--fill) 50%);box-shadow:none}
+.wk-dot.zero{background:var(--fill);box-shadow:none}
+.wk-cap{margin:10px 0 0;font-size:13px;line-height:20px;color:var(--faint)}
+/* 위젯 미리보기 — 앱에서는 이 모양이 잠금화면·홈 화면 위젯으로 자동 반영 */
+.wdg-row{display:flex;gap:8px;justify-content:center;margin:-16px 0 26px}
+.wdg-lock{width:170px;padding:9px 12px;border-radius:20px;background:rgba(43,43,43,.08);color:var(--brand-ink);font-size:12px;line-height:16px}
+.wdg-lock .t{display:flex;justify-content:space-between;font-weight:600}
+.wdg-lock .m{margin-top:3px;font-size:13px;line-height:18px;font-weight:600;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.wdg-lock .b{height:4px;margin-top:6px;border-radius:2px;background:rgba(43,43,43,.14);overflow:hidden}
+.wdg-lock .b i{display:block;height:100%;background:var(--brand-ink)}
+.wdg-circ{width:62px;height:62px;border-radius:50%;background:rgba(43,43,43,.08);display:flex;align-items:center;justify-content:center;position:relative;color:var(--brand-ink)}
+.wdg-circ svg{position:absolute;inset:6px;width:50px;height:50px;transform:rotate(-90deg)}
+.wdg-circ .tr{fill:none;stroke:rgba(43,43,43,.14);stroke-width:4}
+.wdg-circ .fl{fill:none;stroke:var(--brand-ink);stroke-width:4;stroke-linecap:round}
+.wdg-circ b{font-size:13px;font-weight:600;font-variant-numeric:tabular-nums}
+.wdg-home{margin-top:10px;padding:14px 16px;border-radius:22px;background:var(--paper);box-shadow:var(--ring)}
+.wdg-home .t{display:flex;justify-content:space-between;align-items:baseline;font-size:12px;line-height:16px;color:var(--faint)}
+.wdg-home .t b{font-size:13px;color:var(--ink);font-weight:600}
+.wdg-home ul{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:6px}
+.wdg-home li{display:flex;gap:8px;align-items:center;font-size:14px;line-height:20px}
+.wdg-home li i{flex:none;width:14px;height:14px;border-radius:50%;box-shadow:inset 0 0 0 1.5px var(--faint)}
+.wdg-home li.on{color:var(--faint);text-decoration:line-through}
+.wdg-home li.on i{background:var(--ink);box-shadow:none}
+.wdg-home .n{margin-top:8px;font-size:12px;line-height:16px;color:var(--sub)}
+/* 체크 손맛 */
+.chk.pop .box{animation:pop .3s ease}
+@keyframes pop{0%{transform:scale(.6)}60%{transform:scale(1.18)}100%{transform:scale(1)}}
+.cheer{position:absolute;left:50%;top:34%;width:0;height:0;z-index:60;pointer-events:none}
+.cheer i{position:absolute;width:8px;height:8px;border-radius:2px;background:var(--c);animation:burst 1.1s cubic-bezier(.2,.7,.3,1) forwards}
+@keyframes burst{from{transform:translate(0,0) rotate(0);opacity:1}to{transform:translate(var(--dx),var(--dy)) rotate(260deg);opacity:0}}
+.cheer-msg{position:absolute;left:50%;top:30%;transform:translate(-50%,-50%);z-index:61;background:var(--ink);color:var(--paper);font-size:15px;line-height:22px;padding:10px 18px;border-radius:999px;white-space:nowrap;animation:cheerIn 1.6s ease forwards;pointer-events:none}
+@keyframes cheerIn{0%{opacity:0;transform:translate(-50%,-30%) scale(.9)}15%{opacity:1;transform:translate(-50%,-50%) scale(1)}80%{opacity:1}100%{opacity:0}}
+
 /* ===== 10. 채팅 ===== */
 .thread{flex:1;overflow:auto;padding:0 16px 24px}
 .sys{display:flex;justify-content:center;font-size:12px;line-height:16px;color:var(--faint);padding:8px 0 0}
@@ -232,7 +290,7 @@ button{cursor:pointer}
 .chat .composer{padding-top:12px}
 .fsheet{margin-top:6px}
 
-@media (prefers-reduced-motion: reduce){.q-in,.typing,.fg.draw svg,.fg.draw .end,.big-stamp{animation:none;opacity:1}.splash{transition:none}}
+@media (prefers-reduced-motion: reduce){.q-in,.typing,.fg.draw svg,.fg.draw .end,.big-stamp,.chk.pop .box{animation:none;opacity:1}.cheer{display:none}.splash{transition:none}}
 
 /* ===== 11. PC — 폰 테두리만 (반드시 마지막) ===== */
 @media (min-width: 600px){
@@ -354,28 +412,43 @@ function todayStr() {
   if (typeof p === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(p)) return p;
   const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
-function blankToday(date) { return { date, items: [0, 1, 2].map(() => ({ text: '', ox: null, done: false, kind: null })), extra: [], confirmed: false, split: false, via: '', mantra: '', avoid: '' }; }
-function defaultState() { return { v: V, name: '', formula: { numeric: '', customer: '', problem: '' }, today: blankToday(todayStr()), rejected: [], stamps: [], history: [] }; }
+function blankToday(date) { return { date, items: [0, 1, 2].map(() => ({ text: '', ox: null, done: false, kind: null })), extra: [], confirmed: false, split: false, via: '', mantra: '', avoid: '', review: '' }; }
+function blankFormula() { return { numeric: '', customer: '', problem: '', start: '', judged: false }; }
+function defaultState() { return { v: V, name: '', formula: blankFormula(), today: blankToday(todayStr()), rejected: [], stamps: [], history: [], weekly: {} }; }
 function loadState() {
   try {
     const s = JSON.parse(localStorage.getItem(KEY) || 'null');
-    if (s && s.v === V) { if (!Array.isArray(s.history)) s.history = []; rollDay(s, todayStr()); return s; }
+    if (s && s.v === V) { if (!Array.isArray(s.history)) s.history = []; if (!s.weekly) s.weekly = {}; if (formulaDone(s) && !s.formula.start) { s.formula.start = todayStr(); s.formula.judged = false; } rollDay(s, todayStr()); return s; } // 시작일이 없던 저장본은 오늘부터 3개월
   } catch (e) { /* 무시 */ }
   return defaultState();
 }
 // 날이 바뀌면 어제 정한 바운더리를 기록으로 넘기고, 아침에 '했는지' 점검하게 한다
 function rollDay(s, today) {
   if (s.today && s.today.date === today) return s;
-  if (s.today && s.today.confirmed) s.history.unshift({ date: s.today.date, items: s.today.items.map(it => ({ text: it.text, kind: it.kind, done: it.done ? true : null })), reviewed: false });
+  if (s.today && s.today.confirmed) s.history.unshift({ date: s.today.date, items: s.today.items.map(it => ({ text: it.text, kind: it.kind, done: it.done ? true : null })), review: s.today.review || '', reviewed: false });
   s.today = blankToday(today); return s;
 }
+// --- 날짜 · 3개월 기간 (교과서: 바운더리는 3개월 단위, "끝점은 3개월 뒤 한 번 판단한다") ---
+function isoOf(d) { return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; }
+function isoAdd(iso, days) { const d = new Date(iso + 'T00:00:00'); d.setDate(d.getDate() + days); return isoOf(d); }
+function addMonths(iso, n) { const d = new Date(iso + 'T00:00:00'), day = d.getDate(); d.setMonth(d.getMonth() + n); if (d.getDate() < day) d.setDate(0); return isoOf(d); }
+function daysTo(from, to) { return Math.round((Date.parse(to + 'T00:00:00') - Date.parse(from + 'T00:00:00')) / 86400000); }
+function periodEnd(s) { return s.formula.start ? addMonths(s.formula.start, 3) : ''; }
+function ddayLabel(s, today) { if (!s.formula.start) return ''; const d = daysTo(today, periodEnd(s)); return d > 0 ? `D-${d}` : d === 0 ? 'D-day' : `D+${-d}`; }
+function needJudge(s, today) { return formulaDone(s) && !!s.formula.start && !s.formula.judged && today >= periodEnd(s); }
+function mondayOf(iso) { const d = new Date(iso + 'T00:00:00'); d.setDate(d.getDate() - (d.getDay() + 6) % 7); return isoOf(d); }
+function lastMissed(s) { const h = s.history && s.history[0]; return h && h.reviewed ? h.items.filter(it => it.done === false && it.text.trim()).map(it => it.text) : []; }
+function dayRecord(s, iso) { if (s.today.date === iso) return s.today.confirmed ? s.today : null; return (s.history || []).find(h => h.date === iso) || null; }
+function doneCount(rec) { return rec ? rec.items.filter(it => it.done === true).length : 0; }
+// 지난주 실행 횟수 — 교과서: "매주는 실행 횟수와 고객 반응만 본다"
+function lastWeek(s, today) { const mon = mondayOf(today), from = isoAdd(mon, -7); let set = 0, done = 0; for (let i = 0; i < 7; i++) { const r = dayRecord(s, isoAdd(from, i)); if (r) { set++; done += doneCount(r); } } return { set, done }; }
 function pendingReview(s) { const h = s.history && s.history[0]; return h && !h.reviewed ? h : null; }
 function formulaDone(s) { return !!(s.name && s.formula.numeric && s.formula.customer && s.formula.problem); }
 function allFilled(t) { return t.items.every(it => it.text.trim()); }
 function oCount(t) { return t.items.filter(it => it.ox === 'O').length; }
 function splitCount(t) { return t.items.filter(it => it.kind).length; }
 function ofKind(t, k) { return [...t.items.filter(it => it.kind === k), ...t.extra.filter(it => it.kind === k)]; }
-function startScreen(s) { return !formulaDone(s) ? 'q' : pendingReview(s) ? 'review' : s.today.split ? 'dash' : s.today.confirmed ? 'split' : 'today'; }
+function startScreen(s) { return !formulaDone(s) ? 'q' : needJudge(s, todayStr()) ? 'judge' : pendingReview(s) ? 'review' : s.today.split ? 'dash' : s.today.confirmed ? 'split' : 'today'; }
 function fmtDate(iso) { const d = new Date(iso + 'T00:00:00'); return `${d.getMonth() + 1}월 ${d.getDate()}일 ${'일월화수목금토'[d.getDay()]}요일`; }
 
 // ===== RENDER =====
@@ -397,9 +470,11 @@ function graphHTML(f, draw) {
     <div class="end"><b>${esc(f.numeric)}</b><q>${esc(f.customer)}</q></div></div>`;
 }
 // 일의 공식 카드 — 오른쪽 위 '성과 달성' 추가 버튼. 매일 루틴의 출발점
-function fcardHTML(achieve = true) {
-  return `<div class="fcard"><div class="fhead"><span>나의 일의 공식</span>${achieve ? '<button class="pill" id="achieve">성과 달성</button>' : ''}</div>${graphHTML(S.formula)}</div>`;
+function fcardHTML(actions = true) {
+  const dd = ddayLabel(S, todayStr());
+  return `<div class="fcard"><div class="fhead"><span>나의 일의 공식${dd ? `<b class="dd" title="3개월 끝까지">${dd}</b>` : ''}</span>${actions ? '<span class="fbtns"><button class="pill" id="editF">고치기</button><button class="pill" id="achieve">성과 달성</button></span>' : ''}</div>${graphHTML(S.formula)}</div>`;
 }
+let editing = null; // 일의 공식 고치는 중이면 돌아갈 화면 이름 ('judge'면 새 3개월로 시작)
 let achAsk = false;
 function sheetHTML() {
   return `<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="shT"><div class="panel"><div class="grab"></div><h3 id="shT">성과를 달성했나요?</h3><p>끝점 <b>“${esc(S.formula.numeric)}”</b>에 닿았다면 스탬프를 받고, 다음 일의 공식을 만들어요.</p><div class="row2"><button class="pill primary" id="achYes">달성했어요</button><button class="pill" id="achNo">아직이에요</button></div></div></div>`;
@@ -420,6 +495,7 @@ function render() {
   else if (scr === 'dash') ph.innerHTML = dashHTML();
   else if (scr === 'stamp') ph.innerHTML = stampHTML();
   else if (scr === 'review') ph.innerHTML = reviewHTML();
+  else if (scr === 'judge') ph.innerHTML = judgeHTML();
   if (achAsk) { const sec = ph.querySelector('.scr'); if (sec) sec.insertAdjacentHTML('beforeend', sheetHTML()); }
   bind();
 }
@@ -427,18 +503,21 @@ function render() {
 function qHTML() {
   const q = QUESTIONS[qi], val = (qi === 0 ? S.name : S.formula[q.k]) || '';
   const pre = qi === 0 ? q.g : `${S.name} 님, ${q.g}`;
-  return `<section class="scr">${headHTML('일의 공식 만들기', { back: qi > 0 ? 'qBack' : '', right: `${qi + 1} / ${QUESTIONS.length}` })}
+  return `<section class="scr">${headHTML(editing ? '일의 공식 고치기' : '일의 공식 만들기', { back: qi > 0 ? 'qBack' : '', right: editing ? `${qi} / ${QUESTIONS.length - 1}` : `${qi + 1} / ${QUESTIONS.length}` })}
     <div class="hero q-in"><span class="av lg"><img src="${COACH_AV}" alt=""></span><p class="pre">${esc(pre)}</p><h1>${esc(q.b)}</h1><p class="sub">${esc(q.sub).replace(/\n/g, '<br>')}</p></div>
     <div class="composer"><div class="chips"><button class="chip" id="qEx"><span class="k">예시</span>${esc(q.ex)}</button></div>
       <form class="cbox" id="qForm"><textarea id="qIn" rows="1" placeholder="${esc(q.ph)}" maxlength="${q.max}" autocomplete="off" enterkeyhint="send" aria-label="${esc(q.b)}">${esc(val)}</textarea><div class="cbar"><span class="cnt" id="qCnt">${val.length}/${q.max}</span><button class="send" id="qGo" aria-label="다음"${val.trim() ? '' : ' disabled'}>${IC.up}</button></div></form>
-      <div class="cfoot">${qi === 0 ? '답하면 다음 질문으로 넘어가요.' : '한 문장이면 충분해요. 나중에 고칠 수 있어요.'}</div></div></section>`;
+      <div class="cfoot">${editing ? '지금 문장이 들어 있어요. 고칠 곳만 고치고 보내요.' : qi === 0 ? '답하면 다음 질문으로 넘어가요.' : '한 문장이면 충분해요. 나중에 고칠 수 있어요.'}</div></div></section>`;
 }
 function qSubmit() {
   const q = QUESTIONS[qi], v = $('qIn').value.trim();
   if (!v) return;
   if (qi === 0) S.name = v; else S.formula[q.k] = v;
   persist();
-  if (qi < QUESTIONS.length - 1) { qi++; render(); focusIn(); } else show('made');
+  if (qi < QUESTIONS.length - 1) { qi++; render(); focusIn(); return; }
+  if (editing) { const back = editing; editing = null; if (back === 'judge') { S.formula.start = todayStr(); S.formula.judged = false; } persist(); show(back === 'judge' ? startScreen(S) : back); toast(back === 'judge' ? '일의 공식을 고치고 새 3개월을 시작해요.' : '일의 공식을 고쳤어요.'); return; }
+  if (!S.formula.start) { S.formula.start = todayStr(); S.formula.judged = false; persist(); }
+  show('made');
 }
 function focusIn() { const i = $('qIn'); if (i) setTimeout(() => { i.focus(); i.setSelectionRange(i.value.length, i.value.length); }, FAST ? 0 : 120); }
 // --- 매일 아침: 어제 바운더리 점검 ---
@@ -448,8 +527,17 @@ function reviewHTML() {
     <div class="body">${fcardHTML()}
       <div class="sec"><h2 class="h2">좋은 아침이에요, ${esc(S.name)} 님.<br>어제 바운더리는 다 했나요?</h2><p class="lead">어제 정한 3가지예요. 오늘을 정하기 전에 먼저 체크해요.</p>
       <div class="rv-list">${h.items.map((it, i) => `<div class="rv-row"><span class="tx">${it.kind ? `<span class="tag${it.kind === '28' ? ' a' : ''}">${it.kind === '28' ? '2:8' : '8:2'}</span>` : ''}${esc(it.text)}</span><span class="seg" role="group" aria-label="${esc(it.text)}"><button class="dn" data-i="${i}" data-v="1" aria-pressed="${it.done === true}">했어요</button><button class="dn" data-i="${i}" data-v="0" aria-pressed="${it.done === false}">못 했어요</button></span></div>`).join('')}</div>
-      ${all ? `<p class="rv-sum">어제는 3개 중 <b>${n}개</b>를 해냈어요.${n < 3 ? ' 못 한 일은 오늘 다시 적어도 돼요.' : ''}</p>` : ''}</div></div>
+      ${all ? `<p class="rv-sum">어제는 3개 중 <b>${n}개</b>를 해냈어요.${n < 3 ? ' 못 한 일은 오늘 칸에 바로 넣을 수 있어요.' : ''}</p>` : ''}
+      ${h.review ? `<p class="yrv"><b>어제 남긴 회고</b> · ${esc(h.review)}</p>` : ''}</div></div>
     <div class="foot"><button class="pill primary w" id="rvDone"${all ? '' : ' disabled'}>오늘의 바운더리 정하기</button></div></section>`;
+}
+// --- 3개월 판단 — 교과서 전략 설정 프롬프트: "3개월 안에 주간 지표가 안 움직이면, 새 전략을 찾지 않고 이 전략의 무엇을 먼저 고치겠습니까? (실행·메시지·대상 중에서)" ---
+function judgeHTML() {
+  return `<section class="scr">${headHTML('3개월 판단', { right: esc(shortDate(todayStr())) })}
+    <div class="body">${fcardHTML(false)}
+      <div class="sec"><h2 class="h2">${esc(S.name)} 님, 이 일의 공식을 정한 지<br>3개월이 됐어요</h2><p class="lead">끝점은 3개월 뒤 한 번 판단해요. 끝점에 닿았나요?</p></div>
+      <p class="why">닿지 않았다면 새 공식을 찾기보다, 지금 하던 일의 실행 · 메시지 · 대상 중 무엇을 먼저 고칠지 봐요.</p></div>
+    <div class="foot"><button class="pill primary w" id="jYes">닿았어요 · 스탬프 받기</button><button class="pill w" id="jMore">아직이에요 · 3개월 더 이어가기</button><button class="pill w" id="jEdit">일의 공식 고치기</button></div></section>`;
 }
 // --- 공식 완성 ---
 function madeHTML() {
@@ -463,9 +551,21 @@ function todayHTML() {
   const rows = t.items.map((it, i) => `<div class="row${it.ox === 'X' ? ' x' : ''}"><span class="n">${i + 1}</span><input class="it" data-i="${i}" value="${esc(it.text)}" placeholder="${['가장 먼저 끝낼 일', '그다음 일', '그다음 일'][i]}" maxlength="40" aria-label="오늘의 바운더리 ${i + 1}">${filled ? `<span class="seg" role="group" aria-label="${i + 1}번 끝점에 필요한 일인가요"><button class="ox o" data-i="${i}" data-v="O" aria-pressed="${it.ox === 'O'}">O</button><button class="ox x" data-i="${i}" data-v="X" aria-pressed="${it.ox === 'X'}">X</button></span>` : ''}</div>${it.ox === 'X' ? `<p class="xnote">끝점에 닿는 일로 바꿔 적어볼까요?</p>` : ''}`).join('');
   return `<section class="scr">${headHTML('오늘의 바운더리', { right: esc(shortDate(t.date)) })}
     <div class="body">${fcardHTML()}
-      <div class="sec"><h2 class="h2">일의 공식을 보고,<br>오늘 끝낼 3가지를 정해요</h2><p class="lead">스스로 적거나, 코치와 채팅하며 정해요.</p><div class="items">${rows}</div>
+      ${weekAskHTML()}
+      <div class="sec"><h2 class="h2">일의 공식을 보고,<br>오늘 끝낼 3가지를 정해요</h2><p class="lead">스스로 적거나, 코치와 채팅하며 정해요.</p>${carryHTML()}<div class="items">${rows}</div>
       <p class="hint" id="hint">${filled ? `<span class="ask-q"><b>끝점에 필요한 일인가요?</b> O가 3개면 확정돼요 · ${n}/3</span>` : '3개를 적으면 항목마다 O X로 점검해요.'}</p></div></div>
     <div class="foot"><button class="pill primary w" id="confirm"${n === 3 ? '' : ' disabled'}>확정하기</button><button class="pill w" id="toChat">코치와 채팅으로 정하기</button></div></section>`;
+}
+// 어제 못 한 일 — 누르면 빈 칸에 들어간다 (프롬프트 ③: 어제 기록을 오늘의 출발 재료로)
+function carryHTML() {
+  const have = S.today.items.map(it => it.text.trim()), miss = lastMissed(S).filter(m => !have.includes(m.trim()));
+  return miss.length ? `<div class="carry"><span class="clab">어제 못 한 일</span>${miss.map(m => `<button class="chip cy" data-t="${esc(m)}">+ ${esc(m)}</button>`).join('')}</div>` : '';
+}
+// 월요일 — 지난주 실행 횟수는 기록에서 세고, 고객 반응 한 줄만 묻는다
+function weekAskHTML() {
+  const today = todayStr(); if (new Date(today + 'T00:00:00').getDay() !== 1 || S.weekly[mondayOf(today)]) return '';
+  const w = lastWeek(S, today);
+  return `<div class="wk-ask"><p><b>월요일이에요.</b> 지난주에는 ${w.set}일 바운더리를 정했고 <b>${w.done}개</b>를 끝냈어요. 지난주 고객 반응 한 줄만 남겨요.</p><form id="wkForm"><input id="wkIn" placeholder="예) 순서 영상에 ‘어디 거예요?’ 댓글 12개" maxlength="60" aria-label="지난주 고객 반응"><button class="pill sm primary">저장</button></form></div>`;
 }
 // --- 최종 점검: 2:8 / 8:2 ---
 // 교과서 워싱 1단계 p163: "어떤 일은 적은 자원으로 큰 결과를 만들고, 어떤 일은 많은 자원을 쓰고도 결과를 조금 바꾼다."
@@ -483,10 +583,20 @@ function splitHTML() {
 function hhmm() { const d = new Date(); return `${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`; }
 function lockHTML() {
   const t = S.today, main = ofKind(t, '28'), minor = ofKind(t, '82');
-  return `<section class="scr lock"><div class="ls"><div class="clock" id="clock">${hhmm()}</div><div class="ldate">${esc(fmtDate(t.date))}</div><div class="fcard">${graphHTML(S.formula)}</div>
+  return `<section class="scr lock"><div class="ls"><div class="clock" id="clock">${hhmm()}</div><div class="ldate">${esc(fmtDate(t.date))}</div>${lockWidgetHTML()}<div class="fcard">${graphHTML(S.formula)}</div>
     <p class="lb">오늘의 바운더리</p>${main.map(it => `<p class="main">${esc(it.text)}</p>`).join('')}${minor.map(it => `<p class="minor">· ${esc(it.text)}</p>`).join('')}
     <div class="brand"><img src="${LOGO}" alt="withWITH"><span>앱으로 나오면 잠금화면 위젯으로 자동으로 들어가요</span></div></div>
     <div class="foot"><div class="row2"><button class="pill" id="toDash">대시보드</button><button class="pill primary" id="saveBg">배경으로 저장</button></div></div></section>`;
+}
+// 위젯 — 앱에서는 이 모양이 잠금화면·홈 화면 위젯으로 자동 반영된다. 여기서는 지금 상태로 바로 다시 그린다
+function progressOf(t) { const all = [...t.items, ...t.extra.filter(x => x.kind)].filter(it => it.text.trim()); return { all, done: all.filter(it => it.done).length }; }
+function lockWidgetHTML() {
+  const t = S.today, { all, done } = progressOf(t), next = ofKind(t, '28').find(it => !it.done) || all.find(it => !it.done), pct = all.length ? done / all.length : 0, C = 2 * Math.PI * 21;
+  return `<div class="wdg-row" aria-label="잠금화면 위젯 미리보기"><div class="wdg-circ"><svg viewBox="0 0 50 50" aria-hidden="true"><circle class="tr" cx="25" cy="25" r="21"/><circle class="fl" cx="25" cy="25" r="21" stroke-dasharray="${(C * pct).toFixed(1)} ${C.toFixed(1)}"/></svg><b>${done}/${all.length}</b></div><div class="wdg-lock"><div class="t"><span>오늘의 바운더리</span><span>${esc(ddayLabel(S, todayStr()))}</span></div><div class="m">${next ? esc(next.text) : '오늘을 다 끝냈어요'}</div><div class="b"><i style="width:${Math.round(pct * 100)}%"></i></div></div></div>`;
+}
+function homeWidgetHTML() {
+  const t = S.today, { all, done } = progressOf(t);
+  return `<div class="wdg-home" aria-label="홈 화면 위젯 미리보기"><div class="t"><b>withWITH · 오늘의 바운더리</b><span>${done}/${all.length} · ${esc(ddayLabel(S, todayStr()))}</span></div><ul>${all.map(it => `<li class="${it.done ? 'on' : ''}"><i></i>${esc(it.text)}</li>`).join('')}</ul><p class="n">끝점 · ${esc(S.formula.numeric)}</p></div>`;
 }
 // 배경으로 저장 — 1179×2556(아이폰 화면) PNG를 캔버스로 그린다. 외부 라이브러리 없이
 // 한국어도 띄어쓰기 단위로 줄바꿈(keep-all). 한 단어가 폭보다 길 때만 글자 단위로 자른다
@@ -542,11 +652,27 @@ function dashHTML() {
       <div class="group"><div class="glab a"><b>2:8</b>오늘 힘을 모을 곳</div><div class="todo">${main.map(chk).join('')}</div></div>
       ${minor.length ? `<div class="group"><div class="glab"><b>8:2</b>어느 수준이면 충분한지 정한 만큼만</div><div class="todo">${minor.map(chk).join('')}</div></div>` : ''}
       ${t.mantra ? `<p class="mantra">오늘 계속 되뇔 말 · <b>“${esc(t.mantra)}”</b></p>` : ''}
+      ${nightHTML(done === all.length && all.length > 0)}
       <div class="row2" style="margin-top:22px"><button class="pill sm" id="toLock2">잠금화면</button><button class="pill sm" id="dashRedo">다시 정하기</button></div>
+      ${weekHTML()}
+      <div class="sec"><div class="glab"><b>위젯</b>앱에서는 이 모양이 홈 화면에 자동으로 떠요</div>${homeWidgetHTML()}</div>
       <div class="sec">${fcardHTML()}</div>
       <div class="stamps"><div class="top"><b>달성한 일의 공식</b><span>${n}개</span></div>
         <div class="srow2">${S.stamps.map((_, i) => `<span class="stp on">${i + 1}</span>`).join('')}<span class="stp">${n + 1}</span></div>
         <p class="lead" style="margin:0">${n ? '다음 끝점에 닿으면 스탬프가 하나 더 찍혀요.' : '끝점에 닿은 날, 위의 ‘성과 달성’을 눌러요.'}</p></div></div></section>`;
+}
+// 밤 회고 — 3개를 다 끝냈거나 저녁 6시가 지나면 열린다. 프롬프트 ③: "잘함" 한 마디 말고 두 문장
+function nowHour() { const p = Q.get('now'); if (p && /^\d{2}:\d{2}$/.test(p)) return +p.slice(0, 2); return new Date().getHours(); }
+function nightHTML(allDone) {
+  const t = S.today; if (!allDone && nowHour() < 18 && !t.review) return '';
+  return `<div class="nr"><div class="glab"><b>오늘의 회고</b>뭐가 됐고, 내일은 뭘 다르게 할지</div><textarea id="nrIn" rows="3" maxlength="300" placeholder="예) 순서 영상이 링크를 제일 많이 받았다. 내일은 그 형식으로 하나 더 찍는다." aria-label="오늘의 회고">${esc(t.review || '')}</textarea><div class="nr-bar"><p class="hint" id="nrHint">${t.review ? '남겼어요. 내일 아침 어제 점검에서 다시 보여드려요.' : '한 마디보다 두 문장이면 좋아요.'}</p><button class="pill sm primary" id="nrSave">${t.review ? '고치기' : '남기기'}</button></div></div>`;
+}
+// 최근 7일 — ● 다 끝냄 ◐ 일부 ○ 정했지만 0개 · 빈 칸은 안 정한 날
+function weekHTML() {
+  const today = todayStr(), w = S.weekly[mondayOf(today)];
+  const cells = [...Array(7)].map((_, i) => { const iso = isoAdd(today, i - 6), r = dayRecord(S, iso), n = doneCount(r), k = !r ? '' : n >= 3 ? 'full' : n > 0 ? 'half' : 'zero'; return `<div class="wk-cell${iso === today ? ' now' : ''}" title="${esc(shortDate(iso))}${r ? ` · ${n}/3` : ' · 안 정함'}"><span class="wk-dot ${k}"></span>${'일월화수목금토'[new Date(iso + 'T00:00:00').getDay()]}</div>`; }).join('');
+  const sum = [...Array(7)].reduce((a, _, i) => a + doneCount(dayRecord(S, isoAdd(today, i - 6))), 0);
+  return `<div class="week"><div class="glab"><b>최근 7일</b>${sum}개 끝냄</div><div class="wk-row">${cells}</div>${w && w.reaction ? `<p class="wk-cap">이번 주 시작 때 남긴 고객 반응 · ${esc(w.reaction)}</p>` : ''}</div>`;
 }
 // --- 스탬프 ---
 function stampHTML() {
@@ -614,7 +740,13 @@ function bind() {
   if (scr === 'splash') { on('splash', afterSplash); return; }
   on('achieve', () => { achAsk = true; render(); const y = $('achYes'); if (y) y.focus(); });
   on('achNo', () => { achAsk = false; render(); const a = $('achieve'); if (a) a.focus(); });
-  on('achYes', () => { S.stamps.push({ date: S.today.date, ...S.formula }); S.formula = { numeric: '', customer: '', problem: '' }; S.today = blankToday(todayStr()); S.history.forEach(h => { h.reviewed = true; }); achAsk = false; persist(); show('stamp'); });
+  on('achYes', achieveNow);
+  on('editF', () => { editing = scr; achAsk = false; qi = 1; show('q'); focusIn(); });
+  if (scr === 'judge') {
+    on('jYes', achieveNow);
+    on('jMore', () => { S.formula.start = todayStr(); S.formula.judged = false; persist(); show(startScreen(S)); toast('같은 일의 공식으로 3개월 더 가요.'); });
+    on('jEdit', () => { editing = 'judge'; qi = 1; show('q'); focusIn(); });
+  }
   const sh = $('sheet'); if (sh) sh.addEventListener('click', e => { if (e.target === sh) { achAsk = false; render(); } });
   if (scr === 'review') {
     document.querySelectorAll('.dn').forEach(b => b.addEventListener('click', () => { const it = pendingReview(S).items[+b.dataset.i], v = b.dataset.v === '1'; it.done = it.done === v ? null : v; persist(); render(); }));
@@ -627,7 +759,7 @@ function bind() {
     inp.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); qSubmit(); } });
     $('qForm').addEventListener('submit', e => { e.preventDefault(); qSubmit(); });
     on('qEx', () => { inp.value = q.ex; sync(); inp.focus(); });
-    on('qBack', () => { if (qi > 0) { qi--; render(); focusIn(); } });
+    on('qBack', () => { if (editing && qi === 1) { const back = editing; editing = null; show(back); return; } if (qi > 0) { qi--; render(); focusIn(); } });
     sync();
   }
   on('madeBack', () => { qi = QUESTIONS.length - 1; show('q'); focusIn(); });
@@ -642,6 +774,8 @@ function bind() {
     document.querySelectorAll('.ox').forEach(b => b.addEventListener('click', () => { const it = S.today.items[+b.dataset.i]; it.ox = it.ox === b.dataset.v ? null : b.dataset.v; persist(); render(); }));
     on('confirm', () => { if (oCount(S.today) !== 3) return; S.today.confirmed = true; S.today.split = false; S.today.via = 'self'; S.today.items.forEach(it => { it.kind = null; }); S.today.extra = []; persist(); show('split'); toast('3개를 확정했어요. 이제 2:8로 나눠요.'); });
     on('toChat', chatStart);
+    document.querySelectorAll('.chip.cy').forEach(b => b.addEventListener('click', () => { const slot = S.today.items.find(it => !it.text.trim()); if (!slot) { toast('빈 칸이 없어요. 한 칸을 비우고 넣어요.'); return; } slot.text = b.dataset.t; slot.ox = null; persist(); render(); }));
+    const wf = $('wkForm'); if (wf) wf.addEventListener('submit', e => { e.preventDefault(); const v = $('wkIn').value.trim(); if (!v) return; const w = lastWeek(S, todayStr()); S.weekly[mondayOf(todayStr())] = { reaction: v, ...w }; persist(); render(); toast('지난주를 기록했어요.'); });
   }
   if (scr === 'split') {
     document.querySelectorAll('.to').forEach(b => b.addEventListener('click', () => { const it = S.today.items[+b.dataset.i]; it.kind = it.kind === b.dataset.k ? null : b.dataset.k; persist(); render(); }));
@@ -656,10 +790,18 @@ function bind() {
   if (scr === 'dash') {
     document.querySelectorAll('.chk').forEach(b => b.addEventListener('click', () => {
       const i = +b.dataset.i, e = +b.dataset.e, it = i >= 0 ? S.today.items[i] : S.today.extra[e]; it.done = !it.done; persist(); render();
-      const all = [...S.today.items, ...S.today.extra.filter(x => x.kind)]; if (it.done) toast(all.every(x => x.done) ? '오늘의 바운더리를 다 끝냈어요.' : '완료했어요.');
-      const again = document.querySelector(`.chk[data-i="${b.dataset.i}"][data-e="${b.dataset.e}"]`); if (again) again.focus();
+      const again = document.querySelector(`.chk[data-i="${b.dataset.i}"][data-e="${b.dataset.e}"]`); if (again) { again.focus(); if (it.done) again.classList.add('pop'); }
+      if (!it.done) return;
+      try { if (navigator.vibrate) navigator.vibrate(12); } catch (err) { /* 진동 없는 기기 */ }
+      const { all, done } = progressOf(S.today); if (done === all.length) cheer(); else toast('완료했어요.');
     }));
     on('toLock2', () => show('lock'));
+    const nr = $('nrIn'), ns = $('nrSave');
+    if (nr) {
+      const sync = () => { const v = nr.value.trim(); ns.disabled = v.length < 6; if (v && v !== (S.today.review || '')) $('nrHint').textContent = v.length < 20 ? '한 마디보다 두 문장이면 좋아요. 뭐가 됐고, 내일 뭘 다르게 할지.' : '좋아요. 남기면 내일 아침 다시 보여드려요.'; };
+      nr.addEventListener('input', sync); sync();
+      ns.addEventListener('click', () => { const v = nr.value.trim(); if (v.length < 6) return; S.today.review = v; persist(); render(); toast('회고를 남겼어요. 내일 아침 다시 보여드려요.'); });
+    }
     on('dashRedo', () => { S.today.split = false; persist(); show('split'); });
   }
   on('nextFormula', () => { qi = 1; show('q'); focusIn(); });
@@ -677,6 +819,13 @@ function bind() {
     }
     const th = $('thread'); if (th && chat.view !== 'formula') th.scrollTop = th.scrollHeight;
   }
+}
+function achieveNow() { S.stamps.push({ date: todayStr(), numeric: S.formula.numeric, customer: S.formula.customer, problem: S.formula.problem, start: S.formula.start }); S.formula = blankFormula(); S.today = blankToday(todayStr()); S.history.forEach(h => { h.reviewed = true; }); achAsk = false; editing = null; persist(); show('stamp'); }
+function cheer() {
+  const ph = $('phone'), cols = ['--accent', '--ink', '--warn', '--brand-ink', '--accent-ink'];
+  const bits = [...Array(18)].map((_, k) => { const a = (k / 18) * Math.PI * 2, r = 90 + (k % 3) * 40; return `<i style="--c:var(${cols[k % cols.length]});--dx:${Math.round(Math.cos(a) * r)}px;--dy:${Math.round(Math.sin(a) * r)}px"></i>`; }).join('');
+  ph.insertAdjacentHTML('beforeend', `<div class="cheer" aria-hidden="true">${bits}</div><div class="cheer-msg" role="status">오늘의 바운더리를 다 끝냈어요</div>`);
+  setTimeout(() => ph.querySelectorAll('.cheer,.cheer-msg').forEach(el => el.remove()), 1700);
 }
 function syncToday() { const n = oCount(S.today), c = $('confirm'); if (c) c.disabled = n !== 3; }
 
