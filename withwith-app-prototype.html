@@ -526,22 +526,24 @@ function saveBg() {
   c.toBlob(async blob => {
     if (!blob) { toast('이미지를 만들지 못했어요.'); return; }
     const file = new File([blob], name, { type: 'image/png' });
-    try { if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title: '오늘의 바운더리' }); return; } } catch (e) { if (e && e.name === 'AbortError') return; }
+    // 저장이 끝나면 오늘의 바운더리 리스트로 — 거기서 체크하면 완료 처리 (사용자 지시 2026-09-19). 공유 창을 닫으면(취소) 그대로 둔다
+    try { if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title: '오늘의 바운더리' }); show('dash'); toast('배경을 저장했어요. 끝낸 일은 체크해요.'); return; } } catch (e) { if (e && e.name === 'AbortError') return; }
     const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
-    toast('배경 이미지를 저장했어요. 사진에서 배경화면으로 지정해요.');
+    show('dash'); toast('배경을 저장했어요. 끝낸 일은 체크해요.');
   }, 'image/png');
 }
 // --- 대시보드 ---
 function dashHTML() {
   const t = S.today, main = ofKind(t, '28'), minor = ofKind(t, '82'), n = S.stamps.length;
-  const chk = it => { const i = t.items.indexOf(it), e = t.extra.indexOf(it); return `<button class="chk${it.done ? ' on' : ''}" data-i="${i}" data-e="${e}" aria-pressed="${!!it.done}"><span class="box">${IC.check}</span><span class="tx">${esc(it.text)}${it.sub ? `<span class="sb">완료 = ${esc(it.sub)}</span>` : ''}</span></button>`; };
-  const done = t.items.filter(it => it.done).length;
-  return `<section class="scr">${headHTML(`${esc(S.name)} 님의 오늘`, { right: esc(shortDate(t.date)) })}
-    <div class="body">${fcardHTML()}
-      <div class="group"><div class="glab a"><b>2:8</b>오늘 힘을 모을 곳 · ${done}/3 끝냄</div><div class="todo">${main.map(chk).join('')}</div></div>
+  const all = [...main, ...minor], done = all.filter(it => it.done).length;
+  const chk = it => { const i = t.items.indexOf(it), e = t.extra.indexOf(it); return `<button class="chk${it.done ? ' on' : ''}" data-i="${i}" data-e="${e}" aria-pressed="${!!it.done}" aria-label="${esc(it.text)} — ${it.done ? '완료함, 누르면 되돌려요' : '누르면 완료'}"><span class="box">${IC.check}</span><span class="tx">${esc(it.text)}${it.sub ? `<span class="sb">완료 = ${esc(it.sub)}</span>` : ''}</span></button>`; };
+  return `<section class="scr">${headHTML('오늘의 바운더리', { right: esc(shortDate(t.date)) })}
+    <div class="body"><div class="sec" style="margin-top:8px"><h2 class="h2">${done === all.length && all.length ? '오늘의 바운더리를 다 끝냈어요' : `${esc(S.name)} 님, 끝낸 일을 체크해요`}</h2><p class="lead">${done} / ${all.length} 완료</p></div>
+      <div class="group"><div class="glab a"><b>2:8</b>오늘 힘을 모을 곳</div><div class="todo">${main.map(chk).join('')}</div></div>
       ${minor.length ? `<div class="group"><div class="glab"><b>8:2</b>어느 수준이면 충분한지 정한 만큼만</div><div class="todo">${minor.map(chk).join('')}</div></div>` : ''}
       ${t.mantra ? `<p class="mantra">오늘 계속 되뇔 말 · <b>“${esc(t.mantra)}”</b></p>` : ''}
       <div class="row2" style="margin-top:22px"><button class="pill sm" id="toLock2">잠금화면</button><button class="pill sm" id="dashRedo">다시 정하기</button></div>
+      <div class="sec">${fcardHTML()}</div>
       <div class="stamps"><div class="top"><b>달성한 일의 공식</b><span>${n}개</span></div>
         <div class="srow2">${S.stamps.map((_, i) => `<span class="stp on">${i + 1}</span>`).join('')}<span class="stp">${n + 1}</span></div>
         <p class="lead" style="margin:0">${n ? '다음 끝점에 닿으면 스탬프가 하나 더 찍혀요.' : '끝점에 닿은 날, 위의 ‘성과 달성’을 눌러요.'}</p></div></div></section>`;
@@ -652,7 +654,11 @@ function bind() {
     clearInterval(bind._clock); bind._clock = setInterval(() => { const c = $('clock'); if (c) c.textContent = hhmm(); else clearInterval(bind._clock); }, 15000);
   }
   if (scr === 'dash') {
-    document.querySelectorAll('.chk').forEach(b => b.addEventListener('click', () => { const i = +b.dataset.i, e = +b.dataset.e, it = i >= 0 ? S.today.items[i] : S.today.extra[e]; it.done = !it.done; persist(); render(); }));
+    document.querySelectorAll('.chk').forEach(b => b.addEventListener('click', () => {
+      const i = +b.dataset.i, e = +b.dataset.e, it = i >= 0 ? S.today.items[i] : S.today.extra[e]; it.done = !it.done; persist(); render();
+      const all = [...S.today.items, ...S.today.extra.filter(x => x.kind)]; if (it.done) toast(all.every(x => x.done) ? '오늘의 바운더리를 다 끝냈어요.' : '완료했어요.');
+      const again = document.querySelector(`.chk[data-i="${b.dataset.i}"][data-e="${b.dataset.e}"]`); if (again) again.focus();
+    }));
     on('toLock2', () => show('lock'));
     on('dashRedo', () => { S.today.split = false; persist(); show('split'); });
   }
