@@ -1040,6 +1040,7 @@ const SHOW_EPS = false;     // 1~5화 진행 칩·자물쇠 안내문 — 숨김
 const SHOW_DROPPED_TOTALS = false; // '3개월 동안 안 하기로 한 일' 토글 — 홈에서 숨김
 const SHOW_HOME_REVIEW = false;    // 홈 오늘 카드의 회고(OX·글·저장) — 숨김, 회고는 날짜 페이지에서 (사용자 지시 2026-09-17)
 const SHOW_DUE_CHIP = false;       // 첫 줄 '먼저 · 마감 정하기' 칩 — 숨김 (사용자 지시 2026-09-17)
+const SHOW_HOME_PAST = false;     // 홈 오늘 카드 아래 지난 3일 카드 — 숨김, '지난 기록 전체 보기'에서 다 보여요 (사용자 지시 2026-09-18)
 const SHOW_LIST_DROPPED = false;  // 지난 날 목록 카드의 '오늘 안 하는 일' 접기 — 숨김 (사용자 지시 2026-09-18). 날짜 페이지에는 그대로
 const SHOW_LIST_CHIPS = false;    // 지난 날 목록 카드의 회고 요약 칩(끝점 도달 O · 다르게 O) — 숨김 (같은 지시)
 const COACH_BUBBLE = false;        // 우측 하단 코치 채팅 아이콘·미니 말풍선·패널 — 숨김 (사용자 지시 2026-09-17)
@@ -1322,7 +1323,7 @@ function renderBoundaryPage() {
     <div class="h3-row"><span class="h3"><a class="day-link" href="#/day/${TODAY}">${fmtDate(TODAY)}</a> <span class="tag gray">오늘</span></span><span class="h3-right">${npaAvailable() ? `<button class="npa-open" id="npaOpenBtn">${p.filled ? '코치와 다시 정하기' : '코치와 정하기'}</button>` : ''}<span class="h3-meta">${p.done}/3</span></span></div>
     <div class="day today${p.filled === 3 && p.done === 3 ? ' full' : ''}" id="todayBlock" data-d="${TODAY}"><div class="day-b">${itemsHTML(day, TODAY)}${showReview ? reviewBlock(day, TODAY, stage) : ''}</div></div>
     ${day.npa && day.npa.mantra ? `<p class="npa-mantra">오늘 계속 되뇔 말 · <b>“${esc(day.npa.mantra)}”</b>${day.npa.avoid ? ` &nbsp;·&nbsp; 오늘 하지 않을 것 · <b>${esc(day.npa.avoid)}</b>` : ''}</p>` : ''}
-    <div class="list-wrap home-list">${listHTML(pastDates)}</div>
+    ${SHOW_HOME_PAST ? `<div class="list-wrap home-list">${listHTML(pastDates)}</div>` : ''}
     <p class="small home-more"><a class="link-all" href="#/records/table">지난 기록 ${Math.max(0, total - 1)}개 전체 보기 →</a><span class="faint">표 · 달력으로도 볼 수 있어요</span></p>`;
   renderHead();
   if (!LECTURE_LOCK) bindTitle();
