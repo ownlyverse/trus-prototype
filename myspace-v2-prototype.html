@@ -135,6 +135,10 @@ button{cursor:pointer}
 .rv-sum .chip{font-size:11px;color:var(--muted);background:rgba(25,31,40,.05);border-radius:4px;padding:2px 7px}
 .rv-sum .chip.on{color:var(--indigo-ink);background:var(--indigo-soft)}
 .rv-sum .txt{font-size:15px;white-space:pre-wrap;line-height:1.7;word-break:keep-all}
+/* 목록 카드 — 3줄 아래 구분선 · '오늘의 회고' 제목 · 회고 글 (사용자 지시 2026-09-18) */
+.rv-div{height:1px;background:var(--line);margin:14px 0 12px}
+.rv-h{margin:0;font-size:13px;font-weight:600;color:var(--muted)}
+.rv-h + .rv-sum,.rv-h + .rv{margin-top:6px}
 .days .sec-h{margin-top:24px}
 .dump{margin:4px 0 8px;padding:16px;background:var(--bg);border-radius:4px}
 .dump .dump-title{font-size:15px;font-weight:600;margin:0 0 6px;word-break:keep-all}
@@ -462,6 +466,9 @@ button{cursor:pointer}
   .tabbar .tab svg{width:20px;height:20px}
   .tabbar .tab.on{color:var(--indigo)}
   .top-fix .doc-head{padding:10px 0 12px}
+  .list-day .day-h b{white-space:nowrap}
+  .list-day .day-h .peek{display:none}
+  .list-day .day-h .prog{margin-left:auto;white-space:nowrap}
   .top-fix .doc-head h1{font-size:28px}
   .npa-col{padding:0 16px 24px}
   .npa-composer{padding:12px 12px env(safe-area-inset-bottom)}
@@ -1033,6 +1040,8 @@ const SHOW_EPS = false;     // 1~5화 진행 칩·자물쇠 안내문 — 숨김
 const SHOW_DROPPED_TOTALS = false; // '3개월 동안 안 하기로 한 일' 토글 — 홈에서 숨김
 const SHOW_HOME_REVIEW = false;    // 홈 오늘 카드의 회고(OX·글·저장) — 숨김, 회고는 날짜 페이지에서 (사용자 지시 2026-09-17)
 const SHOW_DUE_CHIP = false;       // 첫 줄 '먼저 · 마감 정하기' 칩 — 숨김 (사용자 지시 2026-09-17)
+const SHOW_LIST_DROPPED = false;  // 지난 날 목록 카드의 '오늘 안 하는 일' 접기 — 숨김 (사용자 지시 2026-09-18). 날짜 페이지에는 그대로
+const SHOW_LIST_CHIPS = false;    // 지난 날 목록 카드의 회고 요약 칩(끝점 도달 O · 다르게 O) — 숨김 (같은 지시)
 const COACH_BUBBLE = false;        // 우측 하단 코치 채팅 아이콘·미니 말풍선·패널 — 숨김 (사용자 지시 2026-09-17)
 const LECTURE_KEY = 'trus_lecture_outputs'; // 강의실이 화별 산출물을 저장하는 키 {v:1,title,numeric,customer,problem,strategy}
 const LECTURE_EPS = [
@@ -1255,7 +1264,7 @@ function listHTML(dates) {
     const first = (day.review.text || '').split('\n')[0];
     const peek = first ? `“${first.slice(0, 20)}${first.length > 20 ? '…' : ''}”` : '';
     const miss = s.missed > 0 ? `<small class="miss prog">미실행 ${s.missed}건</small>` : `<span class="prog">${s.done}/3</span>`;
-    const body = `<div class="day-b">${day.items.map((it, i) => itemRow(it, i, d)).join('')}${droppedInteractive(day, d)}${reviewBlock(day, d, stage)}</div>`;
+    const body = `<div class="day-b">${day.items.map((it, i) => itemRow(it, i, d)).join('')}${SHOW_LIST_DROPPED ? droppedInteractive(day, d) : ''}<div class="rv-div" role="separator"></div><p class="rv-h">오늘의 회고</p>${reviewBlock(day, d, stage, { chips: SHOW_LIST_CHIPS })}</div>`;
     return `<div class="day list-day${open ? ' open' : ''}${isToday ? ' today' : ''}" data-d="${d}"><div class="day-h"><b>${fmtDate(d)}</b>${isToday ? '<span class="badge">오늘</span>' : `<span class="peek">${esc(peek)}</span>`}${miss}</div>${body}</div>`;
   }).join('');
 }
@@ -1266,12 +1275,12 @@ function statsFooter(yyyyMM) {
   dates.forEach(d => { const s = dayStats(S.days[d]); missed += s.missed; if (s.filled === 3 && s.missed === 0) done++; if (s.reached === true) reached++; });
   return `<div class="stats-foot small muted">${label} 미실행 ${missed}건 · 완료 ${done}일 · 끝점 도달 O ${reached}회</div>`;
 }
-function reviewBlock(day, d, stage) {
+function reviewBlock(day, d, stage, { chips = true } = {}) {
   const r = day.review;
   const ox = (q) => `<div class="q"><span>${esc(REVIEW_Q[q - 1])}</span><button class="ox${r['q' + q] === true ? ' on' : ''}" data-d="${d}" data-q="${q}" data-v="1">O</button><button class="ox${r['q' + q] === false ? ' on' : ''}" data-d="${d}" data-q="${q}" data-v="0">X</button></div>`;
   if (reviewDone(r) && editingReview !== d) {
     const chip = (q, label) => `<span class="chip${r['q' + q] != null ? ' on' : ''}">${label} ${r['q' + q] === true ? 'O' : r['q' + q] === false ? 'X' : '–'}</span>`;
-    return `<div class="rv-sum" data-d="${d}"><div class="chips">${chip(1, '끝점 도달')}${chip(2, '다르게')}</div><div class="txt">${esc(r.text)}</div></div>`;
+    return `<div class="rv-sum" data-d="${d}">${chips ? `<div class="chips">${chip(1, '끝점 도달')}${chip(2, '다르게')}</div>` : ''}<div class="txt">${esc(r.text)}</div></div>`;
   }
   return `<div class="rv" data-d="${d}">${ox(1)}${ox(2)}<textarea class="rv-text" data-d="${d}" placeholder="${esc(reviewHintFor(r, stage))}" maxlength="600">${esc(r.text)}</textarea><div class="rv-act"><button class="rv-save" data-d="${d}">저장</button></div></div>`;
 }
