@@ -138,7 +138,7 @@ t('reviewHintFor: OX에 따라 유도 문구', () => {
   const st = L.stageOf(2);
   assert.match(L.reviewHintFor({ q1: false, q2: null, text: '' }, st), /끼어들/);
   assert.match(L.reviewHintFor({ q1: true, q2: true, text: '' }, st), /바꿀지/);
-  assert.equal(L.reviewHintFor({ q1: null, q2: null, text: '' }, st), st.reviewPh);
+  assert.equal(L.reviewHintFor({ q1: null, q2: null, text: '' }, st), '오늘의 회고를 적어볼까요?');
 });
 t('SUGGEST 플래그 꺼짐, 키 퀘스천·문항 상수', () => {
   assert.equal(L.SUGGEST, false);
