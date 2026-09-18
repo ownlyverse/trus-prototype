@@ -10,7 +10,7 @@
 :root{
   --brand-bg:#F5F2ED; --brand-ink:#2B2B2B;            /* withWITH 로고 */
   --paper:#FFFFFF; --ink:#0D0D0D; --sub:#5D5D5D; --faint:#8F8F8F; --line:#E5E5E5; --fill:#F4F4F4; --fill2:#FAFAFA;
-  --accent:#5B5BD6; --accent-ink:#3F3FB0; --accent-soft:#EEF0FF;   /* 일의 공식 그래프·2:8에만 */
+  --accent:#D27593; --accent-ink:#A63F66; --accent-soft:#FBEEF2;   /* 일의 공식 그래프·2:8에만 — 톤 다운 핑크(2026-09-19). 글자·흰 글씨 바탕은 AA를 위해 accent-ink */
   --warn:#C8323A; --warn-soft:#FDECEC; --outside:#EDEDED;
   --ring:0 4px 4px rgba(0,0,0,.04),0 0 1px rgba(0,0,0,.62); --inring:inset 0 0 0 1px rgba(0,0,0,.12);
   --shadow:0 8px 24px rgba(0,0,0,.10);
@@ -171,10 +171,10 @@ button{cursor:pointer}
 .stamps .top span{font-size:13px;color:var(--faint)}
 .srow2{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 14px}
 .stp{width:36px;height:36px;border-radius:50%;box-shadow:inset 0 0 0 1.5px var(--line);background:var(--paper);display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:var(--faint);font-variant-numeric:tabular-nums}
-.stp.on{background:var(--accent);color:var(--paper);box-shadow:none}
+.stp.on{background:var(--accent-ink);color:var(--paper);box-shadow:none}
 .confirm-q{margin:0 0 10px;font-size:15px;line-height:24px}
 .stamp-scr .hero{padding-bottom:10vh}
-.big-stamp{width:120px;height:120px;border-radius:50%;background:var(--accent);color:var(--paper);display:flex;flex-direction:column;align-items:center;justify-content:center;margin-bottom:28px;animation:stampIn .45s cubic-bezier(.2,1.5,.4,1)}
+.big-stamp{width:120px;height:120px;border-radius:50%;background:var(--accent-ink);color:var(--paper);display:flex;flex-direction:column;align-items:center;justify-content:center;margin-bottom:28px;animation:stampIn .45s cubic-bezier(.2,1.5,.4,1)}
 .big-stamp b{font-size:40px;line-height:1;font-weight:600}
 .big-stamp span{margin-top:6px;font-size:11px;letter-spacing:.14em}
 @keyframes stampIn{from{transform:scale(1.8);opacity:0}to{transform:none;opacity:1}}
