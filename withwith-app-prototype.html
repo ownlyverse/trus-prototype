@@ -46,6 +46,8 @@ button{cursor:pointer}
 .pill.w{width:100%}
 .row2{display:flex;gap:8px}
 .row2 .pill{flex:1}
+.row3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.row3 .pill{padding:0 8px;white-space:nowrap}
 .cbox{border-radius:28px;background:var(--paper);box-shadow:var(--ring);padding:10px;display:flex;flex-direction:column}
 .cbox textarea{width:100%;border:0;outline:0;resize:none;background:none;font-size:16px;line-height:24px;min-height:24px;max-height:120px;margin:6px 0 10px;padding:0 10px;cursor:text}
 .cbox textarea::placeholder{color:var(--faint)}
@@ -496,6 +498,7 @@ function render() {
   else if (scr === 'stamp') ph.innerHTML = stampHTML();
   else if (scr === 'review') ph.innerHTML = reviewHTML();
   else if (scr === 'judge') ph.innerHTML = judgeHTML();
+  else if (scr === 'formula') ph.innerHTML = formulaHTML();
   if (achAsk) { const sec = ph.querySelector('.scr'); if (sec) sec.insertAdjacentHTML('beforeend', sheetHTML()); }
   bind();
 }
@@ -653,10 +656,15 @@ function dashHTML() {
       ${minor.length ? `<div class="group"><div class="glab"><b>8:2</b>어느 수준이면 충분한지 정한 만큼만</div><div class="todo">${minor.map(chk).join('')}</div></div>` : ''}
       ${t.mantra ? `<p class="mantra">오늘 계속 되뇔 말 · <b>“${esc(t.mantra)}”</b></p>` : ''}
       ${nightHTML(done === all.length && all.length > 0)}
-      <div class="row2" style="margin-top:22px"><button class="pill sm" id="toLock2">잠금화면</button><button class="pill sm" id="dashRedo">다시 정하기</button></div>
+      <div class="row3" style="margin-top:22px"><button class="pill sm" id="toFormula">일의 공식 보기</button><button class="pill sm" id="toLock2">잠금화면</button><button class="pill sm" id="dashRedo">다시 정하기</button></div>
       ${weekHTML()}
-      <div class="sec"><div class="glab"><b>위젯</b>앱에서는 이 모양이 홈 화면에 자동으로 떠요</div>${homeWidgetHTML()}</div>
-      <div class="sec">${fcardHTML()}</div>
+      <div class="sec"><div class="glab"><b>위젯</b>앱에서는 이 모양이 홈 화면에 자동으로 떠요</div>${homeWidgetHTML()}</div></div></div></section>`;
+}
+// --- 나의 일의 공식 (오늘의 바운더리 리스트의 '일의 공식 보기') ---
+function formulaHTML() {
+  const n = S.stamps.length;
+  return `<section class="scr">${headHTML('나의 일의 공식', { back: 'fBack' })}
+    <div class="body">${fcardHTML()}
       <div class="stamps"><div class="top"><b>달성한 일의 공식</b><span>${n}개</span></div>
         <div class="srow2">${S.stamps.map((_, i) => `<span class="stp on">${i + 1}</span>`).join('')}<span class="stp">${n + 1}</span></div>
         <p class="lead" style="margin:0">${n ? '다음 끝점에 닿으면 스탬프가 하나 더 찍혀요.' : '끝점에 닿은 날, 위의 ‘성과 달성’을 눌러요.'}</p></div></div></section>`;
@@ -796,6 +804,7 @@ function bind() {
       const { all, done } = progressOf(S.today); if (done === all.length) cheer(); else toast('완료했어요.');
     }));
     on('toLock2', () => show('lock'));
+    on('toFormula', () => show('formula'));
     const nr = $('nrIn'), ns = $('nrSave');
     if (nr) {
       const sync = () => { const v = nr.value.trim(); ns.disabled = v.length < 6; if (v && v !== (S.today.review || '')) $('nrHint').textContent = v.length < 20 ? '한 마디보다 두 문장이면 좋아요. 뭐가 됐고, 내일 뭘 다르게 할지.' : '좋아요. 남기면 내일 아침 다시 보여드려요.'; };
@@ -804,6 +813,7 @@ function bind() {
     }
     on('dashRedo', () => { S.today.split = false; persist(); show('split'); });
   }
+  on('fBack', () => show('dash'));
   on('nextFormula', () => { qi = 1; show('q'); focusIn(); });
   if (scr === 'chat') {
     on('cBack', () => { if (chat.view === 'formula') { chat.view = chat.back; chatStep(); return; } clearTimeout(chat.timer); chat = null; show('today'); });
