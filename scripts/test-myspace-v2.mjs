@@ -12,7 +12,7 @@ assert(m, 'script#app 없음');
 const src = m[1];
 const cut = src.indexOf('// ===== RENDER =====');
 assert(cut > 0, 'RENDER 마커 없음');
-const EXPORTS = '\n;({KEY,todayStr,defaultState,ensureBoundary,loadState,saveState,ensureDay,blank,formulaCount,endDefined,dayProgress,keywords,judgeSignal,stageOf,greeting,canFire,addSuggestion,replaceItem,freeReply,lastReview,daysLeft,fmtDate,USER,STAGES,BOUNDARY,FORMULA,PAST_DAYS,SUGGESTIONS,COACH,FREE,FREE_FALLBACK,blankReview,reviewDone,reviewHintFor,REVIEW_Q,KEY_QUESTION,ITEM_PH,SUGGEST,dumpAdd,dumpRemove,dumpPick,MAX_PICK,migrateV3,carryOver,dropKind,setDue,isPastDue,tomorrowAdd,tomorrowRemove,route,monthGrid,dayStats,validDate,validHHMM,lectureOutputs,applyLecture,episodeStates,LECTURE_KEY,SIDEBAR,SHOW_PROPS,PERSONAS,personaOf,personaState,stateKey,NPA_POPUP,NPA_LIVE,NPA_SCRIPTS,NPA_PROMPT,npaNext,npaShouldOpen,npaApply,npaReject,npaPromptFilled,npaHasItems})';
+const EXPORTS = '\n;({KEY,todayStr,defaultState,ensureBoundary,loadState,saveState,ensureDay,blank,formulaCount,endDefined,dayProgress,keywords,judgeSignal,stageOf,greeting,canFire,addSuggestion,replaceItem,freeReply,lastReview,daysLeft,fmtDate,USER,STAGES,BOUNDARY,FORMULA,PAST_DAYS,SUGGESTIONS,COACH,FREE,FREE_FALLBACK,blankReview,reviewDone,reviewHintFor,REVIEW_Q,KEY_QUESTION,ITEM_PH,SUGGEST,dumpAdd,dumpRemove,dumpPick,MAX_PICK,migrateV3,carryOver,dropKind,setDue,isPastDue,tomorrowAdd,tomorrowRemove,route,monthGrid,dayStats,validDate,validHHMM,lectureOutputs,applyLecture,episodeStates,LECTURE_KEY,SIDEBAR,SHOW_PROPS,PERSONAS,personaOf,personaState,stateKey,NPA_POPUP,NPA_LIVE,NPA_SCRIPTS,NPA_PROMPT,npaNext,npaShouldOpen,npaApply,npaReject,npaPromptFilled,npaHasItems,NPA_ALWAYS})';
 const ctx = { location: { search: '' }, URLSearchParams, console };
 const L = vm.runInNewContext(src.slice(0, cut) + EXPORTS, ctx);
 
@@ -408,8 +408,9 @@ t('npaPromptFilled: 기억 칸이 화면 상태로 채워지고 빈 칸 표식�
   assert(out.includes('거절된 첫 줄'));
   assert(!/\{\{[A-Z_]+\}\}/.test(out));
 });
-t('플래그: NPA 팝업 켬, 실제 모델 연결은 끔', () => {
+t('플래그: NPA 팝업 켬, 당분간 매번 열기, 실제 모델 연결은 끔', () => {
   assert.equal(L.NPA_POPUP, true);
+  assert.equal(L.NPA_ALWAYS, true);
   assert.equal(L.NPA_LIVE, false);
 });
 
