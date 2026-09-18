@@ -21,6 +21,9 @@
   --tri:#B4B4B0;
   --red-bg:#FDECEC; --red-ink:#C8323A;
   --green-bg:#E6F4EC; --green-ink:#1E7A46;
+  /* NPA 챗 창 — 일반 챗 창 규격(화면안 ②-D) */
+  --gpt-ink:#0D0D0D; --gpt-sub:#5D5D5D; --gpt-faint:#8F8F8F; --gpt-line:#E5E5E5; --gpt-me:#F4F4F4; --gpt-head:#FAFAFA; --gpt-warn:#B42318; --gpt-av:#E4EBE0;
+  --gpt-ring:0 4px 4px rgba(0,0,0,.04),0 0 1px rgba(0,0,0,.62); --gpt-inring:inset 0 0 0 1px rgba(0,0,0,.12);
 }
 *{box-sizing:border-box}
 html,body{margin:0;background:var(--paper);color:var(--ink);font-family:'Pretendard Variable',Pretendard,-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;font-size:15px;line-height:1.6}
@@ -64,7 +67,7 @@ button{cursor:pointer}
 /* ===== 2. 일의 공식 ===== */
 .formula{position:static;background:var(--paper);border-bottom:1px solid var(--line);padding:24px 0 32px;margin-bottom:0}
 .formula .sec-h{font-size:18px}
-.f-bar{position:sticky;top:0;height:0;z-index:5;overflow:visible}
+.f-bar{position:sticky;top:var(--topfix-h,0px);height:0;z-index:5;overflow:visible}
 .f-bar .f-summary{position:absolute;left:0;right:0;top:0;background:var(--paper);border-bottom:1px solid var(--line);padding:10px 0}
 .f-bar.on .f-summary{display:flex}
 .sec-h{font-size:24px;font-weight:600;letter-spacing:-.01em;line-height:1.3;margin:0 0 8px;word-break:keep-all}
@@ -352,6 +355,86 @@ button{cursor:pointer}
 .home-more{display:flex;gap:10px;align-items:baseline;margin:32px 0 0}
 .today-h{margin-top:36px}
 
+/* 홈 상단(경로 + 바운더리 이름) — 스크롤해도 위에 붙어 있는다 (사용자 지시 2026-09-18) */
+.top-fix{position:sticky;top:0;z-index:6;background:var(--paper);border-bottom:1px solid var(--line);margin-bottom:24px}
+
+/* ===== 4d. NPA — 오늘의 바운더리 정하기 (2026-09-18) · ChatGPT 웹 규격에 맞춤: 시스템 글꼴, 본문 16/28 #0D0D0D, 머리말 52px, 글 폭 768px(화면 1280 미만은 640px)·옆 여백 PC 24 / 모바일 16, 턴 사이 36px, 내 말풍선 #F4F4F4·최대 70%·둥글기 24·안쪽 10×20, 입력 상자 둥글기 28·안쪽 10·그림자 테두리, 버튼 36px, 안내문 12px ===== */
+.npa{position:fixed;inset:0;z-index:70;background:var(--paper);color:var(--gpt-ink);display:flex;flex-direction:column;font-family:ui-sans-serif,-apple-system,system-ui,'Segoe UI','Apple SD Gothic Neo','Noto Sans KR',Helvetica,'Apple Color Emoji',Arial,sans-serif;font-size:16px;line-height:28px;font-weight:400;letter-spacing:0;-webkit-font-smoothing:antialiased;word-break:keep-all}
+.npa-on{overflow:hidden}
+.npa-on .toast{z-index:90}
+.npa button{font-family:inherit;letter-spacing:0}
+.npa-hd{flex:none;height:52px;display:flex;align-items:center;padding:0 8px 0 12px}
+.npa-model{font-size:18px;line-height:28px;font-weight:600;padding:6px 10px;border-radius:8px;white-space:nowrap}
+.npa-hd .right{margin-left:auto;display:flex;align-items:center;gap:4px}
+.npa-me{width:32px;height:32px;border-radius:50%;background:var(--gpt-me);color:var(--gpt-sub);font-size:13px;font-weight:600;display:inline-flex;align-items:center;justify-content:center;margin-right:4px}
+.npa-x{border:0;background:none;width:36px;height:36px;border-radius:8px;color:var(--gpt-sub);display:inline-flex;align-items:center;justify-content:center}
+.npa-x svg{width:20px;height:20px}
+.npa-x:hover,.npa-tool:hover,.npa-pill:hover{background:var(--gpt-me)}
+.npa-x:focus-visible,.npa-tool:focus-visible,.npa-pill:focus-visible,.npa-sug:focus-visible,.npa-send:focus-visible,.npa-prompt:focus-visible{outline:2px solid var(--gpt-ink);outline-offset:2px}
+.npa-thread{flex:1;overflow:auto;display:flex;justify-content:center;scrollbar-width:thin;scrollbar-color:var(--gpt-line) transparent}
+.npa-col{width:100%;max-width:calc(var(--npa-w) + 48px);padding:0 24px 40px;display:flex;flex-direction:column}
+.npa{--npa-w:640px}
+.npa-sys{display:flex;justify-content:center;font-size:12px;line-height:16px;color:var(--gpt-faint);padding:12px 0 0}
+.npa-sys i{font-style:normal;background:var(--gpt-me);border-radius:999px;padding:3px 10px}
+.npa-turn{display:flex;padding:18px 0}
+.npa-turn.u{justify-content:flex-end}
+.npa-bubble{max-width:70%;background:var(--gpt-me);border-radius:24px;padding:10px 20px;overflow-wrap:anywhere}
+.npa-turn.n{gap:12px;align-items:flex-start}
+.npa-av{flex:none;width:28px;height:28px;border-radius:50%;background:var(--gpt-av);overflow:hidden}
+.npa-av img{display:block;width:100%;height:100%;object-fit:cover}
+.npa-md{min-width:0;flex:1;overflow-wrap:anywhere}
+.npa-md p{margin:0 0 16px}
+.npa-md p:last-child{margin-bottom:0}
+.npa-md b{font-weight:600}
+.npa-md ol{margin:0 0 16px;padding-left:26px}
+.npa-md li{margin:8px 0;padding-left:6px}
+.npa-md li::marker{font-variant-numeric:tabular-nums}
+.npa-md li .sub{display:block;font-size:14px;line-height:24px;color:var(--gpt-sub)}
+.npa-md .meta{font-size:14px;line-height:24px;color:var(--gpt-sub)}
+.npa-md .meta b{color:var(--gpt-ink)}
+.npa-typing{display:inline-block;width:12px;height:12px;border-radius:50%;background:var(--gpt-ink);margin:8px 0;animation:npaPulse 1.25s ease-in-out infinite}
+@keyframes npaPulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(.7);opacity:.55}}
+@media (prefers-reduced-motion: reduce){.npa-typing{animation:none}}
+/* 결과 아래 버튼 · 알약 */
+.npa-acts{display:flex;gap:8px;flex-wrap:wrap;margin:-6px 0 0 40px;padding-bottom:8px}
+.npa-acts.flush{margin-left:0;padding-top:18px}
+.npa-pill{height:36px;padding:0 14px;border-radius:18px;border:0;background:var(--paper);color:var(--gpt-ink);font-size:14px;line-height:20px;font-weight:500;box-shadow:var(--gpt-inring)}
+.npa-pill.primary{background:var(--gpt-ink);color:var(--paper);box-shadow:none}
+.npa-pill.primary:hover{background:var(--gpt-ink);opacity:.88}
+.npa-bar .push{margin-left:auto}
+.npa-warn{flex:1 1 100%;margin:0;font-size:13px;line-height:20px;color:var(--gpt-warn)}
+/* 시작 화면 — 새 대화 화면: 가운데 28px 제목 + 입력 상자 */
+.npa-hero{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 24px 10vh;text-align:center}
+.npa-hero h2{margin:0 0 8px;font-size:28px;line-height:34px;font-weight:400;letter-spacing:0}
+.npa-hero .lead{margin:0 0 28px;font-size:16px;line-height:24px;color:var(--gpt-sub)}
+/* 입력 상자 */
+.npa-composer{flex:none;display:flex;flex-direction:column;align-items:center;padding:0 24px}
+.npa-sug{width:100%;max-width:var(--npa-w);text-align:left;border:0;background:var(--paper);box-shadow:var(--gpt-inring);border-radius:16px;padding:10px 16px;margin:0 0 8px;font-size:14px;line-height:20px;color:var(--gpt-ink);cursor:pointer}
+.npa-sug:hover{background:var(--gpt-head)}
+.npa-sug .lab{display:block;font-size:12px;line-height:16px;color:var(--gpt-faint);margin-bottom:2px}
+.npa-sug .tx{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.npa-box{width:100%;max-width:var(--npa-w);border-radius:28px;background:var(--paper);box-shadow:var(--gpt-ring);padding:10px;display:flex;flex-direction:column;text-align:left}
+.npa-box textarea{width:100%;border:0;outline:0;resize:none;background:none;font:inherit;font-size:16px;line-height:24px;color:var(--gpt-ink);min-height:24px;max-height:200px;margin:6px 0 10px;padding:0 10px;cursor:text}
+.npa-box textarea::placeholder{color:var(--gpt-faint)}
+.npa-bar{display:flex;align-items:center;gap:6px}
+.npa-tool{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 12px;border-radius:18px;border:0;background:none;font-size:14px;line-height:20px;color:var(--gpt-ink);box-shadow:var(--gpt-inring)}
+.npa-tool svg{width:18px;height:18px}
+.npa-send{margin-left:auto;flex:none;width:36px;height:36px;border-radius:50%;border:0;background:var(--gpt-ink);color:var(--paper);display:inline-flex;align-items:center;justify-content:center}
+.npa-send:disabled{background:var(--gpt-line);color:var(--paper);cursor:default}
+.npa-send svg{width:20px;height:20px}
+.npa-foot{min-height:32px;display:flex;align-items:center;justify-content:center;gap:4px;flex-wrap:wrap;padding:8px 0;font-size:12px;line-height:16px;color:var(--gpt-sub);text-align:center}
+.npa-foot button{border:0;background:none;padding:0;font-size:12px;line-height:16px;color:var(--gpt-ink);text-decoration:underline;text-underline-offset:2px}
+/* 일의 공식 · 프롬프트 */
+.npa-formula{border:1px solid var(--gpt-line);border-radius:16px;padding:4px 20px 28px;font-size:15px;line-height:1.6}
+.npa-prompt{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font:14px/24px ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--gpt-head);border:1px solid var(--gpt-line);border-radius:16px;padding:16px;cursor:text}
+@media (min-width: 1280px){.npa{--npa-w:768px}}
+/* 홈 — 오늘 카드 옆 버튼 · 한마디 */
+.h3-right{display:inline-flex;align-items:center;gap:10px;flex:none;margin-left:auto}
+.h3-row .npa-open{border:1px solid var(--line);background:var(--paper);border-radius:6px;padding:4px 10px;font-size:12.5px;font-weight:600;color:var(--indigo-ink)}
+.h3-row .npa-open:hover{background:rgba(25,31,40,.04)}
+.npa-mantra{margin:8px 2px 0;font-size:13.5px;line-height:1.7;color:var(--muted);word-break:keep-all}
+.npa-mantra b{color:var(--ink)}
+
 /* ===== 5. 반응형 (반드시 마지막) ===== */
 @media (max-width: 720px){
   .side{position:fixed;left:0;top:0;bottom:0;z-index:45;transform:translateX(-100%);transition:transform .2s}
@@ -378,6 +461,17 @@ button{cursor:pointer}
   .tabbar .tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;color:var(--muted);text-decoration:none;padding:2px 0}
   .tabbar .tab svg{width:20px;height:20px}
   .tabbar .tab.on{color:var(--indigo)}
+  .top-fix .doc-head{padding:10px 0 12px}
+  .top-fix .doc-head h1{font-size:28px}
+  .npa-col{padding:0 16px 24px}
+  .npa-composer{padding:0 12px env(safe-area-inset-bottom)}
+  .npa-acts{margin-left:0}
+  .npa-hero{justify-content:flex-start;padding:0}
+  .npa-hero h2{font-size:24px;line-height:32px;margin-top:auto;padding:0 20px}
+  .npa-hero .lead{margin-bottom:auto;padding:0 20px 8vh;font-size:15px}
+  .npa-hero .npa-box{margin:0 12px calc(12px + env(safe-area-inset-bottom));width:auto;align-self:stretch}
+  .npa-formula{padding:16px}
+  .npa-model span{display:none}
 }
 </style>
 </head>
@@ -397,6 +491,7 @@ button{cursor:pointer}
 <div class="coach-panel" id="coachPanel" hidden></div>
 <div class="toast" id="toast" hidden></div>
 <div class="scrim" id="scrim" hidden></div>
+<div class="npa" id="npa" role="dialog" aria-modal="true" aria-labelledby="npaTitle" hidden></div>
 <script id="app">
 // ===== MOCK DATA =====
 const Q = new URLSearchParams(location.search);
@@ -492,6 +587,184 @@ const FREE = [
 ];
 const FREE_FALLBACK = '그건 강의실에서 같이 봐요. 지금은 오늘의 3개에 집중해요.';
 
+// ===== NPA — 오늘의 바운더리 정하기 (2026-09-18) =====
+const NPA_POPUP = true;  // 홈에 들어왔을 때 오늘 3줄이 비어 있으면 '오늘의 바운더리 정하기' 팝업을 연다
+const NPA_LIVE = false;  // 실제 모델 연결 전 — 지금은 준비된 대화(NPA_SCRIPTS)를 재생한다. 연결하면 NPA_PROMPT가 시스템 프롬프트가 된다
+// 페르소나 세트 — 준비된 대화와 상단 일의 공식이 같은 사람 것이어야 해서 묶어 둔다. 기본은 지안, ?persona=sojung 이면 기존 목데이터.
+const PERSONAS = {
+  jian: {
+    user: { name: '지안', stage: 2, course: 5 },
+    card: '콘텐츠 마케터 5년차 대리 · 스킨케어 브랜드 마케팅팀(5명) · 인스타·쇼츠·블로그·뉴스레터 담당 · 정할 수 있는 것: 콘텐츠 기획·형식·올리는 시간 / 팀장이 정하는 것: 콘텐츠 개수·예산 / 광고 담당만 보는 것: 누가 와서 샀는지',
+    boundary: { id: 'b-jian', title: '와서 사게 하는 콘텐츠', from: '2026-09-01', to: '2026-11-30' },
+    formula: {
+      numeric: '콘텐츠 보고 와서 산 사람 300명 → 360명',
+      customer: '나 이 계정 보고 화장대 다 바꿨어',
+      problem: '콘텐츠를 본 사람이 제품까지 오지 않는다',
+      strategy: '잘 데려온 콘텐츠 5개를 찾아 그 형식만 만들고, 모든 콘텐츠에 제품으로 가는 길을 넣고, "어디 거예요?" 댓글에 그날 답한다',
+    },
+    avoid: ['틱톡 새 계정', '브랜드 캐릭터 만들기', '유튜브 긴 영상 시리즈(3개월 미룸)'],
+    events: [
+      '지난봄 릴스 하나가 100만 뷰가 났는데 그 주 쇼핑몰 방문은 평소와 같았다',
+      '그 릴스에 "이거 어디 거예요?" 댓글이 40개 달렸는데 아무도 답을 못 했다',
+      '팀장의 말: "조회수 말고, 온 사람." 광고 없이 들어와서 사는 사람이 늘어야 한다',
+    ],
+    days: {
+      '2026-09-15': { items: [{ text: '팀장님께 "올해 우리 팀 성과가 뭐예요?" 여쭤보기', done: true }, { text: '지난봄 100만 뷰 릴스가 난 주의 쇼핑몰 방문 수 확인', done: true }, { text: '이번 주 콘텐츠 12개 마감', done: true }], review: { q1: true, q2: true, text: '팀장님 답은 한 줄이었다. "광고를 끄면 매출도 같이 꺼져. 광고 없이 들어와서 사는 사람이 늘어야 해." 팔로워도 조회수도 아니었다.\n100만 뷰가 난 주의 쇼핑몰 방문을 찾아봤다. 평소와 같았다. 다시 한다면 12개 마감보다 이걸 먼저 봤을 것이다.' }, dump: [], dropped: [{ text: '틱톡 새 계정 열기', kind: 'delete' }] },
+      '2026-09-16': { items: [{ text: '끝점 정하기 — 숫자언어·고객언어', done: true }, { text: '100만 뷰 릴스에 달린 "이거 어디 거예요?" 댓글 세어보기', done: true }, { text: '릴스 2개 편집', done: false }], review: { q1: true, q2: false, text: '끝점을 "콘텐츠 보고 와서 산 사람 300명 → 360명"으로 정했다. 고객에게 듣고 싶은 말은 "나 이 계정 보고 화장대 다 바꿨어".\n댓글을 세어보니 "어디 거예요?"가 40개였다. 아무도 답을 안 달았다. 편집은 하나도 못 했다.' }, dump: [], dropped: [{ text: '브랜드 캐릭터 기획', kind: 'delete' }] },
+      '2026-09-17': { items: [{ text: '문제 한 문장으로 쓰기', done: true }, { text: '3개월간 안 할 일 목록 팀장님과 합의', done: true }, { text: '주 12개를 줄이자고 말씀드리기', done: false }], review: { q1: true, q2: true, text: '문제는 "콘텐츠를 본 사람이 제품까지 오지 않는다". 틱톡과 브랜드 캐릭터는 3개월간 안 하기로 팀장님과 합의했다.\n12개를 줄이자는 말은 못 꺼냈다. 숫자 없이 말하면 그냥 일 줄이고 싶은 사람처럼 보일 것 같았다.' }, dump: [], dropped: [{ text: '유튜브 긴 영상 시리즈', kind: 'later' }], tomorrow: [], coachLog: [{ t: '18:40', text: '문제가 한 문장으로 잡혔어요. 내일 아침엔 이 문장에서 시작해요.' }] },
+    },
+  },
+};
+// 준비된 대화 두 안 — 같은 짧은 프롬프트를 두 GPT에 넣어 나온 결과(2026-09-17). A는 원칙형, B는 완료 기준형. '다시 정하기'를 누르면 다음 안으로 넘어간다.
+const NPA_SCRIPTS = {
+  A: {
+    label: '안 A',
+    turns: [
+      { who: 'n', text: '좋은 아침이에요.\n오늘 출근해서 가장 먼저 머릿속에 걸리는 일이 뭐예요?' },
+      { who: 'u', text: '이번 주 콘텐츠요. 원래 12개 만들어야 하는데, 솔직히 너무 많아요. 릴스도 만들고 쇼츠도 만들고 블로그도 써야 하고요.' },
+      { who: 'n', text: '그 12개를 다 만드는 게 오늘 지안 님의 성과인가요?\n아니면 다른 숫자가 있나요?' },
+      { who: 'u', text: '사실 팀장님이 계속 하시는 말이 있어요. "조회수 말고, 온 사람." 콘텐츠 보고 실제 쇼핑몰에 들어오는 사람이 늘어야 한다고요.' },
+      { who: 'n', text: '지난달에는 몇 명 정도였어요?' },
+      { who: 'u', text: '콘텐츠 보고 들어와서 산 사람이 300명 정도였고, 이번 달에는 360명 정도 만들고 싶어요.' },
+      { who: 'n', text: '좋아요. 그러면 오늘은 **\'콘텐츠를 많이 만드는 날\'이 아니라 \'사는 사람을 늘리는 날\'**이라고 잡아볼게요.\n그런데 하나 걸리는 게 있어요. 지난번에 말씀하신 100만 뷰 릴스 기억나죠?' },
+      { who: 'u', text: '네. 그게 제일 스트레스예요. 조회수는 엄청 잘 나왔는데 매출은 거의 그대로였어요.' },
+      { who: 'n', text: '그 영상에서 사람들이 많이 한 행동은 뭐였어요?' },
+      { who: 'u', text: '"이거 어디 거예요?"라는 댓글이 엄청 달렸어요.' },
+      { who: 'n', text: '그런데 바로 살 수 있었나요?' },
+      { who: 'u', text: '아뇨. 제품 링크도 없었고, 댓글에도 바로 답을 못 했어요.' },
+      { who: 'n', text: '그럼 오늘 12개를 만드는 것과 그 문제를 고치는 것 중 하나만 할 수 있다면요?' },
+      { who: 'u', text: '후자요. 사실 콘텐츠 숫자 채우느라 계속 비슷한 걸 만들고 있거든요.' },
+      { who: 'n', text: '그럼 첫 번째 바운더리는 이렇게 잡을 수 있겠네요.\n**① 오늘은 콘텐츠 개수를 채우기 위한 제작은 하지 않는다.**\n대신 뭘 하죠?' },
+      { who: 'u', text: '최근 콘텐츠 중에서 실제로 사람을 쇼핑몰까지 데려온 콘텐츠를 찾아볼래요.' },
+      { who: 'n', text: '몇 개까지 보면 충분할까요?\n20개를 보면 또 분석 자체가 일이 될 수 있어요.' },
+      { who: 'u', text: '5개요.' },
+      { who: 'n', text: '좋아요.\n**② 오늘은 \'사람을 데려온 콘텐츠\' 5개만 분석한다.**\n마지막 하나만 정해볼게요. 분석하고 끝나면 내일 다시 같은 문제가 생길 수도 있어요. 오늘 안에 실제 고객 동선을 하나 바꾼다면 뭘 바꾸겠어요?' },
+      { who: 'u', text: '모든 콘텐츠에서 제품으로 바로 갈 수 있게 하는 거요. 그리고 "이거 어디 거예요?" 같은 댓글은 그날 바로 답하고요.' },
+      { who: 'n', text: '둘 중 오늘 반드시 끝낼 하나를 고른다면요?' },
+      { who: 'u', text: '제품으로 가는 길이요. 그게 없으면 댓글에 답해도 결국 또 찾아야 하니까.' },
+      { who: 'n', text: '좋아요. 그럼 세 번째입니다.\n**③ 오늘 만드는 모든 콘텐츠에는 제품으로 바로 가는 길을 하나 넣는다.**\n오늘 해야 할 일이 새로 생긴 게 아니라, 오히려 하지 않을 일이 명확해졌네요.' },
+    ],
+    result: {
+      items: [
+        { text: '개수 채우기 위한 콘텐츠 제작은 하지 않는다', why: '12개를 만드는 것 자체를 성과로 보지 않는다' },
+        { text: '사람을 실제로 데려온 콘텐츠 5개만 본다', why: '조회수가 아니라 구매까지 이어진 형식을 찾는다' },
+        { text: '모든 콘텐츠에 제품으로 가는 길을 하나 넣는다', why: '콘텐츠와 제품 사이의 끊어진 길부터 잇는다' },
+      ],
+      avoid: '콘텐츠 개수 채우기',
+      mantra: '조회수 말고, 온 사람.',
+    },
+  },
+  B: {
+    label: '안 B',
+    turns: [
+      { who: 'n', text: '알겠어요. 다른 쪽에서 다시 볼게요.\n오늘 해야 할 일부터 쭉 말해볼까요?' },
+      { who: 'u', text: '오늘 릴스 2개 편집해서 올려야 하고, 쇼츠도 하나 있고요. 뉴스레터 초안도 잡아야 해요. 후배가 만든 콘텐츠 검수도 있고, 오후에는 주간회의 있어요.' },
+      { who: 'n', text: '꽉 찼네요.\n그중에서 오늘 끝났을 때 "이번 주는 매출에 조금 더 가까워졌다"고 말할 수 있는 일은 뭐예요?' },
+      { who: 'u', text: '음… 릴스 아닐까요? 요즘 릴스 조회수가 제일 잘 나오니까요.' },
+      { who: 'n', text: '조회수가 잘 나온 뒤에, 실제로 사람이 제품까지 온 적도 확인됐어요?' },
+      { who: 'u', text: '그건… 사실 잘 모르겠어요. 지난번 100만 뷰도 조회수는 진짜 잘 나왔는데 쇼핑몰 방문은 별 차이 없었어요.' },
+      { who: 'n', text: '그 릴스를 본 사람이 제품에 관심을 보인 흔적은 없었어요?' },
+      { who: 'u', text: '댓글에 "이거 어디 거예요?"가 꽤 있었어요. 40개 정도?' },
+      { who: 'n', text: '그 40명은 그다음에 어떻게 됐어요?' },
+      { who: 'u', text: '……답을 못 했어요. 그 주에 콘텐츠 만드는 게 너무 밀려서요.' },
+      { who: 'n', text: '그럼 오늘 지안 님이 만들어야 하는 건 또 많이 보는 콘텐츠에 가까울까요, 아니면 보고 온 사람이 제품까지 가게 만드는 것에 가까울까요?' },
+      { who: 'u', text: '후자죠. 와서 사게 만드는 거요.' },
+      { who: 'n', text: '좋아요. 그걸 오늘 기준으로 잡을게요.\n오늘 예정된 릴스 2개에는 사람이 제품까지 갈 수 있는 길이 있나요?' },
+      { who: 'u', text: '지금 초안에는 없어요. 그냥 제품명 정도만 자막에 들어가요.' },
+      { who: 'n', text: '오늘 올리기 전에 하나씩 넣을 수 있는 가장 짧은 길은요?' },
+      { who: 'u', text: '프로필 링크로 연결하고, 캡션에는 제품명을 정확히 쓰면 될 것 같아요. 댓글에도 바로 링크 안내할 수 있고요.' },
+      { who: 'n', text: '좋아요. 하나 잡혔어요.\n**① 오늘 발행하는 콘텐츠 3개 모두에 \'제품까지 가는 길\'을 1개 이상 넣고 발행한다.**\n그다음. 지안 님 팀의 숫자는 \'콘텐츠 보고 와서 산 사람 300명 → 360명\'이죠. 지금 지안 님은 그 숫자를 직접 볼 수 있어요?' },
+      { who: 'u', text: '아뇨. 광고 담당자만 봐요.' },
+      { who: 'n', text: '그럼 오늘 숫자를 올리는 것보다 먼저 해야 할 일이 있을 수도 있겠네요.\n내 콘텐츠 중 어떤 게 실제로 사람을 데려왔는지 알 수 있으려면 오늘 뭘 할 수 있죠?' },
+      { who: 'u', text: '광고 담당한테 데이터를 달라고 해야겠네요. 최근 한 달 콘텐츠별로 유입이나 구매가 잡히는지 물어보면 될 것 같아요.' },
+      { who: 'n', text: '"데이터 한번 주세요" 말고, 오늘 답을 받을 수 있게 구체적으로 바꿔볼까요?' },
+      { who: 'u', text: '최근 4주 콘텐츠 중 구매나 사이트 유입을 가장 많이 만든 콘텐츠 5개를 뽑아달라고 할게요.' },
+      { who: 'n', text: '좋아요.\n**② 오전 중 광고 담당자에게 최근 4주간 \'사람을 가장 많이 데려온 콘텐츠 5개\'를 요청하고, 오늘 안에 확인한다.**\n마지막 하나만 더 볼게요. 지금 당장 제품까지 오려는 사람이 있는데 놓치고 있는 곳은 어디예요?' },
+      { who: 'u', text: '댓글이요.' },
+      { who: 'n', text: '오늘 새 댓글만 볼까요, 아니면 밀린 40개까지 볼까요?' },
+      { who: 'u', text: '밀린 것부터 해야 할 것 같아요. "어디 거예요?" 같은 댓글은 다 답하고 싶어요.' },
+      { who: 'n', text: '40개 전체를 오늘 책임질 수 있어요?' },
+      { who: 'u', text: '네. 이건 30분이면 할 수 있을 것 같아요.' },
+      { who: 'n', text: '그럼 세 번째로 잡죠.\n**③ \'이거 어디 거예요?\'처럼 구매 의도가 보이는 미응답 댓글 40개에 오늘 오전 안으로 답한다.**\n오늘 릴스 조회수가 얼마 나오는지는 바운더리에 넣지 않을게요.' },
+      { who: 'u', text: '네. 오늘은 조회수 말고…' },
+      { who: 'n', text: '뭐를 볼까요?' },
+      { who: 'u', text: '온 사람.' },
+      { who: 'n', text: '좋아요. 오늘 할 일이 밀리면 이 세 가지부터 지킵니다.' },
+    ],
+    result: {
+      items: [
+        { text: '오늘 발행하는 콘텐츠 3개 모두에 제품으로 가는 길을 1개 넣는다', done: '오늘 발행 3건 모두에 링크·제품명 등 실제로 이동할 길이 있다' },
+        { text: '광고 담당자에게 \'사람을 많이 데려온 콘텐츠 5개\'를 요청해 오늘 확인한다', done: '최근 4주 데이터를 받아 콘텐츠 5개를 특정했다' },
+        { text: '\'이거 어디 거예요?\' 미응답 댓글 40개에 오전 안으로 답한다', done: '오전 중 40개 응답을 끝냈다' },
+      ],
+      avoid: '릴스 조회수 확인',
+      mantra: '조회수 말고, 온 사람.',
+    },
+  },
+};
+// NPA 시스템 프롬프트 v1 — 실제 모델을 붙일 때 이 글이 그대로 지시문이 된다. {{…}} 칸은 npaPromptFilled()가 화면 상태로 채운다.
+// 근거: Trus World 프롬프트 3종 ①②③(말투·약한 답·판정 가능), 일의 교과서 워싱 1단계 p157–168(세 질문·어느 수준이면 충분한가·시그널과 노이즈), BOOK 4 전략 설정 프롬프트(천 번 반복할 한 문장).
+const NPA_PROMPT = `당신은 "바운더리 코치(NPA)"입니다. 매일 아침 한 사람과 대화해서 그 사람의 "오늘의 바운더리"를 최대 3개 확정합니다.
+당신이 정해주지 않습니다. 질문으로 그 사람 입에서 나오게 합니다.
+
+# 당신이 아는 것 — 이것뿐입니다
+[사용자 카드]
+{{CARD}}
+
+[3개월 확정]
+{{FORMULA}}
+
+[실제 사건 메모]
+{{EVENTS}}
+
+[최근 기록]
+{{RECENT}}
+
+[오늘 거절된 안]
+{{REJECTED}}
+
+여기에 없는 사실(개수, 걸리는 시간, 진행 상황, 회사 사정)은 모릅니다. 모르면 묻습니다. 지어내지 않습니다.
+메모에 있는 사건을 꺼낼 때는 "지난번에 말씀하신 …"처럼 어디서 온 말인지 드러나게 합니다.
+3개월 끝점과 전략은 다시 열지 않습니다. 끝점은 3개월 뒤 한 번 판단합니다.
+
+# 말투
+- 따뜻하게 말 걸듯이 — ~해요, ~죠, ~까요? 상대를 마주 앉은 한 사람으로, 저를 '저'로.
+- 따뜻하되 단호합니다. 약한 답은 공감은 해주되 그냥 넘기지 않습니다.
+- 한 번에 질문 하나. 답을 받은 뒤에만 다음으로 갑니다. 한 번 말할 때 세 줄을 넘기지 않습니다.
+- 답을 대신 말하지 않습니다. 후보가 필요하면 2개를 보여주고 고르게 합니다.
+
+# 질문의 순서
+1. 연다 — "오늘 출근해서 가장 먼저 머릿속에 걸리는 일이 뭐예요?"
+2. 끝으로 되돌린다 — 그 일이 오늘의 성과인지, 3개월 숫자언어에 닿는지 묻습니다. "그걸 다 하는 게 오늘의 성과인가요?"
+3. 실제 사건으로 데려온다 — 느낌이나 추상어가 나오면 실제로 있었던 일로. "그때 사람들이 한 행동은 뭐였어요?" 사건 메모를 쓸 수 있습니다.
+4. 하나만 고르게 한다 — "둘 중 하나만 할 수 있다면요?"
+5. 크기를 정하게 한다 — "몇 개까지 보면 충분할까요?" 없앨 수 없는 일이면 "어느 수준이면 충분한가."
+6. 끝났는지 알 수 있게 한다 — "그걸 오늘 책임질 수 있어요?" 밤에 예/아니오로 말할 수 있는 문장이 될 때까지 다듬습니다.
+7. 한마디 — 오늘 계속 되뇔 한 문장. 그 사람이 대화에서 한 말 중에서 고릅니다.
+바운더리가 하나 잡힐 때마다 "① …"로 되읽어 확인받고 다음으로 갑니다.
+
+# 약한 답이 나오면
+- "모르겠어요" → 더 작게 쪼개 다시 묻습니다. 같은 문장을 되풀이하지 않습니다.
+- "다 해야 되는 일이에요" → "효과가 있는가. 안 해도 되는가. 적당히 할 수 있는가." 중단할 수 없는 일이라도 투입하는 힘은 달리할 수 있습니다.
+- "윗사람이 시킨 일이에요" → 안 하라고 하지 않습니다. 필요한 조건을 확인해 마치게 합니다. "어느 수준이면 충분한가. 그 수준을 정해야 거기서 멈출 수 있다."
+- "열심히·제대로·최대한" → 지적하지 않고, 판정 가능한 문장 후보 2개로 바꿔 보여줍니다.
+- 3개월간 하지 않기로 한 일이 들어오면 → "이건 3개월간 안 하기로 했던 일이에요. 그래도 넣어야 하면 바운더리부터 다시 봐야 해요."
+- 같은 일이 사흘째 남았으면 → "이거, 크기가 큰 거예요, 아니면 사실 안 하고 싶은 거예요?"
+- 대화가 길어지면(당신의 말이 열다섯 번을 넘으면) → "오늘은 하나만 확실히 끝내도 돼요."로 줄입니다. 3개를 억지로 채우지 않습니다.
+
+# 끝내는 법 — 반드시 이 모양으로
+오늘의 바운더리
+1. (무엇을 어디까지) — 완료 = (밤에 예/아니오로 말할 수 있는 기준)
+2. …
+3. …
+오늘 하지 않을 것: (한 줄)
+오늘 계속 되뇔 말: "(그 사람이 한 말)"
+
+그 사람이 "별로예요, 다시 정할래요"라고 하면 — 무엇이 어긋났는지 한 가지만 묻고, 2번부터 다른 각도로 다시 갑니다. [오늘 거절된 안]과 같은 세 줄을 다시 내놓지 않습니다.
+
+# 하지 않는 것
+대신 골라주기 / 3개 억지로 채우기 / 걸리는 시간 추정 / 새 전략·새 숫자 제안 / 끝점 다시 열기 / 못 끝낸 걸 나무라기 / 평가·채점`;
+
 // ===== LOGIC =====
 const KEY = 'trus_myspace_v2';
 // URL 파라미터 검증 — 비정형 값은 무시(반사형 XSS·문자열 비교 오탐 차단)
@@ -533,20 +806,64 @@ function ensureBoundary(state) {
   }
   return state;
 }
-function loadState(storage) {
+// key·fallback·persona를 넘기면 그 페르소나 세트로 읽는다. 저장본의 persona가 다르면 무시하고 새로 시작한다(다른 사람의 공식에 대화가 얹히지 않게).
+function loadState(storage, key = KEY, fallback = defaultState, persona = null) {
   try {
-    const raw = storage.getItem(KEY);
+    const raw = storage.getItem(key);
     if (raw) {
       const s = JSON.parse(raw);
-      if (s && s.v === 4) return ensureBoundary(s);
-      if (s && s.v === 3) return ensureBoundary(migrateV3(s)); // 기존 배포 사용자 데이터 보존
+      const mine = !persona || (s && s.persona === persona);
+      if (s && s.v === 4 && mine) return ensureBoundary(s);
+      if (s && s.v === 3 && !persona) return ensureBoundary(migrateV3(s)); // 기존 배포 사용자 데이터 보존
     }
   } catch (e) { /* 무시 */ }
-  return defaultState();
+  return fallback();
 }
-function saveState(storage, state, onFail) {
-  try { storage.setItem(KEY, JSON.stringify(state)); return true; }
+function saveState(storage, state, onFail, key = KEY) {
+  try { storage.setItem(key, JSON.stringify(state)); return true; }
   catch (e) { if (onFail) onFail(e); return false; }
+}
+// ----- 페르소나 · NPA (2026-09-18) -----
+function personaOf(q) { return (q === 'sojung' || (typeof q === 'string' && Object.prototype.hasOwnProperty.call(PERSONAS, q))) ? q : 'jian'; }
+function stateKey(persona) { return persona === 'sojung' ? KEY : `${KEY}_${persona}`; }
+function personaState(id) {
+  const p = PERSONAS[id];
+  if (!p) return defaultState();
+  const days = JSON.parse(JSON.stringify(p.days));
+  Object.keys(days).forEach(k => normDay(days[k]));
+  return { v: 4, persona: id, user: { ...p.user }, card: p.card, boundary: { ...p.boundary, formula: { ...p.formula } }, avoid: [...p.avoid], events: [...p.events], days, coachSeen: {}, npaLog: [] };
+}
+function npaNext(v) { const ks = Object.keys(NPA_SCRIPTS); const i = ks.indexOf(v); return ks[(i + 1) % ks.length]; }
+function npaHasItems(day) { return !!day && (day.items || []).some(it => (it.text || '').trim()); }
+function npaShouldOpen(day, page) { return !!day && page === 'boundary' && !day.npaSkipped && !npaHasItems(day); }
+function npaApply(day, result, variant, at) {
+  day.items = [0, 1, 2].map(i => ({ text: ((result.items[i] && result.items[i].text) || '').trim().slice(0, 80), done: false }));
+  day.npa = { variant, at: at || '', mantra: result.mantra || '', avoid: result.avoid || '', criteria: [0, 1, 2].map(i => (result.items[i] && result.items[i].done) || '') };
+  return day;
+}
+function npaReject(state, date, variant, result, t) {
+  if (!Array.isArray(state.npaLog)) state.npaLog = [];
+  state.npaLog.push({ date, t: t || '', variant, items: result.items.map(it => it.text) });
+  return state.npaLog;
+}
+function npaPromptFilled(state, today) {
+  const f = state.boundary.formula, NL = '\n';
+  const recent = Object.keys(state.days).filter(d => d < today).sort().slice(-3).map(d => {
+    const day = state.days[d];
+    const its = (day.items || []).filter(it => (it.text || '').trim()).map(it => `${it.done ? '끝냄' : '못 끝냄'}: ${it.text}`).join(' / ');
+    const rv = ((day.review && day.review.text) || '').split(NL)[0];
+    return `- ${d} · ${its}` + (rv ? `${NL}  회고: ${rv}` : '');
+  }).join(NL);
+  const rej = (state.npaLog || []).filter(x => x.date === today).map(x => `- ${x.t} ${x.items.join(' / ')}`).join(NL);
+  const st = stageOf(state.user.stage);
+  const slots = {
+    CARD: [`- ${state.user.name} · ${state.card || ''}`, `- 단계: ${st.name} (${st.point})`].join(NL),
+    FORMULA: [`- 바운더리(집중할 단 하나): ${state.boundary.title}`, `- 하지 않을 일: ${(state.avoid || []).join(', ') || '(없음)'}`, `- 고객언어: "${f.customer}"`, `- 숫자언어: ${f.numeric}`, `- 문제정의: ${f.problem}`, `- 전략: ${f.strategy}`].join(NL),
+    EVENTS: (state.events || []).map(e => `- ${e}`).join(NL) || '(없음)',
+    RECENT: recent || '(없음)',
+    REJECTED: rej || '(없음)',
+  };
+  return NPA_PROMPT.replace(/\{\{([A-Z_]+)\}\}/g, (m, k) => (k in slots ? slots[k] : ''));
 }
 const MAX_PICK = 3;
 function ensureDay(state, date) {
@@ -743,13 +1060,28 @@ function episodeStates(title, f) { return LECTURE_EPS.map(e => !!((e.k === 'titl
 // ===== RENDER =====
 const $ = (id) => document.getElementById(id);
 let S, TODAY;
+const PERSONA = personaOf(Q.get('persona')); // 기본 지안(준비된 NPA 대화와 같은 사람). ?persona=sojung 이면 기존 목데이터
 function toast(msg) { const t = $('toast'); t.textContent = msg; t.hidden = false; clearTimeout(toast._t); toast._t = setTimeout(() => { t.hidden = true; }, 2600); }
-function persist() { saveState(localStorage, S, () => toast('저장이 안 됐어요. 브라우저 저장 공간을 확인해 주세요.')); }
+function persist() { saveState(localStorage, S, () => toast('저장이 안 됐어요. 브라우저 저장 공간을 확인해 주세요.'), stateKey(PERSONA)); }
 function esc(s) { return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
 let onFormulaSaved = () => {};   // Task 5에서 코치가 덮어씀
 let onOrderGuard = () => {};     // Task 5에서 코치가 덮어씀
 let onFormulaComplete = () => {}; // Task 5
 
+// 일의 공식 아치 그래프 — 홈(renderFormula)과 코치 챗 창(일의 공식 버튼)이 같이 쓴다
+function formulaGraphHTML(f, { ce = 'false', lk = ' locked', dim = '', chipId = '' } = {}) {
+  return `<div class="f-graph">
+      <svg viewBox="0 0 1000 290" preserveAspectRatio="none" aria-hidden="true">
+        <path class="f-arc" d="M100,160 Q500,80 900,160"/>
+        <line class="f-line" x1="100" y1="160" x2="900" y2="160"/>
+      </svg>
+      <span class="f-pt l"></span><span class="f-pt r"></span>
+      <div class="f-problem"><span class="f-lab">문제</span><span class="f-val q${dim}${lk}" data-k="problem" contenteditable="${ce}" data-ph="끝점과 지금 사이의 허들 한 문장">${esc(f.problem)}</span></div>
+      <div class="f-chip"${chipId ? ` id="${chipId}"` : ''}>함께 해결 = 일</div>
+      <div class="f-start"><span class="f-lab">시작 · 바운더리</span><span class="f-cap">그 문제를 어떤 바운더리로 풀어 성과에 닿을 것인가?</span></div>
+      <div class="f-end"><span class="f-lab">끝 · 성과</span><span class="f-val big${lk}" data-k="numeric" contenteditable="${ce}" data-ph="무엇이 얼마에서 얼마로 바뀌나요?">${esc(f.numeric)}</span><span class="f-val q${lk}" data-k="customer" contenteditable="${ce}" data-ph="고객이 돈을 내고 나서 뭐라고 말하면 성공인가요?">${esc(f.customer)}</span></div>
+    </div>`;
+}
 function renderFormula() {
   const f = S.boundary.formula;
   const n = formulaCount(f);
@@ -763,17 +1095,7 @@ function renderFormula() {
   box.innerHTML = `
     <div class="sec-row"><h2 class="sec-h">일의 공식${LECTURE_LOCK ? ' <span class="src">강의에서 가져옴</span>' : ''}</h2>${LECTURE_LOCK ? '<a class="btn-ghost" href="lecture-prototype.html">강의실에서 고치기 →</a>' : ''}</div>
     ${eps}
-    <div class="f-graph">
-      <svg viewBox="0 0 1000 290" preserveAspectRatio="none" aria-hidden="true">
-        <path class="f-arc" d="M100,160 Q500,80 900,160"/>
-        <line class="f-line" x1="100" y1="160" x2="900" y2="160"/>
-      </svg>
-      <span class="f-pt l"></span><span class="f-pt r"></span>
-      <div class="f-problem"><span class="f-lab">문제</span><span class="f-val q${dim}${lk}" data-k="problem" contenteditable="${ce}" data-ph="끝점과 지금 사이의 허들 한 문장">${esc(f.problem)}</span></div>
-      <div class="f-chip" id="fChip">함께 해결 = 일</div>
-      <div class="f-start"><span class="f-lab">시작 · 바운더리</span><span class="f-cap">그 문제를 어떤 바운더리로 풀어 성과에 닿을 것인가?</span></div>
-      <div class="f-end"><span class="f-lab">끝 · 성과</span><span class="f-val big${lk}" data-k="numeric" contenteditable="${ce}" data-ph="무엇이 얼마에서 얼마로 바뀌나요?">${esc(f.numeric)}</span><span class="f-val q${lk}" data-k="customer" contenteditable="${ce}" data-ph="고객이 돈을 내고 나서 뭐라고 말하면 성공인가요?">${esc(f.customer)}</span></div>
-    </div>
+    ${formulaGraphHTML(f, { ce, lk, dim, chipId: 'fChip' })}
     ${(LECTURE_LOCK && SHOW_EPS) ? '<p class="lockn">강의를 들으며 인터랙티브 창에 적은 내용이 여기로 내려와요. 여기서는 읽기만 하고, 고칠 땐 그 화의 인터랙티브 창에서 고쳐요.</p>' : ''}
 `;
   $('fSummary').innerHTML = `<span>성과 <b>${esc(f.numeric || '—')}</b></span><span>문제 <b>${esc((f.problem || '—').slice(0, 18))}</b></span><span>전략 <b>${esc((f.strategy || '—').slice(0, 18))}</b></span>`;
@@ -799,7 +1121,8 @@ function renderFormula() {
   });
 }
 // 아치 그래프 접힘 요약 바 — 리스너는 boot에서 1회 바인딩, 페이지 전환에도 null 가드로 안전.
-function collapseSync() { const fb = $('fBar'), f = $('formula'); if (fb && f) fb.classList.toggle('on', f.getBoundingClientRect().bottom < 40); }
+function topFixSync() { const t = $('topFix'); document.documentElement.style.setProperty('--topfix-h', (t ? t.offsetHeight : 0) + 'px'); } // 고정된 상단 높이만큼 요약 바를 내린다
+function collapseSync() { const fb = $('fBar'), f = $('formula'), t = $('topFix'); if (fb && f) fb.classList.toggle('on', f.getBoundingClientRect().bottom < (t ? t.offsetHeight : 0) + 40); }
 function nowHHMM() { const p = Q.get('now'); if (validHHMM(p)) return p; const d = new Date(); return `${pad2(d.getHours())}:${pad2(d.getMinutes())}`; }
 let onItemSaved = () => {}, onDone3 = () => {}, onReviewSaved = () => {};
 let onDumpOpen = () => {}, onDumpPicked = () => {};
@@ -964,6 +1287,7 @@ function renderApp() {
   else renderBoundaryPage();
   renderSide(r);
   bindMenu();
+  topFixSync();
   collapseSync();
 }
 // ===== 페이지: 바운더리(홈) =====
@@ -974,19 +1298,21 @@ function renderBoundaryPage() {
   const total = allDates().length;
   $('docIn').innerHTML = `
     <button class="menu-btn" id="menuBtn" aria-label="메뉴">☰</button>
+    <div class="top-fix" id="topFix">
     <div class="crumb"><span>${esc(S.user.name)}의 워크스페이스</span><span>/</span><span>바운더리</span></div>
     <header class="doc-head${SHOW_PROPS ? '' : ' no-props'}">
       <h1 id="bTitle" contenteditable="${LECTURE_LOCK ? 'false' : 'plaintext-only'}"${LECTURE_LOCK ? ' class="locked"' : ''} aria-label="${LECTURE_LOCK ? '바운더리 이름 — 강의 1화에서 적은 것' : '바운더리 이름 — 언제든 고칠 수 있어요'}" data-ph="바운더리 이름을 지어요 (예: 정체기 탈출 강의 완주 프로젝트)"></h1>
       ${SHOW_PROPS ? '<div class="props" id="props"></div>' : ''}
     </header>
-    <div class="hr"></div>
+    </div>
     <section class="formula" id="formula"></section>
     <div class="f-bar" id="fBar"><div class="f-summary" id="fSummary"></div></div>
     ${SHOW_DROPPED_TOTALS ? `<div class="drop-toggle-slot">${droppedTotalsBlock()}</div><div class="hr"></div>` : ''}
     <h2 class="sec-h today-h">오늘의 바운더리</h2>
     <p class="keyq">${esc(KEY_QUESTION)}</p>
-    <div class="h3-row"><span class="h3"><a class="day-link" href="#/day/${TODAY}">${fmtDate(TODAY)}</a> <span class="tag gray">오늘</span></span><span class="h3-meta">${p.done}/3</span></div>
+    <div class="h3-row"><span class="h3"><a class="day-link" href="#/day/${TODAY}">${fmtDate(TODAY)}</a> <span class="tag gray">오늘</span></span><span class="h3-right">${npaAvailable() ? `<button class="npa-open" id="npaOpenBtn">${p.filled ? '코치와 다시 정하기' : '코치와 정하기'}</button>` : ''}<span class="h3-meta">${p.done}/3</span></span></div>
     <div class="day today${p.filled === 3 && p.done === 3 ? ' full' : ''}" id="todayBlock" data-d="${TODAY}"><div class="day-b">${itemsHTML(day, TODAY)}${showReview ? reviewBlock(day, TODAY, stage) : ''}</div></div>
+    ${day.npa && day.npa.mantra ? `<p class="npa-mantra">오늘 계속 되뇔 말 · <b>“${esc(day.npa.mantra)}”</b>${day.npa.avoid ? ` &nbsp;·&nbsp; 오늘 하지 않을 것 · <b>${esc(day.npa.avoid)}</b>` : ''}</p>` : ''}
     <div class="list-wrap home-list">${listHTML(pastDates)}</div>
     <p class="small home-more"><a class="link-all" href="#/records/table">지난 기록 ${Math.max(0, total - 1)}개 전체 보기 →</a><span class="faint">표 · 달력으로도 볼 수 있어요</span></p>`;
   renderHead();
@@ -996,6 +1322,7 @@ function renderBoundaryPage() {
   bindDayControls($('docIn'));
   bindDropped($('docIn'));
   bindListToggles($('docIn'));
+  const nb = $('npaOpenBtn'); if (nb) nb.addEventListener('click', npaOpen);
 }
 // ===== 페이지: 날짜 =====
 function renderEmptyDay(id) {
@@ -1395,6 +1722,146 @@ function wireCoachReactions() {
     day.items.forEach((it, i) => { if (it.text) onItemSaved(i, it); });
   };
 }
+// ===== NPA 팝업 — 오늘의 바운더리 정하기 =====
+// 흐름: 시작 화면 → 준비된 대화(한 턴씩) → 결과 카드 → [바운더리 저장하기] 오늘 3줄에 자동 입력 / [다시 정하기] 거절 기록 후 다음 안으로.
+let npa = { open: false, view: 'start', variant: 'A', idx: 0, log: [], wait: null, timer: null, back: 'start' };
+const NPA_FAST = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) || Q.get('fast') === '1';
+function npaMd(t) { return esc(t).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/\n/g, '<br>'); }
+function npaScript() { return NPA_SCRIPTS[npa.variant]; }
+const NPA_AV = 'data:image/jpeg;base64,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'; // 코치 얼굴(빨간 머리) 112px — 파일 하나만 열어도 보이게 인라인
+const NPA_IC = {
+  x: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/></svg>',
+  up: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M8 13V3M4 7l4-4 4 4"/></svg>',
+  doc: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M2.5 3.5h11v9h-11z M2.5 6.5h11 M6 3.5v9"/></svg>',
+};
+function npaAvHTML() { return `<span class="npa-av"><img src="${NPA_AV}" alt="바운더리 코치"></span>`; }
+// 빈 줄이 있어야 새 문단. 한 줄바꿈은 사용자 말풍선처럼 같은 문단 안 줄바꿈(행간 28px 그대로)
+function npaParas(t) { return t.split(/\n{2,}/).map(l => `<p>${npaMd(l)}</p>`).join(''); }
+function npaMsgHTML(m) {
+  if (m.who === 'sys') return `<div class="npa-sys"><i>${esc(m.text)}</i></div>`;
+  if (m.who === 'u') return `<div class="npa-turn u"><div class="npa-bubble">${npaMd(m.text)}</div></div>`;
+  return `<div class="npa-turn n">${npaAvHTML()}<div class="npa-md">${npaParas(m.text)}</div></div>`;
+}
+function npaResultHTML() {
+  const r = npaScript().result, over = npaHasItems(S.days[TODAY]);
+  return `<div class="npa-turn n" id="npaRes">${npaAvHTML()}<div class="npa-md"><p><b>오늘의 바운더리</b></p><ol>${r.items.map(it => `<li>${esc(it.text)}${it.done ? `<span class="sub">완료 = ${esc(it.done)}</span>` : it.why ? `<span class="sub">${esc(it.why)}</span>` : ''}</li>`).join('')}</ol><p class="meta">오늘 하지 않을 것 · <b>${esc(r.avoid)}</b><br>오늘 계속 되뇔 말 · <b>“${esc(r.mantra)}”</b></p><p>이 3개로 오늘을 시작할까요?</p></div></div>
+    <div class="npa-acts">${over ? '<p class="npa-warn">오늘 칸에 이미 적힌 3줄이 이 3개로 바뀌어요.</p>' : ''}<button class="npa-pill primary" id="npaSave">${over ? '이 3개로 바꿔 저장하기' : '바운더리 저장하기'}</button><button class="npa-pill" id="npaRetry">다시 정하기</button></div>`;
+}
+function npaBoxHTML(mine, ph) {
+  return `<div class="npa-box"><textarea id="npaInput" rows="1" placeholder="${esc(ph)}" aria-label="내 답"${mine ? '' : ' disabled'}></textarea><div class="npa-bar"><button class="npa-tool" id="npaFormulaBtn">${NPA_IC.doc}나의 일의 공식</button><button class="npa-send" id="npaSend" aria-label="보내기"${mine ? '' : ' disabled'}>${NPA_IC.up}</button></div></div>`;
+}
+function npaRender() {
+  const box = $('npa'), f = S.boundary.formula;
+  const head = `<header class="npa-hd"><div class="npa-model" id="npaTitle">MY SPACE</div><div class="right"><span class="npa-me" aria-hidden="true">${esc(S.user.name.slice(0, 1))}</span><button class="npa-x" id="npaClose" aria-label="닫기">${NPA_IC.x}</button></div></header>`;
+  let main = '';
+  if (npa.view === 'start') {
+    main = `<div class="npa-hero"><h2>${esc(S.user.name)} 님, 오늘의 바운더리를 같이 정해볼까요?</h2><p class="lead">질문에 답하다 보면 오늘 끝낼 일 3개가 정해져요. 마음에 들면 저장하고, 아니면 다시 정할 수 있어요.</p>
+      <div class="npa-box"><div class="npa-bar"><button class="npa-tool" id="npaFormulaBtn">${NPA_IC.doc}나의 일의 공식</button><button class="npa-pill primary push" id="npaStart">시작하기</button></div></div></div>`;
+  } else if (npa.view === 'formula') {
+    main = `<div class="npa-thread" id="npaBody"><div class="npa-col"><div class="npa-turn n">${npaAvHTML()}<div class="npa-md"><p>${esc(S.user.name)} 님이 강의에서 정한 <b>${esc(S.boundary.title || '이번 3개월')}</b>의 일의 공식이에요. 오늘의 바운더리는 이 그림의 왼쪽 아래, ‘시작’ 자리에 들어가요.</p></div></div><div class="npa-formula">${formulaGraphHTML(f)}</div><div class="npa-acts flush"><button class="npa-pill primary" id="npaBack">돌아가기</button></div></div></div>`;
+  } else if (npa.view === 'prompt') {
+    main = `<div class="npa-thread" id="npaBody"><div class="npa-col"><div class="npa-turn n">${npaAvHTML()}<div class="npa-md"><p>저에게 주어진 지시문이에요. <b>‘당신이 아는 것’</b> 칸은 지금 이 화면의 값으로 채워져 있어요. 복사해서 다른 챗 창에 붙여넣으면 같은 코치와 이어서 대화할 수 있어요.</p><p>이 화면의 대화는 아직 준비된 예시를 재생해요.</p></div></div><pre class="npa-prompt" id="npaPromptText" tabindex="0">${esc(npaPromptFilled(S, TODAY))}</pre><div class="npa-acts flush"><button class="npa-pill primary" id="npaCopy">프롬프트 복사</button><button class="npa-pill" id="npaBack">돌아가기</button></div></div></div>`;
+  } else {
+    const tn = npaScript().turns[npa.idx], mine = npa.wait === 'u' && tn && tn.who === 'u', res = npa.view === 'result';
+    const typing = npa.wait === 'n' ? `<div class="npa-turn n">${npaAvHTML()}<div class="npa-md"><span class="npa-typing" role="img" aria-label="코치가 쓰는 중"></span></div></div>` : '';
+    main = `<div class="npa-thread" id="npaBody"><div class="npa-col"><div class="npa-sys"><i>${esc(fmtDate(TODAY))} · 아침</i></div>${npa.log.map(npaMsgHTML).join('')}${res ? npaResultHTML() : ''}${typing}</div></div>
+      <div class="npa-composer">${mine ? `<button class="npa-sug" id="npaChip"><span class="lab">예시 답 — 누르면 이대로 보내요</span><span class="tx">${esc(tn.text)}</span></button>` : ''}${npaBoxHTML(mine, res ? '위에서 저장하거나 다시 정해요' : mine ? '코치에게 답해요' : '코치가 쓰는 중이에요…')}<div class="npa-foot">준비된 예시 대화예요. 어떤 답을 보내도 같은 대화가 이어져요.${res ? '' : ' <button id="npaSkip">결과로 건너뛰기</button>'}</div></div>`;
+  }
+  box.innerHTML = head + main;
+  npaBind();
+  const b = $('npaBody'); if (b && npa.view !== 'prompt' && npa.view !== 'formula') b.scrollTop = b.scrollHeight;
+}
+function npaBind() {
+  const on = (id, fn) => { const el = $(id); if (el) el.addEventListener('click', fn); };
+  on('npaClose', () => npaClose(true));
+  on('npaStart', () => { npa.view = 'chat'; npaStep(); });
+  on('npaFormulaBtn', () => { clearTimeout(npa.timer); npa.back = npa.view; npa.view = 'formula'; npaRender(); npaFocus(); });
+  on('npaBack', () => { npa.view = npa.back; if (npa.view === 'chat' && npa.wait === 'n') npaStep(); else { npaRender(); npaFocus(); } }); // 코치가 쓰던 중에 열었으면 이어서 쓴다
+  on('npaCopy', npaCopy);
+  on('npaChip', () => npaSend(npaScript().turns[npa.idx].text));
+  on('npaSend', () => npaSend($('npaInput').value));
+  on('npaSkip', npaSkip);
+  on('npaRetry', npaRetry);
+  on('npaSave', npaSave);
+  const inp = $('npaInput');
+  if (inp) {
+    inp.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); npaSend(inp.value); } });
+    inp.addEventListener('input', () => { inp.style.height = 'auto'; inp.style.height = Math.min(200, inp.scrollHeight) + 'px'; });
+  }
+}
+function npaFocus() { const el = $('npaStart') || $('npaChip') || $('npaSave') || $('npaCopy') || $('npaBack') || $('npaClose'); if (el) el.focus(); }
+function npaStep() {
+  clearTimeout(npa.timer);
+  const tn = npaScript().turns[npa.idx];
+  if (!tn) { npa.wait = null; npa.view = 'result'; npaRender(); npaFocus(); return; }
+  if (tn.who === 'u') { npa.wait = 'u'; npaRender(); npaFocus(); return; }
+  npa.wait = 'n'; npaRender();
+  npa.timer = setTimeout(() => { npa.log.push(tn); npa.idx++; npaStep(); }, NPA_FAST ? 0 : Math.min(1400, 450 + tn.text.length * 9));
+}
+function npaSend(text) {
+  const tn = npaScript().turns[npa.idx];
+  if (npa.wait !== 'u' || !tn) return;
+  const v = (text || '').trim() || tn.text; // 빈칸으로 보내면 예시 답을 쓴다
+  npa.log.push({ who: 'u', text: v }); npa.idx++; npaStep();
+}
+function npaSkip() {
+  clearTimeout(npa.timer);
+  const ts = npaScript().turns;
+  while (npa.idx < ts.length) { npa.log.push(ts[npa.idx]); npa.idx++; }
+  npaStep();
+}
+function npaRetry() {
+  npaReject(S, TODAY, npa.variant, npaScript().result, nowHHMM()); persist(); // 거절한 안은 기록에 남긴다 — 실제 모델에선 '오늘 거절된 안' 칸으로 들어간다
+  npa.variant = npaNext(npa.variant); npa.idx = 0; npa.view = 'chat';
+  npa.log.push({ who: 'sys', text: '다시 정하기 — 앞의 3개는 기록해 두고, 다른 각도로 다시 물을게요' });
+  npaStep();
+}
+function npaSave() {
+  const day = S.days[TODAY], r = npaScript().result;
+  npaApply(day, r, npa.variant, nowHHMM());
+  dumpSel = [];
+  persist();
+  npaClose(false);
+  if (route(location.hash).page !== 'boundary') location.hash = '#/'; else renderApp();
+  toast('오늘의 바운더리 3개를 저장했어요.');
+  setTimeout(() => { const b = $('todayBlock'); if (b) b.scrollIntoView({ behavior: NPA_FAST ? 'auto' : 'smooth', block: 'center' }); }, 60);
+}
+function npaCopy() {
+  const text = npaPromptFilled(S, TODAY);
+  const ok = () => toast('프롬프트를 복사했어요.');
+  const fail = () => { const pre = $('npaPromptText'); if (pre) { const r = document.createRange(); r.selectNodeContents(pre); const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r); } toast('자동 복사가 막혀 있어요. 글을 선택해 뒀으니 ⌘C로 복사해 주세요.'); };
+  try { navigator.clipboard.writeText(text).then(ok, fail); } catch (e) { fail(); }
+}
+// 준비된 대화는 그 사람의 일의 공식에 맞춰 쓴 것이라, 페르소나 세트가 있는 사람에게만 연다(소정 화면에 지안 대화가 얹히지 않게).
+function npaAvailable() { return NPA_POPUP && Object.prototype.hasOwnProperty.call(PERSONAS, PERSONA); }
+function npaOpen() {
+  if (npa.open || !npaAvailable()) return;
+  npa = { open: true, view: 'start', variant: 'A', idx: 0, log: [], wait: null, timer: null, back: 'start' };
+  $('npa').hidden = false; document.body.classList.add('npa-on');
+  npaRender(); npaFocus();
+}
+function npaClose(skipped) {
+  clearTimeout(npa.timer);
+  npa.open = false;
+  $('npa').hidden = true; document.body.classList.remove('npa-on');
+  if (skipped) { const day = S.days[TODAY]; if (day && !npaHasItems(day)) { day.npaSkipped = true; persist(); } }
+  const btn = $('npaOpenBtn'); if (btn) btn.focus();
+}
+function npaTrap(e) {
+  if (!npa.open || e.key !== 'Tab') return;
+  const els = [...$('npa').querySelectorAll('button:not([disabled]),textarea:not([disabled]),[tabindex="0"]')];
+  if (!els.length) return;
+  const first = els[0], last = els[els.length - 1], inside = $('npa').contains(document.activeElement);
+  if (!inside) { e.preventDefault(); first.focus(); }
+  else if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+  else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+}
+function npaMaybeOpen() {
+  if (!npaAvailable()) return;
+  if (Q.get('npa') === 'prompt') { npaOpen(); npa.view = 'prompt'; npaRender(); return; } // 프롬프트 보기 버튼은 뺐어요(2026-09-18). 지시문은 이 주소로만 열어요
+  if (Q.get('npa') === '1' || npaShouldOpen(S.days[TODAY], route(location.hash).page)) npaOpen();
+}
+
 // ===== BOOT =====
 let editingPeriod = false;
 function shortDate(iso) { return iso.slice(5).replace('-', '.'); }
@@ -1450,8 +1917,8 @@ function bindTitle() {
   });
 }
 function boot() {
-  if (Q.get('reset') === '1') { try { localStorage.removeItem(KEY); } catch (e) {} }
-  S = loadState(localStorage);
+  if (Q.get('reset') === '1') { try { localStorage.removeItem(stateKey(PERSONA)); } catch (e) {} }
+  S = PERSONA === 'sojung' ? loadState(localStorage) : loadState(localStorage, stateKey(PERSONA), () => personaState(PERSONA), PERSONA);
   applyLecture(S, lectureOutputs(localStorage)); // 강의실 인터랙티브 창 산출물이 있으면 제목·공식을 덮어쓴다(파생값)
   if (!SIDEBAR) document.body.classList.add('no-side');
   if (!COACH_BUBBLE) document.body.classList.add('no-coach');
@@ -1464,11 +1931,14 @@ function boot() {
   renderApp();
   window.addEventListener('hashchange', () => { editingDue = null; openDays = new Set(); renderApp(); }); // 라우트 전환 시 편집 상태 초기화
   window.addEventListener('scroll', collapseSync, { passive: true });
+  window.addEventListener('resize', () => { topFixSync(); collapseSync(); });
   $('coachBubble').addEventListener('click', () => coachOpen ? closeCoach() : openCoach('chat'));
   $('scrim').addEventListener('click', () => { $('side').classList.remove('open'); closeCoach(); });
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeCoach(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') { if (npa.open) npaClose(true); else closeCoach(); } });
+  document.addEventListener('keydown', npaTrap);
   document.addEventListener('click', e => { if (coachOpen && !$('coachPanel').contains(e.target) && !$('coachBubble').contains(e.target) && !document.querySelector('.doc').contains(e.target)) closeCoach(); });
   if (COACH_BUBBLE) setTimeout(coachGreet, 500);
+  npaMaybeOpen(); // 오늘 3줄이 비어 있으면 '오늘의 바운더리 정하기'부터
   setTimeout(checkDue, 800); // 개구리 마감 — 첫 체크
   setInterval(checkDue, 60000); // 1분 간격
 }

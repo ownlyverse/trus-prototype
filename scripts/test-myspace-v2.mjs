@@ -12,7 +12,7 @@ assert(m, 'script#app 없음');
 const src = m[1];
 const cut = src.indexOf('// ===== RENDER =====');
 assert(cut > 0, 'RENDER 마커 없음');
-const EXPORTS = '\n;({KEY,todayStr,defaultState,ensureBoundary,loadState,saveState,ensureDay,blank,formulaCount,endDefined,dayProgress,keywords,judgeSignal,stageOf,greeting,canFire,addSuggestion,replaceItem,freeReply,lastReview,daysLeft,fmtDate,USER,STAGES,BOUNDARY,FORMULA,PAST_DAYS,SUGGESTIONS,COACH,FREE,FREE_FALLBACK,blankReview,reviewDone,reviewHintFor,REVIEW_Q,KEY_QUESTION,ITEM_PH,SUGGEST,dumpAdd,dumpRemove,dumpPick,MAX_PICK,migrateV3,carryOver,dropKind,setDue,isPastDue,tomorrowAdd,tomorrowRemove,route,monthGrid,dayStats,validDate,validHHMM,lectureOutputs,applyLecture,episodeStates,LECTURE_KEY,SIDEBAR,SHOW_PROPS})';
+const EXPORTS = '\n;({KEY,todayStr,defaultState,ensureBoundary,loadState,saveState,ensureDay,blank,formulaCount,endDefined,dayProgress,keywords,judgeSignal,stageOf,greeting,canFire,addSuggestion,replaceItem,freeReply,lastReview,daysLeft,fmtDate,USER,STAGES,BOUNDARY,FORMULA,PAST_DAYS,SUGGESTIONS,COACH,FREE,FREE_FALLBACK,blankReview,reviewDone,reviewHintFor,REVIEW_Q,KEY_QUESTION,ITEM_PH,SUGGEST,dumpAdd,dumpRemove,dumpPick,MAX_PICK,migrateV3,carryOver,dropKind,setDue,isPastDue,tomorrowAdd,tomorrowRemove,route,monthGrid,dayStats,validDate,validHHMM,lectureOutputs,applyLecture,episodeStates,LECTURE_KEY,SIDEBAR,SHOW_PROPS,PERSONAS,personaOf,personaState,stateKey,NPA_POPUP,NPA_LIVE,NPA_SCRIPTS,NPA_PROMPT,npaNext,npaShouldOpen,npaApply,npaReject,npaPromptFilled,npaHasItems})';
 const ctx = { location: { search: '' }, URLSearchParams, console };
 const L = vm.runInNewContext(src.slice(0, cut) + EXPORTS, ctx);
 
@@ -315,6 +315,102 @@ t('episodeStates: 1화 제목 → 5화 전략 순서로 채움 여부', () => {
 t('플래그: 사이드바·속성 숨김(우선)', () => {
   assert.equal(L.SIDEBAR, false);
   assert.equal(L.SHOW_PROPS, false);
+});
+
+// --- NPA 팝업 (2026-09-18) ---
+t('personaOf: 모르는 값·빈 값 → jian, sojung은 그대로', () => {
+  assert.equal(L.personaOf(null), 'jian');
+  assert.equal(L.personaOf('<script>'), 'jian');
+  assert.equal(L.personaOf('sojung'), 'sojung');
+  assert.equal(L.personaOf('jian'), 'jian');
+});
+t('stateKey: sojung은 기존 키 그대로, 다른 페르소나는 접미사', () => {
+  assert.equal(L.stateKey('sojung'), L.KEY);
+  assert.equal(L.stateKey('jian'), L.KEY + '_jian');
+});
+t('personaState: jian — v4, 일의 공식 4칸, 사건 메모, 지난 날 정규화', () => {
+  const s = L.personaState('jian');
+  assert.equal(s.v, 4);
+  assert.equal(s.persona, 'jian');
+  assert.equal(s.user.name, '지안');
+  assert.equal(L.formulaCount(s.boundary.formula), 4);
+  assert(s.events.length >= 2);
+  const ds = Object.keys(s.days);
+  assert(ds.length >= 3);
+  ds.forEach(d => { assert(Array.isArray(s.days[d].dump)); assert(Array.isArray(s.days[d].coachLog)); assert.equal(s.days[d].items.length, 3); });
+  assert.equal(L.personaState('sojung').user.name, '소정'); // 기존 기본 상태 그대로
+});
+t('loadState: 키·기본값을 넘기면 그 페르소나로 시작, 저장본의 persona가 다르면 무시', () => {
+  const k = L.stateKey('jian');
+  assert.equal(L.loadState(mem({}), k, () => L.personaState('jian')).user.name, '지안');
+  const wrong = L.defaultState(); // persona 없음(소정)
+  assert.equal(L.loadState(mem({ [k]: JSON.stringify(wrong) }), k, () => L.personaState('jian'), 'jian').user.name, '지안');
+  const ok = L.personaState('jian'); ok.user.name = '바뀜';
+  assert.equal(L.loadState(mem({ [k]: JSON.stringify(ok) }), k, () => L.personaState('jian'), 'jian').user.name, '바뀜');
+});
+t('NPA_SCRIPTS: 두 안 모두 NPA로 시작, 번갈아 말함, 결과는 3개·80자 이내·한마디', () => {
+  const vs = Object.keys(L.NPA_SCRIPTS);
+  assert(vs.length >= 2);
+  vs.forEach(v => {
+    const sc = L.NPA_SCRIPTS[v];
+    assert.equal(sc.turns[0].who, 'n');
+    assert.equal(sc.turns[sc.turns.length - 1].who, 'n'); // 마지막은 NPA의 정리
+    sc.turns.forEach(tn => { assert(tn.who === 'n' || tn.who === 'u'); assert(tn.text.trim()); });
+    assert.equal(sc.result.items.length, 3);
+    sc.result.items.forEach(it => { assert(it.text.trim()); assert(it.text.length <= 80); });
+    assert(sc.result.mantra.trim());
+  });
+});
+t('npaNext: 안을 돌아가며 고른다', () => {
+  const vs = Object.keys(L.NPA_SCRIPTS);
+  assert.equal(L.npaNext(vs[0]), vs[1]);
+  assert.equal(L.npaNext(vs[vs.length - 1]), vs[0]);
+  assert.equal(L.npaNext('없는안'), vs[0]);
+});
+t('npaShouldOpen: 홈 + 오늘 3줄이 비었고 + 오늘 건너뛰지 않았을 때만', () => {
+  const day = L.ensureDay(L.personaState('jian'), '2026-09-30');
+  assert.equal(L.npaShouldOpen(day, 'boundary'), true);
+  assert.equal(L.npaShouldOpen(day, 'records'), false);
+  day.npaSkipped = true;
+  assert.equal(L.npaShouldOpen(day, 'boundary'), false);
+  day.npaSkipped = false; day.items[0].text = '이미 적음';
+  assert.equal(L.npaShouldOpen(day, 'boundary'), false);
+  assert.equal(L.npaShouldOpen(null, 'boundary'), false);
+});
+t('npaApply: 3줄을 채우고(80자 자름·done=false) 한마디·하지 않을 것·안을 남긴다', () => {
+  const day = L.ensureDay(L.personaState('jian'), '2026-09-30');
+  day.items[1] = { text: '옛것', done: true };
+  const res = { items: [{ text: ' 가 ', done: '기준1' }, { text: 'x'.repeat(100) }, { text: '다' }], avoid: '안 할 것', mantra: '한마디' };
+  L.npaApply(day, res, 'A', '2026-09-30T09:00');
+  assert.equal(day.items[0].text, '가');
+  assert.equal(day.items[1].text.length, 80);
+  assert.equal(day.items[1].done, false);
+  assert.equal(day.npa.mantra, '한마디');
+  assert.equal(day.npa.avoid, '안 할 것');
+  assert.equal(day.npa.variant, 'A');
+  assertLoose.deepEqual(day.npa.criteria, ['기준1', '', '']);
+  assert.equal(L.npaHasItems(day), true);
+});
+t('npaReject: 거절한 안을 기록에 쌓는다(학습 재료)', () => {
+  const s = L.personaState('jian');
+  L.npaReject(s, '2026-09-30', 'A', { items: [{ text: '가' }, { text: '나' }, { text: '다' }] }, '09:10');
+  L.npaReject(s, '2026-09-30', 'B', { items: [{ text: '라' }, { text: '마' }, { text: '바' }] }, '09:20');
+  assert.equal(s.npaLog.length, 2);
+  assertLoose.deepEqual(s.npaLog[0], { date: '2026-09-30', t: '09:10', variant: 'A', items: ['가', '나', '다'] });
+});
+t('npaPromptFilled: 기억 칸이 화면 상태로 채워지고 빈 칸 표식이 남지 않는다', () => {
+  const s = L.personaState('jian');
+  L.npaReject(s, '2026-09-30', 'A', { items: [{ text: '거절된 첫 줄' }, { text: '나' }, { text: '다' }] }, '09:10');
+  const out = L.npaPromptFilled(s, '2026-09-30');
+  assert(out.includes(s.boundary.formula.numeric));
+  assert(out.includes(s.boundary.formula.problem));
+  assert(out.includes(s.events[0]));
+  assert(out.includes('거절된 첫 줄'));
+  assert(!/\{\{[A-Z_]+\}\}/.test(out));
+});
+t('플래그: NPA 팝업 켬, 실제 모델 연결은 끔', () => {
+  assert.equal(L.NPA_POPUP, true);
+  assert.equal(L.NPA_LIVE, false);
 });
 
 console.log(`\n${n} tests passed`);
